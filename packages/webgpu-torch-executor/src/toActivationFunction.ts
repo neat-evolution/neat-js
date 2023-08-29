@@ -1,7 +1,6 @@
+import { Activation } from '@neat-js/executor/Activation.js'
 import type { Tensor } from 'webgpu-torch'
 import * as torch from 'webgpu-torch'
-
-import { Activation } from '@neat-js/executor/Activation.js'
 
 export type WebGPUTensorActivationFunction = (x: Tensor) => Tensor
 

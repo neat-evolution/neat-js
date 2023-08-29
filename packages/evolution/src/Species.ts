@@ -1,5 +1,4 @@
-import type { Genome, GenomeData } from '@neat-js/core'
-import type { GenomeOptions } from '@neat-js/core'
+import type { Genome, GenomeData, GenomeOptions } from '@neat-js/core'
 
 import { Organism } from './Organism.js'
 import type { OrganismData } from './Organism.js'

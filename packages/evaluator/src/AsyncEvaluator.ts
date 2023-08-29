@@ -1,4 +1,4 @@
-import { type Environment } from '@neat-js/evolution'
+import { type Environment } from '@neat-js/environment'
 import { type ExecutorFactory } from '@neat-js/executor'
 
 import {

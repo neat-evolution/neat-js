@@ -1,5 +1,5 @@
-import type { NEATConfig } from '@neat-js/core'
-import { NEATGenome, type NEATGenomeData } from '@neat-js/core'
+import { NEATGenome } from '@neat-js/core'
+import type { NEATConfig, NEATGenomeData } from '@neat-js/core'
 
 import { createGenome } from './createGenome.js'
 import { createLink } from './createLink.js'
