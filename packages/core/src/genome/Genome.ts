@@ -1,8 +1,8 @@
-import type { Stats } from '../Stats.js'
 import type { ConfigProvider } from '../config/ConfigProvider.js'
 import type { LinkExtension } from '../link/Link.js'
 import type { NodeExtension } from '../node/Node.js'
 import type { StateProvider } from '../state/StateProvider.js'
+import type { Stats } from '../Stats.js'
 
 import type { GenomeOptions } from './GenomeOptions.js'
 

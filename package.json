@@ -12,7 +12,7 @@
     "clean": "turbo run clean",
     "coverage": "turbo run --concurrency=4 coverage",
     "coverage:ci": "turbo run --concurrency=2 coverage -- --maxWorkers=2 --forceExit",
-    "format": "turbo run --concurrency=4 format",
+    "format": "turbo run --concurrency=4 --filter=!@neat-js/webgpu-torch-executor --filter=!@neat-js/workerpool-evaluator build format",
     "lint": "turbo run --concurrency=4 lint",
     "postinstall": "husky install",
     "release": "yarn build && changeset publish",
@@ -26,7 +26,7 @@
     "@commitlint/config-conventional": "^17.7.0",
     "@commitlint/config-lerna-scopes": "^17.7.0",
     "@manypkg/cli": "^0.21.0",
-    "husky": "^8.0.0",
+    "husky": "^8.0.3",
     "turbo": "^1.10.13"
   },
   "volta": {
