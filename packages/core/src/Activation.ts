@@ -1,0 +1,16 @@
+export enum Activation {
+  None = 'None',
+  Linear = 'Linear',
+  Step = 'Step',
+  ReLU = 'ReLU',
+  Sigmoid = 'Sigmoid',
+  Tanh = 'Tanh',
+  Softmax = 'Softmax',
+  Gaussian = 'Gaussian',
+  OffsetGaussian = 'OffsetGaussian',
+  Sine = 'Sine',
+  Cos = 'Cos',
+  Square = 'Square',
+  Abs = 'Abs',
+  Exp = 'Exp',
+}
