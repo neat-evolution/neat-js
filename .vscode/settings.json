@@ -16,5 +16,6 @@
     "source.fixAll.eslint": true
   },
   "files.insertFinalNewline": true,
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "vitest.enable": true
 }

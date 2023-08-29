@@ -35,7 +35,7 @@ export class State<NS extends NodeState, LS extends LinkState>
 
   getLinkSplitByHidden(hiddenNode: NodeRef): InnovationLinkRef | null {
     const result = this.innovationLog.hiddenToLink.get(nodeRefToKey(hiddenNode))
-    return result != null ? result : null
+    return result ?? null
   }
 
   getSplitInnovation(linkInnovation: number): Innovation {
