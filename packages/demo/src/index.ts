@@ -1,24 +1,21 @@
-import type { InitConfig } from '@neat-js/core'
-import { type NEATConfig } from '@neat-js/core'
+import type { InitConfig, NEATConfig } from '@neat-js/core'
 import { defaultNEATConfigOptions } from '@neat-js/core'
 import type { Evaluator } from '@neat-js/evaluator'
-import type { EvolutionOptions } from '@neat-js/evolution'
-import { evolve } from '@neat-js/evolution'
-import { Population } from '@neat-js/evolution'
+import type { EvolutionOptions, PopulationOptions } from '@neat-js/evolution'
 import {
+  evolve,
+  Population,
   defaultPopulationOptions,
-  type PopulationOptions,
 } from '@neat-js/evolution'
-
-import { createConfig } from '@neat-js/neat'
 import type {
   DefaultNEATGenome,
   DefaultNEATGenomeData,
+  NEATGenomeOptions,
 } from '@neat-js/neat'
-import { NEATAlgorithm } from '@neat-js/neat'
 import {
+  createConfig,
+  NEATAlgorithm,
   defaultNEATGenomeOptions,
-  type NEATGenomeOptions,
 } from '@neat-js/neat'
 
 export const neat = async (

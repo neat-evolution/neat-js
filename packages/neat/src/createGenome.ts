@@ -1,5 +1,4 @@
-import type { GenomeFactory } from '@neat-js/core'
-import type { NEATConfig } from '@neat-js/core'
+import type { GenomeFactory, NEATConfig } from '@neat-js/core'
 
 import {
   DefaultNEATGenome,

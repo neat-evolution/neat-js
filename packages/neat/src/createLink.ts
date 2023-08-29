@@ -1,5 +1,4 @@
-import type { LinkFactory } from '@neat-js/core'
-import type { NodeRef } from '@neat-js/core'
+import type { LinkFactory, NodeRef } from '@neat-js/core'
 
 import { NEATLink } from './NEATLink.js'
 

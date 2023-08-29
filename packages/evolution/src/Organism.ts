@@ -41,12 +41,7 @@ export class Organism<G extends Genome<any, any, any, any, G>> {
   // Compare to other organism based on non-adjusted fitness
   cmp(other: Organism<G>): number {
     // Handle cases where fitness is null or undefined
-    if (
-      this.fitness === null ||
-      this.fitness === undefined ||
-      other.fitness === null ||
-      other.fitness === undefined
-    ) {
+    if (this.fitness == null || other.fitness == null) {
       throw new Error('Fitness cannot be null or undefined')
     }
 

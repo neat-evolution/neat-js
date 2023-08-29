@@ -1,16 +1,19 @@
-import type { ConfigFactory } from '@neat-js/core'
-import type { ConfigProvider } from '@neat-js/core'
-import type { Genome, GenomeData } from '@neat-js/core'
-import type { GenomeFactory } from '@neat-js/core'
-import type { GenomeOptions } from '@neat-js/core'
-import type { LinkExtension } from '@neat-js/core'
-import type { LinkFactory } from '@neat-js/core'
-import type { NodeExtension } from '@neat-js/core'
-import type { NodeFactory } from '@neat-js/core'
-import type { StateFactory } from '@neat-js/core'
-import type { StateProvider } from '@neat-js/core'
+import type {
+  ConfigFactory,
+  ConfigProvider,
+  Genome,
+  GenomeData,
+  GenomeFactory,
+  GenomeOptions,
+  LinkExtension,
+  LinkFactory,
+  NodeExtension,
+  NodeFactory,
+  StateFactory,
+  StateProvider,
+  Stats,
+} from '@neat-js/core'
 import type { PhenotypeFactory } from '@neat-js/phenotype'
-import type { Stats } from '@neat-js/core'
 
 export interface Algorithm<
   N extends NodeExtension<any, any, N>,

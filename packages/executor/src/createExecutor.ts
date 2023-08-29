@@ -1,8 +1,8 @@
 import { type Phenotype, PhenotypeActionType } from '@neat-js/phenotype'
 
-import { toActivationFunction } from './toActivationFunction.js'
 import type { Executor } from './Executor.js'
 import type { ExecutorFactory } from './ExecutorFactory.js'
+import { toActivationFunction } from './toActivationFunction.js'
 
 export const createExecutor: ExecutorFactory = (
   phenotype: Phenotype

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
-import { defaultDatasetConfig } from '../src/dataset-environment/DatasetConfig.js'
-import { loadDataset } from '../src/dataset-environment/loadDataset.js'
+import { defaultDatasetConfig } from '../src/DatasetConfig.js'
+import { loadDataset } from '../src/loadDataset.js'
 
 import { dataset } from './fixtures/irisTruncatedDataset.js'
 

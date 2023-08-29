@@ -1,13 +1,11 @@
-import type { Tensor, TensorArrayData } from 'webgpu-torch'
-import * as torch from 'webgpu-torch'
-
-import type { NEATConnection } from '@neat-js/core'
-import type { NEATGenome } from '@neat-js/core'
-import { NodeType, type NEATNode } from '@neat-js/core'
+import { NodeType } from '@neat-js/core'
+import type { NEATConnection, NEATGenome, type NEATNode } from '@neat-js/core'
 import {
   type ActivationFunction,
   toActivationFunction,
 } from '@neat-js/executor/Activation.js'
+import * as torch from 'webgpu-torch'
+import type { Tensor, TensorArrayData } from 'webgpu-torch'
 
 const cat = async (tensors: Tensor[]): Promise<Tensor> => {
   const values: number[][] = []

@@ -1,8 +1,11 @@
-import type { Genome, GenomeData } from '@neat-js/core'
-import type { GenomeFactory } from '@neat-js/core'
-import type { GenomeOptions } from '@neat-js/core'
-import type { StateFactory } from '@neat-js/core'
-import type { StateProvider } from '@neat-js/core'
+import type {
+  Genome,
+  GenomeData,
+  GenomeFactory,
+  GenomeOptions,
+  StateFactory,
+  StateProvider,
+} from '@neat-js/core'
 import type { Evaluator, PhenotypeData } from '@neat-js/evaluator'
 import type { PhenotypeFactory } from '@neat-js/phenotype'
 

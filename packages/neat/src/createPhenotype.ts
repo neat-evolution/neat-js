@@ -1,13 +1,15 @@
-import { isOrderedActionEdge } from '@neat-js/core'
-import { nodeRefsToLinkKey } from '@neat-js/core'
-import { nodeRefToKey, type NodeRef, NodeType } from '@neat-js/core'
-import { Activation } from '@neat-js/core'
-import type { Phenotype } from '@neat-js/phenotype'
 import {
-  PhenotypeActionType,
-  type PhenotypeAction,
+  isOrderedActionEdge,
+  nodeRefsToLinkKey,
+  Activation,
+} from '@neat-js/core'
+import { nodeRefToKey, type NodeRef, NodeType } from '@neat-js/core'
+import { PhenotypeActionType } from '@neat-js/phenotype'
+import type {
+  Phenotype,
+  PhenotypeAction,
+  PhenotypeFactory,
 } from '@neat-js/phenotype'
-import type { PhenotypeFactory } from '@neat-js/phenotype'
 
 import type { DefaultNEATGenome } from './DefaultNEATGenome.js'
 

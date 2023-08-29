@@ -1,5 +1,4 @@
-import { type NodeType } from '@neat-js/core'
-import type { NodeFactory } from '@neat-js/core'
+import { type NodeType, type NodeFactory } from '@neat-js/core'
 
 import { NEATNode } from './NEATNode.js'
 

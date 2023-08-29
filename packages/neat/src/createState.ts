@@ -1,5 +1,4 @@
-import type { StateData } from '@neat-js/core'
-import type { StateFactory } from '@neat-js/core'
+import type { StateData, StateFactory } from '@neat-js/core'
 
 import { NEATState } from './NEATState.js'
 

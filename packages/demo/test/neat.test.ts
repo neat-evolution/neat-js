@@ -1,15 +1,17 @@
+import { NEATConfig } from '@neat-js/core'
+import {
+  defaultDatasetConfig,
+  DatasetEnvironment,
+  loadDataset,
+} from '@neat-js/dataset-environment'
+import { AsyncEvaluator } from '@neat-js/evaluator'
+import {
+  defaultEvolutionOptions,
+  defaultPopulationOptions,
+} from '@neat-js/evolution'
+import { createExecutor } from '@neat-js/executor'
+import { neat, defaultNEATGenomeOptions } from '@neat-js/neat'
 import { describe, expect, test } from 'vitest'
-
-import { NEATConfig } from '../src/core/NEATConfig.js'
-import { defaultDatasetConfig } from '../src/dataset-environment/DatasetConfig.js'
-import { DatasetEnvironment } from '../src/dataset-environment/DatasetEnvironment.js'
-import { loadDataset } from '../src/dataset-environment/loadDataset.js'
-import { AsyncEvaluator } from '../src/evaluator/AsyncEvaluator.js'
-import { defaultEvolutionOptions } from '../src/evolution/EvolutionOptions.js'
-import { defaultPopulationOptions } from '../src/evolution/PopulationOptions.js'
-import { createExecutor } from '../src/executor/createExecutor.js'
-import { neat } from '../src/neat/index.js'
-import { defaultNEATGenomeOptions } from '../src/neat/NEATGenomeOptions.js'
 
 describe.skip('neat', () => {
   test.skip('should evolve a genome', async () => {
