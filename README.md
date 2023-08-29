@@ -19,7 +19,7 @@ yarn add @neat-js/neat
 Evolve a neural network.
 
 ```ts
-import { defaultNEATConfigOptions } from '@neat-js/core/NEATOptions.js'
+import { defaultNEATConfigOptions } from '@neat-js/core'
 import { defaultDatasetConfig } from '@neat-js/dataset-environment/DatasetConfig.js'
 import { DatasetEnvironment } from '@neat-js/dataset-environment/DatasetEnvironment.js'
 import { loadDataset } from '@neat-js/dataset-environment/loadDataset.js'
