@@ -6,7 +6,6 @@ import {
   defaultDatasetOptions,
   type Dataset,
   loadDataset,
-  DatasetEnvironment,
 } from '../src/index.js'
 
 const options = {
@@ -24,21 +23,6 @@ describe('datasetToSharedBuffer', () => {
 
   test('should convert a dataset to a SharedArrayBuffer', () => {
     const sharedBuffer = datasetToSharedBuffer(dataset)
-    const restoredDataset = datasetFromSharedBuffer(sharedBuffer)
-    expect(restoredDataset).toEqual(dataset)
-  })
-})
-
-describe('DatasetEnvironment.toSharedBuffer', () => {
-  let dataset: Dataset
-  let environment: DatasetEnvironment
-  beforeEach(async () => {
-    dataset = await loadDataset(options)
-    environment = new DatasetEnvironment(dataset)
-  })
-
-  test('should convert a dataset to a SharedArrayBuffer', () => {
-    const sharedBuffer = environment.toSharedBuffer()
     const restoredDataset = datasetFromSharedBuffer(sharedBuffer)
     expect(restoredDataset).toEqual(dataset)
   })

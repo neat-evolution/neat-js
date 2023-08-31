@@ -1,5 +1,4 @@
-type Vector = number[]
-type Matrix = Vector[]
+import type { Matrix, Vector } from './types.js'
 
 export const normalize = (list: Vector): Vector => {
   let sum = 0
@@ -23,6 +22,12 @@ export const mse = (
   predictions: Matrix,
   norm: boolean
 ): number => {
+  if (targets.length === 0) {
+    return 0
+  }
+  if (targets.length !== predictions.length) {
+    throw new Error('Mismatched lengths between targets and predictions')
+  }
   let totalError = 0
   for (const [i, target] of targets.entries()) {
     totalError += mseSingle(target, predictions[i] as Vector, norm)
@@ -36,13 +41,20 @@ export const mseSingle = (
   prediction: Vector,
   norm: boolean
 ): number => {
-  const normalizedPrediction = norm ? normalize(prediction) : [...prediction]
-  let error = 0
-  for (const [i, val] of target.entries()) {
-    error += Math.pow(val - (normalizedPrediction[i] ?? 0), 2)
+  if (target.length !== prediction.length) {
+    throw new Error('Mismatched lengths between target and prediction vectors.')
   }
 
-  return error / target.length
+  const normalizedPrediction = norm ? normalize(prediction) : prediction
+
+  let error = 0
+
+  for (const [i, t] of target.entries()) {
+    const p = normalizedPrediction[i] as number
+    error += Math.pow(t - p, 2)
+  }
+
+  return target.length > 0 ? error / target.length : 0
 }
 
 export const crossentropy = (
@@ -50,6 +62,12 @@ export const crossentropy = (
   predictions: Matrix,
   norm: boolean
 ): number => {
+  if (targets.length === 0) {
+    return 0
+  }
+  if (targets.length !== predictions.length) {
+    throw new Error('Mismatched lengths between targets and predictions')
+  }
   let totalEntropy = 0
   for (const [i, target] of targets.entries()) {
     totalEntropy += crossentropySingle(target, predictions[i] as Vector, norm)
@@ -63,6 +81,10 @@ export const crossentropySingle = (
   prediction: Vector,
   norm: boolean
 ): number => {
+  if (target.length !== prediction.length) {
+    throw new Error('Mismatched lengths between target and prediction vectors.')
+  }
+
   const e = 0.0000001
   const mi = e
   const ma = 1.0 - e
@@ -77,7 +99,8 @@ export const crossentropySingle = (
 
   let entropy = 0
   for (const [i, val] of target.entries()) {
-    entropy += -val * Math.log(normalizedPrediction[i] ?? 0)
+    const pred = normalizedPrediction[i] as number
+    entropy += -val * Math.log(pred)
   }
 
   return entropy

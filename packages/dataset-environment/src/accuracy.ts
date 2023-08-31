@@ -1,6 +1,6 @@
-type Matrix = number[][]
+import type { Matrix, Vector } from './types.js'
 
-export const argmax = (vec: number[]): number => {
+export const argmax = (vec: Vector): number => {
   let bestIdx = 0
   for (let i = 0; i < vec.length; i++) {
     if ((vec[i] as number) > (vec[bestIdx] as number)) {
@@ -14,7 +14,7 @@ export const oneHotAccuracy = (targets: Matrix, outputs: Matrix): number => {
   let correctMatches = 0
 
   for (let i = 0; i < targets.length; i++) {
-    if (argmax(targets[i] as number[]) === argmax(outputs[i] ?? [0])) {
+    if (argmax(targets[i] as Vector) === argmax(outputs[i] ?? [0])) {
       correctMatches += 1
     }
   }
@@ -26,8 +26,8 @@ export const roundedAccuracy = (targets: Matrix, outputs: Matrix): number => {
   let matchedRoundedVals = 0
 
   for (let i = 0; i < targets.length; i++) {
-    const targetRow = targets[i] as number[]
-    const outputRow = outputs[i] as number[]
+    const targetRow = targets[i] as Vector
+    const outputRow = outputs[i] as Vector
     let matchedCounts = 0
 
     for (let j = 0; j < targetRow.length; j++) {
@@ -48,8 +48,8 @@ export const binaryAccuracy = (targets: Matrix, outputs: Matrix): number => {
   let matchedBinaryVals = 0
 
   for (let i = 0; i < targets.length; i++) {
-    const targetRow = targets[i] as number[]
-    const outputRow = outputs[i] as number[]
+    const targetRow = targets[i] as Vector
+    const outputRow = outputs[i] as Vector
     let matchedCounts = 0
 
     for (let j = 0; j < targetRow.length; j++) {
