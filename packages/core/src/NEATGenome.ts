@@ -153,7 +153,7 @@ export class NEATGenome<
           this.config.link(),
           this.state.link()
         )
-        this.insertLink(link)
+        this.insertLink(link, factoryOptions.isSafe)
       }
     }
   }
@@ -328,9 +328,9 @@ export class NEATGenome<
     for (const [linkRef, link] of parent1.links.entries()) {
       if (parent2.links.has(linkRef)) {
         const link2 = parent2.links.get(linkRef) as L
-        genome.insertLink(link.crossover(link2, fitness, otherFitness))
+        genome.insertLink(link.crossover(link2, fitness, otherFitness), true)
       } else {
-        genome.insertLink(link)
+        genome.insertLink(link, true)
       }
     }
 
@@ -454,10 +454,13 @@ export class NEATGenome<
     this.insertLink(link2)
   }
 
-  insertLink(link: L): void {
-    if (!this.connections.createsCycle(link.from, link.to)) {
+  insertLink(link: L, isSafe?: boolean): void {
+    if (
+      (isSafe != null && isSafe) ||
+      !this.connections.createsCycle(link.from, link.to)
+    ) {
       this.links.set(linkRefToKey(link), link)
-      this.connections.add(link.from, link.to, link.weight)
+      this.connections.add(link.from, link.to, link.weight, true)
     }
   }
 
@@ -489,8 +492,7 @@ export class NEATGenome<
     const shuffledKeys = shuffle(linkKeys)
     const maxIterations = Math.min(shuffledKeys.length, 50)
 
-    for (let i = 0; i < maxIterations; i++) {
-      const selectedLinkKey = shuffledKeys[i] as string
+    for (const selectedLinkKey of shuffledKeys.slice(0, maxIterations)) {
       const link = this.links.get(selectedLinkKey)
 
       if (link != null) {
@@ -531,13 +533,18 @@ export class NEATGenome<
       return
     }
 
-    const sourceNodes: N[] = [
-      ...this.inputs.values(),
-      ...this.hiddenNodes.values(),
-    ]
-    const sourceWeights: number[] = sourceNodes.map(
-      (nodeRef) => numTargets - this.connections.edgeCount(nodeRef)
-    )
+    const sourceNodes: N[] = []
+    const sourceWeights: number[] = []
+
+    for (const node of this.inputs.values()) {
+      sourceNodes.push(node)
+      sourceWeights.push(numTargets - this.connections.edgeCount(node))
+    }
+
+    for (const node of this.hiddenNodes.values()) {
+      sourceNodes.push(node)
+      sourceWeights.push(numTargets - this.connections.edgeCount(node))
+    }
 
     const wheel: number[] = [sourceWeights[0] as number]
     for (let i = 1; i < sourceWeights.length; i++) {
@@ -554,12 +561,21 @@ export class NEATGenome<
     const sourceIndex = wheel.findIndex((w) => w >= val)
     const source = sourceNodes[sourceIndex] as N
 
-    const targetNodes: N[] = shuffle(
-      [...this.hiddenNodes.values(), ...this.outputs.values()].filter(
-        (node) =>
-          !this.links.has(toLinkKey(source.type, source.id, node.type, node.id))
-      )
-    )
+    const targetNodes: N[] = []
+
+    for (const node of this.hiddenNodes.values()) {
+      if (!this.links.has(nodeRefsToLinkKey(source, node))) {
+        targetNodes.push(node)
+      }
+    }
+
+    for (const node of this.outputs.values()) {
+      if (!this.links.has(nodeRefsToLinkKey(source, node))) {
+        targetNodes.push(node)
+      }
+    }
+
+    shuffle(targetNodes)
 
     // Try to create link with potential target nodes in random order
     for (const target of targetNodes) {
@@ -579,7 +595,7 @@ export class NEATGenome<
           this.state.link()
         )
 
-        this.insertLink(link)
+        this.insertLink(link, true)
         break
       }
     }

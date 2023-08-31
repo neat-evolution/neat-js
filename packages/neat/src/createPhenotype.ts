@@ -18,43 +18,54 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
 ): Phenotype => {
   // Sort genomes network topologically
   const order = genome.connections.sortTopologically()
+  const nodes: NodeRef[] = []
 
   // Create array of all input node indexes, for insertion of neural network inputs
-  const numInputNodes =
-    Math.max(...Array.from(genome.inputs.values()).map((n) => n.id)) + 1
-  const inputs = Array.from({ length: numInputNodes }, (_, i) => i)
+  let maxInputNode = -1
+  for (const node of genome.inputs.values()) {
+    if (node.id > maxInputNode) {
+      maxInputNode = node.id
+    }
+  }
+  const numInputNodes = maxInputNode + 1
+  const inputs: number[] = []
 
-  // Prepend input nodes to extraction of hidden nodes from topological sorting
-  let nodes: NodeRef[] = [
-    ...inputs.map((id) => ({ type: NodeType.Input, id })),
-    ...order
-      .filter((action) => action[0].type === NodeType.Hidden)
-      .map((action) => action[0]),
-  ]
+  for (let i = 0; i < numInputNodes; i++) {
+    inputs.push(i)
+    // Prepend input nodes to extraction of hidden nodes from topological sorting
+    nodes.push({ type: NodeType.Input, id: i })
+  }
+
+  for (const action of order) {
+    if (action[0].type === NodeType.Hidden) {
+      nodes.push(action[0])
+    }
+  }
 
   // Create array of all output node indexes, for extraction of neural network execution result
-  const numOutputNodes =
-    Math.max(...Array.from(genome.outputs.values()).map((n) => n.id)) + 1
-  const outputs = Array.from(
-    { length: numOutputNodes },
-    (_, i) => i + nodes.length
-  )
-
-  // Append all output nodes
-  nodes = nodes.concat(
-    Array.from({ length: numOutputNodes }, (_, i) => ({
-      type: NodeType.Output,
-      id: i,
-    }))
-  )
+  let maxOutputNode = -1
+  for (const node of genome.outputs.values()) {
+    if (node.id > maxOutputNode) {
+      maxOutputNode = node.id
+    }
+  }
+  const numOutputNodes = maxOutputNode + 1
+  const outputs: number[] = []
+  for (let i = 0; i < numOutputNodes; i++) {
+    outputs.push(i + nodes.length)
+    // Append all output nodes
+    nodes.push({ type: NodeType.Output, id: i })
+  }
 
   // Create mapping from NodeRef to array index in Network's node array
-  const nodeMapping = new Map(
-    nodes.map((nodeRef, index) => [nodeRefToKey(nodeRef), index])
-  )
+  const nodeMapping = new Map()
+  for (const [i, node] of nodes.entries()) {
+    nodeMapping.set(nodeRefToKey(node), i)
+  }
 
   // Map topologically sorted order to neural network actions
-  const actions: PhenotypeAction[] = order.map((action) => {
+  const actions: PhenotypeAction[] = []
+  for (const action of order) {
     if (isOrderedActionEdge(action)) {
       const [from, to] = action
       const link = genome.links.get(nodeRefsToLinkKey(from, to))
@@ -65,15 +76,15 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
           )} not found in genome`
         )
       }
-      return {
+      actions.push({
         type: PhenotypeActionType.Link,
         from: nodeMapping.get(nodeRefToKey(from)) as number,
         to: nodeMapping.get(nodeRefToKey(to)) as number,
         weight: link.weight,
-      }
+      })
     } else {
       const [node] = action
-      return {
+      actions.push({
         type: PhenotypeActionType.Activation,
         node: nodeMapping.get(nodeRefToKey(node)) as number,
         bias: 0,
@@ -81,9 +92,9 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
           node.type === NodeType.Output
             ? genome.options.outputActivation
             : Activation.Sigmoid,
-      }
+      })
     }
-  })
+  }
 
   return {
     length: nodes.length,
