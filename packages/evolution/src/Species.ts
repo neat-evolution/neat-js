@@ -54,6 +54,7 @@ export class Species<
   constructor(
     options: SpeciesOptions,
     parseGenomeData: GenomeDataParser<G['options'], FO, G, GD>,
+    // FIXME: use factoryOptions here
     data?: SpeciesData<G>
   ) {
     this.options = options
@@ -72,7 +73,9 @@ export class Species<
       throw new Error('Missing genome data parser.')
     }
     if (data?.organisms != null && parseGenomeData != null) {
-      this.organisms = data.organisms.map((organismData) => {
+      this.organisms = []
+
+      for (const organismData of data.organisms) {
         // FIXME: casting to FO here is not explicit enough to prevent errors
         const genome = parseGenomeData(organismData.genome as GD)
         const organism = new Organism<G>(
@@ -81,8 +84,8 @@ export class Species<
           organismData.fitness,
           organismData.adjustedFitness
         )
-        return organism
-      })
+        this.organisms.push(organism)
+      }
     }
   }
 

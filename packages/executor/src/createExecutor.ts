@@ -35,9 +35,12 @@ export const createExecutor: ExecutorFactory = (
     }
 
     // Collect output
-    const outputs = phenotype.outputs.map((o) =>
-      Number.isFinite(values[o] as number) ? (values[o] as number) : 0
-    )
+    const outputs: number[] = []
+    for (const o of phenotype.outputs) {
+      outputs.push(
+        Number.isFinite(values[o] as number) ? (values[o] as number) : 0
+      )
+    }
     return outputs
   }
 }
