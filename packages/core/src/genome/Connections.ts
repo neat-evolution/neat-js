@@ -104,18 +104,12 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
     return target.edge
   }
 
-  *getAllConnections(): Generator<Connection<N, E>, void, undefined> {
-    for (const data of this.connections.values()) {
-      for (const { node, edge } of data.targets) {
-        yield [data.node, node, edge]
-      }
-    }
-  }
-
   *getAllNodes(): Generator<N, void, undefined> {
-    for (const connection of this.getAllConnections()) {
-      yield connection[0]
-      yield connection[1]
+    for (const { node: from, targets } of this.connections.values()) {
+      yield from
+      for (const { node: to } of targets) {
+        yield to
+      }
     }
   }
 
@@ -134,15 +128,14 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
   }
 
   *getTargets(from: N): Generator<N, void, undefined> {
-    const targets = this.getEdges(from)
-    for (const target of targets) {
-      yield target.node
+    for (const { node } of this.getEdges(from)) {
+      yield node
     }
   }
 
   *getSources(): Generator<N, void, undefined> {
-    for (const data of this.connections.values()) {
-      yield data.node
+    for (const { node } of this.connections.values()) {
+      yield node
     }
   }
 

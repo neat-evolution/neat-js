@@ -205,10 +205,11 @@ export class Species<
   calculateOffsprings(avgFitness: number): void {
     if (this.locked) throw new Error('Species is locked.')
 
-    this.offsprings = this.organisms.reduce(
-      (sum, organism) => sum + (organism.adjustedFitness ?? 0) / avgFitness,
-      0
-    )
+    let sum = 0
+    for (const organism of this.organisms) {
+      sum += (organism.adjustedFitness ?? 0) / avgFitness
+    }
+    this.offsprings = sum
 
     this.elites = this.options.guaranteedElites
   }

@@ -14,7 +14,7 @@ export const demo = async (createEvaluator: EvaluatorFactory<null>) => {
   const datasetOptions = defaultDatasetOptions
   datasetOptions.dataset = new URL(
     // FIXME: make dataset pathname an env variable
-    '../../generated/retina',
+    '../../generated/iris',
     import.meta.url
   ).pathname
   datasetOptions.validationFraction = 0.1
@@ -26,7 +26,7 @@ export const demo = async (createEvaluator: EvaluatorFactory<null>) => {
 
   const evolutionOptions: EvolutionOptions = {
     ...defaultEvolutionOptions,
-    secondsLimit: 180,
+    secondsLimit: 60,
   }
   const best = await neat(evaluator, evolutionOptions)
   return best
