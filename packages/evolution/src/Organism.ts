@@ -1,13 +1,20 @@
 import type { Genome, GenomeData } from '@neat-js/core'
 
-export interface OrganismData<G extends Genome<any, any, any, any, G>> {
-  genome: GenomeData<any, any, any, G['options'], G>
+export interface OrganismData<G extends Genome<any, any, any, any, any, G>> {
+  genome: GenomeData<
+    any,
+    any,
+    any,
+    G['options'],
+    ReturnType<G['toFactoryOptions']>,
+    G
+  >
   fitness: number | null
   adjustedFitness: number | null
   generation: number
 }
 
-export class Organism<G extends Genome<any, any, any, any, G>> {
+export class Organism<G extends Genome<any, any, any, any, any, G>> {
   public readonly genome: G
 
   public fitness: number | null
