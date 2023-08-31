@@ -20,19 +20,14 @@ Evolve a neural network.
 
 ```ts
 import { defaultNEATConfigOptions } from '@neat-js/core'
-import { defaultDatasetConfig } from '@neat-js/dataset-environment/DatasetConfig.js'
-import { DatasetEnvironment } from '@neat-js/dataset-environment/DatasetEnvironment.js'
-import { loadDataset } from '@neat-js/dataset-environment/loadDataset.js'
-import { AsyncEvaluator } from '@neat-js/evaluator/AsyncEvaluator.js'
-import { defaultEvolutionOptions } from '@neat-js/evolution/EvolutionOptions.js'
-import { defaultPopulationOptions } from '@neat-js/evolution/PopulationOptions.js'
-import { createExecutor } from '@neat-js/executor/createExecutor.js'
-import { createConfig } from '@neat-js/neat/createConfig.js'
-import { neat } from '@neat-js/neat/index.js'
-import { defaultNEATGenomeOptions } from '@neat-js/neat/NEATGenomeOptions.js'
+import { defaultDatasetOptions, DatasetEnvironment, loadDataset } from '@neat-js/dataset-environment'
+import { AsyncEvaluator } from '@neat-js/evaluator'
+import { defaultEvolutionOptions, defaultPopulationOptions } from '@neat-js/evolution'
+import { createExecutor } from '@neat-js/executor'
+import { createConfig, neat, defaultNEATGenomeOptions } from '@neat-js/neat'
 
 const datasetOptions = {
-  ...defaultDatasetConfig,
+  ...defaultDatasetOptions,
   dataset: new URL('../../generated/wine', import.meta.url).pathname,
   validationFraction: 0.1,
   testFraction: 0.1,

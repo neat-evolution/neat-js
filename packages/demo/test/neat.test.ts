@@ -1,6 +1,6 @@
 import { NEATConfig } from '@neat-js/core'
 import {
-  defaultDatasetConfig,
+  defaultDatasetOptions,
   DatasetEnvironment,
   loadDataset,
 } from '@neat-js/dataset-environment'
@@ -15,7 +15,7 @@ import { describe, expect, test } from 'vitest'
 
 describe.skip('neat', () => {
   test.skip('should evolve a genome', async () => {
-    const datasetOptions = defaultDatasetConfig
+    const datasetOptions = defaultDatasetOptions
     datasetOptions.dataset = new URL(
       './fixtures/iris-truncated',
       import.meta.url
@@ -43,7 +43,6 @@ describe.skip('neat', () => {
     )
 
     const genomeData = JSON.stringify(genome)
-    console.log(genomeData)
 
     expect(1).toBe(1)
   })

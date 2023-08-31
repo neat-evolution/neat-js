@@ -8,8 +8,8 @@ import {
 } from './Evaluator.js'
 
 export class AsyncEvaluator implements Evaluator {
-  environment: Environment
-  createExecutor: ExecutorFactory
+  public readonly environment: Environment
+  public readonly createExecutor: ExecutorFactory
 
   constructor(environment: Environment, createExecutor: ExecutorFactory) {
     this.environment = environment
@@ -18,23 +18,24 @@ export class AsyncEvaluator implements Evaluator {
 
   private async worker(data: PhenotypeData): Promise<FitnessData> {
     const [speciesIndex, organismIndex, phenotype] = data
-
-    // FIXME: how to access this across worker thread boundary?
     const executor = this.createExecutor(phenotype)
     const fitness = await this.environment.evaluate(executor)
     return [speciesIndex, organismIndex, fitness]
   }
 
   async *evaluate(
-    organismData: Iterable<PhenotypeData>
+    phenotypeData: Iterable<PhenotypeData>
   ): AsyncIterable<FitnessData> {
-    const promises = new Set<Promise<FitnessData>>()
-    for (const data of organismData) {
-      promises.add(this.worker(data))
+    const promises: Array<Promise<FitnessData>> = []
+    for (const data of phenotypeData) {
+      promises.push(this.worker(data))
     }
 
-    for (const p of promises) {
-      yield await p
+    while (promises.length > 0) {
+      const p = promises.shift()
+      if (p != null) {
+        yield await p
+      }
     }
   }
 }

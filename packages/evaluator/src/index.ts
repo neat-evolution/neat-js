@@ -1,2 +1,4 @@
 export * from './AsyncEvaluator.js'
+export * from './createEvaluator.js'
 export * from './Evaluator.js'
+export * from './EvaluatorFactory.js'

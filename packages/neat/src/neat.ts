@@ -8,10 +8,10 @@ import {
   defaultPopulationOptions,
 } from '@neat-js/evolution'
 
-import { createConfig } from './createConfig.js'
 import type {
   DefaultNEATGenome,
   DefaultNEATGenomeData,
+  DefaultNEATGenomeFactoryOptions,
 } from './DefaultNEATGenome.js'
 import { NEATAlgorithm } from './NEATAlgorithm.js'
 import {
@@ -31,6 +31,7 @@ export const neat = async (
 ) => {
   const population = new Population<
     NEATGenomeOptions,
+    DefaultNEATGenomeFactoryOptions,
     DefaultNEATGenome,
     DefaultNEATGenomeData
   >(
@@ -39,7 +40,7 @@ export const neat = async (
     NEATAlgorithm.createGenome,
     NEATAlgorithm.createState,
     populationOptions,
-    configProvider ?? createConfig(defaultNEATConfigOptions),
+    configProvider ?? NEATAlgorithm.createConfig(defaultNEATConfigOptions),
     {
       ...genomeOptions,
       ...evaluator.environment.description,

@@ -2,20 +2,20 @@ import type { GenomeFactory, NEATConfig } from '@neat-js/core'
 
 import {
   DefaultNEATGenome,
-  type DefaultNEATGenomeData,
+  type DefaultNEATGenomeFactoryOptions,
 } from './DefaultNEATGenome.js'
 import { type NEATGenomeOptions } from './NEATGenomeOptions.js'
 import type { NEATState } from './NEATState.js'
 
 export const createGenome: GenomeFactory<
   NEATGenomeOptions,
-  DefaultNEATGenome,
-  DefaultNEATGenomeData
+  DefaultNEATGenomeFactoryOptions,
+  DefaultNEATGenome
 > = (
   config: NEATConfig,
   options: NEATGenomeOptions,
   state: NEATState,
-  data?: DefaultNEATGenomeData
+  factoryOptions?: DefaultNEATGenomeFactoryOptions
 ) => {
-  return new DefaultNEATGenome(config, options, state, data)
+  return new DefaultNEATGenome(config, options, state, factoryOptions)
 }

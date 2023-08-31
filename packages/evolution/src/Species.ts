@@ -1,4 +1,9 @@
-import type { Genome, GenomeData, GenomeOptions } from '@neat-js/core'
+import type {
+  Genome,
+  GenomeData,
+  GenomeFactoryOptions,
+  GenomeOptions,
+} from '@neat-js/core'
 
 import { Organism } from './Organism.js'
 import type { OrganismData } from './Organism.js'
@@ -6,11 +11,12 @@ import type { SpeciesOptions } from './SpeciesOptions.js'
 
 export type GenomeDataParser<
   GO extends GenomeOptions,
-  G extends Genome<any, any, any, GO, G>,
-  GD extends GenomeData<any, any, any, GO, G>
-> = (data: GD) => G
+  FO extends GenomeFactoryOptions,
+  G extends Genome<any, any, any, GO, FO, G>,
+  GD extends GenomeData<any, any, any, GO, FO, G>
+> = (genomeData: GD) => G
 
-export interface SpeciesData<G extends Genome<any, any, any, any, G>> {
+export interface SpeciesData<G extends Genome<any, any, any, any, any, G>> {
   options?: SpeciesOptions
   currentAge: number
   bestFitness: number
@@ -25,8 +31,9 @@ export interface SpeciesData<G extends Genome<any, any, any, any, G>> {
 }
 
 export class Species<
-  G extends Genome<any, any, any, any, G>,
-  GD extends GenomeData<any, any, any, G['options'], G>
+  FO extends GenomeFactoryOptions,
+  G extends Genome<any, any, any, any, FO, G>,
+  GD extends GenomeData<any, any, any, any, FO, G>
 > {
   private readonly options: SpeciesOptions
 
@@ -46,7 +53,7 @@ export class Species<
 
   constructor(
     options: SpeciesOptions,
-    parseGenomeData: GenomeDataParser<G['options'], G, GD>,
+    parseGenomeData: GenomeDataParser<G['options'], FO, G, GD>,
     data?: SpeciesData<G>
   ) {
     this.options = options
@@ -66,7 +73,7 @@ export class Species<
     }
     if (data?.organisms != null && parseGenomeData != null) {
       this.organisms = data.organisms.map((organismData) => {
-        // FIXME: casting to GD here is not explicit enough to prevent errors
+        // FIXME: casting to FO here is not explicit enough to prevent errors
         const genome = parseGenomeData(organismData.genome as GD)
         const organism = new Organism<G>(
           genome,

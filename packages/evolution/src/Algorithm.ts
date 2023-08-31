@@ -2,8 +2,8 @@ import type {
   ConfigFactory,
   ConfigProvider,
   Genome,
-  GenomeData,
   GenomeFactory,
+  GenomeFactoryOptions,
   GenomeOptions,
   LinkExtension,
   LinkFactory,
@@ -20,8 +20,8 @@ export interface Algorithm<
   L extends LinkExtension<any, any, L>,
   T extends Stats,
   O extends GenomeOptions,
-  G extends Genome<N, L, T, O, G>,
-  D extends GenomeData<N, L, T, O, G>
+  FO extends GenomeFactoryOptions,
+  G extends Genome<N, L, T, O, FO, G>
 > {
   defaultOptions: O
   createConfig: ConfigFactory<
@@ -29,7 +29,7 @@ export interface Algorithm<
     L['config'],
     ConfigProvider<N['config'], L['config']>
   >
-  createGenome: GenomeFactory<O, G, D>
+  createGenome: GenomeFactory<O, FO, G>
   createLink: LinkFactory<L['config'], L['state'], L>
   createNode: NodeFactory<N['config'], N['state'], N>
   createPhenotype: PhenotypeFactory<G>

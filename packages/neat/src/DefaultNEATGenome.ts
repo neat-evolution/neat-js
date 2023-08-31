@@ -1,5 +1,9 @@
 import { NEATGenome } from '@neat-js/core'
-import type { NEATConfig, NEATGenomeData } from '@neat-js/core'
+import type {
+  NEATConfig,
+  NEATGenomeData,
+  NEATGenomeFactoryOptions,
+} from '@neat-js/core'
 
 import { createGenome } from './createGenome.js'
 import { createLink } from './createLink.js'
@@ -10,19 +14,38 @@ import type { NEATNode } from './NEATNode.js'
 import type { NEATState } from './NEATState.js'
 
 export interface DefaultNEATGenomeData
-  extends NEATGenomeData<NEATNode, NEATLink, NEATGenomeOptions> {}
+  extends NEATGenomeData<
+    NEATNode,
+    NEATLink,
+    NEATGenomeOptions,
+    NEATGenomeFactoryOptions<NEATNode, NEATLink>
+  > {}
+
+export type DefaultNEATGenomeFactoryOptions = NEATGenomeFactoryOptions<
+  NEATNode,
+  NEATLink
+>
 
 export class DefaultNEATGenome extends NEATGenome<
   NEATNode,
   NEATLink,
-  NEATGenomeOptions
+  NEATGenomeOptions,
+  DefaultNEATGenomeFactoryOptions
 > {
   constructor(
     config: NEATConfig,
     options: NEATGenomeOptions,
     state: NEATState,
-    data?: DefaultNEATGenomeData
+    factoryOptions?: DefaultNEATGenomeFactoryOptions
   ) {
-    super(config, options, state, createNode, createLink, createGenome, data)
+    super(
+      config,
+      options,
+      state,
+      createNode,
+      createLink,
+      createGenome,
+      factoryOptions
+    )
   }
 }

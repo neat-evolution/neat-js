@@ -6,4 +6,5 @@ export type EnvironmentDescription = InitConfig
 export interface Environment {
   description: EnvironmentDescription
   evaluate: (executor: Executor) => Promise<number>
+  serialize?: () => SharedArrayBuffer
 }
