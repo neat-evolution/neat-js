@@ -3,7 +3,7 @@ import type { Organism } from './Organism.js'
 import { type Population } from './Population.js'
 
 export const evolve = async <
-  P extends Population<any, any, any>,
+  P extends Population<any, any, any, any>,
   O extends EvolutionOptions = EvolutionOptions
 >(
   population: P,
@@ -18,7 +18,9 @@ export const evolve = async <
 
   const startTime = Date.now()
   for (let i = 0; i < iterations; i++) {
-    console.log(`Iteration ${i + 1}`)
+    if (i % 10 === 0) {
+      console.log(`Iteration ${i + 1}`)
+    }
     const iterationStartTime = Date.now()
     await population.evaluate()
 
@@ -32,11 +34,16 @@ export const evolve = async <
     ) {
       break
     }
-    console.log(`fitness: ${(population.best() as Organism<any>).fitness ?? 0}`)
+    if (i % 10 === 0) {
+      console.log(
+        `fitness: ${(population.best() as Organism<any>).fitness ?? 0}`
+      )
+    }
 
     population.evolve()
-
-    console.log(`took ${Date.now() - iterationStartTime}ms`)
+    if (i % 10 === 0) {
+      console.log(`took ${Date.now() - iterationStartTime}ms`)
+    }
   }
   console.log(`ended after ${Date.now() - startTime}ms`)
   for (const species of population.species.values()) {
