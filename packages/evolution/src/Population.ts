@@ -84,20 +84,30 @@ export class Population<
     }
   }
 
-  *organismEntries(): IterableIterator<
-    [speciesIndex: number, organismIndex: number, organism: Organism<G>]
+  *genomeEntries(): IterableIterator<
+    [speciesIndex: number, organismIndex: number, genome: G]
   > {
-    for (const [speciesIndex, species] of this.species.entries()) {
-      for (const [organismIndex, organism] of species.organisms.entries()) {
-        yield [speciesIndex, organismIndex, organism]
+    for (const [speciesIndex, { organisms }] of this.species.entries()) {
+      for (const [organismIndex, { genome }] of organisms.entries()) {
+        yield [speciesIndex, organismIndex, genome]
       }
     }
   }
 
   *organismValues(): IterableIterator<Organism<G>> {
-    for (const [, , organism] of this.organismEntries()) {
-      yield organism
+    for (const { organisms } of this.species.values()) {
+      for (const organism of organisms.values()) {
+        yield organism
+      }
     }
+  }
+
+  organismSize(): number {
+    let size = 0
+    for (const species of this.species.values()) {
+      size += species.organisms.length
+    }
+    return size
   }
 
   push(organism: Organism<G>, lockNew: boolean): void {
@@ -139,26 +149,23 @@ export class Population<
       this.populationOptions.guaranteedElites * this.species.size
 
     // Average fitness of all organisms
-    const organisms = Array.from(this.organismValues())
+    let sumAdjustedFitness = 0
+    for (const { adjustedFitness } of this.organismValues()) {
+      sumAdjustedFitness += adjustedFitness ?? 0
+    }
     const avgFitness =
-      organisms
-        .map((o) => o.adjustedFitness ?? 0)
-        .reduce((acc, v) => acc + v, 0) /
-      (this.populationOptions.populationSize - elites)
+      sumAdjustedFitness / (this.populationOptions.populationSize - elites)
 
     for (const species of this.species.values()) {
       species.calculateOffsprings(avgFitness)
     }
 
     let sumOffsprings = 0
-
     for (const species of this.species.values()) {
       sumOffsprings += Math.floor(species.offsprings)
     }
-
     let newPopulationSize = sumOffsprings + elites
 
-    // Make a single copy of the keys
     const speciesIds = Array.from(this.species.keys())
 
     // Sort speciesIds array
@@ -302,10 +309,7 @@ export class Population<
     }
 
     // Verify correct number of individuals in new population
-    if (
-      Array.from(this.organismValues()).length !==
-      this.populationOptions.populationSize
-    ) {
+    if (this.organismSize() !== this.populationOptions.populationSize) {
       throw new Error('Wrong number of individuals in population')
     }
 
@@ -361,15 +365,11 @@ export class Population<
     const phenotypeData = new Set<PhenotypeData>()
 
     // convert every organism to a phenotype
-    for (const [
-      speciesIndex,
-      organismIndex,
-      organism,
-    ] of this.organismEntries()) {
+    for (const [speciesIndex, organismIndex, genome] of this.genomeEntries()) {
       phenotypeData.add([
         speciesIndex,
         organismIndex,
-        this.createPhenotype(organism.genome),
+        this.createPhenotype(genome),
       ])
     }
 

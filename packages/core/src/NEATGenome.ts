@@ -329,8 +329,10 @@ export class NEATGenome<
     for (const [linkRef, link] of parent1.links.entries()) {
       if (parent2.links.has(linkRef)) {
         const link2 = parent2.links.get(linkRef) as L
+        // FIXME: can this be assumed safe?
         genome.insertLink(link.crossover(link2, fitness, otherFitness), true)
       } else {
+        // FIXME: can this be assumed safe?
         genome.insertLink(link, true)
       }
     }
