@@ -159,6 +159,7 @@ export class NEATGenome<
   }
 
   toJSON(): NEATGenomeData<N, L, O, FO> {
+    // FIXME: rewrite this to use for...of
     return {
       config: this.config.toJSON(),
       state: this.state.toJSON(),

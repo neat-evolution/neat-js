@@ -150,20 +150,26 @@ export class Population<
       species.calculateOffsprings(avgFitness)
     }
 
-    let newPopulationSize =
-      Array.from(this.species.values())
-        .map((s) => Math.floor(s.offsprings))
-        .reduce((acc, v) => acc + v, 0) + elites
+    let sumOffsprings = 0
 
+    for (const species of this.species.values()) {
+      sumOffsprings += Math.floor(species.offsprings)
+    }
+
+    let newPopulationSize = sumOffsprings + elites
+
+    // Make a single copy of the keys
     const speciesIds = Array.from(this.species.keys())
 
-    // Sort species based on closeness to additional offspring
-    speciesIds.sort(
-      (a, b) =>
-        1 -
-        ((this.species.get(a) as Species<FO, G, GD>).offsprings % 1) -
-        (1 - ((this.species.get(b) as Species<FO, G, GD>).offsprings % 1))
-    )
+    // Sort speciesIds array
+    speciesIds.sort((a, b) => {
+      const fractionA =
+        (this.species.get(a) as Species<FO, G, GD>).offsprings % 1
+      const fractionB =
+        (this.species.get(b) as Species<FO, G, GD>).offsprings % 1
+
+      return 1 - fractionB - (1 - fractionA)
+    })
 
     while (newPopulationSize < this.populationOptions.populationSize) {
       for (const speciesId of speciesIds) {
@@ -200,10 +206,12 @@ export class Population<
       }
     }
 
-    // I'm going to assume we have a helper function to sum up offsprings and elites for validation
-    const totalOffspringAndElites = Array.from(this.species.values())
-      .map((s) => Math.floor(s.offsprings) + s.elites)
-      .reduce((acc, v) => acc + v, 0)
+    let totalOffspringAndElites = 0
+
+    for (const species of this.species.values()) {
+      totalOffspringAndElites += Math.floor(species.offsprings) + species.elites
+    }
+
     if (totalOffspringAndElites !== this.populationOptions.populationSize) {
       throw new Error('Wrong number of planned individuals in next population')
     }

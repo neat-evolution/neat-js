@@ -1,51 +1,65 @@
 type Matrix = number[][]
 
 export const argmax = (vec: number[]): number => {
-  return vec.reduce(
-    (bestIdx, currVal, currIdx, arr) =>
-      currVal > (arr[bestIdx] ?? 0) ? currIdx : bestIdx,
-    0
-  )
+  let bestIdx = 0
+  for (let i = 0; i < vec.length; i++) {
+    if ((vec[i] as number) > (vec[bestIdx] as number)) {
+      bestIdx = i
+    }
+  }
+  return bestIdx
 }
 
 export const oneHotAccuracy = (targets: Matrix, outputs: Matrix): number => {
-  const correctMatches = targets
-    .map<number>((targetRow, index) =>
-      argmax(targetRow) === argmax(outputs[index] ?? [0]) ? 1 : 0
-    )
-    .reduce((acc, curr) => acc + curr, 0)
+  let correctMatches = 0
+
+  for (let i = 0; i < targets.length; i++) {
+    if (argmax(targets[i] as number[]) === argmax(outputs[i] ?? [0])) {
+      correctMatches += 1
+    }
+  }
 
   return correctMatches / targets.length
 }
 
 export const roundedAccuracy = (targets: Matrix, outputs: Matrix): number => {
-  const matchedRoundedVals = targets
-    .map((targetRow, index) => {
-      const outputRow = outputs[index] as number[]
-      const matchedCounts = targetRow
-        .map<number>((tVal, tIndex) =>
-          Math.round(tVal) === Math.round(outputRow[tIndex] ?? 0) ? 1 : 0
-        )
-        .reduce((acc, curr) => acc + curr, 0)
-      return matchedCounts / targetRow.length
-    })
-    .reduce((acc, curr) => acc + curr, 0)
+  let matchedRoundedVals = 0
+
+  for (let i = 0; i < targets.length; i++) {
+    const targetRow = targets[i] as number[]
+    const outputRow = outputs[i] as number[]
+    let matchedCounts = 0
+
+    for (let j = 0; j < targetRow.length; j++) {
+      if (
+        Math.round(targetRow[j] as number) === Math.round(outputRow[j] ?? 0)
+      ) {
+        matchedCounts++
+      }
+    }
+
+    matchedRoundedVals += matchedCounts / targetRow.length
+  }
 
   return matchedRoundedVals / targets.length
 }
 
 export const binaryAccuracy = (targets: Matrix, outputs: Matrix): number => {
-  const matchedBinaryVals = targets
-    .map((targetRow, index) => {
-      const outputRow = outputs[index] as number[]
-      const matchedCounts = targetRow
-        .map<number>((tVal, tIndex) =>
-          tVal > 0 === (outputRow[tIndex] ?? 0) > 0 ? 1 : 0
-        )
-        .reduce((acc, curr) => acc + curr, 0)
-      return matchedCounts / targetRow.length
-    })
-    .reduce((acc, curr) => acc + curr, 0)
+  let matchedBinaryVals = 0
+
+  for (let i = 0; i < targets.length; i++) {
+    const targetRow = targets[i] as number[]
+    const outputRow = outputs[i] as number[]
+    let matchedCounts = 0
+
+    for (let j = 0; j < targetRow.length; j++) {
+      if ((targetRow[j] as number) > 0 === (outputRow[j] ?? 0) > 0) {
+        matchedCounts++
+      }
+    }
+
+    matchedBinaryVals += matchedCounts / targetRow.length
+  }
 
   return matchedBinaryVals / targets.length
 }

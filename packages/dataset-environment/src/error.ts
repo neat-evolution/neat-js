@@ -2,10 +2,17 @@ type Vector = number[]
 type Matrix = Vector[]
 
 export const normalize = (list: Vector): Vector => {
-  const sum = list.reduce((acc, curr) => acc + curr, 0)
+  let sum = 0
+  for (const val of list) {
+    sum += val
+  }
 
   if (sum !== 0) {
-    return list.map((x) => x / sum)
+    const normalized = []
+    for (const val of list) {
+      normalized.push(val / sum)
+    }
+    return normalized
   } else {
     return [...list] // Clone the list
   }
@@ -16,11 +23,10 @@ export const mse = (
   predictions: Matrix,
   norm: boolean
 ): number => {
-  const totalError = targets
-    .map((targetRow, index) =>
-      mseSingle(targetRow, predictions[index] as Vector, norm)
-    )
-    .reduce((acc, curr) => acc + curr, 0)
+  let totalError = 0
+  for (const [i, target] of targets.entries()) {
+    totalError += mseSingle(target, predictions[i] as Vector, norm)
+  }
 
   return totalError / targets.length
 }
@@ -31,12 +37,10 @@ export const mseSingle = (
   norm: boolean
 ): number => {
   const normalizedPrediction = norm ? normalize(prediction) : [...prediction]
-
-  const error = target
-    .map((tVal, tIndex) =>
-      Math.pow(tVal - (normalizedPrediction[tIndex] ?? 0), 2)
-    )
-    .reduce((acc, curr) => acc + curr, 0)
+  let error = 0
+  for (const [i, val] of target.entries()) {
+    error += Math.pow(val - (normalizedPrediction[i] ?? 0), 2)
+  }
 
   return error / target.length
 }
@@ -46,11 +50,10 @@ export const crossentropy = (
   predictions: Matrix,
   norm: boolean
 ): number => {
-  const totalEntropy = targets
-    .map((targetRow, index) =>
-      crossentropySingle(targetRow, predictions[index] as Vector, norm)
-    )
-    .reduce((acc, curr) => acc + curr, 0)
+  let totalEntropy = 0
+  for (const [i, target] of targets.entries()) {
+    totalEntropy += crossentropySingle(target, predictions[i] as Vector, norm)
+  }
 
   return totalEntropy / targets.length
 }
@@ -65,15 +68,17 @@ export const crossentropySingle = (
   const ma = 1.0 - e
 
   let normalizedPrediction = norm ? normalize(prediction) : [...prediction]
-  normalizedPrediction = normalizedPrediction.map((x) =>
-    Math.min(Math.max(x, mi), ma)
-  )
+
+  for (const [i, val] of normalizedPrediction.entries()) {
+    normalizedPrediction[i] = Math.min(Math.max(val, mi), ma)
+  }
 
   normalizedPrediction = normalize(normalizedPrediction)
 
-  const entropy = target
-    .map((tVal, tIndex) => -tVal * Math.log(normalizedPrediction[tIndex] ?? 0))
-    .reduce((acc, curr) => acc + curr, 0)
+  let entropy = 0
+  for (const [i, val] of target.entries()) {
+    entropy += -val * Math.log(normalizedPrediction[i] ?? 0)
+  }
 
   return entropy
 }
