@@ -7,17 +7,17 @@ export interface Target<N extends NodeRef, E extends Edge> {
   edge: E
 }
 
-export interface Connection<N extends NodeRef, E extends Edge> {
-  from: N
-  to: N
-  edge: E
-}
-
-export type OrderedActionEdge<N extends NodeRef, E extends Edge> = [
+export type Connection<N extends NodeRef, E extends Edge> = [
   from: N,
   to: N,
   edge: E
 ]
+
+export type OrderedActionEdge<N extends NodeRef, E extends Edge> = Connection<
+  N,
+  E
+>
+
 export type OrderedActionNode<N extends NodeRef> = [nodeRef: N]
 
 export type OrderedAction<N extends NodeRef, E extends Edge> =
