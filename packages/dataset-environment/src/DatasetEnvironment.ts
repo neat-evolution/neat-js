@@ -6,6 +6,7 @@ import type { Executor } from '@neat-js/executor'
 
 // import { binaryAccuracy, oneHotAccuracy } from './accuracy.js'
 import { type Dataset } from './Dataset.js'
+import { datasetToSharedBuffer } from './datasetToSharedBuffer.js'
 import { crossentropy, mse } from './error.js'
 
 export interface DatasetStats {
@@ -53,5 +54,9 @@ export class DatasetEnvironment implements Environment {
 
     const fitness = this.fitness(this.dataset.trainingTargets, predictions)
     return fitness
+  }
+
+  serialize(): SharedArrayBuffer {
+    return datasetToSharedBuffer(this.dataset)
   }
 }
