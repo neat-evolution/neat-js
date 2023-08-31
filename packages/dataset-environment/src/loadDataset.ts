@@ -3,9 +3,9 @@ import { promises as fs } from 'node:fs'
 import { shuffle } from '@neat-js/core'
 
 import type { Dataset } from './Dataset.js'
-import type { DatasetConfig } from './DatasetConfig.js'
+import type { DatasetOptions } from './DatasetOptions.js'
 
-export const loadDataset = async (config: DatasetConfig): Promise<Dataset> => {
+export const loadDataset = async (config: DatasetOptions): Promise<Dataset> => {
   try {
     const fileContent = await fs.readFile(config.dataset, 'utf-8')
     const lines = fileContent.split('\n').map((line) => line.trim())
