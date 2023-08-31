@@ -9,7 +9,7 @@ import { createPhenotype } from './createPhenotype.js'
 import { createState } from './createState.js'
 import {
   type DefaultNEATGenome,
-  type DefaultNEATGenomeData,
+  type DefaultNEATGenomeFactoryOptions,
 } from './DefaultNEATGenome.js'
 import {
   defaultNEATGenomeOptions,
@@ -23,8 +23,8 @@ export const NEATAlgorithm: Algorithm<
   NEATLink,
   NEATGenomeStats,
   NEATGenomeOptions,
-  DefaultNEATGenome,
-  DefaultNEATGenomeData
+  DefaultNEATGenomeFactoryOptions,
+  DefaultNEATGenome
 > = {
   defaultOptions: defaultNEATGenomeOptions,
   createConfig,

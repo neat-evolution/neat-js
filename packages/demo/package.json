@@ -46,10 +46,12 @@
   "dependencies": {
     "@neat-js/core": "^0.0.1",
     "@neat-js/dataset-environment": "^0.0.1",
+    "@neat-js/environment": "^0.0.1",
     "@neat-js/evaluator": "^0.0.1",
     "@neat-js/evolution": "^0.0.1",
     "@neat-js/executor": "^0.0.1",
     "@neat-js/neat": "^0.0.1",
+    "@neat-js/worker-evaluator": "^0.0.1",
     "@swc/helpers": "^0.5.1"
   },
   "devDependencies": {

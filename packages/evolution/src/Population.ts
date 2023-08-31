@@ -1,10 +1,11 @@
 import type {
   Genome,
-  GenomeData,
   GenomeFactory,
+  GenomeFactoryOptions,
   GenomeOptions,
   StateFactory,
   StateProvider,
+  GenomeData,
 } from '@neat-js/core'
 import type { Evaluator, PhenotypeData } from '@neat-js/evaluator'
 import type { PhenotypeFactory } from '@neat-js/phenotype'
@@ -18,18 +19,19 @@ import { Species, type GenomeDataParser } from './Species.js'
 
 export class Population<
   GO extends GenomeOptions,
-  G extends Genome<any, any, any, GO, G>,
-  GD extends GenomeData<any, any, any, GO, G>
+  FO extends GenomeFactoryOptions,
+  G extends Genome<any, any, any, GO, FO, G>,
+  GD extends GenomeData<any, any, any, GO, FO, G>
 > {
-  species: Map<number, Species<G, GD>>
-  extinctSpecies: Map<number, Species<G, GD>>
+  species: Map<number, Species<FO, G, GD>>
+  extinctSpecies: Map<number, Species<FO, G, GD>>
   state: StateProvider<any, any>
   nextId: number
 
   createPhenotype: PhenotypeFactory<G>
-  createGenome: GenomeFactory<GO, G, GD>
+  createGenome: GenomeFactory<GO, FO, G>
   createState: StateFactory<any, any, any>
-  parseGenomeData: GenomeDataParser<GO, G, GD>
+  parseGenomeData: GenomeDataParser<GO, FO, G, GD>
   evaluator: Evaluator
 
   populationOptions: PopulationOptions
@@ -39,22 +41,30 @@ export class Population<
   constructor(
     evaluator: Evaluator,
     createPhenotype: PhenotypeFactory<G>,
-    createGenome: GenomeFactory<GO, G, GD>,
+    createGenome: GenomeFactory<GO, FO, G>,
     createState: StateFactory<any, any, any>,
     populationOptions: PopulationOptions = defaultPopulationOptions,
     NEATOptions: G['config'],
     genomeOptions: GO
   ) {
-    this.species = new Map<number, Species<G, GD>>()
-    this.extinctSpecies = new Map<number, Species<G, GD>>()
+    this.species = new Map<number, Species<FO, G, GD>>()
+    this.extinctSpecies = new Map<number, Species<FO, G, GD>>()
     this.nextId = 0
     this.evaluator = evaluator
 
     this.createPhenotype = createPhenotype
     this.createGenome = createGenome
     this.createState = createState
-    this.parseGenomeData = (data: GD) =>
-      createGenome(NEATOptions, genomeOptions, this.state, data)
+    this.parseGenomeData = (genomeData: GD) => {
+      // FIXME: how to make genome and FO mutually inclusive?
+      const factoryOptions = genomeData as unknown as FO
+      return createGenome(
+        NEATOptions,
+        genomeOptions,
+        this.state,
+        factoryOptions
+      )
+    }
 
     this.populationOptions = populationOptions
     this.NEATOptions = NEATOptions
@@ -95,7 +105,10 @@ export class Population<
     if (species != null) {
       species.push(organism)
     } else {
-      species = new Species<G, GD>(this.populationOptions, this.parseGenomeData)
+      species = new Species<FO, G, GD>(
+        this.populationOptions,
+        this.parseGenomeData
+      )
       if (lockNew) {
         species.lock()
       }
@@ -105,7 +118,7 @@ export class Population<
     }
   }
 
-  private compatibleSpecies(organism: Organism<G>): Species<G, GD> | null {
+  private compatibleSpecies(organism: Organism<G>): Species<FO, G, GD> | null {
     for (const species of this.species.values()) {
       if (species.isCompatible(organism)) {
         return species
@@ -148,13 +161,13 @@ export class Population<
     speciesIds.sort(
       (a, b) =>
         1 -
-        ((this.species.get(a) as Species<G, GD>).offsprings % 1) -
-        (1 - ((this.species.get(b) as Species<G, GD>).offsprings % 1))
+        ((this.species.get(a) as Species<FO, G, GD>).offsprings % 1) -
+        (1 - ((this.species.get(b) as Species<FO, G, GD>).offsprings % 1))
     )
 
     while (newPopulationSize < this.populationOptions.populationSize) {
       for (const speciesId of speciesIds) {
-        const species = this.species.get(speciesId) as Species<G, GD>
+        const species = this.species.get(speciesId) as Species<FO, G, GD>
         species.offsprings = Math.floor(species.offsprings) + 1
         newPopulationSize++
 
@@ -167,15 +180,15 @@ export class Population<
     // Sort species based on bestFitness (best first)
     speciesIds.sort((a, b) => {
       return (
-        ((this.species.get(b) as Species<G, GD>).bestFitness ?? 0) -
-        ((this.species.get(a) as Species<G, GD>).bestFitness ?? 0)
+        ((this.species.get(b) as Species<FO, G, GD>).bestFitness ?? 0) -
+        ((this.species.get(a) as Species<FO, G, GD>).bestFitness ?? 0)
       )
     })
 
     let elitesDistributed = 0
     while (elitesDistributed < this.populationOptions.globalElites) {
       for (const speciesId of speciesIds) {
-        const species = this.species.get(speciesId) as Species<G, GD>
+        const species = this.species.get(speciesId) as Species<FO, G, GD>
         if (species.elites < species.organisms.length) {
           species.elites++
           elitesDistributed++
@@ -206,7 +219,7 @@ export class Population<
     }
 
     for (const i of speciesIds) {
-      const species = this.species.get(i) as Species<G, GD>
+      const species = this.species.get(i) as Species<FO, G, GD>
 
       // Steal elites from number of offsprings
       const elitesTakenFromOffspring = Math.min(
@@ -229,7 +242,7 @@ export class Population<
 
     // Evolve species
     for (const i of speciesIds) {
-      const species = this.species.get(i) as Species<G, GD>
+      const species = this.species.get(i) as Species<FO, G, GD>
       const reproductions = Math.floor(species.offsprings)
 
       // Breed new organisms
