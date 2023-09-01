@@ -1,6 +1,7 @@
 export * from './Algorithm.js'
 export * from './EvolutionOptions.js'
 export * from './evolve.js'
+export * from './GenomeDataParser.js'
 export * from './Organism.js'
 export * from './Population.js'
 export * from './PopulationOptions.js'

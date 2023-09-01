@@ -8,35 +8,37 @@ import type {
   GenomeData,
 } from '@neat-js/core'
 import type { Evaluator, PhenotypeData } from '@neat-js/evaluator'
-import type { PhenotypeFactory } from '@neat-js/phenotype'
+import { type PhenotypeFactory } from '@neat-js/phenotype'
 
+import type { GenomeDataParser } from './GenomeDataParser.js'
 import { Organism } from './Organism.js'
 import {
   defaultPopulationOptions,
   type PopulationOptions,
 } from './PopulationOptions.js'
-import { Species, type GenomeDataParser } from './Species.js'
+import { Species } from './Species.js'
 
+// FIXME: Add PopulationData and PopulationFactoryOptions
 export class Population<
   GO extends GenomeOptions,
   FO extends GenomeFactoryOptions,
   G extends Genome<any, any, any, GO, FO, G>,
   GD extends GenomeData<any, any, any, GO, FO, G>
 > {
-  species: Map<number, Species<FO, G, GD>>
-  extinctSpecies: Map<number, Species<FO, G, GD>>
-  state: StateProvider<any, any>
-  nextId: number
+  public readonly species: Map<number, Species<FO, G, GD>>
+  public readonly extinctSpecies: Map<number, Species<FO, G, GD>>
+  public readonly state: StateProvider<any, any>
+  private nextId: number
 
-  createPhenotype: PhenotypeFactory<G>
-  createGenome: GenomeFactory<GO, FO, G>
-  createState: StateFactory<any, any, any>
-  parseGenomeData: GenomeDataParser<GO, FO, G, GD>
-  evaluator: Evaluator
+  public readonly createPhenotype: PhenotypeFactory<G>
+  public readonly createGenome: GenomeFactory<GO, FO, G>
+  public readonly createState: StateFactory<any, any, any>
+  public readonly parseGenomeData: GenomeDataParser<GO, FO, G, GD>
+  public readonly evaluator: Evaluator
 
-  populationOptions: PopulationOptions
-  NEATOptions: G['config']
-  genomeOptions: GO
+  public readonly populationOptions: PopulationOptions
+  public readonly configProvider: G['config']
+  public readonly genomeOptions: GO
 
   constructor(
     evaluator: Evaluator,
@@ -55,6 +57,8 @@ export class Population<
     this.createPhenotype = createPhenotype
     this.createGenome = createGenome
     this.createState = createState
+
+    // FIXME: this was half implemented and should migrate to the FactoryOptions strategy
     this.parseGenomeData = (genomeData: GD) => {
       // FIXME: how to make genome and FO mutually inclusive?
       const factoryOptions = genomeData as unknown as FO
@@ -67,13 +71,19 @@ export class Population<
     }
 
     this.populationOptions = populationOptions
-    this.NEATOptions = NEATOptions
+    this.configProvider = NEATOptions
     this.genomeOptions = genomeOptions
 
+    // FIXME: implement factoryOptions
+    // - PopulationFactoryOptions
+    //   - StateFactoryOptions
+    //   - SpeciesFactoryOptions
+    //   - OrganismFactoryOptions
+    //   - GenomeFactoryOptions
     this.state = this.createState()
     for (let i = 0; i < this.populationOptions.populationSize; i++) {
       const genome = createGenome(
-        this.NEATOptions,
+        this.configProvider,
         {
           ...this.genomeOptions,
           ...this.evaluator.environment.description,
@@ -102,7 +112,7 @@ export class Population<
     }
   }
 
-  organismSize(): number {
+  public get size(): number {
     let size = 0
     for (const species of this.species.values()) {
       size += species.organisms.length
@@ -110,6 +120,7 @@ export class Population<
     return size
   }
 
+  // FIXME: rename to add
   push(organism: Organism<G>, lockNew: boolean): void {
     let species = this.compatibleSpecies(organism)
     if (species != null) {
@@ -223,13 +234,10 @@ export class Population<
       throw new Error('Wrong number of planned individuals in next population')
     }
 
-    // Kill individuals of low performance, not allowed to reproduce
     for (const species of this.species.values()) {
+      // Kill individuals of low performance, not allowed to reproduce
       species.retainBest()
-    }
-
-    // Increase the age of and lock all species, making current organisms old
-    for (const species of this.species.values()) {
+      // Increase the age of and lock all species, making current organisms old
       species.age()
     }
 
@@ -246,12 +254,10 @@ export class Population<
 
       // Directly copy elites, without crossover or mutation
       for (let j = 0; j < species.elites; j++) {
-        this.push(
-          (
-            species.organisms[j % species.organisms.length] as Organism<G>
-          ).asElite(),
-          true
-        )
+        const organism = species.organisms[
+          j % species.organisms.length
+        ] as Organism<G>
+        this.push(organism.asElite(), true)
       }
     }
 
@@ -301,16 +307,18 @@ export class Population<
 
     // Remove extinct species
     for (const i of speciesIds) {
-      const species = this.species.get(i)
-      if (species?.extinct === true) {
+      const species = this.species.get(i) as Species<FO, G, GD>
+      if (species.extinct) {
         this.species.delete(i)
         this.extinctSpecies.set(i, species)
       }
     }
 
     // Verify correct number of individuals in new population
-    if (this.organismSize() !== this.populationOptions.populationSize) {
-      throw new Error('Wrong number of individuals in population')
+    if (this.size !== this.populationOptions.populationSize) {
+      throw new Error(
+        `Wrong number of individuals in population; expected ${this.populationOptions.populationSize}, got ${this.size}`
+      )
     }
 
     if (this.populationOptions.speciesTarget > 0) {
@@ -366,11 +374,8 @@ export class Population<
 
     // convert every organism to a phenotype
     for (const [speciesIndex, organismIndex, genome] of this.genomeEntries()) {
-      phenotypeData.add([
-        speciesIndex,
-        organismIndex,
-        this.createPhenotype(genome),
-      ])
+      const phenotype = this.createPhenotype(genome)
+      phenotypeData.add([speciesIndex, organismIndex, phenotype])
     }
 
     // evaluate every organism

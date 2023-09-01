@@ -2,10 +2,13 @@ import type { Environment } from '@neat-js/environment'
 import type { ExecutorFactory } from '@neat-js/executor'
 
 import { AsyncEvaluator } from './AsyncEvaluator.js'
+import type { EvaluatorFactory } from './EvaluatorFactory.js'
 
-export const createEvaluator = (
+export type AsyncEvaluatorFactoryOptions = ExecutorFactory
+
+export const createEvaluator: EvaluatorFactory<AsyncEvaluatorFactoryOptions> = (
   environment: Environment,
-  options: ExecutorFactory
+  createExecutor: AsyncEvaluatorFactoryOptions
 ) => {
-  return new AsyncEvaluator(environment, options)
+  return new AsyncEvaluator(environment, createExecutor)
 }

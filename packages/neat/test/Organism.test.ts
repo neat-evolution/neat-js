@@ -10,7 +10,6 @@ import { type DefaultNEATGenome } from '../src/DefaultNEATGenome.js'
 import { defaultNEATGenomeOptions } from '../src/NEATGenomeOptions.js'
 
 describe('Organism class', () => {
-  let config: DefaultNEATGenome['config']
   let state: DefaultNEATGenome['state']
   let initConfig: InitConfig
   let genomeOptions: DefaultNEATGenome['options']
@@ -20,7 +19,6 @@ describe('Organism class', () => {
   let createSeasonedGenome: () => DefaultNEATGenome
 
   beforeEach(() => {
-    config = createConfig(defaultNEATConfigOptions)
     state = createState()
     initConfig = {
       inputs: 1,

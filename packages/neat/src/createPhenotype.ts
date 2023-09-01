@@ -1,8 +1,4 @@
-import {
-  isOrderedActionEdge,
-  nodeRefsToLinkKey,
-  Activation,
-} from '@neat-js/core'
+import { isOrderedActionEdge, Activation } from '@neat-js/core'
 import { nodeRefToKey, type NodeRef, NodeType } from '@neat-js/core'
 import { PhenotypeActionType } from '@neat-js/phenotype'
 import type {
@@ -51,8 +47,9 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
   }
   const numOutputNodes = maxOutputNode + 1
   const outputs: number[] = []
+  const offset = nodes.length
   for (let i = 0; i < numOutputNodes; i++) {
-    outputs.push(i + nodes.length)
+    outputs.push(i + offset)
     // Append all output nodes
     nodes.push({ type: NodeType.Output, id: i })
   }
@@ -67,20 +64,15 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
   const actions: PhenotypeAction[] = []
   for (const action of order) {
     if (isOrderedActionEdge(action)) {
-      const [from, to] = action
-      const link = genome.links.get(nodeRefsToLinkKey(from, to))
-      if (link == null) {
-        throw new Error(
-          `Link from ${nodeRefToKey(from)} to ${nodeRefToKey(
-            to
-          )} not found in genome`
-        )
+      const [from, to, weight] = action
+      if (to === undefined) {
+        throw new Error('Invalid action')
       }
       actions.push({
         type: PhenotypeActionType.Link,
         from: nodeMapping.get(nodeRefToKey(from)) as number,
         to: nodeMapping.get(nodeRefToKey(to)) as number,
-        weight: link.weight,
+        weight,
       })
     } else {
       const [node] = action

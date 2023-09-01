@@ -15,6 +15,7 @@ import { createState } from '../src/createState.js'
 import type {
   DefaultNEATGenome,
   DefaultNEATGenomeData,
+  DefaultNEATGenomeFactoryOptions,
 } from '../src/DefaultNEATGenome.js'
 import {
   defaultNEATGenomeOptions,
@@ -27,6 +28,7 @@ describe('Species class', () => {
   let stateProvider: NEATState
   let parseGenomeData: GenomeDataParser<
     NEATGenomeOptions,
+    DefaultNEATGenomeFactoryOptions,
     DefaultNEATGenome,
     DefaultNEATGenomeData
   >
@@ -63,20 +65,22 @@ describe('Species class', () => {
   describe('Species constructor', () => {
     test('should correctly initialize', () => {
       const options: SpeciesOptions = defaultSpeciesOptions
-      const species = new Species<DefaultNEATGenome, DefaultNEATGenomeData>(
-        options,
-        parseGenomeData
-      )
+      const species = new Species<
+        DefaultNEATGenomeFactoryOptions,
+        DefaultNEATGenome,
+        DefaultNEATGenomeData
+      >(options, parseGenomeData)
       expect(species.organisms.length).toBe(0)
     })
   })
 
   describe('Species push', () => {
     test('should add organism to species', () => {
-      const species = new Species<DefaultNEATGenome, DefaultNEATGenomeData>(
-        defaultSpeciesOptions,
-        parseGenomeData
-      )
+      const species = new Species<
+        DefaultNEATGenomeFactoryOptions,
+        DefaultNEATGenome,
+        DefaultNEATGenomeData
+      >(defaultSpeciesOptions, parseGenomeData)
       const genome = createSeasonedGenome()
       const organism = new Organism(genome)
       species.push(organism)
@@ -90,10 +94,11 @@ describe('Species class', () => {
         ...defaultSpeciesOptions,
         speciationThreshold: 1,
       }
-      const species = new Species<DefaultNEATGenome, DefaultNEATGenomeData>(
-        options,
-        parseGenomeData
-      )
+      const species = new Species<
+        DefaultNEATGenomeFactoryOptions,
+        DefaultNEATGenome,
+        DefaultNEATGenomeData
+      >(options, parseGenomeData)
       const genome1 = createSeasonedGenome()
       const genome2 = createSeasonedGenome()
       const organism1 = new Organism(genome1)
@@ -108,10 +113,11 @@ describe('Species class', () => {
         ...defaultSpeciesOptions,
         speciationThreshold: 0,
       }
-      const species = new Species<DefaultNEATGenome, DefaultNEATGenomeData>(
-        options,
-        parseGenomeData
-      )
+      const species = new Species<
+        DefaultNEATGenomeFactoryOptions,
+        DefaultNEATGenome,
+        DefaultNEATGenomeData
+      >(options, parseGenomeData)
       const genome1 = createSeasonedGenome()
       const genome2 = createSeasonedGenome()
       const organism1 = new Organism(genome1)
@@ -128,10 +134,11 @@ describe('Species class', () => {
         ...defaultSpeciesOptions,
         speciationThreshold: 1,
       }
-      const species = new Species<DefaultNEATGenome, DefaultNEATGenomeData>(
-        options,
-        parseGenomeData
-      )
+      const species = new Species<
+        DefaultNEATGenomeFactoryOptions,
+        DefaultNEATGenome,
+        DefaultNEATGenomeData
+      >(options, parseGenomeData)
 
       // create 10 organisms
       for (let i = 0; i < 10; i++) {
