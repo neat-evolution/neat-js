@@ -7,7 +7,6 @@ import type {
 } from './genome/GenomeFactory.js'
 import type { GenomeOptions } from './genome/GenomeOptions.js'
 import {
-  toLinkKey,
   type LinkExtension,
   nodeRefsToLinkKey,
   linkRefToKey,
@@ -176,8 +175,8 @@ export class NEATGenome<
 
   // TODO: require this to be overridden in subclasses
   toFactoryOptions(): FO {
-    const hiddenNodes = this.hiddenNodes.values()
-    const links = this.links.values()
+    const hiddenNodes = Array.from(this.hiddenNodes.values())
+    const links = Array.from(this.links.values())
 
     return {
       hiddenNodes,
@@ -330,10 +329,10 @@ export class NEATGenome<
       if (parent2.links.has(linkRef)) {
         const link2 = parent2.links.get(linkRef) as L
         // FIXME: can this be assumed safe?
-        genome.insertLink(link.crossover(link2, fitness, otherFitness), true)
+        genome.insertLink(link.crossover(link2, fitness, otherFitness))
       } else {
         // FIXME: can this be assumed safe?
-        genome.insertLink(link, true)
+        genome.insertLink(link)
       }
     }
 
@@ -397,59 +396,66 @@ export class NEATGenome<
   splitLink(
     from: NodeRef,
     to: NodeRef,
-    newNodeId: number,
+    /** Innovation.nodeNumber */
+    nodeNumber: number,
+    /** Innovation.innovationNumber */
     innovationNumber: number
   ): void {
+    // Retrieve the link to be split
     const linkKey = nodeRefsToLinkKey(from, to)
-    const link = this.links.get(linkKey)
+    const link = this.links.get(linkKey) as L
     if (link == null) {
-      throw new Error('unable to split nonexistent link')
+      throw new Error('Unable to split nonexistent link')
     }
 
+    // Remove old link and connection
     this.links.delete(linkKey)
     this.connections.remove(from, to)
 
-    const newNode = this.createNode(
-      NodeType.Hidden,
-      newNodeId,
-      this.config.node(),
-      this.state.node()
+    const newNodeRef = { type: NodeType.Hidden, id: nodeNumber }
+
+    // Insert new hidden node
+    this.hiddenNodes.set(
+      nodeRefToKey(newNodeRef),
+      this.createNode(
+        newNodeRef.type,
+        newNodeRef.id,
+        this.config.node(),
+        this.state.node()
+      )
     )
-    this.hiddenNodes.set(nodeRefToKey(newNode), newNode)
 
-    let link1Details: LinkDetails, link2Details: LinkDetails
-
-    type LinkDetails = [from: NodeRef, to: NodeRef, innovation: number]
+    type LinkDetails = [from: NodeRef, to: NodeRef, innovationNumber: number]
+    let link1Details: LinkDetails
+    let link2Details: LinkDetails
 
     if (from.type === NodeType.Input) {
-      link1Details = [newNode, to, innovationNumber + 1]
-      link2Details = [from, newNode, innovationNumber]
+      link1Details = [newNodeRef, to, innovationNumber + 1]
+      link2Details = [from, newNodeRef, innovationNumber]
     } else {
-      link1Details = [from, newNode, innovationNumber]
-      link2Details = [newNode, to, innovationNumber + 1]
+      link1Details = [from, newNodeRef, innovationNumber]
+      link2Details = [newNodeRef, to, innovationNumber + 1]
     }
 
-    // FIXME: what is this doing?
     const link1 = link.identity(
       this.createLink(
         link1Details[0],
         link1Details[1],
-        1,
+        1.0,
         link1Details[2],
-        this.config.link(),
-        this.state.link()
+        this.config.node(),
+        this.state.node()
       )
     )
 
-    // FIXME: what is this doing?
     const link2 = link.cloneWith(
       this.createLink(
         link2Details[0],
         link2Details[1],
-        link.weight,
+        link.neat().weight,
         link2Details[2],
-        this.config.link(),
-        this.state.link()
+        this.config.node(),
+        this.state.node()
       )
     )
 
@@ -457,11 +463,10 @@ export class NEATGenome<
     this.insertLink(link2)
   }
 
-  insertLink(link: L, isSafe?: boolean): void {
-    if (
-      (isSafe != null && isSafe) ||
-      !this.connections.createsCycle(link.from, link.to)
-    ) {
+  insertLink(link: L, knownNotCreateCycle?: boolean): void {
+    const isSafe =
+      knownNotCreateCycle ?? !this.connections.createsCycle(link.from, link.to)
+    if (isSafe) {
       this.links.set(linkRefToKey(link), link)
       this.connections.add(link.from, link.to, link.weight, true)
     }
@@ -491,38 +496,33 @@ export class NEATGenome<
   }
 
   mutationAddNode(): void {
-    const linkKeys = Array.from(this.links.keys())
-    const shuffledKeys = shuffle(linkKeys)
-    const maxIterations = Math.min(shuffledKeys.length, 50)
+    for (let i = 0; i < 50; i++) {
+      const linkKeys = Array.from(this.links.keys())
+      const randomIndex = Math.floor(Math.random() * linkKeys.length)
+      const linkKey = linkKeys[randomIndex]
 
-    for (const selectedLinkKey of shuffledKeys.slice(0, maxIterations)) {
-      const link = this.links.get(selectedLinkKey)
+      if (linkKey == null) {
+        continue
+      }
 
-      if (link != null) {
-        const innovation = this.state.neat().getSplitInnovation(link.innovation)
+      const link = this.links.get(linkKey) as L
+      const innovation = this.state.neat().getSplitInnovation(link.innovation)
 
-        const linkFromKey = toLinkKey(
-          link.from.type,
-          link.from.id,
-          NodeType.Hidden,
-          innovation.nodeNumber
-        )
-        const linkToKey = toLinkKey(
-          NodeType.Hidden,
-          innovation.nodeNumber,
-          link.to.type,
-          link.to.id
-        )
-
-        if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
-          this.splitLink(
-            link.from,
-            link.to,
-            innovation.nodeNumber,
-            innovation.innovationNumber
-          )
-          break
+      const newNodeRef = { type: NodeType.Hidden, id: innovation.nodeNumber }
+      const linkFromKey = nodeRefsToLinkKey(link.from, newNodeRef)
+      const linkToKey = nodeRefsToLinkKey(newNodeRef, link.to)
+      if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
+        if (link.to == null || link.from == null) {
+          throw new Error('linkToKey includes undefined')
         }
+        this.splitLink(
+          link.from,
+          link.to,
+          innovation.nodeNumber,
+          innovation.innovationNumber
+        )
+
+        break
       }
     }
   }
@@ -626,6 +626,7 @@ export class NEATGenome<
       this.hiddenNodes.delete(selectedNodeRef)
 
       const connectionsToRemove = this.connections.removeNode(node)
+
       for (const connection of connectionsToRemove) {
         const linkKey = nodeRefsToLinkKey(connection[0], connection[1])
         this.links.delete(linkKey)

@@ -1,21 +1,11 @@
-import type {
-  Genome,
-  GenomeData,
-  GenomeFactoryOptions,
-  GenomeOptions,
-} from '@neat-js/core'
+import type { Genome, GenomeData, GenomeFactoryOptions } from '@neat-js/core'
 
+import type { GenomeDataParser } from './GenomeDataParser.js'
 import { Organism } from './Organism.js'
 import type { OrganismData } from './Organism.js'
 import type { SpeciesOptions } from './SpeciesOptions.js'
 
-export type GenomeDataParser<
-  GO extends GenomeOptions,
-  FO extends GenomeFactoryOptions,
-  G extends Genome<any, any, any, GO, FO, G>,
-  GD extends GenomeData<any, any, any, GO, FO, G>
-> = (genomeData: GD) => G
-
+// FIXME: Add SpeciesFactoryOptions
 export interface SpeciesData<G extends Genome<any, any, any, any, any, G>> {
   options?: SpeciesOptions
   currentAge: number
@@ -35,13 +25,13 @@ export class Species<
   G extends Genome<any, any, any, any, FO, G>,
   GD extends GenomeData<any, any, any, any, FO, G>
 > {
-  private readonly options: SpeciesOptions
+  public readonly options: SpeciesOptions
 
   // internal state
-  private currentAge: number
+  public currentAge: number
   public bestFitness: number
-  private lifetimeBestFitness: number
-  private lastImprovement: number
+  public lifetimeBestFitness: number
+  public lastImprovement: number
   public offsprings: number
   public elites: number
   public extinct: boolean
@@ -72,6 +62,10 @@ export class Species<
     if (data != null && parseGenomeData == null) {
       throw new Error('Missing genome data parser.')
     }
+    // FIXME: use factoryOptions here
+    // This was half implemented
+    // - OrganismFactoryOptions
+    // - GenomeFactoryOptions
     if (data?.organisms != null && parseGenomeData != null) {
       this.organisms = []
 

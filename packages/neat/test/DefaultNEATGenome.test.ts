@@ -16,6 +16,7 @@ import { createState } from '../src/createState.js'
 import {
   type DefaultNEATGenome,
   type DefaultNEATGenomeData,
+  type DefaultNEATGenomeFactoryOptions,
 } from '../src/DefaultNEATGenome.js'
 import {
   defaultNEATGenomeOptions,
@@ -35,6 +36,7 @@ describe('DefaultNEATGenome class', () => {
     NEATLink,
     Stats,
     NEATGenomeOptions,
+    DefaultNEATGenomeFactoryOptions,
     DefaultNEATGenome
   >
 
@@ -125,6 +127,7 @@ describe('DefaultNEATGenome class', () => {
           ...defaultData,
           hiddenNodes,
           links,
+          isSafe: true,
         }
       })
 
@@ -245,19 +248,27 @@ describe('DefaultNEATGenome class', () => {
         // expect(Array.from(genome.hiddenNodes.entries())).toEqual([
         //   ['Hidden[0]', { type: 'Hidden', id: 0, config: null, state: null }],
         // ]);
-        expect(genome.connections.getAllConnections()).toHaveLength(2)
-        // expect(genome.connections.getAllConnections()).toEqual([
+        expect(Array.from(genome.connections.getAllNodes())).toHaveLength(3)
+        // expect(Array.from(genome.connections.getAllNodes())).toEqual([
         //   {
-        //     from: { type: 'Hidden', id: 0, config: null, state: null },
-        //     to: { type: 'Output', id: 0, config: null, state: null },
-        //     edge: 1,
+        //     config: null,
+        //     id: 0,
+        //     state: null,
+        //     type: 'Hidden',
         //   },
         //   {
-        //     from: { type: 'Input', id: 0, config: null, state: null },
-        //     to: { type: 'Hidden', id: 0, config: null, state: null },
-        //     edge: -0.055262767171873284,
+        //     config: null,
+        //     id: 0,
+        //     state: null,
+        //     type: 'Output',
         //   },
-        // ]);
+        //   {
+        //     config: null,
+        //     id: 0,
+        //     state: null,
+        //     type: 'Input',
+        //   },
+        // ])
       })
 
       test('should correctly generate and assign innovation numbers', () => {
@@ -287,7 +298,7 @@ describe('DefaultNEATGenome class', () => {
         // Assert
         expect(Array.from(genome.links.entries())).toEqual([])
         expect(Array.from(genome.hiddenNodes.entries())).toEqual([])
-        expect(genome.connections.getAllConnections()).toEqual([])
+        expect(Array.from(genome.connections.getAllNodes())).toEqual([])
       })
 
       test('should correctly generate and assign innovation numbers', () => {
