@@ -1,17 +1,5 @@
 import type { Environment } from '@neat-js/environment'
-import type { Phenotype } from '@neat-js/phenotype'
-
-// FIXME: where should this live?
-export interface PhenotypeStats {
-  nodes: number
-  edges: number
-}
-
-export type PhenotypeData = [
-  speciesIndex: number,
-  genomeIndex: number,
-  phenotype: Phenotype
-]
+import type { PhenotypeData } from '@neat-js/phenotype'
 
 export type FitnessData = [
   speciesIndex: number,

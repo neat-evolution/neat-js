@@ -3,6 +3,7 @@ import { parentPort } from 'node:worker_threads'
 import type { Environment } from '@neat-js/environment'
 import type { FitnessData } from '@neat-js/evaluator'
 import type { Executor, ExecutorFactory } from '@neat-js/executor'
+import { phenotypeDataFromSharedBuffer } from '@neat-js/phenotype'
 
 import {
   ActionType,
@@ -34,11 +35,12 @@ async function handleInit({
   parentPort.postMessage(createAction(ActionType.INIT_SUCCESS, null))
 }
 
-async function handleEvaluate(phenotypeData: EvaluatePayload) {
+async function handleEvaluate(serializedPhenotypeData: EvaluatePayload) {
   if (createExecutor == null || environment == null) {
     throw new Error('Worker must be initialized before evaluating')
   }
-  const [speciesIndex, organismIndex, phenotype] = phenotypeData
+  const [speciesIndex, organismIndex, phenotype] =
+    phenotypeDataFromSharedBuffer(serializedPhenotypeData)
   const executor: Executor = createExecutor(phenotype)
 
   const fitness = await environment.evaluate(executor)

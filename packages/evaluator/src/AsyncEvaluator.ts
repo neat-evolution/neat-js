@@ -1,11 +1,8 @@
-import { type Environment } from '@neat-js/environment'
-import { type ExecutorFactory } from '@neat-js/executor'
+import type { Environment } from '@neat-js/environment'
+import type { ExecutorFactory } from '@neat-js/executor'
+import type { PhenotypeData } from '@neat-js/phenotype'
 
-import {
-  type Evaluator,
-  type FitnessData,
-  type PhenotypeData,
-} from './Evaluator.js'
+import { type Evaluator, type FitnessData } from './Evaluator.js'
 
 export class AsyncEvaluator implements Evaluator {
   public readonly environment: Environment

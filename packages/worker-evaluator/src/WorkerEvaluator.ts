@@ -1,7 +1,9 @@
 import { Worker } from 'node:worker_threads'
 
 import type { Environment } from '@neat-js/environment'
-import type { Evaluator, FitnessData, PhenotypeData } from '@neat-js/evaluator'
+import type { Evaluator, FitnessData } from '@neat-js/evaluator'
+import type { SerializedPhenotypeData, PhenotypeData } from '@neat-js/phenotype'
+import { phenotypeDataToSharedBuffer } from '@neat-js/phenotype'
 import { Sema } from 'async-sema'
 
 import {
@@ -157,7 +159,10 @@ export class WorkerEvaluator implements Evaluator {
     }
   }
 
-  private async processData(data: PhenotypeData): Promise<FitnessData> {
+  private async processData(
+    phenotypeData: PhenotypeData
+  ): Promise<FitnessData> {
+    const serializedPhenotypeData = phenotypeDataToSharedBuffer(phenotypeData)
     await this.semaphore.acquire()
     const worker = this.workers.pop()
 
@@ -169,7 +174,7 @@ export class WorkerEvaluator implements Evaluator {
     let fitnessData: FitnessData
 
     try {
-      fitnessData = await this.runWorker(worker, data)
+      fitnessData = await this.runWorker(worker, serializedPhenotypeData)
     } finally {
       this.semaphore.release()
       this.workers.push(worker)
@@ -179,7 +184,7 @@ export class WorkerEvaluator implements Evaluator {
 
   private async runWorker(
     worker: Worker,
-    phenotypeData: PhenotypeData
+    serializedPhenotypeData: SerializedPhenotypeData
   ): Promise<FitnessData> {
     return await new Promise((resolve, reject) => {
       const customResolve = (value: FitnessData | PromiseLike<FitnessData>) => {
@@ -189,7 +194,9 @@ export class WorkerEvaluator implements Evaluator {
       this.requestMap.set(worker, { resolve: customResolve, reject })
 
       // Post data to the worker
-      worker.postMessage(createAction(ActionType.EVALUATE, phenotypeData))
+      worker.postMessage(
+        createAction(ActionType.EVALUATE, serializedPhenotypeData)
+      )
     })
   }
 }
