@@ -7,8 +7,8 @@ import type {
   StateProvider,
   GenomeData,
 } from '@neat-js/core'
-import type { Evaluator, PhenotypeData } from '@neat-js/evaluator'
-import { type PhenotypeFactory } from '@neat-js/phenotype'
+import type { Evaluator } from '@neat-js/evaluator'
+import type { PhenotypeData, PhenotypeFactory } from '@neat-js/phenotype'
 
 import type { GenomeDataParser } from './GenomeDataParser.js'
 import { Organism } from './Organism.js'

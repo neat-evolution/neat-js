@@ -1,4 +1,6 @@
+export * from './createEvaluator.js'
 export * from './WorkerEvaluator.js'
+export * from './WorkerAction.js'
 
 /*
   "main": "./dist/cjs/node/index.js",

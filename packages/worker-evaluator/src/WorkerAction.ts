@@ -1,4 +1,5 @@
-import type { FitnessData, PhenotypeData } from '@neat-js/evaluator'
+import type { FitnessData } from '@neat-js/evaluator'
+import type { SerializedPhenotypeData } from '@neat-js/phenotype'
 
 export enum ActionType {
   EVALUATE = 'EVALUATE',
@@ -13,7 +14,7 @@ export interface Action<P> {
   payload: P
 }
 
-export type EvaluatePayload = PhenotypeData
+export type EvaluatePayload = SerializedPhenotypeData
 export type EvaluateAction = Action<EvaluatePayload>
 
 export type EvaluationResultPayload = FitnessData

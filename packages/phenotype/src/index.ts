@@ -1,3 +1,7 @@
 export * from './Phenotype.js'
 export * from './PhenotypeAction.js'
+export * from './PhenotypeData.js'
+export * from './phenotypeDataFromSharedBuffer.js'
+export * from './phenotypeDataToSharedBuffer.js'
 export * from './PhenotypeFactory.js'
+export * from './PhenotypeStats.js'
