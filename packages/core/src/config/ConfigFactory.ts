@@ -1,4 +1,4 @@
-import type { NEATOptions } from '../NEATOptions.js'
+import type { NEATConfigOptions } from '../NEATConfigOptions.js'
 
 import type { ConfigProvider } from './ConfigProvider.js'
 import type { LinkConfig, NodeConfig } from './ExtendedConfig.js'
@@ -7,13 +7,14 @@ export type ConfigFactoryWithNull<
   NC extends null,
   LC extends null,
   C extends ConfigProvider<NC, LC>
-> = (options: NEATOptions) => C
+> = (options: NEATConfigOptions) => C
 
+// FIXME: nodeConfig and linkConfig need to be NCO and LCO respectively (maybe?)
 export type ConfigFactoryWithNonNull<
   NC extends NodeConfig,
   LC extends LinkConfig,
   C extends ConfigProvider<NC, LC>
-> = (options: NEATOptions, nodeConfig: NC, linkConfig: LC) => C
+> = (options: NEATConfigOptions, nodeConfig: NC, linkConfig: LC) => C
 
 export type ConfigFactory<
   NC extends NodeConfig,

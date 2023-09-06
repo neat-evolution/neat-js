@@ -1,8 +1,9 @@
-import { NEATConfig } from '@neat-js/core'
-import type { ConfigFactory, NEATOptions } from '@neat-js/core'
+import type { ConfigFactory, NEATConfigOptions } from '@neat-js/core'
+
+import { NEATConfig } from './NEATConfig.js'
 
 export const createConfig: ConfigFactory<null, null, NEATConfig> = (
-  options: NEATOptions
+  neatConfigOptions: NEATConfigOptions
 ) => {
-  return new NEATConfig(options)
+  return new NEATConfig(neatConfigOptions)
 }

@@ -10,4 +10,9 @@ const createEvaluator: EvaluatorFactory<null> = (environment: Environment) => {
   return new AsyncEvaluator(environment, createExecutor)
 }
 
-await demo(createEvaluator)
+try {
+  await demo(createEvaluator)
+} catch (error) {
+  console.error(error)
+  throw error
+}

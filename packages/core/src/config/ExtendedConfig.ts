@@ -1,4 +1,7 @@
-import type { NEATConfig } from '../NEATConfig.js'
+import type { Config } from './Config.js'
 
-export type NodeConfig = NEATConfig | null
-export type LinkConfig = NEATConfig | null
+/** only used by des-hyperneat */
+export type NodeConfig = Config<null, null> | null
+
+/** only used by des-hyperneat */
+export type LinkConfig = Config<null, null> | null

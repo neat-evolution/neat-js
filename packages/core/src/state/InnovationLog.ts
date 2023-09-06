@@ -1,4 +1,6 @@
-import type { NodeRef } from '../node/Node.js'
+import type { LinkKey } from '../link/linkRefToKey.js'
+import type { NodeRef } from '../node/NodeData.js'
+import type { NodeKey } from '../node/nodeRefToKey.js'
 
 export type InnovationLinkRef = [from: NodeRef, to: NodeRef]
 
@@ -10,17 +12,25 @@ export interface Innovation {
 export interface InnovationLogData {
   hiddenNodeInnovations: Array<[number, Innovation]>
   splitInnovations: Array<[number, Innovation]>
-  connectInnovations: Array<[string, number]>
+  connectInnovations: Array<[LinkKey, number]>
   reverseConnectInnovations: Array<[number, InnovationLinkRef]>
-  hiddenToLink: Array<[string, InnovationLinkRef]>
+  hiddenToLink: Array<[NodeKey, InnovationLinkRef]>
+}
+
+export interface InnovationLogOptions {
+  maxHiddenNodeInnovationsSize?: number
+  maxSplitInnovationsSize?: number
+  maxConnectInnovationsSize?: number
+  maxReverseConnectInnovationsSize?: number
+  maxHiddenToLinkSize?: number
 }
 
 export class InnovationLog {
-  hiddenNodeInnovations: Map<number, Innovation>
-  splitInnovations: Map<number, Innovation>
-  connectInnovations: Map<string, number>
-  reverseConnectInnovations: Map<number, InnovationLinkRef>
-  hiddenToLink: Map<string, InnovationLinkRef>
+  public readonly hiddenNodeInnovations: Map<number, Innovation>
+  public readonly splitInnovations: Map<number, Innovation>
+  public readonly connectInnovations: Map<LinkKey, number>
+  public readonly reverseConnectInnovations: Map<number, InnovationLinkRef>
+  public readonly hiddenToLink: Map<NodeKey, InnovationLinkRef>
 
   constructor(data?: InnovationLogData) {
     this.hiddenNodeInnovations = new Map(data?.hiddenNodeInnovations)

@@ -1,37 +1,25 @@
-import type { Genome, GenomeData } from '@neat-js/core'
+import type { Genome } from '@neat-js/core'
 
-// FIXME: Add OrganismFactoryOptions
-export interface OrganismData<G extends Genome<any, any, any, any, any, G>> {
-  genome: GenomeData<
-    any,
-    any,
-    any,
-    G['options'],
-    ReturnType<G['toFactoryOptions']>,
-    G
-  >
-  fitness: number | null
-  adjustedFitness: number | null
-  generation: number
-}
+import type { OrganismData } from './OrganismData.js'
+import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
 
-export class Organism<G extends Genome<any, any, any, any, any, G>> {
+export class Organism<G extends Genome<any, any, any, any, any, any, any, G>> {
   public readonly genome: G
+  public readonly generation: number
 
   public fitness: number | null
   public adjustedFitness: number | null
-  public readonly generation: number
 
   constructor(
     genome: G,
-    generation: number = 0,
-    fitness?: number | null,
-    adjustedFitness?: number | null
+    generation?: number,
+    organismFactoryOptions?: Omit<OrganismFactoryOptions, 'generation'>
   ) {
     this.genome = genome
-    this.fitness = fitness ?? null
-    this.adjustedFitness = adjustedFitness ?? null
-    this.generation = generation
+    this.generation = generation ?? 0
+
+    this.fitness = organismFactoryOptions?.fitness ?? null
+    this.adjustedFitness = organismFactoryOptions?.adjustedFitness ?? null
   }
 
   // Breed organism with other organism
@@ -39,6 +27,7 @@ export class Organism<G extends Genome<any, any, any, any, any, G>> {
     return new Organism<G>(
       this.genome.crossover(
         other.genome,
+        // FIXME: is it correct to cast to zero here?
         this.fitness ?? 0,
         other.fitness ?? 0
       ),
@@ -87,10 +76,21 @@ export class Organism<G extends Genome<any, any, any, any, any, G>> {
 
   toJSON(): OrganismData<G> {
     return {
+      // FIXME: use this.genome.toFactoryOptions()
       genome: this.genome.toJSON(),
+      organismState: {
+        generation: this.generation,
+        fitness: this.fitness,
+        adjustedFitness: this.adjustedFitness,
+      },
+    }
+  }
+
+  toFactoryOptions(): OrganismFactoryOptions {
+    return {
+      generation: this.generation,
       fitness: this.fitness,
       adjustedFitness: this.adjustedFitness,
-      generation: this.generation,
     }
   }
 }

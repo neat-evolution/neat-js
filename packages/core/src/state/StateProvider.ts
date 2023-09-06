@@ -1,12 +1,20 @@
 import type { LinkState, NodeState } from './ExtendedState.js'
-import type { State } from './State.js'
 import type { StateData } from './StateData.js'
 
-export interface StateProvider<NS extends NodeState, LS extends LinkState> {
-  // FIXME: this should return S instead of State<NS, LS>
-  neat: () => State<NS, LS>
+export interface StateProvider<
+  NS extends NodeState,
+  LS extends LinkState,
+  S extends StateProvider<NS, LS, S>
+> {
+  readonly nodeState: NS
+  readonly linkState: LS
+
+  neat: () => this
+  /** only useful in des-hyperneat */
   node: () => NS
+
+  /** only useful in des-hyperneat */
   link: () => LS
-  // FIXME: this should return SD instead of StateData<NS, LS>
+
   toJSON: () => StateData<NS, LS>
 }

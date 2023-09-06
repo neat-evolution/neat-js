@@ -1,63 +1,39 @@
-import type { ConfigProvider } from './config/ConfigProvider.js'
+import type { Config } from './config/Config.js'
 import { Connections } from './genome/Connections.js'
-import type { Genome, GenomeData } from './genome/Genome.js'
-import type {
-  GenomeFactory,
-  GenomeFactoryOptions,
-} from './genome/GenomeFactory.js'
+import type { Genome } from './genome/Genome.js'
+import {
+  type GenomeDataNodeEntry,
+  type GenomeDataLinkEntry,
+} from './genome/GenomeData.js'
+import type { GenomeFactory } from './genome/GenomeFactory.js'
 import type { GenomeOptions } from './genome/GenomeOptions.js'
-import {
-  type LinkExtension,
-  nodeRefsToLinkKey,
-  linkRefToKey,
-  type LinkRef,
-} from './link/Link.js'
+import type { Link } from './link/Link.js'
 import type { LinkFactory } from './link/LinkFactory.js'
-import {
-  NodeType,
-  type NodeRef,
-  type NodeExtension,
-  nodeRefToKey,
-} from './node/Node.js'
+import { linkRefToKey, nodeRefsToLinkKey } from './link/linkRefToKey.js'
+import type { NEATGenomeData } from './NEATGenomeData.js'
+import type { NEATGenomeFactoryOptions } from './NEATGenomeFactoryOptions.js'
+import type { Node } from './node/Node.js'
+import { NodeType, type NodeRef } from './node/NodeData.js'
 import type { NodeFactory } from './node/NodeFactory.js'
-import { type State } from './state/State.js'
+import { nodeRefToKey, type NodeKey } from './node/nodeRefToKey.js'
+import type { State } from './state/State.js'
 import { shuffle } from './utils/shuffle.js'
-
-export interface NEATGenomeStats {
-  hiddenNodes: number
-  links: number
-}
-
-export interface NEATGenomeFactoryOptions<
-  N extends NodeExtension<any, any, N>,
-  L extends LinkExtension<any, any, L>
-> extends GenomeFactoryOptions {
-  hiddenNodes: Iterable<N> | Array<Omit<NodeRef, 'toJSON'>>
-  links: Iterable<L> | Array<Omit<LinkRef, 'toJSON'>>
-}
-
-export interface NEATGenomeData<
-  N extends NodeExtension<any, any, N>,
-  L extends LinkExtension<any, any, L>,
-  O extends GenomeOptions,
-  FO extends NEATGenomeFactoryOptions<N, L>
-> extends GenomeData<N, L, NEATGenomeStats, O, FO, NEATGenome<N, L, O, FO>> {
-  hiddenNodes: Array<Omit<NodeRef, 'toJSON'>>
-  links: Array<Omit<LinkRef, 'toJSON'>>
-  isSafe?: boolean
-}
 
 // FIXME: rename to CoreGenome
 export class NEATGenome<
-  N extends NodeExtension<any, any, N>,
-  L extends LinkExtension<any, any, L>,
-  O extends GenomeOptions,
-  FO extends NEATGenomeFactoryOptions<N, L>
-> implements Genome<N, L, NEATGenomeStats, O, FO, NEATGenome<N, L, O, FO>>
+  N extends Node<any, any, N>,
+  L extends Link<any, any, L>,
+  C extends Config<N['config'], L['config']>,
+  S extends State<N['state'], L['state'], S>,
+  GO extends GenomeOptions,
+  GFO extends NEATGenomeFactoryOptions<N, L, C, S, GO, GFO, GD, G>,
+  GD extends NEATGenomeData<N, L, C, S, GO, GFO, GD, G>,
+  G extends NEATGenome<N, L, C, S, GO, GFO, GD, G>
+> implements Genome<N, L, C, S, GO, GFO, GD, G>
 {
-  public readonly config: ConfigProvider<N['config'], L['config']>
-  public readonly state: State<N['state'], L['state']>
-  public readonly options: O
+  public readonly config: C
+  public readonly state: S
+  public readonly genomeOptions: GO
 
   public readonly inputs: Map<string, N>
   public readonly hiddenNodes: Map<string, N>
@@ -67,19 +43,19 @@ export class NEATGenome<
 
   private readonly createNode: NodeFactory<N['config'], N['state'], N>
   private readonly createLink: LinkFactory<L['config'], L['state'], L>
-  private readonly createGenome: GenomeFactory<O, FO, NEATGenome<N, L, O, FO>>
+  private readonly createGenome: GenomeFactory<C, S, GO, GFO, GD, G>
 
   constructor(
-    config: ConfigProvider<N['config'], L['config']>,
-    options: O,
-    state: State<N['state'], L['state']>,
+    config: C,
+    state: S,
+    genomeOptions: GO,
     createNode: NodeFactory<N['config'], N['state'], N>,
     createLink: LinkFactory<L['config'], L['state'], L>,
-    createGenome: GenomeFactory<O, FO, NEATGenome<N, L, O, FO>>,
-    factoryOptions?: NEATGenomeFactoryOptions<N, L>
+    createGenome: GenomeFactory<C, S, GO, GFO, GD, G>,
+    factoryOptions?: GFO
   ) {
     this.config = config
-    this.options = options
+    this.genomeOptions = genomeOptions
     this.state = state
     this.createNode = createNode
     this.createLink = createLink
@@ -91,7 +67,7 @@ export class NEATGenome<
     this.links = new Map<string, L>()
     this.connections = new Connections()
 
-    for (const i of Array.from({ length: options.inputs }).keys()) {
+    for (let i = 0; i < genomeOptions.inputs; i++) {
       const node = this.createNode(
         NodeType.Input,
         i,
@@ -100,7 +76,8 @@ export class NEATGenome<
       )
       this.inputs.set(nodeRefToKey(node), node)
     }
-    for (const i of Array.from({ length: options.outputs }).keys()) {
+
+    for (let i = 0; i < genomeOptions.outputs; i++) {
       const node = this.createNode(
         NodeType.Output,
         i,
@@ -109,8 +86,9 @@ export class NEATGenome<
       )
       this.outputs.set(nodeRefToKey(node), node)
     }
+
     if (factoryOptions != null) {
-      for (const { id, type } of factoryOptions.hiddenNodes) {
+      for (const [, { id, type }] of factoryOptions.hiddenNodes) {
         const node = this.createNode(
           type,
           id,
@@ -119,29 +97,17 @@ export class NEATGenome<
         )
         this.hiddenNodes.set(nodeRefToKey(node), node)
       }
-      for (const { from, to, weight, innovation } of factoryOptions.links) {
-        const fromKey = nodeRefToKey(from)
-        const toKey = nodeRefToKey(to)
-        if (from.type === NodeType.Hidden && !this.hiddenNodes.has(fromKey)) {
-          this.hiddenNodes.set(
-            fromKey,
-            this.createNode(
-              from.type,
-              from.id,
-              this.config.node(),
-              this.state.node()
-            )
-          )
-        }
-        if (to.type === NodeType.Hidden && !this.hiddenNodes.has(toKey)) {
-          this.hiddenNodes.set(
-            toKey,
-            this.createNode(
-              to.type,
-              to.id,
-              this.config.node(),
-              this.state.node()
-            )
+      for (const [
+        linkKey,
+        [fromKey, toKey, weight, innovation],
+      ] of factoryOptions.links) {
+        const from = this.getNodeByKey(fromKey)
+        const to = this.getNodeByKey(toKey)
+        if (from == null || to == null) {
+          throw new Error(
+            `Unable to hydrate link ${linkKey}; missing node; from: ${fromKey} ${
+              from != null
+            }; to: ${toKey} ${to != null}`
           )
         }
         const link = this.createLink(
@@ -157,39 +123,11 @@ export class NEATGenome<
     }
   }
 
-  toJSON(): NEATGenomeData<N, L, O, FO> {
-    // FIXME: rewrite this to use for...of
-    return {
-      config: this.config.toJSON(),
-      state: this.state.toJSON(),
-      options: this.options,
-      hiddenNodes: Array.from(this.hiddenNodes.values()).map(
-        (node) => node.toJSON?.() ?? node
-      ),
-      links: Array.from(this.links.values()).map(
-        (link) => link.toJSON?.() ?? link
-      ),
-      isSafe: true,
-    }
-  }
-
-  // TODO: require this to be overridden in subclasses
-  toFactoryOptions(): FO {
-    const hiddenNodes = Array.from(this.hiddenNodes.values())
-    const links = Array.from(this.links.values())
-
-    return {
-      hiddenNodes,
-      links,
-      isSafe: true,
-    } as unknown as FO
-  }
-
-  clone(): NEATGenome<N, L, O, FO> {
+  clone(): G {
     return this.createGenome(
       this.config,
-      this.options,
       this.state,
+      this.genomeOptions,
       this.toFactoryOptions()
     )
   }
@@ -218,7 +156,7 @@ export class NEATGenome<
     }
   }
 
-  distance(other: NEATGenome<N, L, O, FO>): number {
+  distance(other: G): number {
     const neatConfig = this.config.neat()
 
     let linkDifferences: number = 0
@@ -309,30 +247,25 @@ export class NEATGenome<
     )
   }
 
-  crossover(
-    other: NEATGenome<N, L, O, FO>,
-    fitness: number,
-    otherFitness: number
-  ): NEATGenome<N, L, O, FO> {
+  crossover(other: G, fitness: number, otherFitness: number): G {
     // Let parent1 be the fitter parent
     const [parent1, parent2] =
       fitness > otherFitness ? [this, other] : [other, this]
 
     const genome = this.createGenome(
       parent1.config,
-      parent1.options,
-      parent1.state
+      parent1.state,
+      parent1.genomeOptions
     )
 
     // Copy links only in fitter parent, perform crossover if in both parents
     for (const [linkRef, link] of parent1.links.entries()) {
       if (parent2.links.has(linkRef)) {
         const link2 = parent2.links.get(linkRef) as L
-        // FIXME: can this be assumed safe?
-        genome.insertLink(link.crossover(link2, fitness, otherFitness))
+        const newLink = link.crossover(link2, fitness, otherFitness)
+        genome.insertLink(newLink, true)
       } else {
-        // FIXME: can this be assumed safe?
-        genome.insertLink(link)
+        genome.insertLink(link, false)
       }
     }
 
@@ -370,14 +303,7 @@ export class NEATGenome<
       }
     }
 
-    return genome as this
-  }
-
-  getStats(): NEATGenomeStats {
-    return {
-      hiddenNodes: this.hiddenNodes.size,
-      links: this.links.size,
-    }
+    return genome
   }
 
   getNode(nodeRef: NodeRef): N | undefined {
@@ -388,6 +314,20 @@ export class NEATGenome<
         return this.hiddenNodes.get(nodeRefToKey(nodeRef))
       case NodeType.Output:
         return this.outputs.get(nodeRefToKey(nodeRef))
+      default:
+        return undefined
+    }
+  }
+
+  getNodeByKey(nodeKey: NodeKey): N | undefined {
+    const type = nodeKey[0]
+    switch (type) {
+      case 'I':
+        return this.inputs.get(nodeKey)
+      case 'H':
+        return this.hiddenNodes.get(nodeKey)
+      case 'O':
+        return this.outputs.get(nodeKey)
       default:
         return undefined
     }
@@ -410,33 +350,35 @@ export class NEATGenome<
 
     // Remove old link and connection
     this.links.delete(linkKey)
-    this.connections.remove(from, to)
+    this.connections.delete(from, to)
 
-    const newNodeRef = { type: NodeType.Hidden, id: nodeNumber }
-
-    // Insert new hidden node
-    this.hiddenNodes.set(
-      nodeRefToKey(newNodeRef),
+    const newNodeKey = nodeRefToKey({ type: NodeType.Hidden, id: nodeNumber })
+    const isSafe = !this.hiddenNodes.has(newNodeKey)
+    const newNode =
+      this.hiddenNodes.get(newNodeKey) ??
       this.createNode(
-        newNodeRef.type,
-        newNodeRef.id,
+        NodeType.Hidden,
+        nodeNumber,
         this.config.node(),
         this.state.node()
       )
-    )
+
+    // Insert new hidden node
+    this.hiddenNodes.set(newNodeKey, newNode)
 
     type LinkDetails = [from: NodeRef, to: NodeRef, innovationNumber: number]
     let link1Details: LinkDetails
     let link2Details: LinkDetails
 
     if (from.type === NodeType.Input) {
-      link1Details = [newNodeRef, to, innovationNumber + 1]
-      link2Details = [from, newNodeRef, innovationNumber]
+      link1Details = [newNode, to, innovationNumber + 1]
+      link2Details = [from, newNode, innovationNumber]
     } else {
-      link1Details = [from, newNodeRef, innovationNumber]
-      link2Details = [newNodeRef, to, innovationNumber + 1]
+      link1Details = [from, newNode, innovationNumber]
+      link2Details = [newNode, to, innovationNumber + 1]
     }
 
+    // FIXME: why?
     const link1 = link.identity(
       this.createLink(
         link1Details[0],
@@ -458,15 +400,15 @@ export class NEATGenome<
         this.state.node()
       )
     )
-
-    this.insertLink(link1)
-    this.insertLink(link2)
+    this.insertLink(link1, isSafe)
+    this.insertLink(link2, isSafe)
   }
 
-  insertLink(link: L, knownNotCreateCycle?: boolean): void {
-    const isSafe =
-      knownNotCreateCycle ?? !this.connections.createsCycle(link.from, link.to)
-    if (isSafe) {
+  insertLink(link: L, isSafe?: boolean): void {
+    const knownNotToCreateCycle =
+      isSafe === true || !this.connections.createsCycle(link.from, link.to)
+
+    if (knownNotToCreateCycle) {
       this.links.set(linkRefToKey(link), link)
       this.connections.add(link.from, link.to, link.weight, true)
     }
@@ -511,6 +453,7 @@ export class NEATGenome<
       const newNodeRef = { type: NodeType.Hidden, id: innovation.nodeNumber }
       const linkFromKey = nodeRefsToLinkKey(link.from, newNodeRef)
       const linkToKey = nodeRefsToLinkKey(newNodeRef, link.to)
+
       if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
         if (link.to == null || link.from == null) {
           throw new Error('linkToKey includes undefined')
@@ -541,12 +484,12 @@ export class NEATGenome<
 
     for (const node of this.inputs.values()) {
       sourceNodes.push(node)
-      sourceWeights.push(numTargets - this.connections.edgeCount(node))
+      sourceWeights.push(numTargets - this.connections.getTargets(node).length)
     }
 
     for (const node of this.hiddenNodes.values()) {
       sourceNodes.push(node)
-      sourceWeights.push(numTargets - this.connections.edgeCount(node))
+      sourceWeights.push(numTargets - this.connections.getTargets(node).length)
     }
 
     const wheel: number[] = [sourceWeights[0] as number]
@@ -612,7 +555,7 @@ export class NEATGenome<
       const selectedLinkRef = linkRefs[randomIndex] as string
       const link = this.links.get(selectedLinkRef) as L
       this.links.delete(selectedLinkRef)
-      this.connections.remove(link.from, link.to)
+      this.connections.delete(link.from, link.to)
     }
   }
 
@@ -625,12 +568,64 @@ export class NEATGenome<
       const node = this.hiddenNodes.get(selectedNodeRef) as N
       this.hiddenNodes.delete(selectedNodeRef)
 
-      const connectionsToRemove = this.connections.removeNode(node)
+      const connectionsToRemove = this.connections.deleteNode(node)
 
       for (const connection of connectionsToRemove) {
         const linkKey = nodeRefsToLinkKey(connection[0], connection[1])
         this.links.delete(linkKey)
       }
     }
+  }
+
+  toJSON(): GD {
+    const hiddenNodes: Array<GenomeDataNodeEntry<G>> = Array.from(
+      this.hiddenNodes.entries()
+    ).map(([nodeKey, node]) => [nodeKey, node.toFactoryOptions()])
+
+    const links: Array<GenomeDataLinkEntry<G>> = Array.from(
+      this.links.entries()
+    ).map(([linkKey, link]) => [
+      linkKey,
+      [
+        nodeRefToKey(link.from),
+        nodeRefToKey(link.to),
+        link.weight,
+        link.innovation,
+      ],
+    ])
+
+    // FIXME: how to get this typed correctly?
+    return {
+      config: this.config.toJSON(),
+      state: this.state.toJSON(),
+      genomeOptions: this.genomeOptions,
+      hiddenNodes,
+      links,
+      isSafe: true,
+    } as unknown as GD
+  }
+
+  toFactoryOptions(): GFO {
+    const hiddenNodes: Array<GenomeDataNodeEntry<G>> = Array.from(
+      this.hiddenNodes.entries()
+    ).map(([nodeKey, node]) => [nodeKey, node.toFactoryOptions()])
+
+    const links: Array<GenomeDataLinkEntry<G>> = Array.from(
+      this.links.entries()
+    ).map(([linkKey, link]) => [
+      linkKey,
+      [
+        nodeRefToKey(link.from),
+        nodeRefToKey(link.to),
+        link.weight,
+        link.innovation,
+      ],
+    ])
+
+    return {
+      hiddenNodes,
+      links,
+      isSafe: true,
+    } as unknown as GFO
   }
 }

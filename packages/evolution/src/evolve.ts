@@ -3,7 +3,7 @@ import type { Organism } from './Organism.js'
 import { type Population } from './Population.js'
 
 export const evolve = async <
-  P extends Population<any, any, any, any>,
+  P extends Population<any, any, any, any, any, any, any, any, any>,
   O extends EvolutionOptions = EvolutionOptions
 >(
   population: P,
@@ -32,6 +32,7 @@ export const evolve = async <
       options.secondsLimit > 0 &&
       Date.now() - startTime >= (options.secondsLimit + 3) * 1000
     ) {
+      console.log(`seconds limit ${options.secondsLimit} reached`)
       break
     }
     if (i % 10 === 0) {

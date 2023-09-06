@@ -1,9 +1,9 @@
-import type { StateData, StateFactory } from '@neat-js/core'
+import type { StateFactory, StateFactoryOptions } from '@neat-js/core'
 
 import { NEATState } from './NEATState.js'
 
 export const createState: StateFactory<null, null, NEATState> = (
-  data?: StateData<null, null>
+  stateFactoryOptions?: StateFactoryOptions<null, null>
 ) => {
-  return new NEATState(data)
+  return new NEATState(stateFactoryOptions)
 }

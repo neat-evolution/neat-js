@@ -9,6 +9,7 @@ import { type Dataset } from './Dataset.js'
 import { datasetToSharedBuffer } from './datasetToSharedBuffer.js'
 import { crossentropy, mse } from './error.js'
 
+// FIXME: implement this
 export interface DatasetStats {
   validationFitness: number
   trainingAccuracy: number
@@ -56,6 +57,7 @@ export class DatasetEnvironment implements Environment {
     return fitness
   }
 
+  // FIXME: rename to toSharedBuffer
   serialize(): SharedArrayBuffer {
     return datasetToSharedBuffer(this.dataset)
   }

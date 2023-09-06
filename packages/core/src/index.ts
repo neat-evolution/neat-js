@@ -6,20 +6,26 @@ export * from './config/ConfigProvider.js'
 export * from './config/ExtendedConfig.js'
 
 // src/genome/
-export * from './genome/Connections.js'
+export * from './genome/Connections.js' // FIXME: move to a new home
 export * from './genome/Genome.js'
+export * from './genome/GenomeData.js'
 export * from './genome/GenomeFactory.js'
 export * from './genome/GenomeOptions.js'
 export * from './genome/InitConfig.js'
-export * from './genome/topologicalSort.js'
 
 // src/link/
 export * from './link/Link.js'
+export * from './link/LinkData.js'
+export * from './link/LinkExtension.js'
 export * from './link/LinkFactory.js'
+export * from './link/linkRefToKey.js'
 
 // src/node/
 export * from './node/Node.js'
+export * from './node/NodeData.js'
+export * from './node/NodeExtension.js'
 export * from './node/NodeFactory.js'
+export * from './node/nodeRefToKey.js'
 
 // src/state/
 export * from './state/ExtendedState.js'
@@ -34,8 +40,7 @@ export * from './utils/shuffle.js'
 
 // src/
 export * from './Activation.js'
-export * from './NEATConfig.js'
+export * from './NEATConfigOptions.js'
 export * from './NEATGenome.js'
-export * from './NEATOptions.js'
-export * from './NEATState.js'
-export * from './Stats.js'
+export * from './NEATGenomeData.js'
+export * from './NEATGenomeFactoryOptions.js'

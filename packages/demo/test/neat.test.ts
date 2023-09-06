@@ -42,8 +42,6 @@ describe.skip('neat', () => {
       genomeOptions
     )
 
-    const genomeData = JSON.stringify(genome)
-
-    expect(1).toBe(1)
+    expect(1).toBe(0)
   })
 })
