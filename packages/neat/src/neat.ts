@@ -1,4 +1,4 @@
-import type { InitConfig, NEATConfig } from '@neat-js/core'
+import type { InitConfig, NEATConfigOptions } from '@neat-js/core'
 import { defaultNEATConfigOptions } from '@neat-js/core'
 import type { Evaluator } from '@neat-js/evaluator'
 import type { EvolutionOptions, PopulationOptions } from '@neat-js/evolution'
@@ -14,40 +14,51 @@ import type {
   DefaultNEATGenomeFactoryOptions,
 } from './DefaultNEATGenome.js'
 import { NEATAlgorithm } from './NEATAlgorithm.js'
+import type { NEATConfig } from './NEATConfig.js'
 import {
   defaultNEATGenomeOptions,
   type NEATGenomeOptions,
 } from './NEATGenomeOptions.js'
+import type { NEATLink } from './NEATLink.js'
+import type { NEATNode } from './NEATNode.js'
+import type { NEATState } from './NEATState.js'
 
 export const neat = async (
   evaluator: Evaluator,
-  options: EvolutionOptions,
-  configProvider?: NEATConfig,
+  evolutionOptions: EvolutionOptions,
+  neatConfigOptions?: NEATConfigOptions,
   populationOptions: PopulationOptions = defaultPopulationOptions,
   genomeOptions: Omit<
     NEATGenomeOptions,
     keyof InitConfig
   > = defaultNEATGenomeOptions
 ) => {
+  const configProvider = NEATAlgorithm.createConfig(
+    neatConfigOptions ?? defaultNEATConfigOptions
+  )
+  const mergedGenomeOptions = {
+    ...genomeOptions,
+    ...evaluator.environment.description,
+  }
   const population = new Population<
+    NEATNode,
+    NEATLink,
+    NEATConfig,
+    NEATState,
     NEATGenomeOptions,
     DefaultNEATGenomeFactoryOptions,
+    DefaultNEATGenomeData,
     DefaultNEATGenome,
-    DefaultNEATGenomeData
+    typeof NEATAlgorithm
   >(
     evaluator,
-    NEATAlgorithm.createPhenotype,
-    NEATAlgorithm.createGenome,
-    NEATAlgorithm.createState,
+    NEATAlgorithm,
+    configProvider,
     populationOptions,
-    configProvider ?? NEATAlgorithm.createConfig(defaultNEATConfigOptions),
-    {
-      ...genomeOptions,
-      ...evaluator.environment.description,
-    }
+    mergedGenomeOptions
   )
 
-  await evolve(population, options)
+  await evolve(population, evolutionOptions)
 
   return population.best()
 }

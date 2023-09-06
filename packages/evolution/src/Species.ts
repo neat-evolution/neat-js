@@ -1,92 +1,80 @@
-import type { Genome, GenomeData, GenomeFactoryOptions } from '@neat-js/core'
+import type { Genome, GenomeData, GenomeOptions } from '@neat-js/core'
 
-import type { GenomeDataParser } from './GenomeDataParser.js'
-import { Organism } from './Organism.js'
-import type { OrganismData } from './Organism.js'
+import { type Organism } from './Organism.js'
+import type { SpeciesData, SpeciesState } from './SpeciesData.js'
+import type { SpeciesFactoryOptions } from './SpeciesFactoryOptions.js'
 import type { SpeciesOptions } from './SpeciesOptions.js'
 
-// FIXME: Add SpeciesFactoryOptions
-export interface SpeciesData<G extends Genome<any, any, any, any, any, G>> {
-  options?: SpeciesOptions
-  currentAge: number
-  bestFitness: number
-  lifetimeBestFitness: number
-  lastImprovement: number
-  offsprings: number
-  elites: number
-  organisms: Array<OrganismData<G>>
-  extinct: boolean
-  locked: boolean
-  lockedOrganisms: number
-}
-
 export class Species<
-  FO extends GenomeFactoryOptions,
-  G extends Genome<any, any, any, any, FO, G>,
-  GD extends GenomeData<any, any, any, any, FO, G>
+  GO extends GenomeOptions,
+  GD extends GenomeData<GO, G>,
+  G extends Genome<any, any, any, any, GO, any, GD, G>
 > {
-  public readonly options: SpeciesOptions
+  public readonly speciesOptions: SpeciesOptions
 
   // internal state
-  public currentAge: number
-  public bestFitness: number
-  public lifetimeBestFitness: number
-  public lastImprovement: number
-  public offsprings: number
-  public elites: number
-  public extinct: boolean
-  private locked: boolean
-  private lockedOrganisms: number
+  public readonly speciesState: SpeciesState
 
   // organism set
   public organisms: Array<Organism<G>>
 
   constructor(
-    options: SpeciesOptions,
-    parseGenomeData: GenomeDataParser<G['options'], FO, G, GD>,
-    // FIXME: use factoryOptions here
-    data?: SpeciesData<G>
+    speciesOptions: SpeciesOptions,
+    speciesFactoryOptions?: SpeciesFactoryOptions<G>
   ) {
-    this.options = options
-    this.currentAge = data?.currentAge ?? 0
-    this.bestFitness = data?.bestFitness ?? 0.0
-    this.lifetimeBestFitness = data?.lifetimeBestFitness ?? 0.0
-    this.lastImprovement = data?.lastImprovement ?? 0
-    this.offsprings = data?.offsprings ?? 0.0
-    this.elites = data?.elites ?? 0
-    this.organisms = []
-    this.extinct = data?.extinct ?? false
-    this.locked = data?.locked ?? false
-    this.lockedOrganisms = data?.lockedOrganisms ?? 0
-
-    if (data != null && parseGenomeData == null) {
-      throw new Error('Missing genome data parser.')
+    this.speciesOptions = speciesOptions
+    const speciesState = speciesFactoryOptions?.speciesState
+    this.speciesState = {
+      currentAge: speciesState?.currentAge ?? 0,
+      bestFitness: speciesState?.bestFitness ?? 0,
+      lifetimeBestFitness: speciesState?.lifetimeBestFitness ?? 0,
+      lastImprovement: speciesState?.lastImprovement ?? 0,
+      offsprings: speciesState?.offsprings ?? 0,
+      elites: speciesState?.elites ?? 0,
+      extinct: speciesState?.extinct ?? false,
+      locked: speciesState?.locked ?? false,
+      lockedOrganisms: speciesState?.lockedOrganisms ?? 0,
     }
-    // FIXME: use factoryOptions here
-    // This was half implemented
-    // - OrganismFactoryOptions
-    // - GenomeFactoryOptions
-    if (data?.organisms != null && parseGenomeData != null) {
-      this.organisms = []
+    this.organisms = speciesFactoryOptions?.organisms ?? []
+  }
 
-      for (const organismData of data.organisms) {
-        // FIXME: casting to FO here is not explicit enough to prevent errors
-        const genome = parseGenomeData(organismData.genome as GD)
-        const organism = new Organism<G>(
-          genome,
-          organismData.generation,
-          organismData.fitness,
-          organismData.adjustedFitness
-        )
-        this.organisms.push(organism)
-      }
-    }
+  public get extinct(): boolean {
+    return this.speciesState.extinct
+  }
+
+  public set extinct(value: boolean) {
+    this.speciesState.extinct = value
+  }
+
+  public get bestFitness(): number {
+    // FIXME: calculate this automatically
+    return this.speciesState.bestFitness
+  }
+
+  public get elites(): number {
+    // FIXME: calculate this automatically
+    return this.speciesState.elites
+  }
+
+  public set elites(value: number) {
+    // FIXME: calculate this automatically
+    this.speciesState.elites = value
+  }
+
+  public get offsprings(): number {
+    // FIXME: calculate this automatically
+    return this.speciesState.offsprings
+  }
+
+  public set offsprings(value: number) {
+    // FIXME: calculate this automatically
+    this.speciesState.offsprings = value
   }
 
   isCompatible(other: Organism<G>): boolean {
     const organism = this.organisms[0]
     if (organism != null) {
-      return organism.distance(other) < this.options.speciationThreshold
+      return organism.distance(other) < this.speciesOptions.speciationThreshold
     }
     return true // All organisms are compatible if the species is empty
   }
@@ -101,22 +89,24 @@ export class Species<
   }
 
   adjustFitness(): void {
-    if (this.locked) throw new Error('Species is locked.')
+    if (this.speciesState.locked) throw new Error('Species is locked.')
 
     const isStagnant =
-      this.currentAge - this.lastImprovement > this.options.dropoffAge
-    const isYoung = this.currentAge < this.options.youngAgeLimit
+      this.speciesState.currentAge - this.speciesState.lastImprovement >
+      this.speciesOptions.dropoffAge
+    const isYoung =
+      this.speciesState.currentAge < this.speciesOptions.youngAgeLimit
     const size = this.organisms.length
 
     for (const organism of this.organisms) {
       let adjustedFitness = organism.fitness ?? 0
 
       if (isStagnant) {
-        adjustedFitness *= this.options.stagnantSpeciesFitnessMultiplier
+        adjustedFitness *= this.speciesOptions.stagnantSpeciesFitnessMultiplier
       }
 
       if (isYoung) {
-        adjustedFitness *= this.options.youngSpeciesFitnessMultiplier
+        adjustedFitness *= this.speciesOptions.youngSpeciesFitnessMultiplier
       }
 
       adjustedFitness /= size
@@ -148,21 +138,24 @@ export class Species<
       return b.adjustedFitness - a.adjustedFitness
     })
 
-    this.bestFitness = this.organisms[0]?.fitness ?? 0.0
-    if (this.bestFitness > this.lifetimeBestFitness) {
-      this.lifetimeBestFitness = this.bestFitness
-      this.lastImprovement = this.currentAge
+    this.speciesState.bestFitness = this.organisms[0]?.fitness ?? 0.0
+    if (this.speciesState.bestFitness > this.speciesState.lifetimeBestFitness) {
+      this.speciesState.lifetimeBestFitness = this.speciesState.bestFitness
+      this.speciesState.lastImprovement = this.speciesState.currentAge
     }
   }
 
   // Retain only the best individuals
   retainBest(): void {
-    if (this.locked) throw new Error('Species is locked.')
+    if (this.speciesState.locked) throw new Error('Species is locked.')
 
     const newSize = Math.round(
-      this.organisms.length * this.options.survivalRatio
+      this.organisms.length * this.speciesOptions.survivalRatio
     )
-    const truncateSize = Math.max(Math.max(newSize, this.elites), 2)
+    const truncateSize = Math.max(
+      Math.max(newSize, this.speciesState.elites),
+      2
+    )
 
     // Assumes the individuals are sorted in descending fitness order
     // Keep a minimum of two individuals for sexual reproduction
@@ -170,42 +163,42 @@ export class Species<
   }
 
   lock(): void {
-    if (this.locked) throw new Error('Species is already locked.')
+    if (this.speciesState.locked) throw new Error('Species is already locked.')
 
-    this.lockedOrganisms = this.organisms.length
-    this.locked = true
+    this.speciesState.lockedOrganisms = this.organisms.length
+    this.speciesState.locked = true
   }
 
   age(): void {
     this.lock()
-    this.currentAge++
+    this.speciesState.currentAge++
   }
 
   // Remove all the locked organisms (the old generation), and retain the organisms pushed after lock (next generation)
   removeOld(): void {
-    if (!this.locked) throw new Error('Species is not locked.')
+    if (!this.speciesState.locked) throw new Error('Species is not locked.')
 
-    this.locked = false
+    this.speciesState.locked = false
 
-    if (this.lockedOrganisms < this.organisms.length) {
-      this.organisms.splice(0, this.lockedOrganisms)
+    if (this.speciesState.lockedOrganisms < this.organisms.length) {
+      this.organisms.splice(0, this.speciesState.lockedOrganisms)
     } else {
       // No new individuals were added, species is now extinct
       this.organisms.splice(1)
-      this.extinct = true
+      this.speciesState.extinct = true
     }
   }
 
   calculateOffsprings(avgFitness: number): void {
-    if (this.locked) throw new Error('Species is locked.')
+    if (this.speciesState.locked) throw new Error('Species is locked.')
 
     let sum = 0
     for (const organism of this.organisms) {
       sum += (organism.adjustedFitness ?? 0) / avgFitness
     }
-    this.offsprings = sum
+    this.speciesState.offsprings = sum
 
-    this.elites = this.options.guaranteedElites
+    this.speciesState.elites = this.speciesOptions.guaranteedElites
   }
 
   tournamentSelect(k: number): Organism<G> | null {
@@ -224,19 +217,34 @@ export class Species<
     return best
   }
 
-  toJSON(): SpeciesData<G> {
+  toJSON(): SpeciesData<GO, GD, G> {
+    const config = this.organisms[0]?.genome.config.toJSON() ?? null
+    const state = this.organisms[0]?.genome.state.toJSON() ?? null
+    const genomeOptions = this.organisms[0]?.genome.genomeOptions ?? null
     return {
-      options: this.options,
-      currentAge: this.currentAge,
-      bestFitness: this.bestFitness,
-      lifetimeBestFitness: this.lifetimeBestFitness,
-      lastImprovement: this.lastImprovement,
-      offsprings: this.offsprings,
-      elites: this.elites,
-      organisms: this.organisms.map((organism) => organism.toJSON()),
-      extinct: this.extinct,
-      locked: this.locked,
-      lockedOrganisms: this.lockedOrganisms,
+      // species state
+      speciesOptions: this.speciesOptions,
+      speciesState: this.speciesState,
+
+      // to recreate the genomes
+      config,
+      state,
+      genomeOptions,
+
+      // to recreate the organisms
+      organisms: this.organisms.map((organism) => {
+        return {
+          organismState: organism.toFactoryOptions(),
+          genome: organism.genome.toFactoryOptions(),
+        }
+      }),
+    }
+  }
+
+  toFactoryOptions(): SpeciesFactoryOptions<G> {
+    return {
+      speciesState: this.speciesState,
+      organisms: this.organisms,
     }
   }
 }

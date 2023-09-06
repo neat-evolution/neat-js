@@ -1,4 +1,4 @@
-import { defaultNEATConfigOptions, type NEATOptions } from '../NEATOptions.js'
+import type { NEATConfigOptions } from '../NEATConfigOptions.js'
 
 import type { ConfigData } from './ConfigData.js'
 import type { ConfigProvider } from './ConfigProvider.js'
@@ -7,18 +7,16 @@ import type { LinkConfig, NodeConfig } from './ExtendedConfig.js'
 export class Config<NC extends NodeConfig, LC extends LinkConfig>
   implements ConfigProvider<NC, LC>
 {
-  public readonly config: NEATOptions
+  public readonly config: NEATConfigOptions
   public readonly nodeConfig: NC
   public readonly linkConfig: LC
 
   constructor(
-    // FIXME: stop allowing partial config
-    config: Partial<NEATOptions> = {},
+    configOptions: NEATConfigOptions,
     nodeConfig: NC,
     linkConfig: LC
   ) {
-    // FIXME: remove this magic
-    this.config = { ...defaultNEATConfigOptions, ...config }
+    this.config = configOptions
     this.nodeConfig = nodeConfig
     this.linkConfig = linkConfig
   }

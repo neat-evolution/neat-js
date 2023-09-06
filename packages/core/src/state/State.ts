@@ -1,5 +1,6 @@
-import { nodeRefsToLinkKey } from '../link/Link.js'
-import { NodeType, type NodeRef, nodeRefToKey } from '../node/Node.js'
+import { nodeRefsToLinkKey } from '../link/linkRefToKey.js'
+import { NodeType, type NodeRef } from '../node/NodeData.js'
+import { nodeRefToKey } from '../node/nodeRefToKey.js'
 
 import type { LinkState, NodeState } from './ExtendedState.js'
 import {
@@ -8,10 +9,14 @@ import {
   type InnovationLinkRef,
 } from './InnovationLog.js'
 import type { StateData } from './StateData.js'
+import type { StateFactoryOptions } from './StateFactory.js'
 import type { StateProvider } from './StateProvider.js'
 
-export class State<NS extends NodeState, LS extends LinkState>
-  implements StateProvider<NS, LS>
+export class State<
+  NS extends NodeState,
+  LS extends LinkState,
+  S extends State<NS, LS, S>
+> implements StateProvider<NS, LS, S>
 {
   public readonly innovationLog: InnovationLog
   public readonly nextInnovation: Innovation
@@ -22,12 +27,16 @@ export class State<NS extends NodeState, LS extends LinkState>
   /** only used in DES-HyperNEAT */
   public readonly linkState: LS
 
-  // FIXME: an options interface that accepted only data would be more flexible.
-  constructor(nodeState: NS, linkState: LS, data?: StateData<NS, LS>) {
-    this.innovationLog = new InnovationLog(data?.neat.innovationLog)
+  constructor(
+    nodeState: NS,
+    linkState: LS,
+    stateFactoryOptions?: StateFactoryOptions<NS, LS>
+  ) {
+    this.innovationLog = new InnovationLog(stateFactoryOptions?.innovationLog)
     this.nextInnovation = {
-      nodeNumber: data?.neat.nextInnovation.nodeNumber ?? 0,
-      innovationNumber: data?.neat.nextInnovation.innovationNumber ?? 0,
+      nodeNumber: stateFactoryOptions?.nextInnovation.nodeNumber ?? 0,
+      innovationNumber:
+        stateFactoryOptions?.nextInnovation.innovationNumber ?? 0,
     }
     this.nodeState = nodeState
     this.linkState = linkState
@@ -75,15 +84,12 @@ export class State<NS extends NodeState, LS extends LinkState>
         [newNode, to]
       )
 
-      const newInnovation: Innovation = {
-        nodeNumber: this.nextInnovation.nodeNumber,
-        innovationNumber: this.nextInnovation.innovationNumber,
-      }
-
-      this.innovationLog.splitInnovations.set(linkInnovation, newInnovation)
+      this.innovationLog.splitInnovations.set(linkInnovation, {
+        ...this.nextInnovation,
+      })
       this.innovationLog.hiddenNodeInnovations.set(
         this.nextInnovation.nodeNumber,
-        newInnovation
+        { ...this.nextInnovation }
       )
 
       this.nextInnovation.nodeNumber += 1
@@ -94,22 +100,22 @@ export class State<NS extends NodeState, LS extends LinkState>
   }
 
   getConnectInnovation(from: NodeRef, to: NodeRef): number {
-    const key = nodeRefsToLinkKey(from, to)
+    const linkKey = nodeRefsToLinkKey(from, to)
 
-    if (!this.innovationLog.connectInnovations.has(key)) {
+    if (!this.innovationLog.connectInnovations.has(linkKey)) {
       this.innovationLog.connectInnovations.set(
-        key,
+        linkKey,
         this.nextInnovation.innovationNumber
       )
       this.innovationLog.reverseConnectInnovations.set(
         this.nextInnovation.innovationNumber,
         [from, to]
       )
-
+      // Increase global innovation number
       this.nextInnovation.innovationNumber += 1
     }
 
-    return this.innovationLog.connectInnovations.get(key) as number
+    return this.innovationLog.connectInnovations.get(linkKey) as number
   }
 
   neat(): this {

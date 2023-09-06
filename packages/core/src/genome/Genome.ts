@@ -1,42 +1,31 @@
 import type { ConfigProvider } from '../config/ConfigProvider.js'
-import type { LinkExtension } from '../link/Link.js'
-import type { NodeExtension } from '../node/Node.js'
+import type { LinkExtension } from '../link/LinkExtension.js'
+import type { NodeExtension } from '../node/NodeExtension.js'
 import type { StateProvider } from '../state/StateProvider.js'
-import type { Stats } from '../Stats.js'
 
+import type { GenomeData } from './GenomeData.js'
 import type { GenomeFactoryOptions } from './GenomeFactory.js'
 import type { GenomeOptions } from './GenomeOptions.js'
-
-export interface GenomeData<
-  N extends NodeExtension<any, any, N>,
-  L extends LinkExtension<any, any, L>,
-  T extends Stats,
-  O extends GenomeOptions,
-  FO extends GenomeFactoryOptions,
-  G extends Genome<N, L, T, O, FO, G>
-> {
-  config: ReturnType<ConfigProvider<N['config'], L['config']>['toJSON']>
-  state?: ReturnType<StateProvider<N['state'], L['state']>['toJSON']>
-  options: O
-}
 
 export interface Genome<
   N extends NodeExtension<any, any, N>,
   L extends LinkExtension<any, any, L>,
-  T extends Stats,
-  O extends GenomeOptions,
-  FO extends GenomeFactoryOptions,
-  G extends Genome<N, L, T, O, FO, G>
+  C extends ConfigProvider<N['config'], L['config']>,
+  S extends StateProvider<N['state'], L['state'], G['state']>,
+  GO extends GenomeOptions,
+  GFO extends GenomeFactoryOptions<C, S, GO, GFO, GD, G>,
+  GD extends GenomeData<GO, G>,
+  G extends Genome<N, L, C, S, GO, GFO, GD, G>
 > {
-  readonly config: ConfigProvider<N['config'], L['config']>
-  readonly state: StateProvider<N['state'], L['state']>
-  readonly options: O
+  readonly config: C
+  readonly state: S
+  readonly genomeOptions: GO
 
-  toJSON: () => GenomeData<N, L, T, O, FO, G>
-  toFactoryOptions: () => FO
+  toJSON: () => GD
+  toFactoryOptions: () => GFO
+
   clone: () => G
   crossover: (other: G, fitness: number, otherFitness: number) => G
   mutate: () => void
   distance?: (other: G) => number
-  getStats: () => T
 }

@@ -11,7 +11,7 @@ export const loadDataset = async (config: DatasetOptions): Promise<Dataset> => {
     const lines = fileContent.split('\n').map((line) => line.trim())
 
     const isClassification = lines[0] === 'true'
-    const oneHotEncoded = lines[1] === 'true'
+    const oneHotOutput = lines[1] === 'true'
 
     const inputs: number[][] = []
     const targets: number[][] = []
@@ -72,7 +72,7 @@ export const loadDataset = async (config: DatasetOptions): Promise<Dataset> => {
         outputs: (trainingTargets[0] as number[]).length,
       },
       isClassification,
-      oneHotOutput: oneHotEncoded,
+      oneHotOutput,
       trainingInputs,
       trainingTargets,
       validationInputs,

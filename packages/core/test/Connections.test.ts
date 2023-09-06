@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { Connections } from '../src/genome/Connections.js'
-import { NodeType, type NodeRef } from '../src/node/Node.js'
+import { NodeType, type NodeRef } from '../src/index.js'
 
 describe('Connections', () => {
   describe('Connections constructor', () => {
@@ -28,21 +28,21 @@ describe('Connections', () => {
 
     test('should add a new connection when connections is empty', () => {
       connections.add(node1, node2, 1)
-      expect(connections.contains(node1, node2)).toBe(true)
+      expect(connections.hasConnection(node1, node2)).toBe(true)
     })
 
     test('should add a new edge between two existing nodes', () => {
       connections.add(node1, node2, 1)
       connections.add(node2, node3, 1)
-      expect(connections.contains(node1, node2)).toBe(true)
-      expect(connections.contains(node2, node3)).toBe(true)
+      expect(connections.hasConnection(node1, node2)).toBe(true)
+      expect(connections.hasConnection(node2, node3)).toBe(true)
     })
 
     test('should add a new node and an edge when the node does not exist', () => {
       connections.add(node1, node2, 1)
       connections.add(node3, node4, 1)
-      expect(connections.contains(node1, node2)).toBe(true)
-      expect(connections.contains(node3, node4)).toBe(true)
+      expect(connections.hasConnection(node1, node2)).toBe(true)
+      expect(connections.hasConnection(node3, node4)).toBe(true)
     })
 
     test('should throw an error when adding an edge that creates a cycle', () => {
@@ -141,7 +141,7 @@ describe('Connections', () => {
     })
   })
 
-  describe('Connections getAllConnections method', () => {
+  describe('Connections.connections method', () => {
     let connections: Connections<NodeRef, number>
     let node1: NodeRef
     let node2: NodeRef
@@ -157,93 +157,44 @@ describe('Connections', () => {
     })
 
     test('should return an empty list for an empty graph', () => {
-      const allConnections = connections.getAllConnections()
+      const allConnections = Array.from(connections.connections())
       expect(allConnections).toEqual([])
     })
 
     test('should return a list with one connection for a graph with one connection', () => {
       connections.add(node1, node2, 1)
-      const allConnections = connections.getAllConnections()
-      expect(allConnections).toEqual([{ from: node1, to: node2, edge: 1 }])
+      const allConnections = Array.from(connections.connections())
+      expect(allConnections).toEqual([[node1, node2, 1]])
     })
 
     test('should return a list with multiple connections', () => {
       connections.add(node1, node2, 1)
       connections.add(node2, node3, 2)
-      const allConnections = connections.getAllConnections()
+      const allConnections = Array.from(connections.connections())
       expect(allConnections).toEqual([
-        { from: node1, to: node2, edge: 1 },
-        { from: node2, to: node3, edge: 2 },
+        [node1, node2, 1],
+        [node2, node3, 2],
       ])
     })
 
     test('should return all connections from the same source node', () => {
       connections.add(node1, node2, 1)
       connections.add(node1, node3, 2)
-      const allConnections = connections.getAllConnections()
+      const allConnections = Array.from(connections.connections())
       expect(allConnections).toEqual([
-        { from: node1, to: node2, edge: 1 },
-        { from: node1, to: node3, edge: 2 },
+        [node1, node2, 1],
+        [node1, node3, 2],
       ])
     })
 
     test('should return all connections to the same target node', () => {
       connections.add(node1, node4, 1)
       connections.add(node2, node4, 2)
-      const allConnections = connections.getAllConnections()
+      const allConnections = Array.from(connections.connections())
       expect(allConnections).toEqual([
-        { from: node1, to: node4, edge: 1 },
-        { from: node2, to: node4, edge: 2 },
+        [node1, node4, 1],
+        [node2, node4, 2],
       ])
-    })
-  })
-
-  describe('Connections getAllNodes method', () => {
-    let connections: Connections<NodeRef, number>
-    let node1: NodeRef
-    let node2: NodeRef
-    let node3: NodeRef
-    let node4: NodeRef
-
-    beforeEach(() => {
-      connections = new Connections()
-      node1 = { type: NodeType.Input, id: 0 }
-      node2 = { type: NodeType.Hidden, id: 0 }
-      node3 = { type: NodeType.Hidden, id: 1 }
-      node4 = { type: NodeType.Output, id: 0 }
-    })
-
-    test('should return an empty list for an empty graph', () => {
-      const allNodes = connections.getAllNodes()
-      expect(allNodes).toEqual([])
-    })
-
-    test('should return a list with all unique nodes', () => {
-      connections.add(node1, node2, 1)
-      connections.add(node2, node3, 2)
-      connections.add(node3, node4, 3)
-      const allNodes = connections.getAllNodes()
-      expect(allNodes).toEqual([node1, node2, node3, node4])
-    })
-
-    test('should not include duplicate nodes', () => {
-      connections.add(node1, node2, 1)
-      connections.add(node1, node3, 1)
-      connections.add(node1, node4, 1)
-      connections.add(node2, node3, 1)
-      connections.add(node2, node4, 1)
-      connections.add(node3, node4, 1)
-      const allNodes = connections.getAllNodes()
-      expect(allNodes).toEqual([node1, node2, node3, node4])
-    })
-
-    test('should handle complex scenarios', () => {
-      connections.add(node1, node2, 1)
-      connections.add(node1, node3, 2)
-      connections.add(node2, node4, 3)
-      connections.add(node3, node4, 4)
-      const allNodes = connections.getAllNodes()
-      expect(allNodes).toEqual([node1, node2, node3, node4])
     })
   })
 
@@ -261,13 +212,13 @@ describe('Connections', () => {
 
     test('should remove a connection without errors', () => {
       connections.add(node1, node2, 1)
-      const edge = connections.remove(node1, node2)
+      const edge = connections.delete(node1, node2)
       expect(edge).toBe(1)
-      expect(connections.contains(node1, node2)).toBe(false)
+      expect(connections.hasConnection(node1, node2)).toBe(false)
     })
 
     test('should throw an error when removing a non-existent connection', () => {
-      expect(() => connections.remove(node1, node2)).toThrow(
+      expect(() => connections.delete(node1, node2)).toThrow(
         'cannot remove non-existent connection'
       )
     })
@@ -275,20 +226,20 @@ describe('Connections', () => {
     test('should not remove other connections when removing one', () => {
       connections.add(node1, node2, 1)
       connections.add(node1, node3, 2)
-      connections.remove(node1, node2)
-      expect(connections.contains(node1, node3)).toBe(true)
+      connections.delete(node1, node2)
+      expect(connections.hasConnection(node1, node3)).toBe(true)
     })
 
     test('should remove node entry when removing the last edge', () => {
       connections.add(node1, node2, 1)
-      connections.remove(node1, node2)
+      connections.delete(node1, node2)
       // Add some method or check to validate that `node1` no longer exists in `connections`.
-      expect(connections.containsNode(node1)).toBe(false)
+      expect(connections.hasNode(node1)).toBe(false)
     })
 
     test('should return the correct edge data when removing', () => {
       connections.add(node1, node2, 42)
-      const edge = connections.remove(node1, node2)
+      const edge = connections.delete(node1, node2)
       expect(edge).toBe(42)
     })
   })
@@ -307,32 +258,32 @@ describe('Connections', () => {
 
     test('should remove a node without errors', () => {
       connections.add(node1, node2, 1)
-      const removed = connections.removeNode(node1)
+      const removed = connections.deleteNode(node1)
       expect(removed.length).toBe(1)
     })
 
     test('should remove all outgoing edges from the node', () => {
       connections.add(node1, node2, 1)
       connections.add(node1, node3, 2)
-      connections.removeNode(node1)
-      expect(connections.contains(node1, node2)).toBe(false)
-      expect(connections.contains(node1, node3)).toBe(false)
+      connections.deleteNode(node1)
+      expect(connections.hasConnection(node1, node2)).toBe(false)
+      expect(connections.hasConnection(node1, node3)).toBe(false)
     })
 
     test('should remove all inbound edges to the node', () => {
       connections.add(node2, node1, 1)
       connections.add(node3, node1, 2)
-      connections.removeNode(node1)
-      expect(connections.contains(node2, node1)).toBe(false)
-      expect(connections.contains(node3, node1)).toBe(false)
+      connections.deleteNode(node1)
+      expect(connections.hasConnection(node2, node1)).toBe(false)
+      expect(connections.hasConnection(node3, node1)).toBe(false)
     })
 
     test('should remove nodes with no remaining connections', () => {
       connections.add(node1, node2, 1)
-      connections.removeNode(node1)
-      expect(connections.contains(node1, node2)).toBe(false)
-      expect(connections.containsNode(node1)).toBe(false)
-      expect(connections.containsNode(node2)).toBe(false)
+      connections.deleteNode(node1)
+      expect(connections.hasConnection(node1, node2)).toBe(false)
+      expect(connections.hasNode(node1)).toBe(false)
+      expect(connections.hasNode(node2)).toBe(false)
     })
 
     test('should return all removed connections', () => {
@@ -342,11 +293,11 @@ describe('Connections', () => {
       connections.add(node2, node3, 2)
       connections.add(node3, node4, 3)
 
-      const removed = connections.removeNode(node2)
+      const removed = connections.deleteNode(node2)
 
       expect(removed).toEqual([
-        { from: node2, to: node3, edge: 2 },
-        { from: node1, to: node2, edge: 1 },
+        [node2, node3, 2],
+        [node1, node2, 1],
       ])
     })
   })
@@ -398,13 +349,13 @@ describe('Connections', () => {
     })
 
     test('should return empty array for empty graph', () => {
-      const result = connections.sortTopologically()
+      const result = Array.from(connections.sortTopologically())
       expect(result).toEqual([]) // Expects an empty array
     })
 
     test('should correctly sort a single connection', () => {
       connections.add(node1, node2, 1)
-      const result = connections.sortTopologically()
+      const result = Array.from(connections.sortTopologically())
       expect(result).toEqual([[node1], [node1, node2, 1], [node2]])
     })
 
@@ -413,7 +364,7 @@ describe('Connections', () => {
       connections.add(node2, node3, 2)
       connections.add(node3, node4, 3)
 
-      const result = connections.sortTopologically()
+      const result = Array.from(connections.sortTopologically())
 
       expect(result).toEqual([
         [node1],
@@ -432,7 +383,7 @@ describe('Connections', () => {
       connections.add(node2, node4, 3)
       connections.add(node3, node4, 4)
 
-      const result = connections.sortTopologically()
+      const result = Array.from(connections.sortTopologically())
 
       expect(result).toEqual([
         [node1],
@@ -452,7 +403,7 @@ describe('Connections', () => {
       connections.add(node1, node3, 2)
       connections.add(node1, node2, 1)
 
-      const result = connections.sortTopologically()
+      const result = Array.from(connections.sortTopologically())
 
       expect(result).toEqual([
         [node1],
@@ -465,7 +416,5 @@ describe('Connections', () => {
         [node4],
       ])
     })
-
-    // Add other tests...
   })
 })

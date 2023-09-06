@@ -1,4 +1,4 @@
-import { isOrderedActionEdge, Activation } from '@neat-js/core'
+import { isActionEdge, Activation, isActionNode } from '@neat-js/core'
 import { nodeRefToKey, type NodeRef, NodeType } from '@neat-js/core'
 import { PhenotypeActionType } from '@neat-js/phenotype'
 import type {
@@ -13,42 +13,29 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
   genome: DefaultNEATGenome
 ): Phenotype => {
   // Sort genomes network topologically
-  const order = genome.connections.sortTopologically()
+  const order = new Set(genome.connections.sortTopologically())
   const nodes: NodeRef[] = []
 
   // Create array of all input node indexes, for insertion of neural network inputs
-  let maxInputNode = -1
-  for (const node of genome.inputs.values()) {
-    if (node.id > maxInputNode) {
-      maxInputNode = node.id
-    }
-  }
-  const numInputNodes = maxInputNode + 1
   const inputs: number[] = []
-
-  for (let i = 0; i < numInputNodes; i++) {
+  const inputLength = new Set(genome.inputs.values()).size
+  for (let i = 0; i < inputLength; i++) {
     inputs.push(i)
     // Prepend input nodes to extraction of hidden nodes from topological sorting
     nodes.push({ type: NodeType.Input, id: i })
   }
 
   for (const action of order) {
-    if (action[0].type === NodeType.Hidden) {
-      nodes.push(action[0])
+    if (isActionNode(action) && action[0].type === NodeType.Hidden) {
+      nodes.push({ type: NodeType.Hidden, id: action[0].id })
     }
   }
 
   // Create array of all output node indexes, for extraction of neural network execution result
-  let maxOutputNode = -1
-  for (const node of genome.outputs.values()) {
-    if (node.id > maxOutputNode) {
-      maxOutputNode = node.id
-    }
-  }
-  const numOutputNodes = maxOutputNode + 1
+  const outputLength = new Set(genome.outputs.values()).size
   const outputs: number[] = []
   const offset = nodes.length
-  for (let i = 0; i < numOutputNodes; i++) {
+  for (let i = 0; i < outputLength; i++) {
     outputs.push(i + offset)
     // Append all output nodes
     nodes.push({ type: NodeType.Output, id: i })
@@ -63,11 +50,8 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
   // Map topologically sorted order to neural network actions
   const actions: PhenotypeAction[] = []
   for (const action of order) {
-    if (isOrderedActionEdge(action)) {
+    if (isActionEdge(action)) {
       const [from, to, weight] = action
-      if (to === undefined) {
-        throw new Error('Invalid action')
-      }
       actions.push({
         type: PhenotypeActionType.Link,
         from: nodeMapping.get(nodeRefToKey(from)) as number,
@@ -82,7 +66,7 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
         bias: 0,
         activation:
           node.type === NodeType.Output
-            ? genome.options.outputActivation
+            ? genome.genomeOptions.outputActivation
             : Activation.Sigmoid,
       })
     }

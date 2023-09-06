@@ -1,4 +1,3 @@
-import { type NEATGenomeStats } from '@neat-js/core'
 import type { Algorithm } from '@neat-js/evolution'
 
 import { createConfig } from './createConfig.js'
@@ -9,23 +8,29 @@ import { createPhenotype } from './createPhenotype.js'
 import { createState } from './createState.js'
 import {
   type DefaultNEATGenome,
+  type DefaultNEATGenomeData,
   type DefaultNEATGenomeFactoryOptions,
 } from './DefaultNEATGenome.js'
+import type { NEATConfig } from './NEATConfig.js'
 import {
   defaultNEATGenomeOptions,
   type NEATGenomeOptions,
 } from './NEATGenomeOptions.js'
 import type { NEATLink } from './NEATLink.js'
 import type { NEATNode } from './NEATNode.js'
+import type { NEATState } from './NEATState.js'
 
 export const NEATAlgorithm: Algorithm<
   NEATNode,
   NEATLink,
-  NEATGenomeStats,
+  NEATConfig,
+  NEATState,
   NEATGenomeOptions,
   DefaultNEATGenomeFactoryOptions,
+  DefaultNEATGenomeData,
   DefaultNEATGenome
 > = {
+  name: 'NEAT',
   defaultOptions: defaultNEATGenomeOptions,
   createConfig,
   createGenome,

@@ -1,58 +1,35 @@
 import type { LinkConfig } from '../config/ExtendedConfig.js'
-import { toNodeKey, type NodeRef } from '../node/Node.js'
+import type { NodeRef } from '../node/NodeData.js'
 import type { LinkState } from '../state/ExtendedState.js'
 
-import type { LinkFactory } from './LinkFactory.js'
+import type { LinkData } from './LinkData.js'
+import type { LinkExtension } from './LinkExtension.js'
+import type { LinkFactory, LinkFactoryOptions } from './LinkFactory.js'
+import { toLinkKey } from './linkRefToKey.js'
 
-export interface LinkRef {
-  from: NodeRef
-  to: NodeRef
-  weight: number
-  innovation: number
-  toJSON?: () => Omit<LinkRef, 'toJSON'>
-}
-
-export interface LinkData<C extends LinkConfig, S extends LinkState>
-  extends Omit<LinkRef, 'toJSON'> {
-  config: C
-  state: S
-}
-
-export interface LinkExtension<
-  C extends LinkConfig,
-  S extends LinkState,
-  L extends LinkExtension<C, S, L>
-> extends LinkRef {
-  config: C
-  state: S
-  createLink: LinkFactory<C, S, L>
-  neat: () => L
-  identity: (neat: L) => L
-  cloneWith: (neat: L) => L
-  crossover: (other: L, fitness: number, otherFitness: number) => L
-  distance: (other: L) => number
-}
-
-export class Link<C extends LinkConfig, S extends LinkState>
-  implements LinkExtension<C, S, Link<C, S>>
+export class Link<
+  LC extends LinkConfig,
+  LS extends LinkState,
+  L extends Link<LC, LS, L>
+> implements LinkExtension<LC, LS, L>
 {
   public readonly from: NodeRef
   public readonly to: NodeRef
-  public readonly weight: number
+  public weight: number
   public readonly innovation: number
 
-  public readonly config: C
-  public readonly state: S
-  public readonly createLink: LinkFactory<C, S, Link<C, S>>
+  public readonly config: LC
+  public readonly state: LS
+  public readonly createLink: LinkFactory<LC, LS, L>
 
   constructor(
     from: NodeRef,
     to: NodeRef,
     weight: number,
     innovation: number,
-    config: C,
-    state: S,
-    createLink: LinkFactory<C, S, Link<C, S>>
+    config: LC,
+    state: LS,
+    createLink: LinkFactory<LC, LS, L>
   ) {
     this.from = from
     this.to = to
@@ -63,23 +40,19 @@ export class Link<C extends LinkConfig, S extends LinkState>
     this.createLink = createLink
   }
 
-  public neat(): this {
+  public neat(): LinkExtension<LC, LS, L> {
     return this
   }
 
-  public identity(neat: Link<C, S>): Link<C, S> {
+  public identity(neat: L): L {
     return neat
   }
 
-  public cloneWith(neat: Link<C, S>): Link<C, S> {
+  public cloneWith(neat: L): L {
     return neat
   }
 
-  crossover(
-    other: Link<C, S>,
-    _fitness: number,
-    _otherFitness: number
-  ): Link<C, S> {
+  crossover(other: L, _fitness: number, _otherFitness: number): L {
     if (
       this.from.type !== other.from.type ||
       this.from.id !== other.from.id ||
@@ -100,7 +73,7 @@ export class Link<C extends LinkConfig, S extends LinkState>
     )
   }
 
-  distance(other: Link<C, S>): number {
+  distance(other: L): number {
     return Math.tanh(Math.abs(this.weight - other.weight))
   }
 
@@ -108,36 +81,25 @@ export class Link<C extends LinkConfig, S extends LinkState>
     return toLinkKey(this.from.type, this.from.id, this.to.type, this.to.id)
   }
 
-  toJSON(): LinkData<C, S> {
+  toJSON(): LinkData<LC, LS> {
     return {
       from: this.from,
       to: this.to,
       weight: this.weight,
       innovation: this.innovation,
+      // FIXME: this.config.toFactoryOptions()
       config: this.config,
+      // FIXME: this.state.toFactoryOptions()
       state: this.state,
     }
   }
-}
 
-export const linkRefToKey = (linkRef: LinkRef): string => {
-  return toLinkKey(
-    linkRef.from.type,
-    linkRef.from.id,
-    linkRef.to.type,
-    linkRef.to.id
-  )
-}
-
-export const nodeRefsToLinkKey = (from: NodeRef, to: NodeRef): string => {
-  return toLinkKey(from.type, from.id, to.type, to.id)
-}
-
-export const toLinkKey = (
-  fromType: NodeRef['type'],
-  fromId: NodeRef['id'],
-  toType: NodeRef['type'],
-  toId: NodeRef['id']
-): string => {
-  return `${toNodeKey(fromType, fromId)} -> ${toNodeKey(toType, toId)}`
+  toFactoryOptions(): LinkFactoryOptions<LC, LS> {
+    return {
+      from: this.from,
+      to: this.to,
+      weight: this.weight,
+      innovation: this.innovation,
+    }
+  }
 }

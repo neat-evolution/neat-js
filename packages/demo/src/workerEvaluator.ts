@@ -6,7 +6,7 @@ import { WorkerEvaluator } from '@neat-js/worker-evaluator'
 
 import { demo } from './demo.js'
 
-const workerThreadLimit = os.cpus().length - 2
+const workerThreadLimit = os.cpus().length - 1
 
 const evaluators = new Set<WorkerEvaluator>()
 const createEvaluator: EvaluatorFactory<null> = (environment: Environment) => {

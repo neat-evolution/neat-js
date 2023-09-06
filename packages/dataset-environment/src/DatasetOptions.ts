@@ -9,7 +9,7 @@ export interface DatasetOptions {
 export const defaultDatasetOptions: DatasetOptions = {
   // FIXME: use new URL(pathname, import.meta.url).pathname
   dataset: './generated/iris',
-  seed: '0',
+  seed: '10',
   validationFraction: 0.1,
   testFraction: 0.1,
   addBiasInput: false,

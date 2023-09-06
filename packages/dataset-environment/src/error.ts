@@ -1,19 +1,12 @@
 import type { Matrix, Vector } from './types.js'
 
 export const normalize = (list: Vector): Vector => {
-  let sum = 0
-  for (const val of list) {
-    sum += val
-  }
+  const sum = list.reduce((acc, val) => acc + val, 0)
 
   if (sum !== 0) {
-    const normalized = []
-    for (const val of list) {
-      normalized.push(val / sum)
-    }
-    return normalized
+    return list.map((x) => x / sum)
   } else {
-    return [...list] // Clone the list
+    return list
   }
 }
 
@@ -62,18 +55,20 @@ export const crossentropy = (
   predictions: Matrix,
   norm: boolean
 ): number => {
-  if (targets.length === 0) {
-    return 0
-  }
-  if (targets.length !== predictions.length) {
-    throw new Error('Mismatched lengths between targets and predictions')
-  }
-  let totalEntropy = 0
-  for (const [i, target] of targets.entries()) {
-    totalEntropy += crossentropySingle(target, predictions[i] as Vector, norm)
+  let sum = 0
+  for (let i = 0; i < targets.length; i++) {
+    const t = targets[i]
+    const p = predictions[i]
+    if (t === undefined) {
+      throw new Error('target is undefined')
+    }
+    if (p === undefined) {
+      throw new Error('prediction is undefined')
+    }
+    sum += crossentropySingle(t, p, norm)
   }
 
-  return totalEntropy / targets.length
+  return sum / targets.length
 }
 
 export const crossentropySingle = (
@@ -81,27 +76,36 @@ export const crossentropySingle = (
   prediction: Vector,
   norm: boolean
 ): number => {
-  if (target.length !== prediction.length) {
-    throw new Error('Mismatched lengths between target and prediction vectors.')
+  let pred = prediction
+  if (norm) {
+    pred = normalize(prediction)
   }
 
-  const e = 0.0000001
+  const e = 1e-7
   const mi = e
   const ma = 1.0 - e
-
-  let normalizedPrediction = norm ? normalize(prediction) : [...prediction]
-
-  for (const [i, val] of normalizedPrediction.entries()) {
-    normalizedPrediction[i] = Math.min(Math.max(val, mi), ma)
+  for (let i = 0; i < pred.length; i++) {
+    const p = pred[i]
+    if (p === undefined) {
+      throw new Error('prediction is undefined')
+    }
+    pred[i] = Math.min(ma, Math.max(mi, p))
   }
 
-  normalizedPrediction = normalize(normalizedPrediction)
+  pred = normalize(pred)
 
-  let entropy = 0
-  for (const [i, val] of target.entries()) {
-    const pred = normalizedPrediction[i] as number
-    entropy += -val * Math.log(pred)
+  let sum = 0
+  for (let i = 0; i < target.length; i++) {
+    const t = target[i]
+    const p = pred[i]
+    if (t === undefined) {
+      throw new Error('target is undefined')
+    }
+    if (p === undefined) {
+      throw new Error('prediction is undefined')
+    }
+    sum += t * Math.log(p)
   }
 
-  return entropy
+  return -sum
 }
