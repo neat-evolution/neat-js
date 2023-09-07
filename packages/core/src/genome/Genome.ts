@@ -21,11 +21,13 @@ export interface Genome<
   readonly state: S
   readonly genomeOptions: GO
 
-  toJSON: () => GD
-  toFactoryOptions: () => GFO
-
   clone: () => G
+
   crossover: (other: G, fitness: number, otherFitness: number) => G
   mutate: () => void
-  distance?: (other: G) => number
+  distance: (other: G) => number
+
+  // Stats
+  toJSON: () => GD
+  toFactoryOptions: () => GFO
 }

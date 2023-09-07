@@ -25,6 +25,8 @@ export interface LinkExtension<
   /** only useful in des-hyperneat */
   cloneWith: (neat: L) => L
 
+  clone: () => L
+
   crossover: (other: L, fitness: number, otherFitness: number) => L
   distance: (other: L) => number
 

@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs'
 
-import { shuffle } from '@neat-js/core'
+import { createRNG, shuffle } from '@neat-js/core'
 
 import type { Dataset } from './Dataset.js'
 import type { DatasetOptions } from './DatasetOptions.js'
@@ -45,8 +45,8 @@ export const loadDataset = async (config: DatasetOptions): Promise<Dataset> => {
       )
     }
 
-    shuffle(inputs, config.seed)
-    shuffle(targets, config.seed)
+    shuffle(inputs, createRNG(config.seed))
+    shuffle(targets, createRNG(config.seed))
 
     const totalCount = inputs.length
     const validationCount = Math.round(totalCount * config.validationFraction)

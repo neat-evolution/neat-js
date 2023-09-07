@@ -36,6 +36,7 @@ export * from './state/StateFactory.js'
 export * from './state/StateProvider.js'
 
 // src/utils/
+export * from './utils/rand.js'
 export * from './utils/shuffle.js'
 
 // src/

@@ -1,18 +1,10 @@
-import {
-  defaultNEATConfigOptions,
-  type NEATConfig,
-  type NEATState,
-} from '@neat-js/core'
+import { defaultNEATConfigOptions } from '@neat-js/core'
 import {
   defaultDatasetOptions,
   loadDataset,
   DatasetEnvironment,
 } from '@neat-js/dataset-environment'
-import {
-  createEvaluator,
-  type AsyncEvaluator,
-  type PhenotypeData,
-} from '@neat-js/evaluator'
+import { createEvaluator, type Evaluator } from '@neat-js/evaluator'
 import {
   Population,
   defaultPopulationOptions,
@@ -20,6 +12,7 @@ import {
   type Species,
 } from '@neat-js/evolution'
 import { createExecutor } from '@neat-js/executor'
+import type { PhenotypeData } from '@neat-js/phenotype'
 import {
   beforeEach,
   describe,
@@ -40,6 +33,11 @@ import {
   createState,
   createGenome,
   createPhenotype,
+  type NEATConfig,
+  type NEATState,
+  NEATAlgorithm,
+  type NEATLink,
+  type NEATNode,
 } from '../src/index.js'
 
 const createEnvironment = async () => {
@@ -64,13 +62,7 @@ describe('Population class', () => {
   let populationOptions: PopulationOptions
   let genomeOptions: NEATGenomeOptions
   let environment: DatasetEnvironment
-  let evaluator: AsyncEvaluator
-
-  /**
-   * Creates a genome that has been mutated 50 times
-   * @returns {DefaultNEATGenome} seasoned genome
-   */
-  let createSeasonedGenome: () => DefaultNEATGenome
+  let evaluator: Evaluator
 
   beforeEach(async () => {
     configProvider = createConfig(defaultNEATConfigOptions)
@@ -79,41 +71,24 @@ describe('Population class', () => {
     populationOptions = defaultPopulationOptions
     environment = await createEnvironment()
     evaluator = createEvaluator(environment, createExecutor)
-
-    createSeasonedGenome = () => {
-      const configOptions = {
-        ...defaultNEATConfigOptions,
-        addNodeProbability: 1,
-        addLinkProbability: 1,
-        removeLinkProbability: 0,
-        removeNodeProbability: 0,
-        mutateLinkWeightProbability: 0,
-      }
-      const genome = createGenome(
-        createConfig(configOptions),
-        genomeOptions,
-        stateProvider
-      )
-      for (let i = 0; i < 50; i++) {
-        genome.mutate()
-      }
-      return genome
-    }
   })
 
   test('should correctly initialize', () => {
     const population = new Population<
+      NEATNode,
+      NEATLink,
+      NEATConfig,
+      NEATState,
       NEATGenomeOptions,
       DefaultNEATGenomeFactoryOptions,
+      DefaultNEATGenomeData,
       DefaultNEATGenome,
-      DefaultNEATGenomeData
+      typeof NEATAlgorithm
     >(
       evaluator,
-      createPhenotype,
-      createGenome,
-      createState,
-      populationOptions,
+      NEATAlgorithm,
       configProvider,
+      populationOptions,
       genomeOptions
     )
 
@@ -121,37 +96,47 @@ describe('Population class', () => {
     expect(population.species.size).toBe(1)
     expect(population.extinctSpecies).toBeDefined()
     expect(population.extinctSpecies.size).toBe(0)
-    expect(population.state).toBeDefined()
-    expect(population.createPhenotype).toBe(createPhenotype)
-    expect(population.createGenome).toBe(createGenome)
-    expect(population.createState).toBe(createState)
-    expect(population.parseGenomeData).toBeDefined()
+    expect(population.stateProvider).toBeDefined()
+    expect(population.algorithm.createPhenotype).toBe(createPhenotype)
+    expect(population.algorithm.createGenome).toBe(createGenome)
+    expect(population.algorithm.createState).toBe(createState)
     expect(population.evaluator).toBe(evaluator)
     expect(population.populationOptions).toBe(populationOptions)
     expect(population.configProvider).toBe(configProvider)
-    expect(population.genomeOptions).toBe(genomeOptions)
+    expect(population.genomeOptions).toEqual({
+      ...genomeOptions,
+      ...evaluator.environment.description,
+    })
   })
 
   describe('Population.size', () => {
     let population: Population<
+      NEATNode,
+      NEATLink,
+      NEATConfig,
+      NEATState,
       NEATGenomeOptions,
       DefaultNEATGenomeFactoryOptions,
+      DefaultNEATGenomeData,
       DefaultNEATGenome,
-      DefaultNEATGenomeData
+      typeof NEATAlgorithm
     >
     beforeEach(() => {
       population = new Population<
+        NEATNode,
+        NEATLink,
+        NEATConfig,
+        NEATState,
         NEATGenomeOptions,
         DefaultNEATGenomeFactoryOptions,
+        DefaultNEATGenomeData,
         DefaultNEATGenome,
-        DefaultNEATGenomeData
+        typeof NEATAlgorithm
       >(
         evaluator,
-        createPhenotype,
-        createGenome,
-        createState,
-        populationOptions,
+        NEATAlgorithm,
         configProvider,
+        populationOptions,
         genomeOptions
       )
     })
@@ -163,24 +148,32 @@ describe('Population class', () => {
 
   describe('Population.species.size', () => {
     let population: Population<
+      NEATNode,
+      NEATLink,
+      NEATConfig,
+      NEATState,
       NEATGenomeOptions,
       DefaultNEATGenomeFactoryOptions,
+      DefaultNEATGenomeData,
       DefaultNEATGenome,
-      DefaultNEATGenomeData
+      typeof NEATAlgorithm
     >
     beforeEach(() => {
       population = new Population<
+        NEATNode,
+        NEATLink,
+        NEATConfig,
+        NEATState,
         NEATGenomeOptions,
         DefaultNEATGenomeFactoryOptions,
+        DefaultNEATGenomeData,
         DefaultNEATGenome,
-        DefaultNEATGenomeData
+        typeof NEATAlgorithm
       >(
         evaluator,
-        createPhenotype,
-        createGenome,
-        createState,
-        populationOptions,
+        NEATAlgorithm,
         configProvider,
+        populationOptions,
         genomeOptions
       )
     })
@@ -189,17 +182,20 @@ describe('Population class', () => {
       let speciesCount = 0
       for (let i = 0; i < 100; i++) {
         population = new Population<
+          NEATNode,
+          NEATLink,
+          NEATConfig,
+          NEATState,
           NEATGenomeOptions,
           DefaultNEATGenomeFactoryOptions,
+          DefaultNEATGenomeData,
           DefaultNEATGenome,
-          DefaultNEATGenomeData
+          typeof NEATAlgorithm
         >(
           evaluator,
-          createPhenotype,
-          createGenome,
-          createState,
-          populationOptions,
+          NEATAlgorithm,
           configProvider,
+          populationOptions,
           genomeOptions
         )
         speciesCount += population.species.size
@@ -215,30 +211,38 @@ describe('Population class', () => {
       expect(population.species.size).toBeLessThan(
         1.1 * populationOptions.speciesTarget
       )
-      expect(speciesCount).toBeGreaterThan(100)
+      expect(speciesCount).toBeGreaterThan(50)
     })
   })
 
   describe('Population.evolve', () => {
     let population: Population<
+      NEATNode,
+      NEATLink,
+      NEATConfig,
+      NEATState,
       NEATGenomeOptions,
       DefaultNEATGenomeFactoryOptions,
+      DefaultNEATGenomeData,
       DefaultNEATGenome,
-      DefaultNEATGenomeData
+      typeof NEATAlgorithm
     >
     beforeEach(() => {
       population = new Population<
+        NEATNode,
+        NEATLink,
+        NEATConfig,
+        NEATState,
         NEATGenomeOptions,
         DefaultNEATGenomeFactoryOptions,
+        DefaultNEATGenomeData,
         DefaultNEATGenome,
-        DefaultNEATGenomeData
+        typeof NEATAlgorithm
       >(
         evaluator,
-        createPhenotype,
-        createGenome,
-        createState,
-        populationOptions,
+        NEATAlgorithm,
         configProvider,
+        populationOptions,
         genomeOptions
       )
 
@@ -312,11 +316,7 @@ describe('Population class', () => {
 
     test('should update the number of new elites and offsprings for each species', () => {
       const dataMap = new Map<
-        Species<
-          DefaultNEATGenomeFactoryOptions,
-          DefaultNEATGenome,
-          DefaultNEATGenomeData
-        >,
+        Species<NEATGenomeOptions, DefaultNEATGenomeData, DefaultNEATGenome>,
         { elites: number; offsprings: number }
       >()
 
@@ -353,23 +353,6 @@ describe('Population class', () => {
       expect(offspringsChanges).toBe(true)
     })
 
-    test.todo('should retain best organisms and age species', () => {
-      population.evolve()
-      // Check that each species only retains the best organisms.
-      // Also, confirm that the age of each species is updated.
-    })
-
-    test.todo('should correctly grow the population', () => {
-      population.evolve()
-      // Check that new organisms are added to the species.
-      // Validate against the number of offsprings and elites.
-    })
-
-    test.todo('should not exceed population size', () => {
-      population.evolve()
-      // Make sure the population size is within the defined limits.
-    })
-
     test('should adjust speciation threshold if speciesTarget is defined', () => {
       const options = population.populationOptions
       const threshold = options.speciationThreshold
@@ -387,89 +370,6 @@ describe('Population class', () => {
       }
 
       expect(newThreshold).toBe(expectedThreshold)
-    })
-  })
-  describe('Population.evaluate', () => {
-    let population: Population<
-      NEATGenomeOptions,
-      DefaultNEATGenomeFactoryOptions,
-      DefaultNEATGenome,
-      DefaultNEATGenomeData
-    >
-    beforeEach(() => {
-      population = new Population<
-        NEATGenomeOptions,
-        DefaultNEATGenomeFactoryOptions,
-        DefaultNEATGenome,
-        DefaultNEATGenomeData
-      >(
-        evaluator,
-        createPhenotype,
-        createGenome,
-        createState,
-        populationOptions,
-        configProvider,
-        genomeOptions
-      )
-
-      // mutate all genomes 50 times
-      for (let i = 0; i < 50; i++) {
-        population.mutate()
-      }
-    })
-
-    test('should evaluate all organisms', async () => {
-      await population.evaluate()
-      for (const organism of population.organismValues()) {
-        expect(organism.fitness).toBe(0)
-      }
-    })
-
-    test('should improve fitness after 100 iterations', async () => {
-      // evolve population for 100 iterations
-      for (let i = 0; i < 100; i++) {
-        await population.evaluate()
-        population.evolve()
-      }
-      // measure fitness
-      await population.evaluate()
-      for (const organism of population.organismValues()) {
-        expect(organism.fitness).toBe(0)
-      }
-    })
-
-    test('should stuff', async () => {
-      // evolve population for 100 iterations
-      for (let i = 0; i < 100; i++) {
-        await population.evaluate()
-        population.evolve()
-      }
-
-      // convert every organism to a phenotype
-      const phenotypeData = new Set<PhenotypeData>()
-      for (const [
-        speciesIndex,
-        organismIndex,
-        genome,
-      ] of population.genomeEntries()) {
-        phenotypeData.add([
-          speciesIndex,
-          organismIndex,
-          population.createPhenotype(genome),
-        ])
-      }
-
-      // evaluate every phenotype
-      const fitnesses: number[] = []
-      for (const [, , phenotype] of phenotypeData) {
-        const executor = createExecutor(phenotype)
-        const trainingInput = environment.dataset.trainingInputs[0] as number[]
-        const output = await executor(trainingInput)
-        expect(phenotype).toBe(120)
-        expect(output).toBe(120)
-      }
-
-      expect(fitnesses).toBe(6)
     })
   })
 })

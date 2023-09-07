@@ -1,10 +1,18 @@
-import type { Genome, GenomeData, GenomeOptions } from '@neat-js/core'
+import {
+  createRNG,
+  type Genome,
+  type GenomeData,
+  type GenomeOptions,
+} from '@neat-js/core'
 
 import { type Organism } from './Organism.js'
 import type { SpeciesData, SpeciesState } from './SpeciesData.js'
 import type { SpeciesFactoryOptions } from './SpeciesFactoryOptions.js'
 import type { SpeciesOptions } from './SpeciesOptions.js'
 
+/// Collection of similar organisms
+// The lock is used to add new organisms without affecting the reproduction of the previous generation.
+// It is unlocked after reproduction, which will remove the previous generation and keep the new.
 export class Species<
   GO extends GenomeOptions,
   GD extends GenomeData<GO, G>,
@@ -47,30 +55,26 @@ export class Species<
   }
 
   public get bestFitness(): number {
-    // FIXME: calculate this automatically
     return this.speciesState.bestFitness
   }
 
   public get elites(): number {
-    // FIXME: calculate this automatically
     return this.speciesState.elites
   }
 
   public set elites(value: number) {
-    // FIXME: calculate this automatically
     this.speciesState.elites = value
   }
 
   public get offsprings(): number {
-    // FIXME: calculate this automatically
     return this.speciesState.offsprings
   }
 
   public set offsprings(value: number) {
-    // FIXME: calculate this automatically
     this.speciesState.offsprings = value
   }
 
+  /// Determine wether a new organism is compatible
   isCompatible(other: Organism<G>): boolean {
     const organism = this.organisms[0]
     if (organism != null) {
@@ -79,13 +83,59 @@ export class Species<
     return true // All organisms are compatible if the species is empty
   }
 
+  /// Add an organism
   push(individual: Organism<G>): void {
     this.organisms.push(individual)
   }
 
+  /// Number of organisms. Adheres to lock.
+  get size(): number {
+    if (this.speciesState.locked) {
+      return this.speciesState.lockedOrganisms
+    } else {
+      return this.organisms.length
+    }
+  }
+
+  /// Iterate organisms. Adheres to lock.
+  *organismValues(): Generator<Organism<G>, void, void> {
+    const size = this.size
+    for (let i = 0; i < size; i++) {
+      const organism = this.organisms[i]
+      if (organism == null) {
+        throw new Error('Organism is null')
+      }
+      yield organism
+    }
+  }
+
+  /// Enumerate organisms. Adheres to lock.
+  *organismEntries(): Generator<
+    [index: number, organism: Organism<G>],
+    void,
+    void
+  > {
+    const size = this.size
+    for (let i = 0; i < size; i++) {
+      const organism = this.organisms[i]
+      if (organism == null) {
+        throw new Error('Organism is null')
+      }
+      yield [i, organism]
+    }
+  }
+
+  /// Get random organism. Adheres to lock.
   randomOrganism(): Organism<G> | null {
-    const randomIndex = Math.floor(Math.random() * this.organisms.length)
-    return this.organisms[randomIndex] ?? null
+    const randomIndex = createRNG().genRange(0, this.size)
+    let i = 0
+    for (const organism of this.organismValues()) {
+      if (i === randomIndex) {
+        return organism
+      }
+      i++
+    }
+    return null
   }
 
   adjustFitness(): void {
@@ -118,24 +168,12 @@ export class Species<
       organism.adjustedFitness = adjustedFitness
     }
 
-    // Sort organisms descendingly by adjusted fitness
+    // Sort organisms descendingly by adjusted fitness (best first)
     this.organisms.sort((a, b) => {
-      // Both null or undefined
-      if (a.adjustedFitness === null && b.adjustedFitness === null) {
-        return 0
-      }
-
-      // One of them is null or undefined
-      if (a.adjustedFitness === null) {
-        return 1 // or whatever value makes sense in your context to say "a is greater than b"
-      }
-
-      if (b.adjustedFitness === null) {
-        return -1 // or whatever value makes sense in your context to say "b is greater than a"
-      }
-
-      // Both are numbers: perform the subtraction
-      return b.adjustedFitness - a.adjustedFitness
+      const aValue = a.adjustedFitness ?? -Infinity
+      const bValue = b.adjustedFitness ?? -Infinity
+      const compare = aValue < bValue ? 1 : aValue > bValue ? -1 : 0
+      return compare
     })
 
     this.speciesState.bestFitness = this.organisms[0]?.fitness ?? 0.0
@@ -203,12 +241,16 @@ export class Species<
 
   tournamentSelect(k: number): Organism<G> | null {
     let best: Organism<G> | null = null
-    let bestFitness = Number.NEGATIVE_INFINITY
+    let bestFitness: number | null = null
 
     for (let i = 0; i < k; i++) {
       const organism = this.randomOrganism()
-      const fitness = organism?.fitness ?? -Number.MAX_VALUE
-      if (fitness > bestFitness) {
+      const fitness = organism?.fitness ?? null
+      if (
+        best === null ||
+        (bestFitness === null && fitness !== null) ||
+        (bestFitness !== null && fitness !== null && fitness > bestFitness)
+      ) {
         best = organism
         bestFitness = fitness
       }

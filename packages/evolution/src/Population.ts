@@ -1,12 +1,13 @@
-import type {
-  Genome,
-  GenomeFactoryOptions,
-  GenomeOptions,
-  GenomeData,
-  ConfigProvider,
-  NodeExtension,
-  LinkExtension,
-  StateProvider,
+import {
+  type Genome,
+  type GenomeFactoryOptions,
+  type GenomeOptions,
+  type GenomeData,
+  type ConfigProvider,
+  type NodeExtension,
+  type LinkExtension,
+  type StateProvider,
+  createRNG,
 } from '@neat-js/core'
 import type { Evaluator } from '@neat-js/evaluator'
 import type { PhenotypeData } from '@neat-js/phenotype'
@@ -70,21 +71,22 @@ export class Population<
     this.nextId = populationFactoryOptions?.nextId ?? 0
 
     this.populationOptions = populationOptions
-    this.genomeOptions = genomeOptions
+    this.genomeOptions = {
+      ...genomeOptions,
+      // InitConfig
+      ...this.evaluator.environment.description,
+    } as unknown as GO
 
     if (populationFactoryOptions != null) {
       const hydrateOrganism = (
-        genomeFactoryOptions: Omit<GD, 'config' | 'state' | 'genomeOptions'>,
+        genomeFactoryOptions: GFO,
         organismFactoryOptions: OrganismState
       ) => {
         const genome = algorithm.createGenome(
           configProvider,
           this.stateProvider,
-          {
-            ...this.genomeOptions,
-            ...this.evaluator.environment.description,
-          },
-          genomeFactoryOptions as GFO
+          this.genomeOptions,
+          genomeFactoryOptions
         )
         const organism = new Organism(
           genome,
@@ -104,7 +106,7 @@ export class Population<
           organismState: organismFactoryOptions,
         } of speciesData.organisms) {
           organisms.push(
-            hydrateOrganism(genomeFactoryOptions, organismFactoryOptions)
+            hydrateOrganism(genomeFactoryOptions as GFO, organismFactoryOptions)
           )
         }
         const speciesFactoryOptions = {
@@ -122,55 +124,27 @@ export class Population<
       for (const [id, speciesData] of populationFactoryOptions.extinctSpecies) {
         hydrateSpecies(this.extinctSpecies, id, speciesData)
       }
-      // FIXME: ensure enough organisms
     } else {
       for (let i = 0; i < this.populationOptions.populationSize; i++) {
         const genome = algorithm.createGenome(
           configProvider,
           this.stateProvider,
-          {
-            ...this.genomeOptions,
-            ...this.evaluator.environment.description,
-          }
+          this.genomeOptions
         )
         this.push(new Organism<G>(genome), false)
       }
     }
   }
 
-  *genomeEntries(): IterableIterator<
-    [speciesIndex: number, organismIndex: number, genome: G]
-  > {
-    for (const [speciesIndex, { organisms }] of this.species.entries()) {
-      for (const [organismIndex, { genome }] of organisms.entries()) {
-        yield [speciesIndex, organismIndex, genome]
-      }
-    }
-  }
-
-  *organismValues(): IterableIterator<Organism<G>> {
-    for (const { organisms } of this.species.values()) {
-      for (const organism of organisms.values()) {
-        yield organism
-      }
-    }
-  }
-
-  public get size(): number {
-    let size = 0
-    for (const species of this.species.values()) {
-      size += species.organisms.length
-    }
-    return size
-  }
-
-  // FIXME: rename to add
+  /// Add organism to population
   push(organism: Organism<G>, lockNew: boolean): void {
     let species = this.compatibleSpecies(organism)
     if (species != null) {
       species.push(organism)
     } else {
+      // New organism is not compatible with any existing species, create a new one
       species = new Species<GO, GD, G>(this.populationOptions)
+      // If during reproduction, the species is locked so that the new organism avoids parent selection
       if (lockNew) {
         species.lock()
       }
@@ -180,7 +154,8 @@ export class Population<
     }
   }
 
-  private compatibleSpecies(organism: Organism<G>): Species<GO, GD, G> | null {
+  /// Find first species compatible with organism
+  compatibleSpecies(organism: Organism<G>): Species<GO, GD, G> | null {
     for (const species of this.species.values()) {
       if (species.isCompatible(organism)) {
         return species
@@ -189,6 +164,7 @@ export class Population<
     return null
   }
 
+  /// Evolve the population
   evolve(): void {
     // Adjust fitnesses based on age, stagnation and apply fitness sharing
     // Also sorts organisms by descending fitness
@@ -196,22 +172,28 @@ export class Population<
       species.adjustFitness()
     }
 
+    // Average fitness of all organisms
     const elites =
       this.populationOptions.globalElites +
       this.populationOptions.guaranteedElites * this.species.size
 
-    // Average fitness of all organisms
+    // Subtract number of guaranteed elites from pop size, reserving these slots for elites.
     let sumAdjustedFitness = 0
     for (const { adjustedFitness } of this.organismValues()) {
-      sumAdjustedFitness += adjustedFitness ?? 0
+      if (adjustedFitness == null) {
+        throw new Error('Adjusted fitness is null')
+      }
+      sumAdjustedFitness += adjustedFitness
     }
     const avgFitness =
       sumAdjustedFitness / (this.populationOptions.populationSize - elites)
 
+    // Calculate number of new offsprings to produce within each new species
     for (const species of this.species.values()) {
       species.calculateOffsprings(avgFitness)
     }
 
+    // The total size of the next population before making up for floating point precision
     let sumOffsprings = 0
     for (const species of this.species.values()) {
       sumOffsprings += Math.floor(species.offsprings)
@@ -220,16 +202,19 @@ export class Population<
 
     const speciesIds = Array.from(this.species.keys())
 
-    // Sort speciesIds array
+    // Sort species based on closeness to additional offspring (lowest first)
     speciesIds.sort((a, b) => {
-      const fractionA =
-        (this.species.get(a) as Species<GO, GD, G>).offsprings % 1
-      const fractionB =
-        (this.species.get(b) as Species<GO, GD, G>).offsprings % 1
-
-      return 1 - fractionB - (1 - fractionA)
+      const speciesA = this.species.get(a) as Species<GO, GD, G>
+      const speciesB = this.species.get(b) as Species<GO, GD, G>
+      const aValue = 1.0 - (speciesA.offsprings % 1.0)
+      const bValue = 1.0 - (speciesB.offsprings % 1.0)
+      const compare = aValue < bValue ? -1 : aValue > bValue ? 1 : 0
+      // FIXME: sorting by ascending or descending doesn't seem to matter
+      return compare
     })
 
+    // Distribute missing offsprings amongst species
+    // in order of floating distance from additional offspring
     while (newPopulationSize < this.populationOptions.populationSize) {
       for (const speciesId of speciesIds) {
         const species = this.species.get(speciesId) as Species<GO, GD, G>
@@ -244,17 +229,21 @@ export class Population<
 
     // Sort species based on bestFitness (best first)
     speciesIds.sort((a, b) => {
-      return (
-        ((this.species.get(b) as Species<GO, GD, G>).bestFitness ?? 0) -
-        ((this.species.get(a) as Species<GO, GD, G>).bestFitness ?? 0)
-      )
+      const speciesA = this.species.get(a) as Species<GO, GD, G>
+      const speciesB = this.species.get(b) as Species<GO, GD, G>
+      const aValue = speciesA.bestFitness ?? -Infinity
+      const bValue = speciesB.bestFitness ?? -Infinity
+      const compare = aValue < bValue ? 1 : aValue > bValue ? -1 : 0
+      // FIXME: sorting by ascending or descending doesn't seem to matter
+      return compare
     })
-
     let elitesDistributed = 0
+
+    // Distribute elites
     while (elitesDistributed < this.populationOptions.globalElites) {
       for (const speciesId of speciesIds) {
         const species = this.species.get(speciesId) as Species<GO, GD, G>
-        if (species.elites < species.organisms.length) {
+        if (species.elites < species.size) {
           species.elites++
           elitesDistributed++
 
@@ -275,16 +264,18 @@ export class Population<
       throw new Error('Wrong number of planned individuals in next population')
     }
 
+    // Kill individuals of low performance, not allowed to reproduce
     for (const species of this.species.values()) {
-      // Kill individuals of low performance, not allowed to reproduce
       species.retainBest()
-      // Increase the age of and lock all species, making current organisms old
+    }
+
+    // Increase the age of and lock all species, making current organisms old
+    for (const species of this.species.values()) {
       species.age()
     }
 
     for (const i of speciesIds) {
       const species = this.species.get(i) as Species<GO, GD, G>
-
       // Steal elites from number of offsprings
       const elitesTakenFromOffspring = Math.min(
         this.populationOptions.elitesFromOffspring,
@@ -295,14 +286,13 @@ export class Population<
 
       // Directly copy elites, without crossover or mutation
       for (let j = 0; j < species.elites; j++) {
-        const organism = species.organisms[
-          j % species.organisms.length
-        ] as Organism<G>
+        const organism = species.organisms[j % species.size] as Organism<G>
         this.push(organism.asElite(), true)
       }
     }
 
     // Evolve species
+    const rng = createRNG()
     for (const i of speciesIds) {
       const species = this.species.get(i) as Species<GO, GD, G>
       const reproductions = Math.floor(species.offsprings)
@@ -310,21 +300,20 @@ export class Population<
       // Breed new organisms
       for (let _ = 0; _ < reproductions; _++) {
         const father =
-          Math.random() <
-          this.populationOptions.interspeciesReproductionProbability
-            ? this.tournamentSelect(
+          rng.gen() < this.populationOptions.interspeciesReproductionProbability
+            ? // Interspecies breeding
+              this.tournamentSelect(
                 this.populationOptions.interspeciesTournamentSize
               )
-            : species.tournamentSelect(this.populationOptions.tournamentSize)
+            : // Breeding within species
+              species.tournamentSelect(this.populationOptions.tournamentSize)
 
         if (father == null) {
           throw new Error('Unable to gather father organism')
         }
 
         let child: Organism<G>
-        if (
-          Math.random() < this.populationOptions.asexualReproductionProbability
-        ) {
+        if (rng.gen() < this.populationOptions.asexualReproductionProbability) {
           child = father.asElite()
         } else {
           const mother = species.tournamentSelect(
@@ -383,33 +372,46 @@ export class Population<
     }
   }
 
+  /// Get random organism from population
   randomOrganism(): Organism<G> | null {
-    const organisms = Array.from(this.organismValues())
-    const len = organisms.length
+    const len = this.size
 
     if (len === 0) {
       return null
     } else {
-      return organisms[Math.floor(Math.random() * len)] ?? null
+      const randomIndex = createRNG().genRange(0, len)
+      let i = 0
+      for (const organism of this.organismValues()) {
+        if (i === randomIndex) {
+          return organism
+        }
+        i++
+      }
     }
+    return null
   }
 
+  /// Use tournament selection to select an organism
   tournamentSelect(k: number): Organism<G> | null {
     let best: Organism<G> | null = null
-    let bestFitness = Number.NEGATIVE_INFINITY
+    let bestFitness: number | null = null
 
     for (let i = 0; i < k; i++) {
       const organism = this.randomOrganism()
-      const fitness = organism?.fitness ?? -Number.MAX_VALUE
-      if (fitness > bestFitness) {
+      const fitness = organism?.fitness ?? null
+      if (
+        best === null ||
+        (bestFitness === null && fitness !== null) ||
+        (bestFitness !== null && fitness !== null && fitness > bestFitness)
+      ) {
         best = organism
         bestFitness = fitness
       }
     }
-
     return best
   }
 
+  /// Update fitness of all organisms
   async evaluate() {
     const phenotypeData = new Set<PhenotypeData>()
 
@@ -435,9 +437,43 @@ export class Population<
     }
   }
 
-  best(): Organism<G> | undefined {
-    const organisms = Array.from(this.organismValues())
-    return organisms.sort((a, b) => (b.fitness ?? 0) - (a.fitness ?? 0))[0]
+  /// Number of organisms. Adheres to lock.
+  public get size(): number {
+    let size = 0
+    for (const species of this.species.values()) {
+      size += species.size
+    }
+    return size
+  }
+
+  /// Iterate organisms. Adheres to lock.
+  *organismValues(): IterableIterator<Organism<G>> {
+    for (const species of this.species.values()) {
+      yield* species.organismValues()
+    }
+  }
+
+  /// Enumerate genomes. Adheres to lock.
+  *genomeEntries(): IterableIterator<
+    [speciesIndex: number, organismIndex: number, genome: G]
+  > {
+    for (const [speciesIndex, species] of this.species.entries()) {
+      for (const [organismIndex, { genome }] of species.organismEntries()) {
+        yield [speciesIndex, organismIndex, genome]
+      }
+    }
+  }
+
+  best(): Organism<G> | null {
+    let best = null
+    for (const organism of this.organismValues()) {
+      if (best == null) {
+        best = organism
+      } else if ((organism.fitness as number) > (best.fitness as number)) {
+        best = organism
+      }
+    }
+    return best
   }
 
   toJSON(): PopulationData<GO, GD, G> {

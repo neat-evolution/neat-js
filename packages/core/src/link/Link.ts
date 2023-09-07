@@ -52,6 +52,17 @@ export class Link<
     return neat
   }
 
+  public clone(): L {
+    return this.createLink(
+      this.from,
+      this.to,
+      this.weight,
+      this.innovation,
+      this.config,
+      this.state
+    )
+  }
+
   crossover(other: L, _fitness: number, _otherFitness: number): L {
     if (
       this.from.type !== other.from.type ||

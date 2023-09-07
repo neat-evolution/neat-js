@@ -12,7 +12,7 @@ import { defaultNEATGenomeOptions } from '../src/NEATGenomeOptions.js'
 describe('Organism class', () => {
   let state: DefaultNEATGenome['state']
   let initConfig: InitConfig
-  let genomeOptions: DefaultNEATGenome['options']
+  let genomeOptions: DefaultNEATGenome['genomeOptions']
   let genome: DefaultNEATGenome
   let generation: number
 
@@ -37,7 +37,7 @@ describe('Organism class', () => {
         removeNodeProbability: 0,
         mutateLinkWeightProbability: 0,
       }
-      const genome = createGenome(createConfig(options), genomeOptions, state)
+      const genome = createGenome(createConfig(options), state, genomeOptions)
       for (let i = 0; i < 50; i++) {
         genome.mutate()
       }
@@ -56,7 +56,10 @@ describe('Organism class', () => {
     })
 
     test('should correctly initialize with all parameters', () => {
-      const organism = new Organism(genome, generation, 100, 200)
+      const organism = new Organism(genome, generation, {
+        fitness: 100,
+        adjustedFitness: 200,
+      })
       expect(organism.genome).toBe(genome)
       expect(organism.generation).toBe(generation)
       expect(organism.fitness).toBe(100)
@@ -72,7 +75,7 @@ describe('Organism class', () => {
     })
 
     test('should correctly initialize with null fitness and adjustedFitness', () => {
-      const organism = new Organism(genome, generation, null, null)
+      const organism = new Organism(genome, generation)
       expect(organism.genome).toBe(genome)
       expect(organism.generation).toBe(generation)
       expect(organism.fitness).toBeNull()
@@ -97,14 +100,23 @@ describe('Organism class', () => {
     })
 
     test('should correctly perform crossover when both organisms have fitness values', () => {
-      const organism1 = new Organism(genome, generation, 100)
-      const organism2 = new Organism(genome, generation, 200)
+      const organism1 = new Organism(genome, generation, {
+        fitness: 100,
+        adjustedFitness: null,
+      })
+      const organism2 = new Organism(genome, generation, {
+        fitness: 200,
+        adjustedFitness: null,
+      })
       const child = organism1.crossover(organism2)
       expect(child.generation).toBe(organism1.generation + 1)
     })
 
     test('should correctly perform crossover when one organism has a fitness value', () => {
-      const organism1 = new Organism(genome, generation, 100)
+      const organism1 = new Organism(genome, generation, {
+        fitness: 100,
+        adjustedFitness: null,
+      })
       const organism2 = new Organism(genome, generation)
       const child = organism1.crossover(organism2)
       expect(child.generation).toBe(organism1.generation + 1)
@@ -118,8 +130,14 @@ describe('Organism class', () => {
     })
 
     test('should produce a different genome', () => {
-      const organism1 = new Organism(genome, generation, 100)
-      const organism2 = new Organism(genome, generation, 200)
+      const organism1 = new Organism(genome, generation, {
+        fitness: 100,
+        adjustedFitness: null,
+      })
+      const organism2 = new Organism(genome, generation, {
+        fitness: 200,
+        adjustedFitness: null,
+      })
       const child = organism1.crossover(organism2)
       expect(child.genome).not.toBe(organism1.genome)
       expect(child.genome).not.toBe(organism2.genome)
@@ -128,33 +146,57 @@ describe('Organism class', () => {
 
   describe('Organism cmp', () => {
     test('should return -1 when fitness of first organism is less', () => {
-      const organism1 = new Organism(genome, generation, 10)
-      const organism2 = new Organism(genome, generation, 20)
+      const organism1 = new Organism(genome, generation, {
+        fitness: 10,
+        adjustedFitness: null,
+      })
+      const organism2 = new Organism(genome, generation, {
+        fitness: 20,
+        adjustedFitness: null,
+      })
       expect(organism1.cmp(organism2)).toBe(-1)
     })
 
     test('should return 1 when fitness of first organism is greater', () => {
-      const organism1 = new Organism(genome, generation, 20)
-      const organism2 = new Organism(genome, generation, 10)
+      const organism1 = new Organism(genome, generation, {
+        fitness: 20,
+        adjustedFitness: null,
+      })
+      const organism2 = new Organism(genome, generation, {
+        fitness: 10,
+        adjustedFitness: null,
+      })
       expect(organism1.cmp(organism2)).toBe(1)
     })
 
     test('should return 0 when fitness of both organisms are equal', () => {
-      const organism1 = new Organism(genome, generation, 20)
-      const organism2 = new Organism(genome, generation, 20)
+      const organism1 = new Organism(genome, generation, {
+        fitness: 20,
+        adjustedFitness: null,
+      })
+      const organism2 = new Organism(genome, generation, {
+        fitness: 20,
+        adjustedFitness: null,
+      })
       expect(organism1.cmp(organism2)).toBe(0)
     })
 
     test('should throw error when fitness of first organism is null', () => {
-      const organism1 = new Organism(genome, generation, null)
-      const organism2 = new Organism(genome, generation, 10)
+      const organism1 = new Organism(genome, generation)
+      const organism2 = new Organism(genome, generation, {
+        fitness: 10,
+        adjustedFitness: null,
+      })
       expect(() => organism1.cmp(organism2)).toThrowError(
         'Fitness cannot be null or undefined'
       )
     })
 
     test('should throw error when fitness of second organism is undefined', () => {
-      const organism1 = new Organism(genome, generation, 10)
+      const organism1 = new Organism(genome, generation, {
+        fitness: 10,
+        adjustedFitness: null,
+      })
       const organism2 = new Organism(genome, generation)
       expect(() => organism1.cmp(organism2)).toThrowError(
         'Fitness cannot be null or undefined'
@@ -162,8 +204,14 @@ describe('Organism class', () => {
     })
 
     test('should throw error when fitness of either organism is NaN', () => {
-      const organism1 = new Organism(genome, generation, NaN)
-      const organism2 = new Organism(genome, generation, 10)
+      const organism1 = new Organism(genome, generation, {
+        fitness: NaN,
+        adjustedFitness: null,
+      })
+      const organism2 = new Organism(genome, generation, {
+        fitness: 10,
+        adjustedFitness: null,
+      })
       expect(() => organism1.cmp(organism2)).toThrowError(
         'Fitness cannot be NaN'
       )
@@ -181,7 +229,10 @@ describe('Organism class', () => {
     })
 
     test('should not change fitness, adjustedFitness, or generation after mutation', () => {
-      const organism = new Organism(genome, generation, 20, 30)
+      const organism = new Organism(genome, generation, {
+        fitness: 20,
+        adjustedFitness: 30,
+      })
       const originalFitness = organism.fitness
       const originalAdjustedFitness = organism.adjustedFitness
       const originalGeneration = organism.generation
@@ -210,17 +261,23 @@ describe('Organism class', () => {
       const organism = new Organism(genome, generation)
       const elite = organism.asElite()
       expect(elite.genome).not.toBe(organism.genome)
-      expect(elite.genome).toEqual(organism.genome)
+      expect(elite.genome.toJSON()).toEqual(organism.genome.toJSON())
     })
 
     test('should reset fitness', () => {
-      const organism = new Organism(genome, generation, 42)
+      const organism = new Organism(genome, generation, {
+        fitness: 42,
+        adjustedFitness: null,
+      })
       const elite = organism.asElite()
       expect(elite.fitness).toBeNull()
     })
 
     test('should reset adjusted fitness', () => {
-      const organism = new Organism(genome, generation, null, 42)
+      const organism = new Organism(genome, generation, {
+        fitness: null,
+        adjustedFitness: 42,
+      })
       const elite = organism.asElite()
       expect(elite.adjustedFitness).toBeNull()
     })
@@ -228,12 +285,15 @@ describe('Organism class', () => {
 
   describe('Organism toJSON', () => {
     test('should correctly serialize', () => {
-      const organism = new Organism(genome, generation, 100, 200)
+      const organism = new Organism(genome, generation, {
+        fitness: 100,
+        adjustedFitness: 200,
+      })
       const json = organism.toJSON()
       expect(json.genome).toEqual(genome.toJSON())
-      expect(json.fitness).toBe(100)
-      expect(json.adjustedFitness).toBe(200)
-      expect(json.generation).toBe(0)
+      expect(json.organismState.fitness).toBe(100)
+      expect(json.organismState.adjustedFitness).toBe(200)
+      expect(json.organismState.generation).toBe(0)
     })
   })
 })

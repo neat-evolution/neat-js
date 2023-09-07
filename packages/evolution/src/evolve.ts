@@ -19,7 +19,7 @@ export const evolve = async <
   const startTime = Date.now()
   for (let i = 0; i < iterations; i++) {
     if (i % 10 === 0) {
-      console.log(`Iteration ${i + 1}`)
+      console.log(`Iter: ${i}`)
     }
     const iterationStartTime = Date.now()
     await population.evaluate()
@@ -36,14 +36,24 @@ export const evolve = async <
       break
     }
     if (i % 10 === 0) {
+      const best = population.best() as Organism<any>
+      console.log(`fitness: ${best.fitness ?? 0}`)
+      console.log('genome:')
+      console.log(` hiddenNodes: ${best.genome.hiddenNodes.size}`)
+      console.log(` links: ${best.genome.links.size}`)
       console.log(
-        `fitness: ${(population.best() as Organism<any>).fitness ?? 0}`
+        `Population(species: ${population.species.size}, extinct: ${
+          population.extinctSpecies.size
+        }) ${Array.from(population.species.values())
+          .map((s) => s.organisms.length)
+          .join(' ')})}`
       )
     }
 
     population.evolve()
     if (i % 10 === 0) {
       console.log(`took ${Date.now() - iterationStartTime}ms`)
+      console.log('---')
     }
   }
   console.log(`ended after ${Date.now() - startTime}ms`)

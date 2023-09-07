@@ -35,29 +35,6 @@ export class Organism<G extends Genome<any, any, any, any, any, any, any, G>> {
     )
   }
 
-  // Compare to other organism based on non-adjusted fitness
-  cmp(other: Organism<G>): number {
-    // Handle cases where fitness is null or undefined
-    if (this.fitness == null || other.fitness == null) {
-      throw new Error('Fitness cannot be null or undefined')
-    }
-
-    // Handle NaN cases
-    if (isNaN(this.fitness) || isNaN(other.fitness)) {
-      throw new Error('Fitness cannot be NaN')
-    }
-
-    const difference = this.fitness - other.fitness
-
-    if (difference < 0) {
-      return -1
-    } else if (difference === 0) {
-      return 0
-    } else {
-      return 1
-    }
-  }
-
   // Mutate organism
   mutate(): void {
     this.genome.mutate()
@@ -65,8 +42,7 @@ export class Organism<G extends Genome<any, any, any, any, any, any, any, G>> {
 
   // Genetic distance to other organism
   distance(other: Organism<G>): number {
-    // FIXME: why is distance optional on a genome?
-    return this.genome.distance?.(other.genome) ?? 0
+    return this.genome.distance(other.genome)
   }
 
   // Produce an elite for the next generation
