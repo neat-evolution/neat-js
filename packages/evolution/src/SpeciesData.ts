@@ -17,7 +17,9 @@ export interface SpeciesState {
   offsprings: number
   elites: number
   extinct: boolean
+  /**  When locked new organisms may be added, but the len() and iter() functions will remain unchanged after addition */
   locked: boolean
+  /**  The number of organisms when species was locked */
   lockedOrganisms: number
 }
 

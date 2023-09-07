@@ -132,6 +132,10 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
     }
   }
 
+  getTargetsLength(from: N): number {
+    return this.connectionMap.get(nodeRefToKey(from))?.targets.length ?? 0
+  }
+
   getTargets(from: N): Array<Target<N, E>> {
     return this.connectionMap.get(nodeRefToKey(from))?.targets ?? []
   }

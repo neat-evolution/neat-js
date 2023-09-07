@@ -1,12 +1,13 @@
 import {
-  type NEATConfig,
   defaultNEATConfigOptions,
   NodeType,
-  type NodeData,
   type InitConfig,
   type GenomeData,
-  type Stats,
-  type LinkData,
+  type GenomeDataNodeEntry,
+  type GenomeDataLinkEntry,
+  nodeRefToKey,
+  nodeRefsToLinkKey,
+  type NodeFactoryOptions,
 } from '@neat-js/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
@@ -16,8 +17,8 @@ import { createState } from '../src/createState.js'
 import {
   type DefaultNEATGenome,
   type DefaultNEATGenomeData,
-  type DefaultNEATGenomeFactoryOptions,
 } from '../src/DefaultNEATGenome.js'
+import type { NEATConfig } from '../src/NEATConfig.js'
 import {
   defaultNEATGenomeOptions,
   type NEATGenomeOptions,
@@ -31,14 +32,7 @@ describe('DefaultNEATGenome class', () => {
   let initConfig: InitConfig
   let genomeOptions: NEATGenomeOptions
   let state: NEATState
-  let defaultData: GenomeData<
-    NEATNode,
-    NEATLink,
-    Stats,
-    NEATGenomeOptions,
-    DefaultNEATGenomeFactoryOptions,
-    DefaultNEATGenome
-  >
+  let defaultData: GenomeData<NEATGenomeOptions, DefaultNEATGenome>
 
   let createSeasonedGenome: () => DefaultNEATGenome
 
@@ -55,8 +49,11 @@ describe('DefaultNEATGenome class', () => {
     }
     defaultData = {
       config: configProvider.toJSON(),
-      options: genomeOptions,
       state: state.toJSON(),
+      genomeOptions,
+      hiddenNodes: [],
+      links: [],
+      isSafe: true,
     }
     createSeasonedGenome = () => {
       const options = {
@@ -68,7 +65,7 @@ describe('DefaultNEATGenome class', () => {
         mutateLinkWeightProbability: 0,
       }
       const config = createConfig(options)
-      const genome = createGenome(config, genomeOptions, state)
+      const genome = createGenome(config, state, genomeOptions)
       for (let i = 0; i < 50; i++) {
         genome.mutate()
       }
@@ -78,12 +75,12 @@ describe('DefaultNEATGenome class', () => {
 
   describe('DefaultNEATGenome constructor', () => {
     test('should correctly initialize', () => {
-      const genome = createGenome(configProvider, genomeOptions, state)
+      const genome = createGenome(configProvider, state, genomeOptions)
       expect(genome).toBeDefined()
     })
 
     test('should properly initialize with default values', () => {
-      const genome = createGenome(configProvider, genomeOptions, state)
+      const genome = createGenome(configProvider, state, genomeOptions)
 
       expect(genome.inputs.size).toBe(genomeOptions.inputs)
       expect(genome.outputs.size).toBe(genomeOptions.outputs)
@@ -92,36 +89,27 @@ describe('DefaultNEATGenome class', () => {
     })
 
     describe('DefaultNEATGenome toJSON', () => {
-      let inputNode: NodeData<null, null>
-      let node1: NodeData<null, null>
-      let outputNode: NodeData<null, null>
-      let hiddenNodes: Array<NodeData<null, null>>
-      let links: Array<LinkData<null, null>>
+      let inputNode: NodeFactoryOptions<null, null>
+      let node1: NodeFactoryOptions<null, null>
+      let outputNode: NodeFactoryOptions<null, null>
+      let hiddenNodes: Array<GenomeDataNodeEntry<DefaultNEATGenome>>
+      let links: Array<GenomeDataLinkEntry<DefaultNEATGenome>>
       let data: DefaultNEATGenomeData
 
       beforeEach(() => {
-        inputNode = { id: 0, type: NodeType.Input, config: null, state: null }
-        node1 = { id: 1, type: NodeType.Hidden, config: null, state: null }
-        outputNode = { id: 2, type: NodeType.Output, config: null, state: null }
-        hiddenNodes = [node1]
-        // FIXME: these links are garbage
+        inputNode = { id: 0, type: NodeType.Input }
+        node1 = { id: 1, type: NodeType.Hidden }
+        outputNode = { id: 0, type: NodeType.Output }
+        hiddenNodes = [[nodeRefToKey(node1), node1]]
         links = [
-          {
-            from: inputNode,
-            to: node1,
-            weight: 1,
-            innovation: 1,
-            config: null,
-            state: null,
-          },
-          {
-            from: node1,
-            to: outputNode,
-            weight: 1,
-            innovation: 1,
-            config: null,
-            state: null,
-          },
+          [
+            nodeRefsToLinkKey(inputNode, node1),
+            [nodeRefToKey(inputNode), nodeRefToKey(node1), 1, 1],
+          ],
+          [
+            nodeRefsToLinkKey(node1, outputNode),
+            [nodeRefToKey(node1), nodeRefToKey(outputNode), 1, 1],
+          ],
         ]
         data = {
           ...defaultData,
@@ -132,20 +120,20 @@ describe('DefaultNEATGenome class', () => {
       })
 
       test('should properly hydrate from given data', () => {
-        const genome = createGenome(configProvider, genomeOptions, state, data)
+        const genome = createGenome(configProvider, state, genomeOptions, data)
         expect(genome.hiddenNodes.size).toBe(data.hiddenNodes.length)
         expect(genome.links.size).toBe(data.links.length)
       })
       test('should match exported data after hydrating', () => {
-        const genome = createGenome(configProvider, genomeOptions, state, data)
+        const genome = createGenome(configProvider, state, genomeOptions, data)
         expect(genome.toJSON()).toEqual(data)
       })
     })
   })
 
   describe('mutationAddLink', () => {
-    let hiddenNodes: Array<NodeData<null, null>>
-    let links: Array<LinkData<null, null>>
+    let hiddenNodes: Array<GenomeDataNodeEntry<DefaultNEATGenome>>
+    let links: Array<GenomeDataLinkEntry<DefaultNEATGenome>>
     let data: DefaultNEATGenomeData
 
     beforeEach(() => {
@@ -159,7 +147,7 @@ describe('DefaultNEATGenome class', () => {
     })
     test('should add a new link with fresh genome', () => {
       // Arrange
-      const genome = createGenome(configProvider, genomeOptions, state)
+      const genome = createGenome(configProvider, state, genomeOptions)
 
       // Act
       genome.mutationAddLink()
@@ -177,7 +165,7 @@ describe('DefaultNEATGenome class', () => {
 
     test('should correctly generate and assign innovation numbers', () => {
       // Arrange
-      const genome = createGenome(configProvider, genomeOptions, state)
+      const genome = createGenome(configProvider, state, genomeOptions)
 
       // Act
       genome.mutationAddLink()
@@ -190,7 +178,7 @@ describe('DefaultNEATGenome class', () => {
     describe('mutationAddNode', () => {
       test('should add a new node with fresh genome', () => {
         // Arrange
-        const genome = createGenome(configProvider, genomeOptions, state)
+        const genome = createGenome(configProvider, state, genomeOptions)
 
         // Act
         genome.mutationAddLink()
@@ -212,7 +200,7 @@ describe('DefaultNEATGenome class', () => {
 
       test('should correctly configure links, hiddenNodes and connections', () => {
         // Arrange
-        const genome = createGenome(configProvider, genomeOptions, state)
+        const genome = createGenome(configProvider, state, genomeOptions)
 
         // Act
         genome.mutationAddLink()
@@ -248,8 +236,8 @@ describe('DefaultNEATGenome class', () => {
         // expect(Array.from(genome.hiddenNodes.entries())).toEqual([
         //   ['Hidden[0]', { type: 'Hidden', id: 0, config: null, state: null }],
         // ]);
-        expect(Array.from(genome.connections.getAllNodes())).toHaveLength(3)
-        // expect(Array.from(genome.connections.getAllNodes())).toEqual([
+        expect(Array.from(genome.connections.nodes())).toHaveLength(3)
+        // expect(Array.from(genome.connections.nodes())).toEqual([
         //   {
         //     config: null,
         //     id: 0,
@@ -273,7 +261,7 @@ describe('DefaultNEATGenome class', () => {
 
       test('should correctly generate and assign innovation numbers', () => {
         // Arrange
-        const genome = createGenome(configProvider, genomeOptions, state)
+        const genome = createGenome(configProvider, state, genomeOptions)
 
         // Act
         genome.mutationAddLink()
@@ -288,7 +276,7 @@ describe('DefaultNEATGenome class', () => {
     describe('mutationRemoveNode', () => {
       test('should remove a new node with fresh genome', () => {
         // Arrange
-        const genome = createGenome(configProvider, genomeOptions, state)
+        const genome = createGenome(configProvider, state, genomeOptions)
 
         // Act
         genome.mutationAddLink()
@@ -298,12 +286,12 @@ describe('DefaultNEATGenome class', () => {
         // Assert
         expect(Array.from(genome.links.entries())).toEqual([])
         expect(Array.from(genome.hiddenNodes.entries())).toEqual([])
-        expect(Array.from(genome.connections.getAllNodes())).toEqual([])
+        expect(Array.from(genome.connections.nodes())).toEqual([])
       })
 
       test('should correctly generate and assign innovation numbers', () => {
         // Arrange
-        const genome = createGenome(configProvider, genomeOptions, state)
+        const genome = createGenome(configProvider, state, genomeOptions)
 
         // Act
         genome.mutationAddLink()
@@ -319,7 +307,7 @@ describe('DefaultNEATGenome class', () => {
     describe('mutationRemoveLink', () => {
       test('should remove a link from a fresh genome', () => {
         // Arrange
-        const genome = createGenome(configProvider, genomeOptions, state)
+        const genome = createGenome(configProvider, state, genomeOptions)
 
         // Act
         genome.mutationAddLink()
@@ -331,7 +319,7 @@ describe('DefaultNEATGenome class', () => {
 
       test('should correctly generate and assign innovation numbers', () => {
         // Arrange
-        const genome = createGenome(configProvider, genomeOptions, state)
+        const genome = createGenome(configProvider, state, genomeOptions)
 
         // Act
         genome.mutationAddLink()
@@ -361,8 +349,8 @@ describe('DefaultNEATGenome class', () => {
 
   describe('DefaultNEATGenome distance function', () => {
     test('should return zero for identical genomes', () => {
-      const genome1 = createGenome(configProvider, genomeOptions, state)
-      const genome2 = createGenome(configProvider, genomeOptions, state)
+      const genome1 = createGenome(configProvider, state, genomeOptions)
+      const genome2 = createGenome(configProvider, state, genomeOptions)
       expect(genome1.distance(genome2)).toBe(0)
     })
 

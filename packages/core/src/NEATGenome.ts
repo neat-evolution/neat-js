@@ -17,7 +17,34 @@ import { NodeType, type NodeRef } from './node/NodeData.js'
 import type { NodeFactory } from './node/NodeFactory.js'
 import { nodeRefToKey, type NodeKey } from './node/nodeRefToKey.js'
 import type { State } from './state/State.js'
+import { createRNG } from './utils/rand.js'
 import { shuffle } from './utils/shuffle.js'
+
+/**
+ * Trying to replicate Vec::binary_search from Rust.
+ * Example: let source_index = wheel.binary_search(&val).unwrap_or_else(|x| x);
+ * @param {number[]} arr Array to search
+ * @param {number} val The value to search for
+ * @returns {number} The index of the value if found, or the index where the value should be inserted
+ */
+function binarySearchOrInsertIndex(arr: number[], val: number): number {
+  let left = 0
+  let right = arr.length - 1
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2)
+
+    if (arr[mid] === val) {
+      return mid
+    } else if ((arr[mid] as number) < val) {
+      left = mid + 1
+    } else {
+      right = mid - 1
+    }
+  }
+
+  return left
+}
 
 // FIXME: rename to CoreGenome
 export class NEATGenome<
@@ -134,24 +161,25 @@ export class NEATGenome<
 
   mutate(): void {
     const neatConfig = this.config.neat()
+    const rng = createRNG()
 
-    if (Math.random() < neatConfig.addNodeProbability) {
+    if (rng.gen() < neatConfig.addNodeProbability) {
       this.mutationAddNode()
     }
 
-    if (Math.random() < neatConfig.addLinkProbability) {
+    if (rng.gen() < neatConfig.addLinkProbability) {
       this.mutationAddLink()
     }
 
-    if (Math.random() < neatConfig.removeLinkProbability) {
+    if (rng.gen() < neatConfig.removeLinkProbability) {
       this.mutationRemoveLink()
     }
 
-    if (Math.random() < neatConfig.removeNodeProbability) {
+    if (rng.gen() < neatConfig.removeNodeProbability) {
       this.mutationRemoveNode()
     }
 
-    if (Math.random() < neatConfig.mutateLinkWeightProbability) {
+    if (rng.gen() < neatConfig.mutateLinkWeightProbability) {
       this.mutateLinkWeight()
     }
   }
@@ -192,44 +220,44 @@ export class NEATGenome<
       nodeCount += this.inputs.size + this.outputs.size
     }
 
-    for (const nodeRef of other.hiddenNodes.keys()) {
-      if (!this.hiddenNodes.has(nodeRef)) {
+    for (const nodeKey of other.hiddenNodes.keys()) {
+      if (!this.hiddenNodes.has(nodeKey)) {
         nodeDifferences++
       }
     }
 
     if (!neatConfig.onlyHiddenNodeDistance) {
-      for (const nodeRef of other.inputs.keys()) {
-        if (!this.inputs.has(nodeRef)) {
+      for (const nodeKey of other.inputs.keys()) {
+        if (!this.inputs.has(nodeKey)) {
           nodeDifferences++
         }
       }
-      for (const nodeRef of other.outputs.keys()) {
-        if (!this.outputs.has(nodeRef)) {
+      for (const nodeKey of other.outputs.keys()) {
+        if (!this.outputs.has(nodeKey)) {
           nodeDifferences++
         }
       }
     }
 
-    for (const [nodeRef, node] of this.hiddenNodes.entries()) {
-      if (other.hiddenNodes.has(nodeRef)) {
-        nodeDistance += node.distance(other.hiddenNodes.get(nodeRef) as N)
+    for (const [nodeKey, node] of this.hiddenNodes.entries()) {
+      if (other.hiddenNodes.has(nodeKey)) {
+        nodeDistance += node.distance(other.hiddenNodes.get(nodeKey) as N)
       } else {
         nodeDifferences++
       }
     }
 
     if (!neatConfig.onlyHiddenNodeDistance) {
-      for (const [nodeRef, node] of this.inputs.entries()) {
-        if (other.inputs.has(nodeRef)) {
-          nodeDistance += node.distance(other.inputs.get(nodeRef) as N)
+      for (const [nodeKey, node] of this.inputs.entries()) {
+        if (other.inputs.has(nodeKey)) {
+          nodeDistance += node.distance(other.inputs.get(nodeKey) as N)
         } else {
           nodeDifferences++
         }
       }
-      for (const [nodeRef, node] of this.outputs.entries()) {
-        if (other.outputs.has(nodeRef)) {
-          nodeDistance += node.distance(other.outputs.get(nodeRef) as N)
+      for (const [nodeKey, node] of this.outputs.entries()) {
+        if (other.outputs.has(nodeKey)) {
+          nodeDistance += node.distance(other.outputs.get(nodeKey) as N)
         } else {
           nodeDifferences++
         }
@@ -253,9 +281,9 @@ export class NEATGenome<
       fitness > otherFitness ? [this, other] : [other, this]
 
     const genome = this.createGenome(
-      parent1.config,
-      parent1.state,
-      parent1.genomeOptions
+      this.config,
+      this.state,
+      this.genomeOptions
     )
 
     // Copy links only in fitter parent, perform crossover if in both parents
@@ -263,9 +291,9 @@ export class NEATGenome<
       if (parent2.links.has(linkRef)) {
         const link2 = parent2.links.get(linkRef) as L
         const newLink = link.crossover(link2, fitness, otherFitness)
-        genome.insertLink(newLink, true)
+        genome.insertLink(newLink, false)
       } else {
-        genome.insertLink(link, false)
+        genome.insertLink(link.clone(), false)
       }
     }
 
@@ -390,6 +418,7 @@ export class NEATGenome<
       )
     )
 
+    // FIXME: why?
     const link2 = link.cloneWith(
       this.createLink(
         link2Details[0],
@@ -415,39 +444,49 @@ export class NEATGenome<
   }
 
   mutateLinkWeight(): void {
+    if (this.links.size === 0) {
+      return
+    }
     const neatConfig = this.config.neat()
+    const rng = createRNG()
 
     if (neatConfig.mutateOnlyOneLink) {
-      if (this.links.size !== 0) {
-        const linkIndices = Array.from(this.links.keys())
-        const randomIndex = Math.floor(Math.random() * linkIndices.length)
-        const linkKey = linkIndices[randomIndex] as string
-        const link = this.links.get(linkKey)
-
-        if (link != null) {
+      const linkIndex = rng.genRange(0, this.links.size)
+      let i = 0
+      for (const link of this.links.values()) {
+        if (i === linkIndex) {
           link.weight +=
-            (Math.random() - 0.5) * 2 * neatConfig.mutateLinkWeightSize
+            (rng.gen() - 0.5) * 2.0 * neatConfig.mutateLinkWeightSize
+          break
         }
+        i++
       }
     } else {
       for (const link of this.links.values()) {
-        link.weight +=
-          (Math.random() - 0.5) * 2 * neatConfig.mutateLinkWeightSize
+        link.weight += (rng.gen() - 0.5) * 2 * neatConfig.mutateLinkWeightSize
       }
     }
   }
 
   mutationAddNode(): void {
+    if (this.links.size === 0) {
+      return
+    }
     for (let i = 0; i < 50; i++) {
-      const linkKeys = Array.from(this.links.keys())
-      const randomIndex = Math.floor(Math.random() * linkKeys.length)
-      const linkKey = linkKeys[randomIndex]
-
-      if (linkKey == null) {
-        continue
+      const linkIndex = createRNG().genRange(0, this.links.size)
+      let i = 0
+      let link: L | null = null
+      for (const l of this.links.values()) {
+        if (i === linkIndex) {
+          link = l
+          break
+        }
+        i++
+      }
+      if (link === null) {
+        throw new Error('Unable to find link')
       }
 
-      const link = this.links.get(linkKey) as L
       const innovation = this.state.neat().getSplitInnovation(link.innovation)
 
       const newNodeRef = { type: NodeType.Hidden, id: innovation.nodeNumber }
@@ -455,22 +494,19 @@ export class NEATGenome<
       const linkToKey = nodeRefsToLinkKey(newNodeRef, link.to)
 
       if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
-        if (link.to == null || link.from == null) {
-          throw new Error('linkToKey includes undefined')
-        }
         this.splitLink(
           link.from,
           link.to,
           innovation.nodeNumber,
           innovation.innovationNumber
         )
-
         break
       }
     }
   }
 
   mutationAddLink(): void {
+    const rng = createRNG()
     // Select random source and target nodes for new link
     const numSources = this.inputs.size + this.hiddenNodes.size
     const numTargets = this.hiddenNodes.size + this.outputs.size
@@ -481,47 +517,38 @@ export class NEATGenome<
 
     const sourceNodes: N[] = []
     const sourceWeights: number[] = []
-
-    for (const node of this.inputs.values()) {
-      sourceNodes.push(node)
-      sourceWeights.push(numTargets - this.connections.getTargets(node).length)
+    const wheel: number[] = []
+    for (const nodeMap of [this.inputs, this.hiddenNodes]) {
+      for (const node of nodeMap.values()) {
+        sourceNodes.push(node)
+        const weight = numTargets - this.connections.getTargetsLength(node)
+        sourceWeights.push(weight)
+        wheel.push((wheel[wheel.length - 1] ?? 0) + weight)
+      }
     }
 
-    for (const node of this.hiddenNodes.values()) {
-      sourceNodes.push(node)
-      sourceWeights.push(numTargets - this.connections.getTargets(node).length)
-    }
-
-    const wheel: number[] = [sourceWeights[0] as number]
-    for (let i = 1; i < sourceWeights.length; i++) {
-      wheel.push((wheel[i - 1] as number) + (sourceWeights[i] as number))
-    }
+    const lastWheelValue = wheel[wheel.length - 1] as number
 
     // Network is fully saturated with links
-    if ((wheel[wheel.length - 1] as number) <= 0) {
+    if (lastWheelValue <= 0) {
       return
     }
 
-    const val =
-      Math.floor(Math.random() * (wheel[wheel.length - 1] as number)) + 1
-    const sourceIndex = wheel.findIndex((w) => w >= val)
+    const val = rng.genRange(1, lastWheelValue + 1)
+    const sourceIndex = binarySearchOrInsertIndex(wheel, val)
     const source = sourceNodes[sourceIndex] as N
 
     const targetNodes: N[] = []
 
-    for (const node of this.hiddenNodes.values()) {
-      if (!this.links.has(nodeRefsToLinkKey(source, node))) {
-        targetNodes.push(node)
+    for (const nodeMap of [this.hiddenNodes, this.outputs]) {
+      for (const node of nodeMap.values()) {
+        if (!this.links.has(nodeRefsToLinkKey(source, node))) {
+          targetNodes.push(node)
+        }
       }
     }
 
-    for (const node of this.outputs.values()) {
-      if (!this.links.has(nodeRefsToLinkKey(source, node))) {
-        targetNodes.push(node)
-      }
-    }
-
-    shuffle(targetNodes)
+    shuffle(targetNodes, createRNG())
 
     // Try to create link with potential target nodes in random order
     for (const target of targetNodes) {
@@ -530,7 +557,7 @@ export class NEATGenome<
           .neat()
           .getConnectInnovation(source, target)
         const weight =
-          (Math.random() - 0.5) * 2.0 * this.config.neat().initialLinkWeightSize
+          (rng.gen() - 0.5) * 2.0 * this.config.neat().initialLinkWeightSize
 
         const link = this.createLink(
           source,
@@ -548,32 +575,41 @@ export class NEATGenome<
   }
 
   mutationRemoveLink(): void {
-    const linkRefs = Array.from(this.links.keys())
+    if (this.links.size === 0) {
+      return
+    }
 
-    if (linkRefs.length > 0) {
-      const randomIndex = Math.floor(Math.random() * linkRefs.length)
-      const selectedLinkRef = linkRefs[randomIndex] as string
-      const link = this.links.get(selectedLinkRef) as L
-      this.links.delete(selectedLinkRef)
-      this.connections.delete(link.from, link.to)
+    const randomIndex = createRNG().genRange(0, this.links.size)
+    let currentIndex = 0
+
+    for (const [linkRef, link] of this.links.entries()) {
+      if (currentIndex === randomIndex) {
+        this.links.delete(linkRef)
+        this.connections.delete(link.from, link.to)
+        break
+      }
+      currentIndex++
     }
   }
 
   mutationRemoveNode(): void {
-    const nodeRefs = Array.from(this.hiddenNodes.keys())
+    if (this.hiddenNodes.size === 0) {
+      return
+    }
 
-    if (nodeRefs.length > 0) {
-      const randomIndex = Math.floor(Math.random() * nodeRefs.length)
-      const selectedNodeRef = nodeRefs[randomIndex] as string
-      const node = this.hiddenNodes.get(selectedNodeRef) as N
-      this.hiddenNodes.delete(selectedNodeRef)
+    const randomIndex = createRNG().genRange(0, this.hiddenNodes.size)
+    let currentIndex = 0
 
-      const connectionsToRemove = this.connections.deleteNode(node)
+    for (const [nodeRef, node] of this.hiddenNodes.entries()) {
+      if (currentIndex === randomIndex) {
+        this.hiddenNodes.delete(nodeRef)
 
-      for (const connection of connectionsToRemove) {
-        const linkKey = nodeRefsToLinkKey(connection[0], connection[1])
-        this.links.delete(linkKey)
+        for (const connection of this.connections.deleteNode(node)) {
+          this.links.delete(nodeRefsToLinkKey(connection[0], connection[1]))
+        }
+        break
       }
+      currentIndex++
     }
   }
 
@@ -594,7 +630,6 @@ export class NEATGenome<
       ],
     ])
 
-    // FIXME: how to get this typed correctly?
     return {
       config: this.config.toJSON(),
       state: this.state.toJSON(),
