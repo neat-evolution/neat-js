@@ -7,10 +7,10 @@ import {
   type NodeExtension,
   type LinkExtension,
   type StateProvider,
-  createRNG,
 } from '@neat-js/core'
 import type { Evaluator } from '@neat-js/evaluator'
 import type { PhenotypeData } from '@neat-js/phenotype'
+import { threadRNG } from '@neat-js/utils'
 
 import type { Algorithm } from './Algorithm.js'
 import { Organism } from './Organism.js'
@@ -292,7 +292,7 @@ export class Population<
     }
 
     // Evolve species
-    const rng = createRNG()
+    const rng = threadRNG()
     for (const i of speciesIds) {
       const species = this.species.get(i) as Species<GO, GD, G>
       const reproductions = Math.floor(species.offsprings)
@@ -379,7 +379,7 @@ export class Population<
     if (len === 0) {
       return null
     } else {
-      const randomIndex = createRNG().genRange(0, len)
+      const randomIndex = threadRNG().genRange(0, len)
       let i = 0
       for (const organism of this.organismValues()) {
         if (i === randomIndex) {
@@ -482,7 +482,7 @@ export class Population<
       speciesData.push([id, toPopulationDataSpecies(species)])
     }
     const extinctSpeciesData: Array<PopulationDataSpeciesEntry<GO, GD, G>> = []
-    for (const [id, species] of this.species.entries()) {
+    for (const [id, species] of this.extinctSpecies.entries()) {
       extinctSpeciesData.push([id, toPopulationDataSpecies(species)])
     }
     return {

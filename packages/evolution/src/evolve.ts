@@ -46,7 +46,7 @@ export const evolve = async <
           population.extinctSpecies.size
         }) ${Array.from(population.species.values())
           .map((s) => s.organisms.length)
-          .join(' ')})}`
+          .join(' ')}`
       )
     }
 
