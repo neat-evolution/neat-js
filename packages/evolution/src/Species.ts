@@ -1,9 +1,5 @@
-import {
-  createRNG,
-  type Genome,
-  type GenomeData,
-  type GenomeOptions,
-} from '@neat-js/core'
+import { type Genome, type GenomeData, type GenomeOptions } from '@neat-js/core'
+import { threadRNG } from '@neat-js/utils'
 
 import { type Organism } from './Organism.js'
 import type { SpeciesData, SpeciesState } from './SpeciesData.js'
@@ -127,7 +123,7 @@ export class Species<
 
   /// Get random organism. Adheres to lock.
   randomOrganism(): Organism<G> | null {
-    const randomIndex = createRNG().genRange(0, this.size)
+    const randomIndex = threadRNG().genRange(0, this.size)
     let i = 0
     for (const organism of this.organismValues()) {
       if (i === randomIndex) {
