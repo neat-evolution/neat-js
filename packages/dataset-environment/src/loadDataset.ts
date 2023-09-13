@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs'
 
-import { createRNG, shuffle } from '@neat-js/core'
+import { createRNG, shuffle } from '@neat-js/utils'
 
 import type { Dataset } from './Dataset.js'
 import type { DatasetOptions } from './DatasetOptions.js'

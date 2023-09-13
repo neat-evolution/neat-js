@@ -26,6 +26,7 @@ export const demo = async (createEvaluator: EvaluatorFactory<null>) => {
 
   const evolutionOptions: EvolutionOptions = {
     ...defaultEvolutionOptions,
+    iterations: 500,
     secondsLimit: 60,
   }
   const best = await neat(evaluator, evolutionOptions)
