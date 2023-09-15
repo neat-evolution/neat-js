@@ -135,7 +135,9 @@ export class Species<
   }
 
   adjustFitness(): void {
-    if (this.speciesState.locked) throw new Error('Species is locked.')
+    if (this.speciesState.locked) {
+      throw new Error('Species is locked.')
+    }
 
     const isStagnant =
       this.speciesState.currentAge - this.speciesState.lastImprovement >
@@ -144,19 +146,26 @@ export class Species<
       this.speciesState.currentAge < this.speciesOptions.youngAgeLimit
     const size = this.organisms.length
 
-    for (const organism of this.organisms) {
-      let adjustedFitness = organism.fitness ?? 0
+    for (const organism of this.organisms.values()) {
+      let adjustedFitness = organism.fitness
+      if (adjustedFitness == null) {
+        throw new Error('Organism fitness is null')
+      }
 
+      // Greatly penalize stagnant species
       if (isStagnant) {
         adjustedFitness *= this.speciesOptions.stagnantSpeciesFitnessMultiplier
       }
 
+      // Boost young species
       if (isYoung) {
         adjustedFitness *= this.speciesOptions.youngSpeciesFitnessMultiplier
       }
 
+      // Share fitness within species
       adjustedFitness /= size
 
+      // Avoid zero fitness
       if (adjustedFitness <= 0.0 || !isFinite(adjustedFitness)) {
         adjustedFitness = 0.0001
       }
@@ -172,6 +181,7 @@ export class Species<
       return compare
     })
 
+    // Update best fitness and last improvement if currently best in lifetime
     this.speciesState.bestFitness = this.organisms[0]?.fitness ?? 0.0
     if (this.speciesState.bestFitness > this.speciesState.lifetimeBestFitness) {
       this.speciesState.lifetimeBestFitness = this.speciesState.bestFitness
@@ -224,13 +234,17 @@ export class Species<
   }
 
   calculateOffsprings(avgFitness: number): void {
-    if (this.speciesState.locked) throw new Error('Species is locked.')
-
-    let sum = 0
-    for (const organism of this.organisms) {
-      sum += (organism.adjustedFitness ?? 0) / avgFitness
+    if (this.speciesState.locked) {
+      throw new Error('Species is locked.')
     }
-    this.speciesState.offsprings = sum
+
+    this.speciesState.offsprings = 0
+    for (const organism of this.organisms) {
+      if (organism.adjustedFitness == null) {
+        throw new Error('Organism adjusted fitness is null')
+      }
+      this.speciesState.offsprings += organism.adjustedFitness / avgFitness
+    }
 
     this.speciesState.elites = this.speciesOptions.guaranteedElites
   }

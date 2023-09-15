@@ -27,23 +27,28 @@ import type { State } from './state/State.js'
  * @param {number} val The value to search for
  * @returns {number} The index of the value if found, or the index where the value should be inserted
  */
-function binarySearchOrInsertIndex(arr: number[], val: number): number {
+export const binarySearchFirst = <T>(arr: T[], val: T): number => {
   let left = 0
   let right = arr.length - 1
+  let result: number | null = null
 
   while (left <= right) {
     const mid = Math.floor((left + right) / 2)
-
-    if (arr[mid] === val) {
-      return mid
-    } else if ((arr[mid] as number) < val) {
+    if ((arr[mid] as T) < val) {
       left = mid + 1
     } else {
       right = mid - 1
+      if (arr[mid] === val) {
+        result = mid
+      }
     }
   }
 
-  return left
+  if (result !== null) {
+    return result
+  } else {
+    return left
+  }
 }
 
 // FIXME: rename to CoreGenome
@@ -197,21 +202,24 @@ export class NEATGenome<
       }
     }
 
-    linkCount += linkDifferences // Count is number of links in A + links in B that are not in A
+    linkCount += linkDifferences // Count is the number of links in A + links in B that are not in A
 
-    for (const linkRef of this.links.keys()) {
-      if (other.links.has(linkRef)) {
-        // Distance normalized between 0 and 1
-        linkDistance += (this.links.get(linkRef) as L).distance(
-          other.links.get(linkRef) as L
-        )
+    // Iterate through the entries of `this.links`
+    for (const [linkRef, link] of this.links.entries()) {
+      const link2 = other.links.get(linkRef)
+      if (link2 !== undefined) {
+        linkDistance += link.distance(link2) // Distance normalized between 0 and 1
       } else {
         linkDifferences++
       }
     }
 
-    const linkDist =
-      linkCount === 0 ? 0 : (linkDifferences + linkDistance) / linkCount
+    let linkDist: number
+    if (linkCount === 0.0) {
+      linkDist = 0.0
+    } else {
+      linkDist = (linkDifferences + linkDistance) / linkCount
+    }
 
     // Same process for nodes
     let nodeDifferences = 0
@@ -242,33 +250,40 @@ export class NEATGenome<
     }
     nodeCount += nodeDifferences
 
-    for (const [nodeKey, node] of this.hiddenNodes.entries()) {
-      if (other.hiddenNodes.has(nodeKey)) {
-        nodeDistance += node.distance(other.hiddenNodes.get(nodeKey) as N)
+    for (const [nodeRef, node] of this.hiddenNodes.entries()) {
+      const node2 = other.hiddenNodes.get(nodeRef)
+      if (node2 !== undefined) {
+        nodeDistance += node.distance(node2)
       } else {
         nodeDifferences++
       }
     }
 
     if (!neatConfig.onlyHiddenNodeDistance) {
-      for (const [nodeKey, node] of this.inputs.entries()) {
-        if (other.inputs.has(nodeKey)) {
-          nodeDistance += node.distance(other.inputs.get(nodeKey) as N)
+      for (const [nodeRef, node] of this.inputs.entries()) {
+        const node2 = other.inputs.get(nodeRef)
+        if (node2 !== undefined) {
+          nodeDistance += node.distance(node2)
         } else {
           nodeDifferences++
         }
       }
-      for (const [nodeKey, node] of this.outputs.entries()) {
-        if (other.outputs.has(nodeKey)) {
-          nodeDistance += node.distance(other.outputs.get(nodeKey) as N)
+      for (const [nodeRef, node] of this.outputs.entries()) {
+        const node2 = other.outputs.get(nodeRef)
+        if (node2 !== undefined) {
+          nodeDistance += node.distance(node2)
         } else {
           nodeDifferences++
         }
       }
     }
 
-    const nodeDist =
-      nodeCount === 0 ? 0 : (nodeDifferences + nodeDistance) / nodeCount
+    let nodeDist: number
+    if (nodeCount === 0.0) {
+      nodeDist = 0.0
+    } else {
+      nodeDist = (nodeDifferences + nodeDistance) / nodeCount
+    }
 
     return (
       neatConfig.linkDistanceWeight * linkDist +
@@ -538,7 +553,7 @@ export class NEATGenome<
     }
 
     const val = rng.genRange(1, lastWheelValue + 1)
-    const sourceIndex = binarySearchOrInsertIndex(wheel, val)
+    const sourceIndex = binarySearchFirst(wheel, val)
     const source = sourceNodes[sourceIndex] as N
 
     const targetNodes: N[] = []
