@@ -9,7 +9,7 @@ import {
   type StateProvider,
 } from '@neat-js/core'
 import type { Evaluator } from '@neat-js/evaluator'
-import type { PhenotypeData } from '@neat-js/phenotype'
+import { type PhenotypeData } from '@neat-js/phenotype'
 import { threadRNG } from '@neat-js/utils'
 
 import type { Algorithm } from './Algorithm.js'
@@ -209,7 +209,6 @@ export class Population<
       const aValue = 1.0 - (speciesA.offsprings % 1.0)
       const bValue = 1.0 - (speciesB.offsprings % 1.0)
       const compare = aValue < bValue ? -1 : aValue > bValue ? 1 : 0
-      // FIXME: sorting by ascending or descending doesn't seem to matter
       return compare
     })
 

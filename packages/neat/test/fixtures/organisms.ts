@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
 
-import { Organism } from '@neat-js/evolution'
+import { Organism, type OrganismData } from '@neat-js/evolution'
 
 import {
   type DefaultNEATGenome,
@@ -17,15 +17,31 @@ const readJSONFile = async (filePath: string) => {
   return JSON.parse(fileContent)
 }
 
-export const organismAData = await readJSONFile('./organismA.json')
-export const organismBData = await readJSONFile('./organismB.json')
+export const organismAData: OrganismData<DefaultNEATGenome> =
+  await readJSONFile('./organism-a.json')
+export const organismBData: OrganismData<DefaultNEATGenome> =
+  await readJSONFile('./organism-b.json')
+export const organismCData: OrganismData<DefaultNEATGenome> =
+  await readJSONFile('./organism-c.json')
+export const organismDData: OrganismData<DefaultNEATGenome> =
+  await readJSONFile('./organism-d.json')
 
-export const createOrganisms = (): [
-  a: Organism<DefaultNEATGenome>,
-  b: Organism<DefaultNEATGenome>
-] => {
+const sets: Array<
+  [a: OrganismData<DefaultNEATGenome>, b: OrganismData<DefaultNEATGenome>]
+> = [
+  [organismAData, organismBData],
+  [organismCData, organismDData],
+]
+
+export const createOrganisms = (
+  setIndex: number = 0
+): [a: Organism<DefaultNEATGenome>, b: Organism<DefaultNEATGenome>] => {
   const organisms: Array<Organism<DefaultNEATGenome>> = []
-  for (const organismData of [organismAData, organismBData]) {
+  const set = sets[setIndex] as [
+    a: OrganismData<DefaultNEATGenome>,
+    b: OrganismData<DefaultNEATGenome>
+  ]
+  for (const organismData of set) {
     const {
       genome: {
         config: configOptions,
