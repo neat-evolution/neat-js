@@ -1,11 +1,11 @@
 import type { Executor, ExecutorFactory } from '@neat-js/executor'
 import { type Phenotype } from '@neat-js/phenotype'
 import * as tf from '@tensorflow/tfjs-node'
-// import '@tensorflow/tfjs-backend-wasm'
+import '@tensorflow/tfjs-backend-wasm'
 
 import { PhenotypeLayer } from './PhenotypeLayer.js'
 
-// await tf.setBackend('wasm')
+await tf.setBackend('wasm')
 await tf.ready()
 
 export const createExecutor: ExecutorFactory = (
