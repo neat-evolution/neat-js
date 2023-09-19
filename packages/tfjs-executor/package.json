@@ -57,9 +57,7 @@
   "devDependencies": {
     "@heygrady/eslint-config": "^1.5.0",
     "@heygrady/tsconfig-bases": "^1.0.5",
-    "@neat-js/evolution": "^0.0.1",
     "@neat-js/gpujs-executor": "^0.0.1",
-    "@neat-js/neat": "^0.0.1",
     "@rushstack/eslint-patch": "^1.3.3",
     "@swc/cli": "^0.1.62",
     "@swc/core": "^1.3.80",
