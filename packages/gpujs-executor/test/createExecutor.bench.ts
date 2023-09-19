@@ -1,14 +1,11 @@
 import { createExecutor as createVanillaExecutor } from '@neat-js/executor'
-import { createPhenotype } from '@neat-js/neat'
 import { bench, describe, expect } from 'vitest'
 
 import { createExecutor } from '../src/index.js'
 
 import { data } from './fixtures/irisInputs.js'
-import { createOrganism } from './fixtures/organisms.js'
+import { phenotype } from './fixtures/phenotype.js'
 
-const organism = createOrganism()
-const phenotype = createPhenotype(organism.genome)
 const executor = createExecutor(phenotype, data.length)
 const vanillaExecutor = createVanillaExecutor(phenotype, data.length)
 
