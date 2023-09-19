@@ -41,7 +41,7 @@ async function handleEvaluate(serializedPhenotypeData: EvaluatePayload) {
   }
   const [speciesIndex, organismIndex, phenotype] =
     phenotypeDataFromSharedBuffer(serializedPhenotypeData)
-  const executor: Executor = createExecutor(phenotype)
+  const executor: Executor = createExecutor(phenotype, environment.batchSize)
 
   const fitness = await environment.evaluate(executor)
   const fitnessData: FitnessData = [speciesIndex, organismIndex, fitness]
