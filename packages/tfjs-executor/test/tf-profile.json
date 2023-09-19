@@ -1,0 +1,1060 @@
+{
+  "newBytes": 0,
+  "newTensors": 0,
+  "peakBytes": 348,
+  "kernels": [
+    {
+      "name": "Slice",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 56,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 11,
+      "inputShapes": [
+        [
+          1,
+          4
+        ]
+      ],
+      "outputShapes": [
+        [
+          1,
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.6520590782165527,
+      "extraInfo": ""
+    },
+    {
+      "name": "Reshape",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 60,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 12,
+      "inputShapes": [
+        [
+          1,
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.14098072052001953,
+      "extraInfo": ""
+    },
+    {
+      "name": "Slice",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 64,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 13,
+      "inputShapes": [
+        [
+          1,
+          4
+        ]
+      ],
+      "outputShapes": [
+        [
+          1,
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.050642967224121094,
+      "extraInfo": ""
+    },
+    {
+      "name": "Reshape",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 68,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 14,
+      "inputShapes": [
+        [
+          1,
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.015277862548828125,
+      "extraInfo": ""
+    },
+    {
+      "name": "Slice",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 72,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 15,
+      "inputShapes": [
+        [
+          1,
+          4
+        ]
+      ],
+      "outputShapes": [
+        [
+          1,
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.035400390625,
+      "extraInfo": ""
+    },
+    {
+      "name": "Reshape",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 76,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 16,
+      "inputShapes": [
+        [
+          1,
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.01216268539428711,
+      "extraInfo": ""
+    },
+    {
+      "name": "Slice",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 80,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 17,
+      "inputShapes": [
+        [
+          1,
+          4
+        ]
+      ],
+      "outputShapes": [
+        [
+          1,
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.03875303268432617,
+      "extraInfo": ""
+    },
+    {
+      "name": "Reshape",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 84,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 18,
+      "inputShapes": [
+        [
+          1,
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.02396535873413086,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 92,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 20,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.49541282653808594,
+      "extraInfo": ""
+    },
+    {
+      "name": "Sigmoid",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 96,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 21,
+      "inputShapes": [
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.0845184326171875,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 104,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 23,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.06923580169677734,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 108,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 24,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.041697025299072266,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 116,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 26,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.054121971130371094,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 120,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 27,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.040973663330078125,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 128,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 29,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.025207042694091797,
+      "extraInfo": ""
+    },
+    {
+      "name": "Sigmoid",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 132,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 30,
+      "inputShapes": [
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.015592098236083984,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 140,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 32,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.027359962463378906,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 144,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 33,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.027643680572509766,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 152,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 35,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.1580209732055664,
+      "extraInfo": ""
+    },
+    {
+      "name": "Sigmoid",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 156,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 36,
+      "inputShapes": [
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.012307167053222656,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 164,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 38,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.032527923583984375,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 168,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 39,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.02089405059814453,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 176,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 41,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.019865989685058594,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 180,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 42,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.01836681365966797,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 188,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 44,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.08788537979125977,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 192,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 45,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.025144100189208984,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 200,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 47,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.018493175506591797,
+      "extraInfo": ""
+    },
+    {
+      "name": "Sigmoid",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 204,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 48,
+      "inputShapes": [
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.016312122344970703,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 212,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 50,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.09074163436889648,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 216,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 51,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.017361164093017578,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 224,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 53,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.015256881713867188,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 228,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 54,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.012810707092285156,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 236,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 56,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.017635822296142578,
+      "extraInfo": ""
+    },
+    {
+      "name": "Sigmoid",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 240,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 57,
+      "inputShapes": [
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.009831905364990234,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 248,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 59,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.018462181091308594,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 252,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 60,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.012013912200927734,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 260,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 62,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.018535137176513672,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 264,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 63,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.012707233428955078,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 272,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 65,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.013475894927978516,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 276,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 66,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.011899948120117188,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 284,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 68,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.01388406753540039,
+      "extraInfo": ""
+    },
+    {
+      "name": "Sigmoid",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 288,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 69,
+      "inputShapes": [
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.009897708892822266,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 296,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 71,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.012682914733886719,
+      "extraInfo": ""
+    },
+    {
+      "name": "Sigmoid",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 300,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 72,
+      "inputShapes": [
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.009021759033203125,
+      "extraInfo": ""
+    },
+    {
+      "name": "Multiply",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 308,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 74,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.01315927505493164,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 312,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 75,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.011629104614257812,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 320,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 77,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.011940956115722656,
+      "extraInfo": ""
+    },
+    {
+      "name": "Sigmoid",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 324,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 78,
+      "inputShapes": [
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.008562088012695312,
+      "extraInfo": ""
+    },
+    {
+      "name": "Add",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 332,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 80,
+      "inputShapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.012421131134033203,
+      "extraInfo": ""
+    },
+    {
+      "name": "Sigmoid",
+      "bytesAdded": 4,
+      "totalBytesSnapshot": 336,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 81,
+      "inputShapes": [
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1
+        ]
+      ],
+      "kernelTimeMs": 0.07427167892456055,
+      "extraInfo": ""
+    },
+    {
+      "name": "Pack",
+      "bytesAdded": 12,
+      "totalBytesSnapshot": 348,
+      "tensorsAdded": 1,
+      "totalTensorsSnapshot": 82,
+      "inputShapes": [
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "outputShapes": [
+        [
+          1,
+          3
+        ]
+      ],
+      "kernelTimeMs": 0.6419401168823242,
+      "extraInfo": ""
+    }
+  ],
+  "kernelNames": [
+    "Slice",
+    "Reshape",
+    "Add",
+    "Sigmoid",
+    "Multiply",
+    "Pack"
+  ]
+}
