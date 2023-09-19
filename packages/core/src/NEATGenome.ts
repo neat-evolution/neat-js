@@ -51,6 +51,28 @@ export const binarySearchFirst = <T>(arr: T[], val: T): number => {
   }
 }
 
+interface Measurable<T extends Measurable<T>> {
+  distance: (other: T) => number
+}
+
+// Function to calculate differences and distance for a pair of maps
+const calcDiffAndDist = <T extends Measurable<T>>(
+  map1: Map<string, T>,
+  map2: Map<string, T>
+): [differences: number, distance: number] => {
+  let differences = 0
+  let distance = 0
+  for (const [ref, item] of map1.entries()) {
+    const item2 = map2.get(ref)
+    if (item2 !== undefined) {
+      distance += item.distance(item2)
+    } else {
+      differences++
+    }
+  }
+  return [differences, distance]
+}
+
 // FIXME: rename to CoreGenome
 export class NEATGenome<
   N extends Node<any, any, N>,
@@ -192,98 +214,35 @@ export class NEATGenome<
   distance(other: G): number {
     const neatConfig = this.config.neat()
 
-    let linkDifferences: number = 0 // Number of links present in only one of the genomes
-    let linkDistance: number = 0 // Total distance between links present in both genomes
-    let linkCount = this.links.size // Number of unique links between the two genomes
-
-    for (const linkRef of other.links.keys()) {
-      if (!this.links.has(linkRef)) {
-        linkDifferences++
-      }
-    }
-
-    linkCount += linkDifferences // Count is the number of links in A + links in B that are not in A
-
-    // Iterate through the entries of `this.links`
-    for (const [linkRef, link] of this.links.entries()) {
-      const link2 = other.links.get(linkRef)
-      if (link2 !== undefined) {
-        linkDistance += link.distance(link2) // Distance normalized between 0 and 1
-      } else {
-        linkDifferences++
-      }
-    }
-
-    let linkDist: number
-    if (linkCount === 0.0) {
-      linkDist = 0.0
-    } else {
-      linkDist = (linkDifferences + linkDistance) / linkCount
-    }
-
-    // Same process for nodes
+    let linkDifferences = 0
+    let linkDistance = 0
+    let linkCount = this.links.size
     let nodeDifferences = 0
     let nodeDistance = 0
     let nodeCount = this.hiddenNodes.size
 
-    if (!neatConfig.onlyHiddenNodeDistance) {
-      nodeCount += this.inputs.size + this.outputs.size
-    }
+    // Links
+    ;[linkDifferences, linkDistance] = calcDiffAndDist(this.links, other.links)
+    linkCount += linkDifferences
 
-    for (const nodeKey of other.hiddenNodes.keys()) {
-      if (!this.hiddenNodes.has(nodeKey)) {
-        nodeDifferences++
-      }
-    }
-
-    if (!neatConfig.onlyHiddenNodeDistance) {
-      for (const nodeKey of other.inputs.keys()) {
-        if (!this.inputs.has(nodeKey)) {
-          nodeDifferences++
-        }
-      }
-      for (const nodeKey of other.outputs.keys()) {
-        if (!this.outputs.has(nodeKey)) {
-          nodeDifferences++
-        }
-      }
-    }
+    // Hidden Nodes
+    ;[nodeDifferences, nodeDistance] = calcDiffAndDist(
+      this.hiddenNodes,
+      other.hiddenNodes
+    )
     nodeCount += nodeDifferences
 
-    for (const [nodeRef, node] of this.hiddenNodes.entries()) {
-      const node2 = other.hiddenNodes.get(nodeRef)
-      if (node2 !== undefined) {
-        nodeDistance += node.distance(node2)
-      } else {
-        nodeDifferences++
-      }
-    }
-
+    // Additional nodes if needed
     if (!neatConfig.onlyHiddenNodeDistance) {
-      for (const [nodeRef, node] of this.inputs.entries()) {
-        const node2 = other.inputs.get(nodeRef)
-        if (node2 !== undefined) {
-          nodeDistance += node.distance(node2)
-        } else {
-          nodeDifferences++
-        }
-      }
-      for (const [nodeRef, node] of this.outputs.entries()) {
-        const node2 = other.outputs.get(nodeRef)
-        if (node2 !== undefined) {
-          nodeDistance += node.distance(node2)
-        } else {
-          nodeDifferences++
-        }
-      }
+      nodeCount += this.inputs.size + this.outputs.size
+      nodeDifferences += calcDiffAndDist(this.inputs, other.inputs)[0]
+      nodeDifferences += calcDiffAndDist(this.outputs, other.outputs)[0]
     }
 
-    let nodeDist: number
-    if (nodeCount === 0.0) {
-      nodeDist = 0.0
-    } else {
-      nodeDist = (nodeDifferences + nodeDistance) / nodeCount
-    }
+    const linkDist =
+      linkCount === 0 ? 0 : (linkDifferences + linkDistance) / linkCount
+    const nodeDist =
+      nodeCount === 0 ? 0 : (nodeDifferences + nodeDistance) / nodeCount
 
     return (
       neatConfig.linkDistanceWeight * linkDist +
@@ -304,10 +263,9 @@ export class NEATGenome<
 
     // Copy links only in fitter parent, perform crossover if in both parents
     for (const [linkRef, link] of parent1.links.entries()) {
-      if (parent2.links.has(linkRef)) {
-        const link2 = parent2.links.get(linkRef) as L
-        const newLink = link.crossover(link2, fitness, otherFitness)
-        genome.insertLink(newLink, true)
+      const link2 = parent2.links.get(linkRef)
+      if (link2 != null) {
+        genome.insertLink(link.crossover(link2, fitness, otherFitness), true)
       } else {
         genome.insertLink(link.clone(), false)
       }
@@ -315,8 +273,8 @@ export class NEATGenome<
 
     // Copy nodes only in fitter parent, perform crossover if in both parents
     for (const [nodeRef, node] of parent1.inputs.entries()) {
-      if (parent2.inputs.has(nodeRef)) {
-        const node2 = parent2.inputs.get(nodeRef) as N
+      const node2 = parent2.inputs.get(nodeRef)
+      if (node2 != null) {
         genome.inputs.set(nodeRef, node.crossover(node2, fitness, otherFitness))
       } else {
         genome.inputs.set(nodeRef, node)
@@ -324,8 +282,8 @@ export class NEATGenome<
     }
 
     for (const [nodeRef, node] of parent1.hiddenNodes.entries()) {
-      if (parent2.hiddenNodes.has(nodeRef)) {
-        const node2 = parent2.hiddenNodes.get(nodeRef) as N
+      const node2 = parent2.hiddenNodes.get(nodeRef)
+      if (node2 != null) {
         genome.hiddenNodes.set(
           nodeRef,
           node.crossover(node2, fitness, otherFitness)
@@ -336,8 +294,8 @@ export class NEATGenome<
     }
 
     for (const [nodeRef, node] of parent1.outputs.entries()) {
-      if (parent2.outputs.has(nodeRef)) {
-        const node2 = parent2.outputs.get(nodeRef) as N
+      const node2 = parent2.outputs.get(nodeRef)
+      if (node2 != null) {
         genome.outputs.set(
           nodeRef,
           node.crossover(node2, fitness, otherFitness)

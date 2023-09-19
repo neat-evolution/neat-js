@@ -1,1 +1,1 @@
-export type Executor = (input: number[]) => Promise<number[]>
+export type Executor = (batch: number[][]) => Promise<number[][]>

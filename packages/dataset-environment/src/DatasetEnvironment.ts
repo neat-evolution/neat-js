@@ -19,6 +19,7 @@ export interface DatasetStats {
 export class DatasetEnvironment implements Environment {
   public readonly dataset: Dataset
   public readonly description: EnvironmentDescription
+  public readonly batchSize: number
 
   constructor(dataset: Dataset) {
     this.dataset = dataset
@@ -26,6 +27,7 @@ export class DatasetEnvironment implements Environment {
       inputs: dataset.dimensions.inputs,
       outputs: dataset.dimensions.outputs,
     }
+    this.batchSize = this.dataset.trainingInputs.length
   }
 
   // private accuracy(targets: number[][], predictions: number[][]): number {
@@ -50,9 +52,10 @@ export class DatasetEnvironment implements Environment {
   }
 
   async evaluate(executor: Executor): Promise<number> {
-    const promises = this.dataset.trainingInputs.map(executor)
-    const predictions = await Promise.all(promises)
+    // do it all in one batch
+    const predictions = await executor(this.dataset.trainingInputs)
 
+    // FIXME: use GPU.js for this
     const fitness = this.fitness(this.dataset.trainingTargets, predictions)
     return fitness
   }

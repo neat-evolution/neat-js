@@ -15,7 +15,7 @@ export class AsyncEvaluator implements Evaluator {
 
   private async worker(data: PhenotypeData): Promise<FitnessData> {
     const [speciesIndex, organismIndex, phenotype] = data
-    const executor = this.createExecutor(phenotype)
+    const executor = this.createExecutor(phenotype, this.environment.batchSize)
     const fitness = await this.environment.evaluate(executor)
     return [speciesIndex, organismIndex, fitness]
   }

@@ -9,37 +9,43 @@ export const createExecutor: ExecutorFactory = (
 ): Executor => {
   const values: number[] = new Array(phenotype.length).fill(0)
 
-  return async (inputs: number[]): Promise<number[]> => {
-    // Clear network values
-    values.fill(0)
+  return async (batch: number[][]) => {
+    const outputs: number[][] = []
 
-    // Copy inputs into values
-    for (const [i, index] of phenotype.inputs.entries()) {
-      values[i] = inputs[index] as number
-    }
+    for (const inputs of batch) {
+      // Clear network values
+      values.fill(0)
 
-    // Do forward pass
-    for (const action of phenotype.actions) {
-      switch (action.type) {
-        case PhenotypeActionType.Link:
-          values[action.to] += (values[action.from] as number) * action.weight
-          break
-        case PhenotypeActionType.Activation: {
-          const activation = toActivationFunction(action.activation)
-          values[action.node] = activation(
-            (values[action.node] as number) + action.bias
-          )
-          break
+      // Copy inputs into values
+      for (const [i, index] of phenotype.inputs.entries()) {
+        values[i] = inputs[index] as number
+      }
+
+      // Do forward pass
+      for (const action of phenotype.actions) {
+        switch (action.type) {
+          case PhenotypeActionType.Link:
+            values[action.to] += (values[action.from] as number) * action.weight
+            break
+          case PhenotypeActionType.Activation: {
+            const activation = toActivationFunction(action.activation)
+            values[action.node] = activation(
+              (values[action.node] as number) + action.bias
+            )
+            break
+          }
         }
       }
-    }
 
-    // Collect output
-    const outputs: number[] = []
-    for (const o of phenotype.outputs) {
-      outputs.push(
-        Number.isFinite(values[o] as number) ? (values[o] as number) : 0
-      )
+      // Collect output
+      const output: number[] = []
+      for (const o of phenotype.outputs) {
+        output.push(
+          Number.isFinite(values[o] as number) ? (values[o] as number) : 0
+        )
+      }
+      // Collect output by batch
+      outputs.push(output)
     }
     return outputs
   }

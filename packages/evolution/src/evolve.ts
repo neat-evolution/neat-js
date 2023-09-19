@@ -24,10 +24,7 @@ export const evolve = async <
     const iterationStartTime = Date.now()
     await population.evaluate()
 
-    // FIXME: break when
-    // - seconds limit is reached
-    // - fitness limit is reached
-    // - iterations limit is reached
+    // FIXME: break when fitness limit is reached
     if (
       options.secondsLimit > 0 &&
       Date.now() - startTime >= (options.secondsLimit + 3) * 1000
@@ -57,8 +54,8 @@ export const evolve = async <
     }
   }
   console.log(`ended after ${Date.now() - startTime}ms`)
-  for (const species of population.species.values()) {
-    species.adjustFitness()
-  }
+  // for (const species of population.species.values()) {
+  //   species.adjustFitness()
+  // }
   return population.best()
 }
