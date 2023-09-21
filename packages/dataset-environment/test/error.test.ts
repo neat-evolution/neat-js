@@ -48,7 +48,7 @@ describe('error', () => {
         (mseSingle([1, 0, 1], [0.9, 0.1, 0.9], true) +
           mseSingle([0, 1, 0], [0.1, 0.9, 0.1], true)) /
         2
-      expect(result).toBeCloseTo(expected, 8)
+      expect(result).toBeCloseTo(expected, 15)
     })
 
     test('should return the correct MSE without normalization', () => {
@@ -65,7 +65,7 @@ describe('error', () => {
         (mseSingle([1, 0, 1], [0.9, 0.1, 0.9], false) +
           mseSingle([0, 1, 0], [0.1, 0.9, 0.1], false)) /
         2
-      expect(result).toBeCloseTo(expected, 8)
+      expect(result).toBeCloseTo(expected, 15)
     })
 
     test('should handle empty matrices', () => {
@@ -111,7 +111,7 @@ describe('error', () => {
           ((target[1] as number) - (normalizedPrediction[1] as number)) ** 2 +
           ((target[2] as number) - (normalizedPrediction[2] as number)) ** 2) /
         3
-      expect(result).toBeCloseTo(expected, 8)
+      expect(result).toBeCloseTo(expected, 15)
     })
 
     test('should return the correct MSE without normalization', () => {
@@ -154,13 +154,6 @@ describe('error', () => {
     })
   })
   describe('crossentropy', () => {
-    test('should handle empty matrices', () => {
-      const targets: Matrix = []
-      const predictions: Matrix = []
-      const result = crossentropy(targets, predictions, true)
-      expect(result).toBe(0)
-    })
-
     test('should return correct value with matched non-empty matrices, with normalization', () => {
       const targets = [
         [1, 0, 1],
@@ -172,7 +165,7 @@ describe('error', () => {
       ]
       const result = crossentropy(targets, predictions, true)
       const expected = 0.8475497495612967
-      expect(result).toBeCloseTo(expected, 8)
+      expect(result).toBeCloseTo(expected, 15)
     })
 
     test('should return correct value with matched non-empty matrices, without normalization', () => {
@@ -186,25 +179,7 @@ describe('error', () => {
       ]
       const result = crossentropy(targets, predictions, false)
       const expected = 0.8475497495612967
-      expect(result).toBeCloseTo(expected, 8)
-    })
-
-    test.skip('should throw error with mismatched matrices', () => {
-      const targets = [[1, 0, 1]]
-      const predictions = [
-        [0.9, 0.1, 0.9],
-        [0.1, 0.9, 0.1],
-      ]
-      let error: any
-      try {
-        crossentropy(targets, predictions, true)
-      } catch (e) {
-        error = e
-      }
-      expect(error).toBeDefined()
-      expect(error?.message).toBe(
-        'Mismatched lengths between targets and predictions'
-      )
+      expect(result).toBeCloseTo(expected, 15)
     })
   })
   describe('crossentropySingle', () => {

@@ -1,5 +1,11 @@
-import { isActionEdge, Activation, isActionNode } from '@neat-js/core'
-import { nodeRefToKey, type NodeRef, NodeType } from '@neat-js/core'
+import {
+  isActionEdge,
+  Activation,
+  isActionNode,
+  nodeRefToKey,
+  type NodeRef,
+  NodeType,
+} from '@neat-js/core'
 import { PhenotypeActionType } from '@neat-js/phenotype'
 import type {
   Phenotype,
@@ -17,10 +23,10 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
   const nodes: NodeRef[] = []
 
   // Create array of all input node indexes, for insertion of neural network inputs
-  const inputs: number[] = []
-  const inputLength = new Set(genome.inputs.values()).size
+  const inputLength = genome.inputs.size
+  const inputs: number[] = new Array(inputLength)
   for (let i = 0; i < inputLength; i++) {
-    inputs.push(i)
+    inputs[i] = i
     // Prepend input nodes to extraction of hidden nodes from topological sorting
     nodes.push({ type: NodeType.Input, id: i })
   }
@@ -32,11 +38,11 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
   }
 
   // Create array of all output node indexes, for extraction of neural network execution result
-  const outputLength = new Set(genome.outputs.values()).size
-  const outputs: number[] = []
+  const outputLength = genome.outputs.size
+  const outputs: number[] = new Array(outputLength)
   const offset = nodes.length
   for (let i = 0; i < outputLength; i++) {
-    outputs.push(i + offset)
+    outputs[i] = i + offset
     // Append all output nodes
     nodes.push({ type: NodeType.Output, id: i })
   }

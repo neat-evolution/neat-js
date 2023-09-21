@@ -508,7 +508,7 @@ export class Population<
       speciesData.push([id, toPopulationDataSpecies(species)])
     }
     const extinctSpeciesData: Array<PopulationDataSpeciesEntry<GO, GD, G>> = []
-    for (const [id, species] of this.species.entries()) {
+    for (const [id, species] of this.extinctSpecies.entries()) {
       extinctSpeciesData.push([id, toPopulationDataSpecies(species)])
     }
     return {

@@ -10,6 +10,7 @@ describe('crossentropy', () => {
       'crossentropy_single_log.jsonl'
     )) {
       const result = crossentropySingle(target, prediction, norm)
+      // FIXME: why is this 6?
       expect(result).toBeCloseTo(output, 6)
     }
   })
@@ -18,7 +19,7 @@ describe('crossentropy', () => {
       'crossentropy_log.jsonl'
     )) {
       const result = crossentropy(targets, predictions, norm)
-      expect(result).toBeCloseTo(output, 10)
+      expect(result).toBeCloseTo(output, 15)
     }
   })
 })

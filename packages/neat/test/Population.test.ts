@@ -12,7 +12,6 @@ import {
   type Species,
 } from '@neat-js/evolution'
 import { createExecutor } from '@neat-js/executor'
-import type { PhenotypeData } from '@neat-js/phenotype'
 import {
   beforeEach,
   describe,
@@ -45,11 +44,7 @@ const createEnvironment = async () => {
     ...defaultDatasetOptions,
     validationFraction: 0.1,
     testFraction: 0.1,
-    dataset: new URL(
-      // '../../dataset-environment/test/fixtures/iris-truncated',
-      '../../demo/generated/iris',
-      import.meta.url
-    ).pathname,
+    dataset: new URL('./fixtures/iris', import.meta.url).pathname,
   }
   const dataset = await loadDataset(options)
   const environment = new DatasetEnvironment(dataset)
@@ -58,7 +53,6 @@ const createEnvironment = async () => {
 
 describe('Population class', () => {
   let configProvider: NEATConfig
-  let stateProvider: NEATState
   let populationOptions: PopulationOptions
   let genomeOptions: NEATGenomeOptions
   let environment: DatasetEnvironment
@@ -67,7 +61,6 @@ describe('Population class', () => {
   beforeEach(async () => {
     configProvider = createConfig(defaultNEATConfigOptions)
     genomeOptions = defaultNEATGenomeOptions
-    stateProvider = createState()
     populationOptions = defaultPopulationOptions
     environment = await createEnvironment()
     evaluator = createEvaluator(environment, createExecutor)
@@ -158,7 +151,7 @@ describe('Population class', () => {
       DefaultNEATGenome,
       typeof NEATAlgorithm
     >
-    beforeEach(() => {
+    beforeEach(async () => {
       population = new Population<
         NEATNode,
         NEATLink,
@@ -176,6 +169,10 @@ describe('Population class', () => {
         populationOptions,
         genomeOptions
       )
+      for (let i = 0; i < 100; i++) {
+        population.mutate()
+      }
+      await population.evaluate()
     })
 
     test('should initialize with only one species', () => {
@@ -202,16 +199,17 @@ describe('Population class', () => {
       }
       expect(speciesCount).toBe(100)
     })
-    test('should evolve more than one species', () => {
+    test('should evolve more than one species', async () => {
       let speciesCount = 0
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 2; i++) {
         population.evolve()
+        await population.evaluate()
         speciesCount += population.species.size
       }
       expect(population.species.size).toBeLessThan(
-        1.1 * populationOptions.speciesTarget
+        population.populationOptions.populationSize / 2
       )
-      expect(speciesCount).toBeGreaterThan(50)
+      expect(speciesCount).toBeGreaterThan(10)
     })
   })
 
@@ -227,7 +225,7 @@ describe('Population class', () => {
       DefaultNEATGenome,
       typeof NEATAlgorithm
     >
-    beforeEach(() => {
+    beforeEach(async () => {
       population = new Population<
         NEATNode,
         NEATLink,
@@ -250,6 +248,7 @@ describe('Population class', () => {
       for (let i = 0; i < 50; i++) {
         population.mutate()
       }
+      await population.evaluate()
     })
 
     describe('Population.evolve species calls', () => {

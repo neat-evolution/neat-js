@@ -51,28 +51,6 @@ export const binarySearchFirst = <T>(arr: T[], val: T): number => {
   }
 }
 
-interface Measurable<T extends Measurable<T>> {
-  distance: (other: T) => number
-}
-
-// Function to calculate differences and distance for a pair of maps
-const calcDiffAndDist = <T extends Measurable<T>>(
-  map1: Map<string, T>,
-  map2: Map<string, T>
-): [differences: number, distance: number] => {
-  let differences = 0
-  let distance = 0
-  for (const [ref, item] of map1.entries()) {
-    const item2 = map2.get(ref)
-    if (item2 !== undefined) {
-      distance += item.distance(item2)
-    } else {
-      differences++
-    }
-  }
-  return [differences, distance]
-}
-
 // FIXME: rename to CoreGenome
 export class NEATGenome<
   N extends Node<any, any, N>,
@@ -210,37 +188,77 @@ export class NEATGenome<
     }
   }
 
-  // Genetic distance between two genomes
   distance(other: G): number {
     const neatConfig = this.config.neat()
 
     let linkDifferences = 0
     let linkDistance = 0
     let linkCount = this.links.size
-    let nodeDifferences = 0
-    let nodeDistance = 0
-    let nodeCount = this.hiddenNodes.size
 
-    // Links
-    ;[linkDifferences, linkDistance] = calcDiffAndDist(this.links, other.links)
-    linkCount += linkDifferences
+    for (const [linkRef, link] of this.links.entries()) {
+      const link2 = other.links.get(linkRef)
+      if (link2 !== undefined) {
+        linkDistance += link.distance(link2)
+      } else {
+        linkDifferences++
+      }
+    }
 
-    // Hidden Nodes
-    ;[nodeDifferences, nodeDistance] = calcDiffAndDist(
-      this.hiddenNodes,
-      other.hiddenNodes
-    )
-    nodeCount += nodeDifferences
-
-    // Additional nodes if needed
-    if (!neatConfig.onlyHiddenNodeDistance) {
-      nodeCount += this.inputs.size + this.outputs.size
-      nodeDifferences += calcDiffAndDist(this.inputs, other.inputs)[0]
-      nodeDifferences += calcDiffAndDist(this.outputs, other.outputs)[0]
+    for (const linkRef of other.links.keys()) {
+      if (!this.links.has(linkRef)) {
+        linkDifferences++
+        linkCount++
+      }
     }
 
     const linkDist =
       linkCount === 0 ? 0 : (linkDifferences + linkDistance) / linkCount
+
+    let nodeDifferences = 0
+    let nodeDistance = 0
+    let nodeCount = this.hiddenNodes.size
+
+    if (!neatConfig.onlyHiddenNodeDistance) {
+      nodeCount += this.inputs.size + this.outputs.size
+    }
+
+    for (const [nodeRef, node] of this.hiddenNodes.entries()) {
+      const node2 = other.hiddenNodes.get(nodeRef)
+      if (node2 !== undefined) {
+        nodeDistance += node.distance(node2)
+      } else {
+        nodeDifferences++
+      }
+    }
+
+    for (const nodeKey of other.hiddenNodes.keys()) {
+      if (!this.hiddenNodes.has(nodeKey)) {
+        nodeDifferences++
+        nodeCount++
+      }
+    }
+
+    if (!neatConfig.onlyHiddenNodeDistance) {
+      for (const [nodeRef, node] of [
+        ...this.inputs.entries(),
+        ...this.outputs.entries(),
+      ]) {
+        const node2 = other.inputs.get(nodeRef) ?? other.outputs.get(nodeRef)
+        if (node2 !== undefined) {
+          nodeDistance += node.distance(node2)
+        } else {
+          nodeDifferences++
+        }
+      }
+
+      for (const nodeKey of [...other.inputs.keys(), ...other.outputs.keys()]) {
+        if (!this.inputs.has(nodeKey) && !this.outputs.has(nodeKey)) {
+          nodeDifferences++
+          nodeCount++
+        }
+      }
+    }
+
     const nodeDist =
       nodeCount === 0 ? 0 : (nodeDifferences + nodeDistance) / nodeCount
 
