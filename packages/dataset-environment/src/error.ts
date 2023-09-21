@@ -1,13 +1,21 @@
 import type { Matrix, Vector } from './types.js'
 
 export const normalize = (list: Vector): Vector => {
-  const sum = list.reduce((acc, val) => acc + val, 0)
+  let sum = 0
 
-  if (sum !== 0) {
-    return list.map((x) => x / sum)
-  } else {
-    return list
+  // Calculate the sum of all elements
+  for (const val of list) {
+    sum += val
   }
+
+  // Normalize the list in place if the sum is not zero
+  if (sum !== 0) {
+    for (let i = 0; i < list.length; i++) {
+      list[i] /= sum
+    }
+  }
+
+  return list
 }
 
 export const mse = (
@@ -56,55 +64,41 @@ export const crossentropy = (
   norm: boolean
 ): number => {
   let sum = 0
-  for (let i = 0; i < targets.length; i++) {
-    const t = targets[i]
-    const p = predictions[i]
-    if (t === undefined) {
-      throw new Error('target is undefined')
-    }
-    if (p === undefined) {
-      throw new Error('prediction is undefined')
-    }
-    sum += crossentropySingle(t, p, norm)
+  const len = targets.length // Cache the length
+
+  for (let i = 0; i < len; i++) {
+    sum += crossentropySingle(
+      targets[i] as Vector,
+      predictions[i] as Vector,
+      norm
+    )
   }
 
-  return sum / targets.length
+  return sum / len
 }
+
+const e = 1e-7
+const mi = e
+const ma = 1.0 - e
 
 export const crossentropySingle = (
   target: Vector,
   prediction: Vector,
   norm: boolean
 ): number => {
-  let pred = prediction
-  if (norm) {
-    pred = normalize(prediction)
-  }
+  let pred = norm ? normalize(prediction) : prediction
 
-  const e = 1e-7
-  const mi = e
-  const ma = 1.0 - e
+  // Bound pred values
   for (let i = 0; i < pred.length; i++) {
-    const p = pred[i]
-    if (p === undefined) {
-      throw new Error('prediction is undefined')
-    }
-    pred[i] = Math.min(ma, Math.max(mi, p))
+    pred[i] = Math.min(ma, Math.max(mi, pred[i] as number))
   }
 
+  // Normalize again
   pred = normalize(pred)
 
   let sum = 0
   for (let i = 0; i < target.length; i++) {
-    const t = target[i]
-    const p = pred[i]
-    if (t === undefined) {
-      throw new Error('target is undefined')
-    }
-    if (p === undefined) {
-      throw new Error('prediction is undefined')
-    }
-    sum += t * Math.log(p)
+    sum += (target[i] as number) * Math.log(pred[i] as number)
   }
 
   return -sum

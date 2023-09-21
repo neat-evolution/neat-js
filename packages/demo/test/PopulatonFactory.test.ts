@@ -59,7 +59,6 @@ describe('PopulationFactory', () => {
   beforeEach(async () => {
     const datasetOptions = {
       ...defaultDatasetOptions,
-      // dataset: new URL('./fixtures/iris-truncated', import.meta.url).pathname,
       dataset: new URL('../generated/iris', import.meta.url).pathname,
       validationFraction: 0.1,
       testFraction: 0.1,
@@ -90,6 +89,7 @@ describe('PopulationFactory', () => {
     const evolutionOptions = {
       ...defaultEvolutionOptions,
       secondsLimit: 1,
+      iterations: 10,
     }
 
     // 2. Mutate it 50 times
@@ -97,28 +97,18 @@ describe('PopulationFactory', () => {
       population.mutate()
     }
 
-    // 3. Evolve it for 1 second
+    // 3. Evolve it for 10 iterations
     await evolve(population, evolutionOptions)
   })
 
   test('population.toJSON', async () => {
     const data = population.toJSON()
     expect(data).toBeDefined()
-    // const json = JSON.stringify(data, null, 2)
-    // await fs.writeFile(
-    //   new URL('./population.json', import.meta.url).pathname,
-    //   json
-    // )
   })
 
   test('population.best().toJSON', async () => {
     const data = population.best()?.toJSON()
     expect(data).toBeDefined()
-    // const json = JSON.stringify(data, null, 2)
-    // await fs.writeFile(
-    //   new URL('./fixtures/organism.json', import.meta.url).pathname,
-    //   json
-    // )
   })
 
   test('population.toFactoryOptions', () => {

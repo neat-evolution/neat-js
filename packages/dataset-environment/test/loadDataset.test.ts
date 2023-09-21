@@ -3,17 +3,28 @@ import { describe, expect, test } from 'vitest'
 import { defaultDatasetOptions } from '../src/DatasetOptions.js'
 import { loadDataset } from '../src/loadDataset.js'
 
-import { dataset } from './fixtures/irisTruncatedDataset.js'
-
 describe('loadDataset', () => {
-  test('should load a dataset from a file', async () => {
+  test('should load a iris dataset from a file', async () => {
     const options = defaultDatasetOptions
     options.dataset = new URL(
       './fixtures/iris-truncated',
       import.meta.url
     ).pathname
     const data = await loadDataset(options)
-    expect(data).toEqual(dataset)
+    expect(data.dimensions.inputs).toBe(4)
+    expect(data.dimensions.outputs).toBe(3)
+    expect(data.isClassification).toBe(true)
+    expect(data.oneHotOutput).toBe(true)
+    expect(data.trainingInputs.length).toBe(8)
+    expect(data.trainingTargets.length).toBe(8)
+    expect(data.validationInputs.length).toBe(1)
+    expect(data.validationTargets.length).toBe(1)
+    expect(data.testInputs.length).toBe(1)
+    expect(data.testTargets.length).toBe(1)
+    expect(data.totalCount).toBe(10)
+    expect(data.trainingCount).toBe(8)
+    expect(data.validationCount).toBe(1)
+    expect(data.testCount).toBe(1)
   })
 
   test('should load a mnist dataset from a file', async () => {
@@ -91,7 +102,9 @@ describe('loadDataset', () => {
     } catch (err) {
       error = err
     }
-    expect(error.message).toBe('Unable to load dataset')
+    expect(error.message.startsWith('Unable to load dataset from file')).toBe(
+      true
+    )
   })
 
   test('should add bias input', async () => {
