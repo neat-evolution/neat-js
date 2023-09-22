@@ -5,13 +5,14 @@ export enum PhenotypeActionType {
   Activation = 'Activation',
 }
 
+// FIXME: tuples are more efficient
 export interface PhenotypeLinkAction {
   type: PhenotypeActionType.Link
   from: number
   to: number
   weight: number
 }
-
+// FIXME: tuples are more efficient
 export interface PhenotypeActivationAction {
   type: PhenotypeActionType.Activation
   node: number

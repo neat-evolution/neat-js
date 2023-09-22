@@ -11,6 +11,12 @@ import {
   type DefaultNEATGenomeData,
   type NEATGenomeOptions,
   defaultNEATGenomeOptions,
+  type NEATNode,
+  type NEATLink,
+  type NEATConfig,
+  type NEATState,
+  type DefaultNEATGenomeFactoryOptions,
+  createConfig,
 } from '@neat-js/neat'
 import { beforeEach, describe, expect, test } from 'vitest'
 
@@ -26,6 +32,18 @@ const datasetOptions = {
 const dataset = await loadDataset(datasetOptions)
 const environment = new DatasetEnvironment(dataset)
 
+type NeatPopulation = Population<
+  NEATNode,
+  NEATLink,
+  NEATConfig,
+  NEATState,
+  NEATGenomeOptions,
+  DefaultNEATGenomeFactoryOptions,
+  DefaultNEATGenomeData,
+  DefaultNEATGenome,
+  typeof NEATAlgorithm
+>
+
 describe('WorkerEvaluator', () => {
   test('should initialize correctly', () => {
     const evaluator = new WorkerEvaluator(environment, {
@@ -39,11 +57,7 @@ describe('WorkerEvaluator', () => {
 
   describe('evaluate', () => {
     let evaluator: WorkerEvaluator
-    let population: Population<
-      NEATGenomeOptions,
-      DefaultNEATGenome,
-      DefaultNEATGenomeData
-    >
+    let population: NeatPopulation
 
     beforeEach(() => {
       evaluator = new WorkerEvaluator(environment, {
@@ -52,21 +66,19 @@ describe('WorkerEvaluator', () => {
         taskCount: 100,
         threadCount: 4,
       })
-      population = new Population<
-        NEATGenomeOptions,
-        DefaultNEATGenome,
-        DefaultNEATGenomeData
-      >(
+
+      const configProvider = createConfig(defaultNEATConfigOptions)
+      const genomeOptions = {
+        ...defaultNEATGenomeOptions,
+        ...evaluator.environment.description,
+      }
+      const populationOptions = defaultPopulationOptions
+      population = new Population(
         evaluator,
-        NEATAlgorithm.createPhenotype,
-        NEATAlgorithm.createGenome,
-        NEATAlgorithm.createState,
-        defaultPopulationOptions,
-        NEATAlgorithm.createConfig(defaultNEATConfigOptions),
-        {
-          ...defaultNEATGenomeOptions,
-          ...evaluator.environment.description,
-        }
+        NEATAlgorithm,
+        configProvider,
+        populationOptions,
+        genomeOptions
       )
       // mutate population 100 times
       for (let i = 0; i < 100; i++) {
