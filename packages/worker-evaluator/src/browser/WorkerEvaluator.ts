@@ -1,5 +1,3 @@
-import { Worker } from 'node:worker_threads'
-
 import type { Environment } from '@neat-js/environment'
 import type { Evaluator, FitnessData } from '@neat-js/evaluator'
 import type { SerializedPhenotypeData, PhenotypeData } from '@neat-js/phenotype'
@@ -12,7 +10,7 @@ import {
   type Action,
   type EvaluationResultAction,
   type InitPayload,
-} from './WorkerAction.js'
+} from '../WorkerAction.js'
 
 export interface WorkerEvaluatorOptions {
   /** path to module that exports createEnvironment */
@@ -65,14 +63,12 @@ export class WorkerEvaluator implements Evaluator {
 
     for (let i = 0; i < this.threadCount; i++) {
       const initPromise = new Promise<void>((resolve, reject) => {
-        const worker = new Worker(
-          new URL('./workerEvaluatorScript.js', import.meta.url),
-          {
-            name: `WorkerEvaluator-${i}`,
-          }
-        )
-
-        const messageListener = (action: Action<unknown>) => {
+        const worker = new Worker(new URL('./workerEvaluatorScript.js', import.meta.url), {
+          name: `WorkerEvaluator-${i}`,
+          type: 'module',
+        })
+        const messageListener = (event: MessageEvent<Action<unknown>>) => {
+          const action = event.data
           switch (action.type) {
             case ActionType.EVALUATION_RESULT: {
               const data = action as EvaluationResultAction
@@ -102,17 +98,17 @@ export class WorkerEvaluator implements Evaluator {
           }
         }
 
-        const errorListener = (error: Error) => {
+        const errorListener = (event: ErrorEvent) => {
           const { reject: rejectRequest } = this.requestMap.get(worker) ?? {}
           if (rejectRequest != null) {
-            rejectRequest(error)
+            rejectRequest(event.error)
           } else {
-            reject(error)
+            reject(event.error)
           }
         }
 
-        worker.on('message', messageListener)
-        worker.on('error', errorListener)
+        worker.addEventListener('message', messageListener)
+        worker.addEventListener('error', errorListener)
 
         const data: InitPayload = {
           createExecutorPathname: this.createExecutorPathname,
@@ -129,14 +125,9 @@ export class WorkerEvaluator implements Evaluator {
   }
 
   async terminate() {
-    const terminatePromises = new Set<Promise<number>>()
     for (const worker of this.workers) {
-      worker.unref()
       worker.postMessage(createAction(ActionType.TERMINATE, null))
-      terminatePromises.add(worker.terminate())
-    }
-    for (const p of terminatePromises) {
-      await p
+      worker.terminate()
     }
   }
 

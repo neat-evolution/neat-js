@@ -12,7 +12,7 @@ import {
   type InitPayload,
   type EvaluatePayload,
   createAction,
-} from './WorkerAction.js'
+} from '../WorkerAction.js'
 
 let environment: Environment | null = null
 let createExecutor: ExecutorFactory | null = null
