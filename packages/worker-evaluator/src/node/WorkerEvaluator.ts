@@ -66,9 +66,11 @@ export class WorkerEvaluator implements Evaluator {
     for (let i = 0; i < this.threadCount; i++) {
       const initPromise = new Promise<void>((resolve, reject) => {
         const worker = new Worker(
-          new URL('./workerEvaluatorScript.js', import.meta.url), {
+          new URL('./workerEvaluatorScript.js', import.meta.url),
+          {
             name: `WorkerEvaluator-${i}`,
-          })
+          }
+        )
         const messageListener = (action: Action<unknown>) => {
           switch (action.type) {
             case ActionType.EVALUATION_RESULT: {
