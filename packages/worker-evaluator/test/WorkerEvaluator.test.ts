@@ -1,3 +1,7 @@
+/**
+ * @vitest-environment jsdom
+ */
+import '@vitest/web-worker'
 import { defaultNEATConfigOptions } from '@neat-js/core'
 import {
   defaultDatasetOptions,
@@ -20,11 +24,12 @@ import {
 } from '@neat-js/neat'
 import { beforeEach, describe, expect, test } from 'vitest'
 
-import { WorkerEvaluator } from '../src/index.js'
+import { WorkerEvaluator } from '../src/browser.js'
 
+const root = __dirname
 const datasetOptions = {
   ...defaultDatasetOptions,
-  dataset: new URL('./fixtures/iris-truncated', import.meta.url).pathname,
+  dataset: `${root}/fixtures/iris-truncated`,
   validationFraction: 0.1,
   testFraction: 0.1,
 }
@@ -44,11 +49,22 @@ type NeatPopulation = Population<
   typeof NEATAlgorithm
 >
 
+
+const foo = import.meta.glob('@neat-js/dataset-environment', {
+  import: 'createEnvironment',
+  eager: true,
+})
+const bar = import.meta.glob('@neat-js/executor', {
+  import: 'createExecutor',
+  eager: true,
+})
+
+
 describe('WorkerEvaluator', () => {
   test('should initialize correctly', () => {
     const evaluator = new WorkerEvaluator(environment, {
-      createEnvironmentPathname: '@neat-js/dataset-environment',
-      createExecutorPathname: '@neat-js/executor',
+      createEnvironmentPathname: foo['@neat-js/dataset-environment'],
+      createExecutorPathname: bar['@neat-js/executor'],
       taskCount: 100,
       threadCount: 4,
     })
@@ -72,7 +88,10 @@ describe('WorkerEvaluator', () => {
         ...defaultNEATGenomeOptions,
         ...evaluator.environment.description,
       }
-      const populationOptions = defaultPopulationOptions
+      const populationOptions = {
+        ...defaultPopulationOptions,
+        populationSize: 1,
+      }
       population = new Population(
         evaluator,
         NEATAlgorithm,
