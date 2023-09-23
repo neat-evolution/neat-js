@@ -24,7 +24,7 @@ export const demo = async (
   const datasetOptions = defaultDatasetOptions
   datasetOptions.dataset = new URL(
     // FIXME: make dataset pathname an env variable
-    '../../generated/iris',
+    '../../generated/mnist',
     import.meta.url
   ).pathname
   datasetOptions.validationFraction = 0.1
