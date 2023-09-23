@@ -1,10 +1,9 @@
 import type { Environment } from '@neat-js/environment'
 import type { EvaluatorFactory } from '@neat-js/evaluator'
 
-import {
-  WorkerEvaluator,
-  type WorkerEvaluatorOptions,
-} from './WorkerEvaluator.js'
+import type { WorkerEvaluatorOptions } from '../types.js'
+
+import { WorkerEvaluator } from './WorkerEvaluator.js'
 
 export const createEvaluator: EvaluatorFactory<WorkerEvaluatorOptions> = (
   environment: Environment,
