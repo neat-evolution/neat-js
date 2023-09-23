@@ -6,11 +6,44 @@ Evaluates Genomes in a worker. Works in the browser using Web Workers and in Nod
 yarn add @neat-js/worker-evaluator
 ```
 
-# Example
+## Usage
+
+This package is designed to be cross platform because the Web Worker API is not identical to the Node Worker Threads API. To support both it provides conditional exports and path exports.
+
+
+### Conditional Exports
+
+If you import the package directly you should get the correct implementation for your environment. Even if you are using a bundler like Vite this should work. The conditional imports will choose the correct implementation based on how they are imported.
+
+```ts
+// Automatically choose between node and browser implementations
+import { createEvaluator } from '@neat-js/worker-evaluator'
+```
+
+### Browser only
+
+If you know you want the browser implementation (or you are having issues) you can import it directly. This version uses Web Workers.
+
+
+```ts
+// Only use the browser implementation
+import { createEvaluator } from '@neat-js/worker-evaluator/browser'
+```
+
+### Node only
+
+If you know you want the Node implementation you can import it directly. This version uses Node Worker Threads.
+
+```ts
+// Only use the node implementation
+import { createEvaluator } from '@neat-js/worker-evaluator/node'
+```
+
+## Example
 
 This is a kitchen sink example adapted from the demo.
 
-The import parts:
+The important parts:
 1. Look up the number of CPUs in your environment
 2. Provide packages or paths for createEnvironment and createExecutor
 3. Create a worker evaluator
@@ -77,5 +110,3 @@ const genome = await neat(
   defaultNEATGenomeOptions
 )
 ```
-
-
