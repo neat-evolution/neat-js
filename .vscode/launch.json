@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Worker",
+      "program": "${workspaceFolder}/packages/demo/dist/esm/worker.js",
+      "runtimeArgs": [
+        "--inspect-brk"
+      ],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/packages/**/dist/**/*.js"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "autoAttachChildProcesses": true,
+      "preLaunchTask": "build"
+    }
+  ]
+}
