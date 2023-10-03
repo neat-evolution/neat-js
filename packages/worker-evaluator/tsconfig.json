@@ -15,5 +15,5 @@
         "@tsconfig/strictest/tsconfig.json",
         "@tsconfig/esm/tsconfig.json"
     ],
-    "include": ["src", "test"]
+    "include": ["src", "test", "_browser/browser.ts"]
 }
