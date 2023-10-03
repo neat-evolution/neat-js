@@ -25,7 +25,6 @@ import {
   DefaultNEATGenome,
   type NEATConfig,
 } from '@neat-js/neat'
-import type { PhenotypeData } from '@neat-js/phenotype'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
@@ -45,7 +44,8 @@ type NEATPopulation = Population<
   DefaultNEATGenomeFactoryOptions,
   DefaultNEATGenomeData,
   DefaultNEATGenome,
-  typeof NEATAlgorithm
+  typeof NEATAlgorithm,
+  undefined
 >
 
 describe('PopulationFactory', () => {
