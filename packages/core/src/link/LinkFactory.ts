@@ -1,5 +1,5 @@
 import type { LinkConfig } from '../config/ExtendedConfig.js'
-import type { NodeRef } from '../node/NodeData.js'
+import type { NodeRef } from '../node/NodeRef.js'
 import type { LinkState } from '../state/ExtendedState.js'
 
 import type { LinkData } from './LinkData.js'

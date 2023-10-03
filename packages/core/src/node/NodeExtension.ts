@@ -1,8 +1,9 @@
 import type { NodeConfig } from '../config/ExtendedConfig.js'
 import type { NodeState } from '../state/ExtendedState.js'
 
-import type { NodeData, NodeRef } from './NodeData.js'
+import type { NodeData } from './NodeData.js'
 import type { NodeFactory, NodeFactoryOptions } from './NodeFactory.js'
+import type { NodeRef } from './NodeRef.js'
 
 export interface NodeExtension<
   NC extends NodeConfig,
@@ -21,5 +22,5 @@ export interface NodeExtension<
   distance: (other: N) => number
 
   toJSON: () => NodeData<NC, NS>
-  toFactoryOptions: () => NodeFactoryOptions<NC, NS>
+  toFactoryOptions: () => NodeFactoryOptions
 }

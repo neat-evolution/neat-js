@@ -1,12 +1,12 @@
 import type { LinkConfig } from '../config/ExtendedConfig.js'
-import type { NodeRef } from '../node/NodeData.js'
+import type { NodeRef } from '../node/NodeRef.js'
+import { toNodeRef } from '../node/toNodeRef.js'
 import type { LinkState } from '../state/ExtendedState.js'
 
 import type { LinkData } from './LinkData.js'
 import type { LinkExtension } from './LinkExtension.js'
 import type { LinkFactory, LinkFactoryOptions } from './LinkFactory.js'
 import { toLinkKey } from './linkRefToKey.js'
-
 export class Link<
   LC extends LinkConfig,
   LS extends LinkState,
@@ -54,8 +54,8 @@ export class Link<
 
   public clone(): L {
     return this.createLink(
-      this.from,
-      this.to,
+      toNodeRef(this.from),
+      toNodeRef(this.to),
       this.weight,
       this.innovation,
       this.config,
@@ -75,8 +75,8 @@ export class Link<
     }
 
     return this.createLink(
-      this.from,
-      this.to,
+      toNodeRef(this.from),
+      toNodeRef(this.to),
       (this.weight + other.weight) / 2,
       this.innovation,
       this.config,
@@ -94,8 +94,8 @@ export class Link<
 
   toJSON(): LinkData<LC, LS> {
     return {
-      from: this.from,
-      to: this.to,
+      from: toNodeRef(this.from),
+      to: toNodeRef(this.to),
       weight: this.weight,
       innovation: this.innovation,
       // FIXME: this.config.toFactoryOptions()
@@ -107,8 +107,8 @@ export class Link<
 
   toFactoryOptions(): LinkFactoryOptions<LC, LS> {
     return {
-      from: this.from,
-      to: this.to,
+      from: toNodeRef(this.from),
+      to: toNodeRef(this.to),
       weight: this.weight,
       innovation: this.innovation,
     }

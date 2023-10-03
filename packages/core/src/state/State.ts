@@ -1,13 +1,9 @@
 import { nodeRefsToLinkKey } from '../link/linkRefToKey.js'
-import { NodeType, type NodeRef } from '../node/NodeData.js'
-import { nodeRefToKey } from '../node/nodeRefToKey.js'
+import type { NodeRef } from '../node/NodeRef.js'
+import { NodeType } from '../node/NodeType.js'
 
 import type { LinkState, NodeState } from './ExtendedState.js'
-import {
-  type Innovation,
-  InnovationLog,
-  type InnovationLinkRef,
-} from './InnovationLog.js'
+import { type Innovation, InnovationLog } from './InnovationLog.js'
 import type { StateData } from './StateData.js'
 import type { StateFactoryOptions } from './StateFactory.js'
 import type { StateProvider } from './StateProvider.js'
@@ -42,11 +38,6 @@ export class State<
     this.linkState = linkState
   }
 
-  getLinkSplitByHidden(hiddenNode: NodeRef): InnovationLinkRef | null {
-    const result = this.innovationLog.hiddenToLink.get(nodeRefToKey(hiddenNode))
-    return result ?? null
-  }
-
   getSplitInnovation(linkInnovation: number): Innovation {
     if (!this.innovationLog.splitInnovations.has(linkInnovation)) {
       const [from, to] = this.innovationLog.reverseConnectInnovations.get(
@@ -61,8 +52,6 @@ export class State<
         type: NodeType.Hidden,
         id: this.nextInnovation.nodeNumber,
       }
-
-      this.innovationLog.hiddenToLink.set(nodeRefToKey(newNode), [from, to])
 
       this.innovationLog.connectInnovations.set(
         nodeRefsToLinkKey(from, newNode),

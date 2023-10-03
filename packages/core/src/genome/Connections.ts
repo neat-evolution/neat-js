@@ -1,5 +1,5 @@
 import { nodeRefsToLinkKey, type LinkKey } from '../link/linkRefToKey.js'
-import type { NodeRef } from '../node/NodeData.js'
+import type { NodeRef } from '../node/NodeRef.js'
 import { nodeRefToKey, type NodeKey } from '../node/nodeRefToKey.js'
 
 /** weight */

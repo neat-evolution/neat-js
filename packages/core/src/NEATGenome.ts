@@ -1,11 +1,11 @@
-import { shuffle, threadRNG } from '@neat-js/utils'
+import { binarySearchFirst, shuffle, threadRNG } from '@neat-js/utils'
 
 import type { Config } from './config/Config.js'
 import { Connections } from './genome/Connections.js'
 import type { Genome } from './genome/Genome.js'
 import {
-  type GenomeDataNodeEntry,
-  type GenomeDataLinkEntry,
+  type GenomeDataNode,
+  type GenomeDataLink,
 } from './genome/GenomeData.js'
 import type { GenomeFactory } from './genome/GenomeFactory.js'
 import type { GenomeOptions } from './genome/GenomeOptions.js'
@@ -15,48 +15,19 @@ import { linkRefToKey, nodeRefsToLinkKey } from './link/linkRefToKey.js'
 import type { NEATGenomeData } from './NEATGenomeData.js'
 import type { NEATGenomeFactoryOptions } from './NEATGenomeFactoryOptions.js'
 import type { Node } from './node/Node.js'
-import { NodeType, type NodeRef } from './node/NodeData.js'
 import type { NodeFactory } from './node/NodeFactory.js'
+import type { NodeRef } from './node/NodeRef.js'
 import { nodeRefToKey, type NodeKey } from './node/nodeRefToKey.js'
-import type { State } from './state/State.js'
-
-/**
- * Trying to replicate Vec::binary_search from Rust.
- * Example: let source_index = wheel.binary_search(&val).unwrap_or_else(|x| x);
- * @param {number[]} arr Array to search
- * @param {number} val The value to search for
- * @returns {number} The index of the value if found, or the index where the value should be inserted
- */
-export const binarySearchFirst = <T>(arr: T[], val: T): number => {
-  let left = 0
-  let right = arr.length - 1
-  let result: number | null = null
-
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2)
-    if ((arr[mid] as T) < val) {
-      left = mid + 1
-    } else {
-      right = mid - 1
-      if (arr[mid] === val) {
-        result = mid
-      }
-    }
-  }
-
-  if (result !== null) {
-    return result
-  } else {
-    return left
-  }
-}
+import { NodeType } from './node/NodeType.js'
+import { toNodeRef } from './node/toNodeRef.js'
+import type { StateProvider } from './state/StateProvider.js'
 
 // FIXME: rename to CoreGenome
 export class NEATGenome<
   N extends Node<any, any, N>,
   L extends Link<any, any, L>,
   C extends Config<N['config'], L['config']>,
-  S extends State<N['state'], L['state'], S>,
+  S extends StateProvider<N['state'], L['state'], S>,
   GO extends GenomeOptions,
   GFO extends NEATGenomeFactoryOptions<N, L, C, S, GO, GFO, GD, G>,
   GD extends NEATGenomeData<N, L, C, S, GO, GFO, GD, G>,
@@ -120,7 +91,7 @@ export class NEATGenome<
     }
 
     if (factoryOptions != null) {
-      for (const [, { id, type }] of factoryOptions.hiddenNodes) {
+      for (const [type, id] of factoryOptions.hiddenNodes) {
         const node = this.createNode(
           type,
           id,
@@ -129,22 +100,19 @@ export class NEATGenome<
         )
         this.hiddenNodes.set(nodeRefToKey(node), node)
       }
-      for (const [
-        linkKey,
-        [fromKey, toKey, weight, innovation],
-      ] of factoryOptions.links) {
+      for (const [fromKey, toKey, weight, innovation] of factoryOptions.links) {
         const from = this.getNodeByKey(fromKey)
         const to = this.getNodeByKey(toKey)
         if (from == null || to == null) {
           throw new Error(
-            `Unable to hydrate link ${linkKey}; missing node; from: ${fromKey} ${
+            `Unable to hydrate link; missing node; from: ${fromKey} ${
               from != null
             }; to: ${toKey} ${to != null}`
           )
         }
         const link = this.createLink(
-          from,
-          to,
+          toNodeRef(from),
+          toNodeRef(to),
           weight,
           innovation,
           this.config.link(),
@@ -164,15 +132,15 @@ export class NEATGenome<
     )
   }
 
-  mutate(): void {
+  async mutate(): Promise<void> {
     const neatConfig = this.config.neat()
     const rng = threadRNG()
     if (rng.gen() < neatConfig.addNodeProbability) {
-      this.mutationAddNode()
+      await this.mutationAddNode()
     }
 
     if (rng.gen() < neatConfig.addLinkProbability) {
-      this.mutationAddLink()
+      await this.mutationAddLink()
     }
 
     if (rng.gen() < neatConfig.removeLinkProbability) {
@@ -285,6 +253,7 @@ export class NEATGenome<
       if (link2 != null) {
         genome.insertLink(link.crossover(link2, fitness, otherFitness), true)
       } else {
+        // FIXME: can this be considered safe?
         genome.insertLink(link.clone(), false)
       }
     }
@@ -307,7 +276,7 @@ export class NEATGenome<
           node.crossover(node2, fitness, otherFitness)
         )
       } else {
-        genome.hiddenNodes.set(nodeRef, node)
+        genome.hiddenNodes.set(nodeRef, node.clone())
       }
     }
 
@@ -319,7 +288,7 @@ export class NEATGenome<
           node.crossover(node2, fitness, otherFitness)
         )
       } else {
-        genome.outputs.set(nodeRef, node)
+        genome.outputs.set(nodeRef, node.clone())
       }
     }
 
@@ -384,7 +353,7 @@ export class NEATGenome<
       )
 
     // Insert new hidden node
-    this.hiddenNodes.set(newNodeKey, newNode)
+    this.hiddenNodes.set(newNodeKey, !isSafe ? newNode.clone() : newNode)
 
     type LinkDetails = [from: NodeRef, to: NodeRef, innovationNumber: number]
     let link1Details: LinkDetails
@@ -401,8 +370,8 @@ export class NEATGenome<
     // FIXME: why?
     const link1 = link.identity(
       this.createLink(
-        link1Details[0],
-        link1Details[1],
+        toNodeRef(link1Details[0]),
+        toNodeRef(link1Details[1]),
         1.0,
         link1Details[2],
         this.config.node(),
@@ -413,8 +382,8 @@ export class NEATGenome<
     // FIXME: why?
     const link2 = link.cloneWith(
       this.createLink(
-        link2Details[0],
-        link2Details[1],
+        toNodeRef(link2Details[0]),
+        toNodeRef(link2Details[1]),
         link.neat().weight,
         link2Details[2],
         this.config.node(),
@@ -460,7 +429,7 @@ export class NEATGenome<
     }
   }
 
-  mutationAddNode(): void {
+  async mutationAddNode(): Promise<void> {
     if (this.links.size === 0) {
       return
     }
@@ -479,7 +448,9 @@ export class NEATGenome<
         throw new Error('Unable to find link')
       }
 
-      const innovation = this.state.neat().getSplitInnovation(link.innovation)
+      const innovation = await this.state
+        .neat()
+        .getSplitInnovation(link.innovation)
 
       const newNodeRef = { type: NodeType.Hidden, id: innovation.nodeNumber }
       const linkFromKey = nodeRefsToLinkKey(link.from, newNodeRef)
@@ -497,7 +468,7 @@ export class NEATGenome<
     }
   }
 
-  mutationAddLink(): void {
+  async mutationAddLink(): Promise<void> {
     const rng = threadRNG()
     // Select random source and target nodes for new link
     const numSources = this.inputs.size + this.hiddenNodes.size
@@ -546,15 +517,15 @@ export class NEATGenome<
     // Try to create link with potential target nodes in random order
     for (const target of targetNodes) {
       if (!this.connections.createsCycle(source, target)) {
-        const innovation = this.state
+        const innovation = await this.state
           .neat()
           .getConnectInnovation(source, target)
         const weight =
           (rng.gen() - 0.5) * 2.0 * this.config.neat().initialLinkWeightSize
 
         const link = this.createLink(
-          source,
-          target,
+          toNodeRef(source),
+          toNodeRef(target),
           weight,
           innovation,
           this.config.link(),
@@ -607,48 +578,30 @@ export class NEATGenome<
   }
 
   toJSON(): GD {
-    const hiddenNodes: Array<GenomeDataNodeEntry<G>> = Array.from(
-      this.hiddenNodes.entries()
-    ).map(([nodeKey, node]) => [nodeKey, node.toFactoryOptions()])
-
-    const links: Array<GenomeDataLinkEntry<G>> = Array.from(
-      this.links.entries()
-    ).map(([linkKey, link]) => [
-      linkKey,
-      [
-        nodeRefToKey(link.from),
-        nodeRefToKey(link.to),
-        link.weight,
-        link.innovation,
-      ],
-    ])
-
     return {
       config: this.config.toJSON(),
       state: this.state.toJSON(),
       genomeOptions: this.genomeOptions,
-      hiddenNodes,
-      links,
-      isSafe: true,
+      ...this.toFactoryOptions(),
     } as unknown as GD
   }
 
   toFactoryOptions(): GFO {
-    const hiddenNodes: Array<GenomeDataNodeEntry<G>> = Array.from(
-      this.hiddenNodes.entries()
-    ).map(([nodeKey, node]) => [nodeKey, node.toFactoryOptions()])
+    const hiddenNodes: GenomeDataNode[] = []
+    const links: GenomeDataLink[] = []
 
-    const links: Array<GenomeDataLinkEntry<G>> = Array.from(
-      this.links.entries()
-    ).map(([linkKey, link]) => [
-      linkKey,
-      [
+    for (const [, node] of this.hiddenNodes) {
+      hiddenNodes.push(node.toFactoryOptions())
+    }
+
+    for (const [, link] of this.links) {
+      links.push([
         nodeRefToKey(link.from),
         nodeRefToKey(link.to),
         link.weight,
         link.innovation,
-      ],
-    ])
+      ])
+    }
 
     return {
       hiddenNodes,

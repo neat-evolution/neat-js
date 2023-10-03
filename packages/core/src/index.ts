@@ -6,7 +6,7 @@ export * from './config/ConfigProvider.js'
 export * from './config/ExtendedConfig.js'
 
 // src/genome/
-export * from './genome/Connections.js' // FIXME: move to a new home
+export * from './genome/Connections.js'
 export * from './genome/Genome.js'
 export * from './genome/GenomeData.js'
 export * from './genome/GenomeFactory.js'
@@ -25,7 +25,12 @@ export * from './node/Node.js'
 export * from './node/NodeData.js'
 export * from './node/NodeExtension.js'
 export * from './node/NodeFactory.js'
+export * from './node/nodeKeyToRef.js'
+export * from './node/NodeRef.js'
 export * from './node/nodeRefToKey.js'
+export * from './node/NodeType.js'
+export * from './node/nodeTypeToNumber.js'
+export * from './node/toNodeRef.js'
 
 // src/phenotype/
 export * from './phenotype/Phenotype.js'
@@ -42,6 +47,7 @@ export * from './state/StateProvider.js'
 
 // src/
 export * from './Activation.js'
+export * from './Algorithm.js'
 export * from './NEATConfigOptions.js'
 export * from './NEATGenome.js'
 export * from './NEATGenomeData.js'
