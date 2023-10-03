@@ -1,21 +1,30 @@
-import { Worker } from 'node:worker_threads'
-
+import type {
+  Algorithm,
+  ConfigData,
+  GenomeFactoryOptions,
+  GenomeOptions,
+} from '@neat-js/core'
 import type { Environment } from '@neat-js/environment'
-import type { Evaluator, FitnessData } from '@neat-js/evaluator'
-import type { SerializedPhenotypeData, PhenotypeData } from '@neat-js/phenotype'
-import { phenotypeDataToSharedBuffer } from '@neat-js/phenotype'
+import type {
+  Evaluator,
+  FitnessData,
+  GenomeEntries,
+  GenomeEntry,
+} from '@neat-js/evaluator'
+import { Worker } from '@neat-js/worker-threads'
 import { Sema } from 'async-sema'
 
-import type { WorkerEvaluatorOptions, RequestMapValue } from '../types.js'
+import type { RequestMapValue } from './RequestMapValue.js'
 import {
   ActionType,
   createAction,
   type Action,
-  type EvaluationResultAction,
   type InitPayload,
-} from '../WorkerAction.js'
+} from './WorkerAction.js'
+import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'
 
 export class WorkerEvaluator implements Evaluator {
+  public readonly algorithm: Algorithm<any, any, any, any, any, any, any, any>
   public readonly environment: Environment
 
   public readonly taskCount: number
@@ -28,7 +37,12 @@ export class WorkerEvaluator implements Evaluator {
   private readonly semaphore: Sema
   private readonly requestMap = new Map<Worker, RequestMapValue>()
 
-  constructor(environment: Environment, options: WorkerEvaluatorOptions) {
+  constructor(
+    algorithm: Algorithm<any, any, any, any, any, any, any, any>,
+    environment: Environment,
+    options: WorkerEvaluatorOptions
+  ) {
+    this.algorithm = algorithm
     this.environment = environment
 
     this.taskCount = options.taskCount
@@ -58,8 +72,8 @@ export class WorkerEvaluator implements Evaluator {
         )
         const messageListener = (action: Action<unknown>) => {
           switch (action.type) {
-            case ActionType.EVALUATION_RESULT: {
-              const data = action as EvaluationResultAction
+            case ActionType.RESPOND_EVALUATE_GENOME: {
+              const data = action as Action<number>
               const { resolve } = this.requestMap.get(worker) ?? {}
               if (resolve == null) {
                 throw new Error('no request found')
@@ -67,9 +81,12 @@ export class WorkerEvaluator implements Evaluator {
               resolve(data.payload)
               break
             }
-            case ActionType.INIT_SUCCESS: {
+            case ActionType.INIT_EVALUATOR_SUCCESS: {
               resolve()
               this.workers.push(worker)
+              break
+            }
+            case ActionType.INIT_GENOME_FACTORY_SUCCESS: {
               break
             }
             default: {
@@ -95,16 +112,17 @@ export class WorkerEvaluator implements Evaluator {
           }
         }
 
-        worker.on('message', messageListener)
-        worker.on('error', errorListener)
+        worker.addEventListener('message', messageListener)
+        worker.addEventListener('error', errorListener)
 
         const data: InitPayload = {
+          algorithmPathname: this.algorithm.pathname,
           createExecutorPathname: this.createExecutorPathname,
           createEnvironmentPathname: this.createEnvironmentPathname,
           environmentData: this.environment.serialize?.() ?? null,
         }
 
-        worker.postMessage(createAction(ActionType.INIT, data))
+        worker.postMessage(createAction(ActionType.INIT_EVALUATOR, data))
       })
 
       initPromises.push(initPromise)
@@ -112,10 +130,25 @@ export class WorkerEvaluator implements Evaluator {
     await Promise.allSettled(initPromises)
   }
 
-  async terminate() {
-    const terminatePromises = new Set<Promise<number>>()
+  async initGenomeFactory(
+    configData: ConfigData<any, any>,
+    genomeOptions: GenomeOptions
+  ) {
+    await this.initPromise
     for (const worker of this.workers) {
-      worker.unref()
+      worker.postMessage(
+        createAction(ActionType.INIT_GENOME_FACTORY, {
+          configData,
+          genomeOptions,
+        })
+      )
+    }
+  }
+
+  async terminate() {
+    const terminatePromises = new Set<Promise<void>>()
+    for (const worker of this.workers) {
+      // worker.unref()
       worker.postMessage(createAction(ActionType.TERMINATE, null))
       terminatePromises.add(worker.terminate())
     }
@@ -125,13 +158,13 @@ export class WorkerEvaluator implements Evaluator {
   }
 
   async *evaluate(
-    phenotypeData: Iterable<PhenotypeData>
+    genomeEntries: GenomeEntries<any>
   ): AsyncIterable<FitnessData> {
     await this.initPromise
     const promises: Array<Promise<FitnessData>> = []
 
-    for (const data of phenotypeData) {
-      const p = this.processData(data)
+    for (const entry of genomeEntries) {
+      const p = this.evaluateGenomeEntry(entry)
       promises.push(p)
     }
 
@@ -143,10 +176,10 @@ export class WorkerEvaluator implements Evaluator {
     }
   }
 
-  private async processData(
-    phenotypeData: PhenotypeData
+  private async evaluateGenomeEntry(
+    genomeEntry: GenomeEntry<any>
   ): Promise<FitnessData> {
-    const serializedPhenotypeData = phenotypeDataToSharedBuffer(phenotypeData)
+    await this.initPromise
     await this.semaphore.acquire()
     const worker = this.workers.pop()
 
@@ -158,7 +191,12 @@ export class WorkerEvaluator implements Evaluator {
     let fitnessData: FitnessData
 
     try {
-      fitnessData = await this.runWorker(worker, serializedPhenotypeData)
+      const [speciesIndex, organismIndex, genome] = genomeEntry
+      const fitness = await this.requestEvaluateGenome(
+        worker,
+        genome.toFactoryOptions()
+      )
+      fitnessData = [speciesIndex, organismIndex, fitness]
     } finally {
       this.semaphore.release()
       this.workers.push(worker)
@@ -166,12 +204,12 @@ export class WorkerEvaluator implements Evaluator {
     return fitnessData
   }
 
-  private async runWorker(
+  private async requestEvaluateGenome(
     worker: Worker,
-    serializedPhenotypeData: SerializedPhenotypeData
-  ): Promise<FitnessData> {
+    genomeFactoryOptions: GenomeFactoryOptions<any, any, any, any, any, any>
+  ): Promise<number> {
     return await new Promise((resolve, reject) => {
-      const customResolve = (value: FitnessData | PromiseLike<FitnessData>) => {
+      const customResolve = (value: number | PromiseLike<number>) => {
         this.requestMap.delete(worker)
         resolve(value)
       }
@@ -179,7 +217,7 @@ export class WorkerEvaluator implements Evaluator {
 
       // Post data to the worker
       worker.postMessage(
-        createAction(ActionType.EVALUATE, serializedPhenotypeData)
+        createAction(ActionType.REQUEST_EVALUATE_GENOME, genomeFactoryOptions)
       )
     })
   }

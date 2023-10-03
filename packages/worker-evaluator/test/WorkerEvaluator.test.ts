@@ -8,7 +8,11 @@ import {
   loadDataset,
   DatasetEnvironment,
 } from '@neat-js/dataset-environment'
-import { Population, defaultPopulationOptions } from '@neat-js/evolution'
+import {
+  Population,
+  createReproducer,
+  defaultPopulationOptions,
+} from '@neat-js/evolution'
 import {
   type DefaultNEATGenome,
   NEATAlgorithm,
@@ -24,7 +28,7 @@ import {
 } from '@neat-js/neat'
 import { beforeEach, describe, expect, test } from 'vitest'
 
-import { WorkerEvaluator } from '../src/browser.js'
+import { WorkerEvaluator } from '../_browser/browser.js'
 
 const root = __dirname
 const datasetOptions = {
@@ -46,7 +50,8 @@ type NeatPopulation = Population<
   DefaultNEATGenomeFactoryOptions,
   DefaultNEATGenomeData,
   DefaultNEATGenome,
-  typeof NEATAlgorithm
+  typeof NEATAlgorithm,
+  undefined
 >
 
 const foo = import.meta.glob('@neat-js/dataset-environment', {
@@ -91,10 +96,12 @@ describe('WorkerEvaluator', () => {
         populationSize: 1,
       }
       population = new Population(
+        createReproducer,
         evaluator,
         NEATAlgorithm,
         configProvider,
         populationOptions,
+        undefined,
         genomeOptions
       )
       // mutate population 100 times

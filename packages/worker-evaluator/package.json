@@ -12,32 +12,14 @@
     "access": "public",
     "registry": "https://npm.pkg.github.com"
   },
-  "main": "./dist/cjs/node.js",
-  "module": "./dist/esm/node.js",
-  "types": "./dist/types/node.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "import": {
-        "node": "./dist/esm/node.js",
-        "browser": "./dist/esm/browser.js",
-        "default": "./dist/esm/node.js"
-      },
-      "require": {
-        "node": "./dist/cjs/node.js",
-        "browser": "./dist/cjs/browser.js",
-        "default": "./dist/cjs/node.js"
-      }
-    },
-    "./browser": {
-      "types": "./dist/types/browser.d.ts",
-      "import": "./dist/esm/browser.js",
-      "require": "./dist/cjs/browser.js"
-    },
-    "./node": {
-      "types": "./dist/types/node.d.ts",
-      "import": "./dist/esm/node.js",
-      "require": "./dist/cjs/node.js"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     }
   },
   "files": [
@@ -62,16 +44,16 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@neat-js/core": "^0.0.1",
     "@neat-js/environment": "^0.0.1",
     "@neat-js/evaluator": "^0.0.1",
     "@neat-js/executor": "^0.0.1",
-    "@neat-js/phenotype": "^0.0.1",
+    "@neat-js/worker-threads": "^0.0.1",
     "@swc/helpers": "^0.5.1",
     "async-sema": "^3.1.1"
   },
   "devDependencies": {
     "@heygrady/eslint-config": "^1.5.0",
-    "@neat-js/core": "^0.0.1",
     "@neat-js/dataset-environment": "^0.0.1",
     "@neat-js/evolution": "^0.0.1",
     "@neat-js/neat": "^0.0.1",
