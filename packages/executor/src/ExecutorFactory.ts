@@ -1,4 +1,4 @@
-import type { Phenotype } from '@neat-js/phenotype'
+import type { Phenotype } from '@neat-js/core'
 
 import type { Executor } from './Executor.js'
 

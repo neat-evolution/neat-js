@@ -1,4 +1,4 @@
-import { type Activation } from '@neat-js/core'
+import { type Activation } from '../Activation.js'
 
 export enum PhenotypeActionType {
   Link = 'Link',

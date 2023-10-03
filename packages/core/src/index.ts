@@ -27,6 +27,11 @@ export * from './node/NodeExtension.js'
 export * from './node/NodeFactory.js'
 export * from './node/nodeRefToKey.js'
 
+// src/phenotype/
+export * from './phenotype/Phenotype.js'
+export * from './phenotype/PhenotypeAction.js'
+export * from './phenotype/PhenotypeFactory.js'
+
 // src/state/
 export * from './state/ExtendedState.js'
 export * from './state/InnovationLog.js'

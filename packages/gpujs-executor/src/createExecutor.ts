@@ -1,6 +1,6 @@
-import type { Activation } from '@neat-js/core'
+import { PhenotypeActionType } from '@neat-js/core'
+import type { Activation, Phenotype } from '@neat-js/core'
 import type { Executor, ExecutorFactory } from '@neat-js/executor'
-import { type Phenotype, PhenotypeActionType } from '@neat-js/phenotype'
 import { GPU, Texture } from 'gpu.js'
 
 import {
