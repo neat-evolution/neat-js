@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "esnext",
+            "dom",
+            "webworker"
+        ],
+        "allowJs": true,
+        "checkJs": false,
+        "declaration": false,
+        "noEmit": true,
+        "allowSyntheticDefaultImports": true,
+        "isolatedModules": true,
+        "resolveJsonModule": false,
+        "useDefineForClassFields": true
+    },
+    "extends": [
+        "@tsconfig/node16/tsconfig.json",
+        "@tsconfig/vite-react/tsconfig.json",
+        "@tsconfig/strictest/tsconfig.json",
+        "@tsconfig/esm/tsconfig.json"
+    ],
+    "include": [
+        "src",
+        "test"
+    ]
+}
