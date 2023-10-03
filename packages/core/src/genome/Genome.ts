@@ -24,7 +24,7 @@ export interface Genome<
   clone: () => G
 
   crossover: (other: G, fitness: number, otherFitness: number) => G
-  mutate: () => void
+  mutate: () => Promise<void>
   distance: (other: G) => number
 
   // Stats

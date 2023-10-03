@@ -1,4 +1,4 @@
-import type { NodeRef } from '../node/NodeData.js'
+import type { NodeRef } from '../node/NodeRef.js'
 import { toNodeKey } from '../node/nodeRefToKey.js'
 
 import type { LinkRef } from './LinkData.js'

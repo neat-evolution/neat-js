@@ -1,10 +1,11 @@
 import type { NodeConfig } from '../config/ExtendedConfig.js'
 import type { NodeState } from '../state/ExtendedState.js'
 
-import { type NodeType, type NodeData } from './NodeData.js'
+import type { NodeData } from './NodeData.js'
 import type { NodeExtension } from './NodeExtension.js'
 import type { NodeFactory, NodeFactoryOptions } from './NodeFactory.js'
 import { toNodeKey } from './nodeRefToKey.js'
+import type { NodeType } from './NodeType.js'
 
 export class Node<
   NC extends NodeConfig,
@@ -12,8 +13,8 @@ export class Node<
   N extends NodeExtension<NC, NS, N>
 > implements NodeExtension<NC, NS, N>
 {
-  public readonly id: number
   public readonly type: NodeType
+  public readonly id: number
   public readonly config: NC
   public readonly state: NS
   public readonly createNode: NodeFactory<NC, NS, N>
@@ -25,8 +26,8 @@ export class Node<
     state: NS,
     createNode: NodeFactory<NC, NS, N>
   ) {
-    this.id = id
     this.type = type
+    this.id = id
     this.config = config
     this.state = state
     this.createNode = createNode
@@ -40,6 +41,10 @@ export class Node<
     if (this.type !== other.type || this.id !== other.id) {
       throw new Error('Mismatch in crossover')
     }
+    return this.createNode(this.type, this.id, this.config, this.state)
+  }
+
+  clone(): N {
     return this.createNode(this.type, this.id, this.config, this.state)
   }
 
@@ -62,10 +67,7 @@ export class Node<
     }
   }
 
-  toFactoryOptions(): NodeFactoryOptions<NC, NS> {
-    return {
-      type: this.type,
-      id: this.id,
-    }
+  toFactoryOptions(): NodeFactoryOptions {
+    return [this.type, this.id]
   }
 }

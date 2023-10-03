@@ -1,16 +1,7 @@
 import type { NodeConfig } from '../config/ExtendedConfig.js'
 import type { NodeState } from '../state/ExtendedState.js'
 
-export enum NodeType {
-  Input = 'Input',
-  Hidden = 'Hidden',
-  Output = 'Output',
-}
-
-export interface NodeRef {
-  id: number
-  type: NodeType
-}
+import { type NodeRef } from './NodeRef.js'
 
 export interface NodeData<C extends NodeConfig, S extends NodeState>
   extends NodeRef {

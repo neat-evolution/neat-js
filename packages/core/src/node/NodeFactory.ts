@@ -1,13 +1,11 @@
 import type { NodeConfig } from '../config/ExtendedConfig.js'
 import type { NodeState } from '../state/ExtendedState.js'
 
-import type { NodeData, NodeType } from './NodeData.js'
 import type { NodeExtension } from './NodeExtension.js'
+import type { NodeRefTuple } from './NodeRef.js'
+import type { NodeType } from './NodeType.js'
 
-export type NodeFactoryOptions<
-  NC extends NodeConfig,
-  NS extends NodeState
-> = Omit<NodeData<NC, NS>, 'config' | 'state'>
+export type NodeFactoryOptions = NodeRefTuple
 
 export type NodeFactory<
   NC extends NodeConfig,

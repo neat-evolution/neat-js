@@ -1,4 +1,7 @@
+import type { NodeRef } from '../index.js'
+
 import type { LinkState, NodeState } from './ExtendedState.js'
+import type { Innovation } from './InnovationLog.js'
 import type { StateData } from './StateData.js'
 
 export interface StateProvider<
@@ -9,7 +12,13 @@ export interface StateProvider<
   readonly nodeState: NS
   readonly linkState: LS
 
+  getSplitInnovation: (
+    linkInnovation: number
+  ) => Innovation | Promise<Innovation>
+  getConnectInnovation: (from: NodeRef, to: NodeRef) => number | Promise<number>
+
   neat: () => this
+
   /** only useful in des-hyperneat */
   node: () => NS
 
