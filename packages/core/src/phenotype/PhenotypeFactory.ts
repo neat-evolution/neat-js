@@ -1,4 +1,4 @@
-import type { Genome } from '@neat-js/core'
+import type { Genome } from '../genome/Genome.js'
 
 import type { Phenotype } from './Phenotype.js'
 

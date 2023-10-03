@@ -1,4 +1,4 @@
-import { type Phenotype, PhenotypeActionType } from '@neat-js/phenotype'
+import { type Phenotype, PhenotypeActionType } from '@neat-js/core'
 import * as tf from '@tensorflow/tfjs-node'
 
 import { toActivationFunction } from './toActivationFunction.js'
