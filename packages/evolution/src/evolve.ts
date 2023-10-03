@@ -3,14 +3,14 @@ import type { Organism } from './Organism.js'
 import { type Population } from './Population.js'
 
 export const evolve = async <
-  P extends Population<any, any, any, any, any, any, any, any, any>,
+  P extends Population<any, any, any, any, any, any, any, any, any, any>,
   O extends EvolutionOptions = EvolutionOptions
 >(
   population: P,
   options: O
 ) => {
   for (let _ = 0; _ < options.initialMutations; _++) {
-    population.mutate()
+    await population.mutate()
   }
 
   const iterations =
@@ -47,7 +47,7 @@ export const evolve = async <
       )
     }
 
-    population.evolve()
+    await population.evolve()
     if (i % 10 === 0) {
       console.log(`took ${Date.now() - iterationStartTime}ms`)
       console.log('---')

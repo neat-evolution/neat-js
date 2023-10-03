@@ -1,4 +1,4 @@
-import type { Genome, GenomeData } from '@neat-js/core'
+import type { Genome, GenomeData, InitConfig } from '@neat-js/core'
 
 export interface OrganismState {
   fitness: number | null
@@ -8,8 +8,9 @@ export interface OrganismState {
 
 // FIXME: Add OrganismFactoryOptions
 export interface OrganismData<
-  G extends Genome<any, any, any, any, any, any, any, G>
+  GO extends InitConfig,
+  G extends Genome<any, any, any, any, GO, any, any, G>
 > {
-  genome: GenomeData<any, G>
+  genome: GenomeData<GO, G>
   organismState: OrganismState
 }

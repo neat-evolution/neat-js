@@ -36,8 +36,8 @@ export class Organism<G extends Genome<any, any, any, any, any, any, any, G>> {
   }
 
   // Mutate organism
-  mutate(): void {
-    this.genome.mutate()
+  async mutate(): Promise<void> {
+    await this.genome.mutate()
   }
 
   // Genetic distance to other organism
@@ -50,7 +50,7 @@ export class Organism<G extends Genome<any, any, any, any, any, any, any, G>> {
     return new Organism<G>(this.genome.clone(), this.generation + 1)
   }
 
-  toJSON(): OrganismData<G> {
+  toJSON(): OrganismData<any, G> {
     return {
       // FIXME: use this.genome.toFactoryOptions()
       genome: this.genome.toJSON(),
