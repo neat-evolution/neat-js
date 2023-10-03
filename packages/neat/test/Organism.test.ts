@@ -7,7 +7,9 @@ import { createConfig } from '../src/createConfig.js'
 import { createGenome } from '../src/createGenome.js'
 import { createState } from '../src/createState.js'
 import { type DefaultNEATGenome } from '../src/DefaultNEATGenome.js'
+import { fromSharedBuffer } from '../src/fromSharedBuffer.js'
 import { defaultNEATGenomeOptions } from '../src/NEATGenomeOptions.js'
+import { toSharedBuffer } from '../src/toSharedBuffer.js'
 
 describe('Organism class', () => {
   let state: DefaultNEATGenome['state']

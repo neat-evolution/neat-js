@@ -5,13 +5,11 @@ import {
   nodeRefToKey,
   type NodeRef,
   NodeType,
+  type Phenotype,
+  type PhenotypeAction,
+  type PhenotypeFactory,
 } from '@neat-js/core'
-import { PhenotypeActionType } from '@neat-js/phenotype'
-import type {
-  Phenotype,
-  PhenotypeAction,
-  PhenotypeFactory,
-} from '@neat-js/phenotype'
+import { PhenotypeActionType } from '@neat-js/core'
 
 import type { DefaultNEATGenome } from './DefaultNEATGenome.js'
 
