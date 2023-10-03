@@ -30,14 +30,14 @@ export const toSharedBuffer = (
   for (const node of data.hiddenNodes) {
     view.setFloat64(offset, 1, true)
     offset += Float64Array.BYTES_PER_ELEMENT // type
-    view.setFloat64(offset, node[1].id, true)
+    view.setFloat64(offset, node[1], true)
     offset += Float64Array.BYTES_PER_ELEMENT // id
   }
 
   // Links
   for (const link of data.links) {
-    const from = nodeKeyToTuple(link[1][0])
-    const to = nodeKeyToTuple(link[1][1])
+    const from = nodeKeyToTuple(link[0])
+    const to = nodeKeyToTuple(link[1])
     view.setFloat64(offset, from[0], true)
     offset += Float64Array.BYTES_PER_ELEMENT
     view.setFloat64(offset, from[1], true)
@@ -46,9 +46,9 @@ export const toSharedBuffer = (
     offset += Float64Array.BYTES_PER_ELEMENT
     view.setFloat64(offset, to[1], true)
     offset += Float64Array.BYTES_PER_ELEMENT
-    view.setFloat64(offset, link[1][2], true)
+    view.setFloat64(offset, link[2], true)
     offset += Float64Array.BYTES_PER_ELEMENT
-    view.setFloat64(offset, link[1][3], true)
+    view.setFloat64(offset, link[3], true)
     offset += Float64Array.BYTES_PER_ELEMENT
   }
 
