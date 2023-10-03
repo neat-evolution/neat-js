@@ -207,7 +207,9 @@ export class Species<
   }
 
   lock(): void {
-    if (this.speciesState.locked) throw new Error('Species is already locked.')
+    if (this.speciesState.locked) {
+      throw new Error('Species is already locked.')
+    }
 
     this.speciesState.lockedOrganisms = this.organisms.length
     this.speciesState.locked = true
@@ -220,7 +222,9 @@ export class Species<
 
   // Remove all the locked organisms (the old generation), and retain the organisms pushed after lock (next generation)
   removeOld(): void {
-    if (!this.speciesState.locked) throw new Error('Species is not locked.')
+    if (!this.speciesState.locked) {
+      throw new Error('Species is not locked.')
+    }
 
     this.speciesState.locked = false
 

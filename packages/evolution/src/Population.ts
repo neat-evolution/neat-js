@@ -7,12 +7,11 @@ import {
   type NodeExtension,
   type LinkExtension,
   type StateProvider,
+  type Algorithm,
 } from '@neat-js/core'
-import type { Evaluator } from '@neat-js/evaluator'
-import { type PhenotypeData } from '@neat-js/phenotype'
+import type { Evaluator, GenomeEntry } from '@neat-js/evaluator'
 import { threadRNG } from '@neat-js/utils'
 
-import type { Algorithm } from './Algorithm.js'
 import { Organism } from './Organism.js'
 import type { OrganismState } from './OrganismData.js'
 import {
@@ -23,11 +22,11 @@ import {
 } from './PopulationData.js'
 import type { PopulationFactoryOptions } from './PopulationFactoryOptions.js'
 import type { PopulationOptions } from './PopulationOptions.js'
+import type { Reproducer } from './reproducer/Reproducer.js'
+import type { ReproducerFactory } from './reproducer/ReproducerFactory.js'
+import type { ReproducerFactoryOptions } from './reproducer/ReproducerFactoryOptions.js'
 import { Species } from './Species.js'
 
-export type BoundConfigFactory<C extends ConfigProvider<any, any>> = () => C
-
-// FIXME: Add PopulationData and PopulationFactoryOptions
 export class Population<
   N extends NodeExtension<any, any, N>,
   L extends LinkExtension<any, any, L>,
@@ -37,9 +36,11 @@ export class Population<
   GFO extends GenomeFactoryOptions<C, S, GO, GFO, GD, G>,
   GD extends GenomeData<GO, G>,
   G extends Genome<N, L, C, S, GO, GFO, GD, G>,
-  A extends Algorithm<N, L, C, S, GO, GFO, GD, G>
+  A extends Algorithm<N, L, C, S, GO, GFO, GD, G>,
+  RFO extends ReproducerFactoryOptions
 > {
   public readonly evaluator: Evaluator
+  public readonly reproducer: Reproducer<G>
   public readonly algorithm: A
   public readonly configProvider: G['config']
   public readonly stateProvider: G['state']
@@ -50,12 +51,19 @@ export class Population<
 
   public readonly populationOptions: PopulationOptions
   public readonly genomeOptions: GO
+  public readonly evaluatorReady: Promise<void>
 
   constructor(
+    createReproducer: ReproducerFactory<
+      G,
+      Population<N, L, C, S, GO, GFO, GD, G, A, RFO>,
+      RFO
+    >,
     evaluator: Evaluator,
     algorithm: A,
     configProvider: G['config'],
     populationOptions: PopulationOptions,
+    reproducerOptions: RFO,
     genomeOptions: GO,
     populationFactoryOptions?: PopulationFactoryOptions<GO, GD, G>
   ) {
@@ -67,6 +75,7 @@ export class Population<
     )
 
     this.species = new Map<number, Species<GO, GD, G>>()
+
     this.extinctSpecies = new Map<number, Species<GO, GD, G>>()
     this.nextId = populationFactoryOptions?.nextId ?? 0
 
@@ -134,6 +143,13 @@ export class Population<
         this.push(new Organism<G>(genome), false)
       }
     }
+
+    // Must be last
+    this.reproducer = createReproducer(this, reproducerOptions)
+    this.evaluatorReady = this.evaluator.initGenomeFactory(
+      this.configProvider.toJSON(),
+      this.genomeOptions
+    )
   }
 
   /// Add organism to population
@@ -165,7 +181,7 @@ export class Population<
   }
 
   /// Evolve the population
-  evolve(): void {
+  async evolve(): Promise<void> {
     // Adjust fitnesses based on age, stagnation and apply fitness sharing
     // Also sorts organisms by descending fitness
     for (const species of this.species.values()) {
@@ -273,61 +289,16 @@ export class Population<
       species.age()
     }
 
-    for (const i of speciesIds) {
-      const species = this.species.get(i) as Species<GO, GD, G>
-      // Steal elites from number of offsprings
-      const elitesTakenFromOffspring = Math.min(
-        this.populationOptions.elitesFromOffspring,
-        Math.floor(species.offsprings)
-      )
-      species.elites += elitesTakenFromOffspring
-      species.offsprings -= elitesTakenFromOffspring
+    // Perform copyElites and reproduce simultaneously
+    const promises: Array<Promise<Array<Organism<G>>>> = []
 
-      // Directly copy elites, without crossover or mutation
-      for (let j = 0; j < species.elites; j++) {
-        const organism = species.organisms[j % species.size] as Organism<G>
-        this.push(organism.asElite(), true)
-      }
-    }
+    // Directly copy elites, without crossover or mutation
+    promises.push(this.reproducer.copyElites(speciesIds))
 
     // Evolve species
-    const rng = threadRNG()
-    for (const i of speciesIds) {
-      const species = this.species.get(i) as Species<GO, GD, G>
-      const reproductions = Math.floor(species.offsprings)
+    promises.push(this.reproducer.reproduce(speciesIds))
 
-      // Breed new organisms
-      for (let _ = 0; _ < reproductions; _++) {
-        const father =
-          rng.gen() < this.populationOptions.interspeciesReproductionProbability
-            ? // Interspecies breeding
-              this.tournamentSelect(
-                this.populationOptions.interspeciesTournamentSize
-              )
-            : // Breeding within species
-              species.tournamentSelect(this.populationOptions.tournamentSize)
-
-        if (father == null) {
-          throw new Error('Unable to gather father organism')
-        }
-
-        let child: Organism<G>
-        if (rng.gen() < this.populationOptions.asexualReproductionProbability) {
-          child = father.asElite()
-        } else {
-          const mother = species.tournamentSelect(
-            this.populationOptions.tournamentSize
-          )
-          if (mother == null) {
-            throw new Error('Unable to gather mother organism')
-          }
-          child = mother.crossover(father)
-        }
-
-        child.mutate()
-        this.push(child, true)
-      }
-    }
+    await Promise.all(promises)
 
     // Kill old population
     for (const species of this.species.values()) {
@@ -365,10 +336,12 @@ export class Population<
     }
   }
 
-  mutate() {
+  async mutate() {
+    const promises: Array<Promise<void>> = []
     for (const organism of this.organismValues()) {
-      organism.mutate()
+      promises.push(organism.mutate())
     }
+    await Promise.all(promises)
   }
 
   /// Get random organism from population
@@ -412,16 +385,10 @@ export class Population<
 
   /// Update fitness of all organisms
   async evaluate() {
-    const phenotypeData = new Set<PhenotypeData>()
+    await this.evaluatorReady
 
-    // convert every organism to a phenotype
-    for (const [speciesIndex, organismIndex, genome] of this.genomeEntries()) {
-      const phenotype = this.algorithm.createPhenotype(genome)
-      phenotypeData.add([speciesIndex, organismIndex, phenotype])
-    }
-
-    // evaluate every organism
-    for await (const result of this.evaluator.evaluate(phenotypeData)) {
+    // evaluate every organism's genome
+    for await (const result of this.evaluator.evaluate(this.genomeEntries())) {
       const [speciesIndex, organismIndex, fitness] = result
       const species = this.species.get(speciesIndex)
       if (species == null) {
@@ -453,9 +420,7 @@ export class Population<
   }
 
   /// Enumerate genomes. Adheres to lock.
-  *genomeEntries(): IterableIterator<
-    [speciesIndex: number, organismIndex: number, genome: G]
-  > {
+  *genomeEntries(): IterableIterator<GenomeEntry<G>> {
     for (const [speciesIndex, species] of this.species.entries()) {
       for (const [organismIndex, { genome }] of species.organismEntries()) {
         yield [speciesIndex, organismIndex, genome]

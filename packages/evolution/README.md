@@ -39,6 +39,7 @@ import {
 } from '@neat-js/neat'
 
 import {
+  createReproducer,
   defaultEvolutionOptions,
   defaultPopulationOptions,
   evolve,
@@ -81,12 +82,15 @@ const population = new Population<
   DefaultNEATGenomeFactoryOptions,
   DefaultNEATGenomeData,
   DefaultNEATGenome,
-  typeof NEATAlgorithm
+  typeof NEATAlgorithm,
+  undefined
 >(
+  createReproducer,
   evaluator,
   NEATAlgorithm,
   configProvider,
   defaultPopulationOptions,
+  undefined,
   mergedGenomeOptions
 )
 

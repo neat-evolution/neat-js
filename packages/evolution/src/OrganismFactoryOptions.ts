@@ -1,3 +1,3 @@
 import type { OrganismData } from './OrganismData.js'
 
-export type OrganismFactoryOptions = OrganismData<any>['organismState']
+export type OrganismFactoryOptions = OrganismData<any, any>['organismState']
