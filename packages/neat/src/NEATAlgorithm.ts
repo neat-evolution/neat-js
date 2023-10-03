@@ -1,4 +1,4 @@
-import type { Algorithm } from '@neat-js/evolution'
+import type { Algorithm } from '@neat-js/core'
 
 import { createConfig } from './createConfig.js'
 import { createGenome } from './createGenome.js'
@@ -11,6 +11,7 @@ import {
   type DefaultNEATGenomeData,
   type DefaultNEATGenomeFactoryOptions,
 } from './DefaultNEATGenome.js'
+import { fromSharedBuffer } from './fromSharedBuffer.js'
 import type { NEATConfig } from './NEATConfig.js'
 import {
   defaultNEATGenomeOptions,
@@ -19,6 +20,7 @@ import {
 import type { NEATLink } from './NEATLink.js'
 import type { NEATNode } from './NEATNode.js'
 import type { NEATState } from './NEATState.js'
+import { toSharedBuffer } from './toSharedBuffer.js'
 
 export const NEATAlgorithm: Algorithm<
   NEATNode,
@@ -31,6 +33,7 @@ export const NEATAlgorithm: Algorithm<
   DefaultNEATGenome
 > = {
   name: 'NEAT',
+  pathname: '@neat-js/neat',
   defaultOptions: defaultNEATGenomeOptions,
   createConfig,
   createGenome,
@@ -38,4 +41,6 @@ export const NEATAlgorithm: Algorithm<
   createNode,
   createPhenotype,
   createState,
+  toSharedBuffer,
+  fromSharedBuffer,
 }

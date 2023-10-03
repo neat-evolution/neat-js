@@ -6,6 +6,7 @@ import {
 } from '@neat-js/dataset-environment'
 import { createEvaluator, type Evaluator } from '@neat-js/evaluator'
 import {
+  createReproducer,
   Population,
   defaultPopulationOptions,
   type PopulationOptions,
@@ -33,6 +34,7 @@ import {
   createGenome,
   createPhenotype,
   type NEATConfig,
+  type NEATPopulation,
   type NEATState,
   NEATAlgorithm,
   type NEATLink,
@@ -67,21 +69,13 @@ describe('Population class', () => {
   })
 
   test('should correctly initialize', () => {
-    const population = new Population<
-      NEATNode,
-      NEATLink,
-      NEATConfig,
-      NEATState,
-      NEATGenomeOptions,
-      DefaultNEATGenomeFactoryOptions,
-      DefaultNEATGenomeData,
-      DefaultNEATGenome,
-      typeof NEATAlgorithm
-    >(
+    const population: NEATPopulation<undefined> = new Population(
+      createReproducer,
       evaluator,
       NEATAlgorithm,
       configProvider,
       populationOptions,
+      undefined,
       genomeOptions
     )
 
@@ -103,33 +97,15 @@ describe('Population class', () => {
   })
 
   describe('Population.size', () => {
-    let population: Population<
-      NEATNode,
-      NEATLink,
-      NEATConfig,
-      NEATState,
-      NEATGenomeOptions,
-      DefaultNEATGenomeFactoryOptions,
-      DefaultNEATGenomeData,
-      DefaultNEATGenome,
-      typeof NEATAlgorithm
-    >
+    let population: NEATPopulation<undefined>
     beforeEach(() => {
-      population = new Population<
-        NEATNode,
-        NEATLink,
-        NEATConfig,
-        NEATState,
-        NEATGenomeOptions,
-        DefaultNEATGenomeFactoryOptions,
-        DefaultNEATGenomeData,
-        DefaultNEATGenome,
-        typeof NEATAlgorithm
-      >(
+      population = new Population(
+        createReproducer,
         evaluator,
         NEATAlgorithm,
         configProvider,
         populationOptions,
+        undefined,
         genomeOptions
       )
     })
@@ -140,33 +116,15 @@ describe('Population class', () => {
   })
 
   describe('Population.species.size', () => {
-    let population: Population<
-      NEATNode,
-      NEATLink,
-      NEATConfig,
-      NEATState,
-      NEATGenomeOptions,
-      DefaultNEATGenomeFactoryOptions,
-      DefaultNEATGenomeData,
-      DefaultNEATGenome,
-      typeof NEATAlgorithm
-    >
+    let population: NEATPopulation<undefined>
     beforeEach(async () => {
-      population = new Population<
-        NEATNode,
-        NEATLink,
-        NEATConfig,
-        NEATState,
-        NEATGenomeOptions,
-        DefaultNEATGenomeFactoryOptions,
-        DefaultNEATGenomeData,
-        DefaultNEATGenome,
-        typeof NEATAlgorithm
-      >(
+      population = new Population(
+        createReproducer,
         evaluator,
         NEATAlgorithm,
         configProvider,
         populationOptions,
+        undefined,
         genomeOptions
       )
       for (let i = 0; i < 100; i++) {
@@ -178,21 +136,13 @@ describe('Population class', () => {
     test('should initialize with only one species', () => {
       let speciesCount = 0
       for (let i = 0; i < 100; i++) {
-        population = new Population<
-          NEATNode,
-          NEATLink,
-          NEATConfig,
-          NEATState,
-          NEATGenomeOptions,
-          DefaultNEATGenomeFactoryOptions,
-          DefaultNEATGenomeData,
-          DefaultNEATGenome,
-          typeof NEATAlgorithm
-        >(
+        population = new Population(
+          createReproducer,
           evaluator,
           NEATAlgorithm,
           configProvider,
           populationOptions,
+          undefined,
           genomeOptions
         )
         speciesCount += population.species.size
@@ -214,33 +164,15 @@ describe('Population class', () => {
   })
 
   describe('Population.evolve', () => {
-    let population: Population<
-      NEATNode,
-      NEATLink,
-      NEATConfig,
-      NEATState,
-      NEATGenomeOptions,
-      DefaultNEATGenomeFactoryOptions,
-      DefaultNEATGenomeData,
-      DefaultNEATGenome,
-      typeof NEATAlgorithm
-    >
+    let population: NEATPopulation<undefined>
     beforeEach(async () => {
-      population = new Population<
-        NEATNode,
-        NEATLink,
-        NEATConfig,
-        NEATState,
-        NEATGenomeOptions,
-        DefaultNEATGenomeFactoryOptions,
-        DefaultNEATGenomeData,
-        DefaultNEATGenome,
-        typeof NEATAlgorithm
-      >(
+      population = new Population(
+        createReproducer,
         evaluator,
         NEATAlgorithm,
         configProvider,
         populationOptions,
+        undefined,
         genomeOptions
       )
 

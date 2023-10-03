@@ -1,9 +1,9 @@
-import { defaultNEATConfigOptions } from '@neat-js/core'
 import {
+  defaultNEATConfigOptions,
   isPhenotypeLinkAction,
   phenotypeDataFromSharedBuffer,
   phenotypeDataToSharedBuffer,
-} from '@neat-js/phenotype'
+} from '@neat-js/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
