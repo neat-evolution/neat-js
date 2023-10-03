@@ -1,3 +1,4 @@
+import { defaultNEATConfigOptions } from '@neat-js/core'
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
@@ -6,11 +7,20 @@ import {
 import type { EvaluatorFactory } from '@neat-js/evaluator'
 import {
   defaultEvolutionOptions,
+  defaultPopulationOptions,
   type EvolutionOptions,
 } from '@neat-js/evolution'
-import { neat } from '@neat-js/neat'
+import {
+  defaultNEATGenomeOptions,
+  neat,
+  NEATAlgorithm,
+  type NEATReproducerFactory,
+} from '@neat-js/neat'
 
-export const demo = async (createEvaluator: EvaluatorFactory<null>) => {
+export const demo = async (
+  createReproducer: NEATReproducerFactory<undefined>,
+  createEvaluator: EvaluatorFactory<null>
+) => {
   const datasetOptions = defaultDatasetOptions
   datasetOptions.dataset = new URL(
     // FIXME: make dataset pathname an env variable
@@ -22,13 +32,21 @@ export const demo = async (createEvaluator: EvaluatorFactory<null>) => {
 
   const dataset = await loadDataset(datasetOptions)
   const environment = new DatasetEnvironment(dataset)
-  const evaluator = createEvaluator(environment, null)
+  const evaluator = createEvaluator(NEATAlgorithm, environment, null)
 
   const evolutionOptions: EvolutionOptions = {
     ...defaultEvolutionOptions,
-    iterations: 500,
-    secondsLimit: 60,
+    iterations: 5_000,
+    secondsLimit: 600,
   }
-  const best = await neat(evaluator, evolutionOptions)
+  const best = await neat(
+    createReproducer,
+    evaluator,
+    evolutionOptions,
+    defaultNEATConfigOptions,
+    defaultPopulationOptions,
+    undefined,
+    defaultNEATGenomeOptions
+  )
   return best
 }

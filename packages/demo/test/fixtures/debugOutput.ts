@@ -11,17 +11,15 @@ import {
   type Action,
   type Connection,
   type Activation,
+  PhenotypeActionType,
+  type Phenotype,
+  type PhenotypeLinkAction,
+  type PhenotypeActivationAction,
 } from '@neat-js/core'
 import type {
   DefaultNEATGenome,
   DefaultNEATGenomeFactoryOptions,
 } from '@neat-js/neat'
-import {
-  PhenotypeActionType,
-  type Phenotype,
-  type PhenotypeLinkAction,
-  type PhenotypeActivationAction,
-} from '@neat-js/phenotype'
 
 const knownNodes = new Set<string>()
 const linksMap = new Map<string, GenomeDataLink<DefaultNEATGenome>>()
