@@ -1,5 +1,7 @@
+import type { ConfigData, GenomeOptions } from '@neat-js/core'
 import type { Environment } from '@neat-js/environment'
-import type { PhenotypeData } from '@neat-js/phenotype'
+
+import type { GenomeEntries } from './GenomeEntries.js'
 
 export type FitnessData = [
   speciesIndex: number,
@@ -9,7 +11,15 @@ export type FitnessData = [
 
 export interface Evaluator {
   environment: Environment
-  evaluate: (
-    organismData: Iterable<PhenotypeData>
-  ) => AsyncIterable<FitnessData>
+  /**
+   * Used by worker-evaluator to hydrate the genome within the worker.
+   * @param {ConfigData<any, any>} configData data from population.configProvider.toJSON()
+   * @param {GenomeOptions} genomeOptions genome options from population.genomeOptions
+   * @returns {Promise<void>} void
+   */
+  initGenomeFactory: (
+    configData: ConfigData<any, any>,
+    genomeOptions: GenomeOptions
+  ) => Promise<void>
+  evaluate: (genomeEntries: GenomeEntries<any>) => AsyncIterable<FitnessData>
 }
