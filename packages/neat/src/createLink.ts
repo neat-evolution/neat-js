@@ -1,10 +1,10 @@
-import type { LinkFactory, NodeRef } from '@neat-js/core'
+import type { LinkFactory, NodeKey } from '@neat-js/core'
 
 import { NEATLink } from './NEATLink.js'
 
 export const createLink: LinkFactory<null, null, NEATLink> = (
-  from: NodeRef,
-  to: NodeRef,
+  from: NodeKey,
+  to: NodeKey,
   weight: number,
   innovation: number
 ): NEATLink => {

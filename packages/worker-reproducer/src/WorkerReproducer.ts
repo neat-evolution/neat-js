@@ -204,13 +204,13 @@ export class WorkerReproducer<
       throw new Error('No organism found')
     }
     // FIXME: OrganismPayload<GFO>
-    const data: OrganismPayload<any> = {
+    const payload: OrganismPayload<any> = {
       genome: organism.genome.toFactoryOptions(),
       organismState: organism.toFactoryOptions(),
       requestId: action.payload.requestId,
     }
     worker.postMessage(
-      createAction(ActionType.RESPOND_POPULATION_TOURNAMENT_SELECT, data)
+      createAction(ActionType.RESPOND_POPULATION_TOURNAMENT_SELECT, payload)
     )
   }
 
@@ -231,13 +231,13 @@ export class WorkerReproducer<
       throw new Error('No organism found')
     }
     // FIXME: OrganismPayload<GFO>
-    const data: OrganismPayload<any> = {
+    const payload: OrganismPayload<any> = {
       genome: organism.genome.toFactoryOptions(),
       organismState: organism.toFactoryOptions(),
       requestId: action.payload.requestId,
     }
     worker.postMessage(
-      createAction(ActionType.RESPOND_SPECIES_TOURNAMENT_SELECT, data)
+      createAction(ActionType.RESPOND_SPECIES_TOURNAMENT_SELECT, payload)
     )
   }
 
@@ -248,11 +248,13 @@ export class WorkerReproducer<
     const innovation: Innovation = this.population.stateProvider
       .neat()
       .getSplitInnovation(action.payload.innovation)
-    const data = {
+    const payload = {
       requestId: action.payload.requestId,
       ...innovation,
     }
-    worker.postMessage(createAction(ActionType.RESPOND_SPLIT_INNOVATION, data))
+    worker.postMessage(
+      createAction(ActionType.RESPOND_SPLIT_INNOVATION, payload)
+    )
   }
 
   protected handleRequestConnectInnovation(
@@ -265,12 +267,12 @@ export class WorkerReproducer<
         nodeKeyToRef(action.payload.from),
         nodeKeyToRef(action.payload.to)
       )
-    const data = {
+    const payload = {
       requestId: action.payload.requestId,
       innovation,
     }
     worker.postMessage(
-      createAction(ActionType.RESPOND_CONNECT_INNOVATION, data)
+      createAction(ActionType.RESPOND_CONNECT_INNOVATION, payload)
     )
   }
 
@@ -340,13 +342,15 @@ export class WorkerReproducer<
       const requestId = nextRequestId()
       this.requestMap.set(worker, { resolve: customResolve, reject })
       // FIXME: OrganismPayload<GFO>
-      const data: OrganismPayload<any> = {
+      const payload: OrganismPayload<any> = {
         genome: organism.genome.toFactoryOptions(),
         organismState: organism.toFactoryOptions(),
         // use negative requests to avoid confusion with worker thread ids
         requestId: -requestId,
       }
-      worker.postMessage(createAction(ActionType.REQUEST_ELITE_ORGANISM, data))
+      worker.postMessage(
+        createAction(ActionType.REQUEST_ELITE_ORGANISM, payload)
+      )
     })
   }
 

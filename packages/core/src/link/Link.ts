@@ -1,6 +1,5 @@
 import type { LinkConfig } from '../config/ExtendedConfig.js'
-import type { NodeRef } from '../node/NodeRef.js'
-import { toNodeRef } from '../node/toNodeRef.js'
+import type { NodeKey } from '../node/nodeRefToKey.js'
 import type { LinkState } from '../state/ExtendedState.js'
 
 import type { LinkData } from './LinkData.js'
@@ -13,8 +12,8 @@ export class Link<
   L extends Link<LC, LS, L>
 > implements LinkExtension<LC, LS, L>
 {
-  public readonly from: NodeRef
-  public readonly to: NodeRef
+  public readonly from: NodeKey
+  public readonly to: NodeKey
   public weight: number
   public readonly innovation: number
 
@@ -23,8 +22,8 @@ export class Link<
   public readonly createLink: LinkFactory<LC, LS, L>
 
   constructor(
-    from: NodeRef,
-    to: NodeRef,
+    from: NodeKey,
+    to: NodeKey,
     weight: number,
     innovation: number,
     config: LC,
@@ -54,8 +53,8 @@ export class Link<
 
   public clone(): L {
     return this.createLink(
-      toNodeRef(this.from),
-      toNodeRef(this.to),
+      this.from,
+      this.to,
       this.weight,
       this.innovation,
       this.config,
@@ -65,18 +64,16 @@ export class Link<
 
   crossover(other: L, _fitness: number, _otherFitness: number): L {
     if (
-      this.from.type !== other.from.type ||
-      this.from.id !== other.from.id ||
-      this.to.type !== other.to.type ||
-      this.to.id !== other.to.id ||
+      this.from !== other.from ||
+      this.to !== other.to ||
       this.innovation !== other.innovation
     ) {
       throw new Error('Mismatch in crossover')
     }
 
     return this.createLink(
-      toNodeRef(this.from),
-      toNodeRef(this.to),
+      this.from,
+      this.to,
       (this.weight + other.weight) / 2,
       this.innovation,
       this.config,
@@ -89,28 +86,23 @@ export class Link<
   }
 
   toString(): string {
-    return toLinkKey(this.from.type, this.from.id, this.to.type, this.to.id)
+    return toLinkKey(this.from, this.to)
   }
 
   toJSON(): LinkData<LC, LS> {
     return {
-      from: toNodeRef(this.from),
-      to: toNodeRef(this.to),
+      from: this.from,
+      to: this.to,
       weight: this.weight,
       innovation: this.innovation,
-      // FIXME: this.config.toFactoryOptions()
+      // FIXME: this.config.toJSON()
       config: this.config,
-      // FIXME: this.state.toFactoryOptions()
+      // FIXME: this.state.toJSON()
       state: this.state,
     }
   }
 
-  toFactoryOptions(): LinkFactoryOptions<LC, LS> {
-    return {
-      from: toNodeRef(this.from),
-      to: toNodeRef(this.to),
-      weight: this.weight,
-      innovation: this.innovation,
-    }
+  toFactoryOptions(): LinkFactoryOptions {
+    return [this.from, this.to, this.weight, this.innovation]
   }
 }

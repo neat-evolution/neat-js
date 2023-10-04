@@ -31,5 +31,5 @@ export interface LinkExtension<
   distance: (other: L) => number
 
   toJSON: () => LinkData<LC, LS>
-  toFactoryOptions: () => LinkFactoryOptions<LC, LS>
+  toFactoryOptions: () => LinkFactoryOptions
 }

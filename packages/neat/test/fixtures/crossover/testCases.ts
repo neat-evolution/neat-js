@@ -55,13 +55,13 @@ const expandTypeString = (str: string): string => {
 
   switch (type) {
     case 'H':
-      expandedType = 'Hidden'
+      expandedType = 'H'
       break
     case 'I':
-      expandedType = 'Input'
+      expandedType = 'I'
       break
     case 'O':
-      expandedType = 'Output'
+      expandedType = 'O'
       break
     default:
       throw new Error(`Unknown node type: ${type}`)

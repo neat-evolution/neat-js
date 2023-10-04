@@ -1,5 +1,5 @@
 import type { NodeRef } from '../node/NodeRef.js'
-import { toNodeKey } from '../node/nodeRefToKey.js'
+import { nodeRefToKey, type NodeKey } from '../node/nodeRefToKey.js'
 
 import type { LinkRef } from './LinkData.js'
 
@@ -7,23 +7,13 @@ import type { LinkRef } from './LinkData.js'
 export type LinkKey = string
 
 export const linkRefToKey = (linkRef: LinkRef): string => {
-  return toLinkKey(
-    linkRef.from.type,
-    linkRef.from.id,
-    linkRef.to.type,
-    linkRef.to.id
-  )
+  return toLinkKey(linkRef.from, linkRef.to)
 }
 
 export const nodeRefsToLinkKey = (from: NodeRef, to: NodeRef): string => {
-  return toLinkKey(from.type, from.id, to.type, to.id)
+  return toLinkKey(nodeRefToKey(from), nodeRefToKey(to))
 }
 
-export const toLinkKey = (
-  fromType: NodeRef['type'],
-  fromId: NodeRef['id'],
-  toType: NodeRef['type'],
-  toId: NodeRef['id']
-): string => {
-  return `${toNodeKey(fromType, fromId)} -> ${toNodeKey(toType, toId)}`
+export const toLinkKey = (from: NodeKey, to: NodeKey): string => {
+  return `${from} -> ${to}`
 }

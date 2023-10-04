@@ -1,4 +1,4 @@
-import { nodeKeyToTuple } from '@neat-js/core'
+import { nodeKeyToNumericTuple } from '@neat-js/core'
 
 import type { DefaultNEATGenomeFactoryOptions } from './DefaultNEATGenome.js'
 
@@ -27,17 +27,17 @@ export const toSharedBuffer = (
   offset += Float64Array.BYTES_PER_ELEMENT
 
   // Hidden Nodes
-  for (const node of data.hiddenNodes) {
+  for (const nodeId of data.hiddenNodes) {
     view.setFloat64(offset, 1, true)
     offset += Float64Array.BYTES_PER_ELEMENT // type
-    view.setFloat64(offset, node[1], true)
+    view.setFloat64(offset, nodeId, true)
     offset += Float64Array.BYTES_PER_ELEMENT // id
   }
 
   // Links
   for (const link of data.links) {
-    const from = nodeKeyToTuple(link[0])
-    const to = nodeKeyToTuple(link[1])
+    const from = nodeKeyToNumericTuple(link[0])
+    const to = nodeKeyToNumericTuple(link[1])
     view.setFloat64(offset, from[0], true)
     offset += Float64Array.BYTES_PER_ELEMENT
     view.setFloat64(offset, from[1], true)

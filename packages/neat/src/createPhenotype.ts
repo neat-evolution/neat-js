@@ -2,12 +2,13 @@ import {
   isActionEdge,
   Activation,
   isActionNode,
-  nodeRefToKey,
-  type NodeRef,
   NodeType,
   type Phenotype,
   type PhenotypeAction,
   type PhenotypeFactory,
+  type NodeRefTuple,
+  nodeKeyToRefTuple,
+  nodeTupleToKey,
 } from '@neat-js/core'
 import { PhenotypeActionType } from '@neat-js/core'
 
@@ -18,7 +19,7 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
 ): Phenotype => {
   // Sort genomes network topologically
   const order = new Set(genome.connections.sortTopologically())
-  const nodes: NodeRef[] = []
+  const nodes: NodeRefTuple[] = []
 
   // Create array of all input node indexes, for insertion of neural network inputs
   const inputLength = genome.inputs.size
@@ -26,12 +27,13 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
   for (let i = 0; i < inputLength; i++) {
     inputs[i] = i
     // Prepend input nodes to extraction of hidden nodes from topological sorting
-    nodes.push({ type: NodeType.Input, id: i })
+    nodes.push([NodeType.Input, i])
   }
 
   for (const action of order) {
-    if (isActionNode(action) && action[0].type === NodeType.Hidden) {
-      nodes.push({ type: NodeType.Hidden, id: action[0].id })
+    const node = nodeKeyToRefTuple(action[0])
+    if (isActionNode(action) && node[0] === NodeType.Hidden) {
+      nodes.push([NodeType.Hidden, node[1]])
     }
   }
 
@@ -42,13 +44,13 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
   for (let i = 0; i < outputLength; i++) {
     outputs[i] = i + offset
     // Append all output nodes
-    nodes.push({ type: NodeType.Output, id: i })
+    nodes.push([NodeType.Output, i])
   }
 
   // Create mapping from NodeRef to array index in Network's node array
   const nodeMapping = new Map()
   for (const [i, node] of nodes.entries()) {
-    nodeMapping.set(nodeRefToKey(node), i)
+    nodeMapping.set(nodeTupleToKey(node), i)
   }
 
   // Map topologically sorted order to neural network actions
@@ -58,18 +60,18 @@ export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
       const [from, to, weight] = action
       actions.push({
         type: PhenotypeActionType.Link,
-        from: nodeMapping.get(nodeRefToKey(from)) as number,
-        to: nodeMapping.get(nodeRefToKey(to)) as number,
+        from: nodeMapping.get(from) as number,
+        to: nodeMapping.get(to) as number,
         weight,
       })
     } else {
       const [node] = action
       actions.push({
         type: PhenotypeActionType.Activation,
-        node: nodeMapping.get(nodeRefToKey(node)) as number,
+        node: nodeMapping.get(node) as number,
         bias: 0,
         activation:
-          node.type === NodeType.Output
+          node[0] === NodeType.Output
             ? genome.genomeOptions.outputActivation
             : Activation.Sigmoid,
       })

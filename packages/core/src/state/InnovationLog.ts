@@ -1,7 +1,7 @@
 import type { LinkKey } from '../link/linkRefToKey.js'
-import type { NodeRef } from '../node/NodeRef.js'
+import type { NodeKey } from '../node/nodeRefToKey.js'
 
-export type InnovationLinkRef = [from: NodeRef, to: NodeRef]
+export type InnovationLinkRef = [from: NodeKey, to: NodeKey]
 
 export interface Innovation {
   nodeNumber: number

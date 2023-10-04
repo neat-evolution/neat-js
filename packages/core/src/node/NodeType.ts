@@ -1,5 +1,5 @@
 export enum NodeType {
-  Input = 'Input',
-  Hidden = 'Hidden',
-  Output = 'Output',
+  Input = 'I',
+  Hidden = 'H',
+  Output = 'O',
 }
