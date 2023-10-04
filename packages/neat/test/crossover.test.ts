@@ -1,4 +1,4 @@
-import type { GenomeDataLinkEntry } from '@neat-js/core'
+import type { GenomeDataLink } from '@neat-js/core'
 import { describe, expect, test } from 'vitest'
 
 import type { DefaultNEATGenome } from '../src/DefaultNEATGenome.js'
@@ -42,16 +42,10 @@ describe('Genome crossover fixtures', () => {
 
       // sort links by innovation
       resultJSON.links.sort(
-        (
-          a: GenomeDataLinkEntry<DefaultNEATGenome>,
-          b: GenomeDataLinkEntry<DefaultNEATGenome>
-        ) => a[1][3] - b[1][3]
+        (a: GenomeDataLink, b: GenomeDataLink) => a[3] - b[3]
       )
       expectedJSON.links.sort(
-        (
-          a: GenomeDataLinkEntry<DefaultNEATGenome>,
-          b: GenomeDataLinkEntry<DefaultNEATGenome>
-        ) => a[1][3] - b[1][3]
+        (a: GenomeDataLink, b: GenomeDataLink) => a[3] - b[3]
       )
       expect(resultJSON).toEqual(expectedJSON)
     }

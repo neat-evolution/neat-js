@@ -1,4 +1,4 @@
-import { NodeType, type NodeRef, type LinkData } from '@neat-js/core'
+import { NodeType, type NodeKey, type LinkData, toNodeKey } from '@neat-js/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createLink } from '../src/createLink.js'
@@ -7,12 +7,12 @@ import type { NEATLink } from '../src/NEATLink.js'
 describe('NEATLink class', () => {
   describe('NEATLink methods', () => {
     let link: NEATLink
-    let from: NodeRef
-    let to: NodeRef
+    let from: NodeKey
+    let to: NodeKey
 
     beforeEach(() => {
-      from = { type: NodeType.Input, id: 0 }
-      to = { type: NodeType.Output, id: 1 }
+      from = toNodeKey(NodeType.Input, 0)
+      to = toNodeKey(NodeType.Output, 1)
       link = createLink(from, to, 0.5, 1, null, null)
     })
 
@@ -21,7 +21,7 @@ describe('NEATLink class', () => {
     })
 
     test('should return string', () => {
-      expect(link.toString()).toBe('Input[0] -> Output[1]')
+      expect(link.toString()).toBe('I[0] -> O[1]')
     })
 
     test('should return identity link', () => {
@@ -36,12 +36,12 @@ describe('NEATLink class', () => {
   describe('NEATLink crossover', () => {
     let link1: NEATLink
     let link2: NEATLink
-    let from: NodeRef
-    let to: NodeRef
+    let from: NodeKey
+    let to: NodeKey
 
     beforeEach(() => {
-      from = { type: NodeType.Input, id: 0 }
-      to = { type: NodeType.Output, id: 1 }
+      from = toNodeKey(NodeType.Input, 0)
+      to = toNodeKey(NodeType.Output, 1)
       link1 = createLink(from, to, 0.5, 1, null, null)
       link2 = createLink(from, to, 0.7, 1, null, null)
     })
@@ -55,14 +55,7 @@ describe('NEATLink class', () => {
     })
 
     test('should throw an error for mismatched from node', () => {
-      link2 = createLink(
-        { type: NodeType.Hidden, id: 3 },
-        to,
-        0.7,
-        1,
-        null,
-        null
-      )
+      link2 = createLink(toNodeKey(NodeType.Hidden, 3), to, 0.7, 1, null, null)
       expect(() => {
         link1.crossover(link2, 10, 5)
       }).toThrowError('Mismatch in crossover')
@@ -71,7 +64,7 @@ describe('NEATLink class', () => {
     test('should throw an error for mismatched to node', () => {
       link2 = createLink(
         from,
-        { type: NodeType.Hidden, id: 3 },
+        toNodeKey(NodeType.Hidden, 3),
         0.7,
         1,
         null,
@@ -99,12 +92,12 @@ describe('NEATLink class', () => {
   describe('NEATLink distance', () => {
     let link1: NEATLink
     let link2: NEATLink
-    let from: NodeRef
-    let to: NodeRef
+    let from: NodeKey
+    let to: NodeKey
 
     beforeEach(() => {
-      from = { type: NodeType.Input, id: 0 }
-      to = { type: NodeType.Output, id: 1 }
+      from = toNodeKey(NodeType.Input, 0)
+      to = toNodeKey(NodeType.Output, 1)
       link1 = createLink(from, to, 0.5, 1, null, null)
       link2 = createLink(from, to, 0.7, 1, null, null)
     })
@@ -137,12 +130,12 @@ describe('NEATLink class', () => {
 
   describe('NEATLink toJSON', () => {
     let link: NEATLink
-    let from: NodeRef
-    let to: NodeRef
+    let from: NodeKey
+    let to: NodeKey
 
     beforeEach(() => {
-      from = { type: NodeType.Input, id: 0 }
-      to = { type: NodeType.Output, id: 1 }
+      from = toNodeKey(NodeType.Input, 0)
+      to = toNodeKey(NodeType.Output, 1)
     })
 
     test('should return a JSON representation of the link', () => {

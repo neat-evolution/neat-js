@@ -28,17 +28,13 @@ import {
   defaultNEATGenomeOptions,
   type DefaultNEATGenome,
   type DefaultNEATGenomeData,
-  type DefaultNEATGenomeFactoryOptions,
   type NEATGenomeOptions,
   createState,
   createGenome,
   createPhenotype,
   type NEATConfig,
   type NEATPopulation,
-  type NEATState,
   NEATAlgorithm,
-  type NEATLink,
-  type NEATNode,
 } from '../src/index.js'
 
 const createEnvironment = async () => {
@@ -65,7 +61,7 @@ describe('Population class', () => {
     genomeOptions = defaultNEATGenomeOptions
     populationOptions = defaultPopulationOptions
     environment = await createEnvironment()
-    evaluator = createEvaluator(environment, createExecutor)
+    evaluator = createEvaluator(NEATAlgorithm, environment, createExecutor)
   })
 
   test('should correctly initialize', () => {
@@ -128,7 +124,7 @@ describe('Population class', () => {
         genomeOptions
       )
       for (let i = 0; i < 100; i++) {
-        population.mutate()
+        await population.mutate()
       }
       await population.evaluate()
     })
@@ -152,7 +148,7 @@ describe('Population class', () => {
     test('should evolve more than one species', async () => {
       let speciesCount = 0
       for (let i = 0; i < 2; i++) {
-        population.evolve()
+        await population.evolve()
         await population.evaluate()
         speciesCount += population.species.size
       }
@@ -178,7 +174,7 @@ describe('Population class', () => {
 
       // mutate all genomes 50 times
       for (let i = 0; i < 50; i++) {
-        population.mutate()
+        await population.mutate()
       }
       await population.evaluate()
     })
@@ -216,15 +212,15 @@ describe('Population class', () => {
         'retainBest',
         'age',
         'removeOld',
-      ])('should call %s exactly once', (methodName) => {
-        population.evolve()
+      ])('should call %s exactly once', async (methodName) => {
+        await population.evolve()
         for (const spyObj of speciesSpies) {
           expect(spyObj[methodName]).toHaveBeenCalledTimes(1)
         }
       })
 
-      test('should call methods in the correct order', () => {
-        population.evolve()
+      test('should call methods in the correct order', async () => {
+        await population.evolve()
         for (const spyObj of speciesSpies) {
           const orderedSpies: SpyInstance[] = [
             spyObj['adjustFitness'] as SpyInstance,
@@ -245,7 +241,7 @@ describe('Population class', () => {
       })
     })
 
-    test('should update the number of new elites and offsprings for each species', () => {
+    test('should update the number of new elites and offsprings for each species', async () => {
       const dataMap = new Map<
         Species<NEATGenomeOptions, DefaultNEATGenomeData, DefaultNEATGenome>,
         { elites: number; offsprings: number }
@@ -258,7 +254,7 @@ describe('Population class', () => {
         })
       }
 
-      population.evolve()
+      await population.evolve()
 
       // Check that the elite count and offsprings count for each species is calculated correctly.
       let elitesChanged = false
@@ -284,10 +280,10 @@ describe('Population class', () => {
       expect(offspringsChanges).toBe(true)
     })
 
-    test('should adjust speciation threshold if speciesTarget is defined', () => {
+    test('should adjust speciation threshold if speciesTarget is defined', async () => {
       const options = population.populationOptions
       const threshold = options.speciationThreshold
-      population.evolve()
+      await population.evolve()
       const newThreshold = options.speciationThreshold
 
       let expectedThreshold = threshold

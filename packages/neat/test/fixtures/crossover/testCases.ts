@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
 
-import { Activation, NodeType, defaultNEATConfigOptions } from '@neat-js/core'
+import { Activation, defaultNEATConfigOptions } from '@neat-js/core'
 
 import { createConfig, createGenome, createState } from '../../../src/index.js'
 
@@ -39,12 +39,10 @@ const configProvider = createConfig(defaultNEATConfigOptions)
 const state = createState()
 
 // Helper function to format hidden nodes
-const formatHiddenNodes = (
-  hiddenNodes: string[]
-): Array<[string, { type: NodeType; id: number }]> => {
+const formatHiddenNodes = (hiddenNodes: string[]): number[] => {
   return hiddenNodes.map((node) => {
     const id = parseInt(node.substring(1)) // Extract the numerical ID from the node string
-    return [node, { type: NodeType.Hidden, id }]
+    return id
   })
 }
 
@@ -73,15 +71,12 @@ const expandTypeString = (str: string): string => {
 // Helper function to format links
 const formatLinks = (
   links: TestCaseLinkData[]
-): Array<
-  [string, [from: string, to: string, weight: number, innovation: number]]
-> => {
+): Array<[from: string, to: string, weight: number, innovation: number]> => {
   return links.map((link) => {
     let { from, to, weight, innovation } = link
     from = expandTypeString(from)
     to = expandTypeString(to)
-    const linkName = `${from} -> ${to}`
-    return [linkName, [from, to, weight, innovation]]
+    return [from, to, weight, innovation]
   })
 }
 
