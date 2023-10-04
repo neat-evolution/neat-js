@@ -6,7 +6,6 @@ export interface OrganismState {
   generation: number
 }
 
-// FIXME: Add OrganismFactoryOptions
 export interface OrganismData<
   GO extends InitConfig,
   G extends Genome<any, any, any, any, GO, any, any, G>

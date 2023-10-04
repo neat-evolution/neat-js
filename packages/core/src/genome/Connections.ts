@@ -1,25 +1,24 @@
-import { nodeRefsToLinkKey, type LinkKey } from '../link/linkRefToKey.js'
-import type { NodeRef } from '../node/NodeRef.js'
-import { nodeRefToKey, type NodeKey } from '../node/nodeRefToKey.js'
+import { toLinkKey, type LinkKey } from '../link/linkRefToKey.js'
+import type { NodeKey } from '../node/nodeRefToKey.js'
 
 /** weight */
 export type Edge = number
 
-export type Connection<N extends NodeRef, E extends Edge> = [
+export type Connection<N extends NodeKey, E extends Edge> = [
   from: N,
   to: N,
   /** weight */
   edge: E
 ]
 
-export interface Target<N extends NodeRef, E extends Edge> {
+export interface Target<N extends NodeKey, E extends Edge> {
   /** to */
   node: N
   /** weight */
   edge: E
 }
 
-export interface ConnectionInfo<N extends NodeRef, E extends Edge> {
+export interface ConnectionInfo<N extends NodeKey, E extends Edge> {
   /** source */
   node: N
   targets: Array<Target<N, E>>
@@ -28,12 +27,12 @@ export interface ConnectionInfo<N extends NodeRef, E extends Edge> {
 export type ConnectionData = [from: NodeKey, to: NodeKey, edge: Edge]
 
 export interface ConnectionsData {
-  nodes: Record<NodeKey, NodeRef>
+  nodes: Record<NodeKey, NodeKey>
   connections: ConnectionData[]
 }
 
-export type ActionEdge = Connection<NodeRef, Edge>
-export type ActionNode = [nodeRef: NodeRef]
+export type ActionEdge = Connection<NodeKey, Edge>
+export type ActionNode = [nodeKey: NodeKey]
 export type Action = ActionEdge | ActionNode
 
 export const isActionEdge = (action: Action): action is ActionEdge => {
@@ -44,7 +43,7 @@ export const isActionNode = (action: Action): action is ActionNode => {
   return (action as ActionNode).length === 1
 }
 
-export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
+export class Connections<N extends NodeKey = NodeKey, E extends Edge = Edge> {
   private readonly connectionMap: Map<NodeKey, ConnectionInfo<N, E>>
 
   private readonly nodeKeyCache = new Set<NodeKey>()
@@ -57,14 +56,14 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
   rebuildNodeKeyCache() {
     this.nodeKeyCache.clear()
     for (const node of this.nodes()) {
-      this.nodeKeyCache.add(nodeRefToKey(node))
+      this.nodeKeyCache.add(node)
     }
   }
 
   rebuildLinkKeyCache() {
     this.linkKeyCache.clear()
     for (const [source, target] of this.connections()) {
-      this.linkKeyCache.add(nodeRefsToLinkKey(source, target))
+      this.linkKeyCache.add(toLinkKey(source, target))
     }
   }
 
@@ -78,30 +77,28 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
     if (this.hasConnection(from, to)) {
       throw new Error('cannot add existing connection')
     }
-    const fromKey = nodeRefToKey(from)
-    const info = this.connectionMap.get(fromKey)
+    const info = this.connectionMap.get(from)
 
     const target = { node: to, edge }
     if (info !== undefined) {
       info.targets.push(target)
     } else {
-      this.connectionMap.set(fromKey, {
+      this.connectionMap.set(from, {
         node: from,
         targets: [target],
       })
     }
-    this.nodeKeyCache.add(fromKey)
-    this.nodeKeyCache.add(nodeRefToKey(to))
-    this.linkKeyCache.add(nodeRefsToLinkKey(from, to))
+    this.nodeKeyCache.add(from)
+    this.nodeKeyCache.add(to)
+    this.linkKeyCache.add(toLinkKey(from, to))
   }
 
   setEdge(from: N, to: N, edge: E) {
-    const data = this.connectionMap.get(nodeRefToKey(from))
+    const data = this.connectionMap.get(from)
     if (data === undefined) {
       throw new Error('cannot set non-existent edge')
     }
-    const toKey = nodeRefToKey(to)
-    const target = data.targets.find(({ node: t }) => nodeRefToKey(t) === toKey)
+    const target = data.targets.find(({ node: t }) => t === to)
     if (target === undefined) {
       throw new Error('cannot set non-existent edge')
     }
@@ -109,12 +106,11 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
   }
 
   getEdge(from: N, to: N): E {
-    const data = this.connectionMap.get(nodeRefToKey(from))
+    const data = this.connectionMap.get(from)
     if (data === undefined) {
       throw new Error('cannot get non-existent edge')
     }
-    const toKey = nodeRefToKey(to)
-    const target = data.targets.find(({ node: t }) => nodeRefToKey(t) === toKey)
+    const target = data.targets.find(({ node: t }) => t === to)
     if (target === undefined) {
       throw new Error('cannot get non-existent edge')
     }
@@ -140,41 +136,37 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
   *nodes(): Generator<N, void, undefined> {
     const uniqueNodes = new Set<NodeKey>()
     for (const { node: source, targets } of this.connectionMap.values()) {
-      const sourceKey = nodeRefToKey(source)
-      if (!uniqueNodes.has(sourceKey)) {
+      if (!uniqueNodes.has(source)) {
         yield source
-        uniqueNodes.add(sourceKey)
+        uniqueNodes.add(source)
       }
       for (const { node: target } of targets) {
-        const targetKey = nodeRefToKey(target)
-        if (!uniqueNodes.has(targetKey)) {
+        if (!uniqueNodes.has(target)) {
           yield target
-          uniqueNodes.add(targetKey)
+          uniqueNodes.add(target)
         }
       }
     }
   }
 
   getTargetsLength(from: N): number {
-    return this.connectionMap.get(nodeRefToKey(from))?.targets.length ?? 0
+    return this.connectionMap.get(from)?.targets.length ?? 0
   }
 
   getTargets(from: N): Array<Target<N, E>> {
-    return this.connectionMap.get(nodeRefToKey(from))?.targets ?? []
+    return this.connectionMap.get(from)?.targets ?? []
   }
 
   hasConnection(from: N, to: N): boolean {
-    return this.linkKeyCache.has(nodeRefsToLinkKey(from, to))
+    return this.linkKeyCache.has(toLinkKey(from, to))
   }
 
   hasNode(node: N): boolean {
-    return this.nodeKeyCache.has(nodeRefToKey(node))
+    return this.nodeKeyCache.has(node)
   }
 
   delete(from: N, to: N): E {
-    const fromKey = nodeRefToKey(from)
-    const toKey = nodeRefToKey(to)
-    const info = this.connectionMap.get(fromKey)
+    const info = this.connectionMap.get(from)
     if (info == null) {
       throw new Error('cannot remove non-existent connection')
     }
@@ -186,11 +178,11 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
 
     if (targets.length === 1) {
       const target = targets[0] as Target<N, E>
-      if (nodeRefToKey(target.node) !== toKey) {
+      if (target.node !== to) {
         throw new Error('cannot remove non-existent connection')
       }
       const edge = target.edge
-      this.connectionMap.delete(fromKey)
+      this.connectionMap.delete(from)
 
       this.rebuildNodeKeyCache()
       this.rebuildLinkKeyCache()
@@ -199,7 +191,7 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
       let index = -1
       for (let i = 0; i < targets.length; i++) {
         const target = targets[i] as Target<N, E>
-        if (nodeRefToKey(target.node) === toKey) {
+        if (target.node === to) {
           index = i
           break
         }
@@ -222,29 +214,26 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
   }
 
   deleteNode(node: N): Array<Connection<N, E>> {
-    const nodeKey = nodeRefToKey(node)
     // Removed outgoing
     const removedConnections: Array<Connection<N, E>> = []
-    if (this.connectionMap.has(nodeKey)) {
+    if (this.connectionMap.has(node)) {
       const targets = this.getTargets(node)
       for (const target of targets) {
         removedConnections.push([node, target.node, target.edge])
       }
-      this.connectionMap.delete(nodeKey)
+      this.connectionMap.delete(node)
     }
 
     // Remove inbound
     const deleteKeys: NodeKey[] = []
 
     for (const { node: source, targets } of this.connectionMap.values()) {
-      const index = targets.findIndex(
-        (target) => nodeRefToKey(target.node) === nodeKey
-      )
+      const index = targets.findIndex((target) => target.node === node)
       if (index !== -1) {
         const [target] = targets.splice(index, 1) as [target: Target<N, E>]
         removedConnections.push([source, node, target.edge])
         if (targets.length === 0) {
-          deleteKeys.push(nodeRefToKey(source))
+          deleteKeys.push(source)
         }
       }
     }
@@ -262,24 +251,21 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
   ///
   /// If 'from' is reachable from 'to', then addition will cause cycle
   createsCycle(from: N, to: N): boolean {
-    const visited = new Set<string>([nodeRefToKey(to)])
+    const visited = new Set<string>([to])
     const queue: N[] = [to]
     let front = 0
-
-    const fromKey = nodeRefToKey(from)
 
     while (front < queue.length) {
       const source = queue[front] as N
       front++
 
-      if (nodeRefToKey(source) === fromKey) {
+      if (source === from) {
         return true
       }
 
       for (const { node: target } of this.getTargets(source)) {
-        const targetKey = nodeRefToKey(target)
-        if (!visited.has(targetKey)) {
-          visited.add(targetKey)
+        if (!visited.has(target)) {
+          visited.add(target)
           queue.push(target)
         }
       }
@@ -288,19 +274,17 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
   }
 
   toJSON(): ConnectionsData {
-    const nodes: Record<NodeKey, NodeRef> = {}
+    const nodes: Record<NodeKey, NodeKey> = {}
     const connections: ConnectionData[] = []
 
     for (const [from, to, edge] of this.connections()) {
-      const fromKey = nodeRefToKey(from)
-      const toKey = nodeRefToKey(to)
-      if (nodes[fromKey] === undefined) {
-        nodes[fromKey] = { type: from.type, id: from.id }
+      if (nodes[from] === undefined) {
+        nodes[from] = from
       }
-      if (nodes[toKey] === undefined) {
-        nodes[toKey] = { type: to.type, id: to.id }
+      if (nodes[to] === undefined) {
+        nodes[to] = to
       }
-      connections.push([fromKey, toKey, edge])
+      connections.push([from, to, edge])
     }
 
     return {
@@ -315,9 +299,8 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
 
     for (const info of this.connectionMap.values()) {
       for (const target of info.targets) {
-        const targetKey = nodeRefToKey(target.node)
-        const count = backwardCount.get(targetKey) ?? 0
-        backwardCount.set(targetKey, count + 1)
+        const count = backwardCount.get(target.node) ?? 0
+        backwardCount.set(target.node, count + 1)
       }
     }
 
@@ -343,12 +326,11 @@ export class Connections<N extends NodeRef = NodeRef, E extends Edge = Edge> {
         yield [node, target.node, target.edge]
 
         // Reduce backward count by 1
-        const targetKey = nodeRefToKey(target.node)
-        const count = backwardCount.get(targetKey) as number
-        backwardCount.set(targetKey, count - 1)
+        const count = backwardCount.get(target.node) as number
+        backwardCount.set(target.node, count - 1)
 
         // Add nodes with no incoming connections to the stack
-        if (backwardCount.get(targetKey) === 0) {
+        if (backwardCount.get(target.node) === 0) {
           stack.push(target.node)
         }
       }

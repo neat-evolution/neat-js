@@ -1,5 +1,6 @@
-import { nodeRefsToLinkKey } from '../link/linkRefToKey.js'
+import { toLinkKey } from '../link/linkRefToKey.js'
 import type { NodeRef } from '../node/NodeRef.js'
+import { nodeRefToKey, toNodeKey } from '../node/nodeRefToKey.js'
 import { NodeType } from '../node/NodeType.js'
 
 import type { LinkState, NodeState } from './ExtendedState.js'
@@ -48,29 +49,29 @@ export class State<
         throw new Error('Invalid linkInnovation key.')
       }
 
-      const newNode = {
-        type: NodeType.Hidden,
-        id: this.nextInnovation.nodeNumber,
-      }
+      const newNodeKey = toNodeKey(
+        NodeType.Hidden,
+        this.nextInnovation.nodeNumber
+      )
 
       this.innovationLog.connectInnovations.set(
-        nodeRefsToLinkKey(from, newNode),
+        toLinkKey(from, newNodeKey),
         this.nextInnovation.innovationNumber
       )
 
       this.innovationLog.connectInnovations.set(
-        nodeRefsToLinkKey(newNode, to),
+        toLinkKey(newNodeKey, to),
         this.nextInnovation.innovationNumber + 1
       )
 
       this.innovationLog.reverseConnectInnovations.set(
         this.nextInnovation.innovationNumber,
-        [from, newNode]
+        [from, newNodeKey]
       )
 
       this.innovationLog.reverseConnectInnovations.set(
         this.nextInnovation.innovationNumber + 1,
-        [newNode, to]
+        [newNodeKey, to]
       )
 
       this.innovationLog.splitInnovations.set(linkInnovation, {
@@ -89,7 +90,9 @@ export class State<
   }
 
   getConnectInnovation(from: NodeRef, to: NodeRef): number {
-    const linkKey = nodeRefsToLinkKey(from, to)
+    const fromKey = nodeRefToKey(from)
+    const toKey = nodeRefToKey(to)
+    const linkKey = toLinkKey(fromKey, toKey)
 
     if (!this.innovationLog.connectInnovations.has(linkKey)) {
       this.innovationLog.connectInnovations.set(
@@ -98,7 +101,7 @@ export class State<
       )
       this.innovationLog.reverseConnectInnovations.set(
         this.nextInnovation.innovationNumber,
-        [from, to]
+        [fromKey, toKey]
       )
       // Increase global innovation number
       this.nextInnovation.innovationNumber += 1

@@ -52,7 +52,6 @@ export class Organism<G extends Genome<any, any, any, any, any, any, any, G>> {
 
   toJSON(): OrganismData<any, G> {
     return {
-      // FIXME: use this.genome.toFactoryOptions()
       genome: this.genome.toJSON(),
       organismState: {
         generation: this.generation,

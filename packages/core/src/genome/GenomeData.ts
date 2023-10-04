@@ -1,10 +1,10 @@
-import type { NodeFactoryOptions } from '../node/NodeFactory.js'
 import type { NodeKey } from '../node/nodeRefToKey.js'
 
 import type { Genome } from './Genome.js'
 import type { GenomeOptions } from './GenomeOptions.js'
 
-export type GenomeDataNode = NodeFactoryOptions
+/** Node.id; implied to be NodeType.Hidden */
+export type GenomeDataNode = number
 
 export type GenomeDataLink = [
   fromKey: NodeKey,

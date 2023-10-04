@@ -60,9 +60,9 @@ export class Node<
     return {
       type: this.type,
       id: this.id,
-      // FIXME: this.config.toFactoryOptions()
+      // FIXME: this.config.toJSON()
       config: this.config,
-      // FIXME: this.state.toFactoryOptions()
+      // FIXME: this.state.toJSON()
       state: this.state,
     }
   }

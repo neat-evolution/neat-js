@@ -1,6 +1,5 @@
 import {
   tupleToNodeKey,
-  NodeType,
   type GenomeDataNode,
   type GenomeDataLink,
 } from '@neat-js/core'
@@ -24,7 +23,7 @@ export const fromSharedBuffer = (
     offset += Float64Array.BYTES_PER_ELEMENT
     const id = view.getFloat64(offset, true)
     offset += Float64Array.BYTES_PER_ELEMENT
-    hiddenNodes.push([NodeType.Hidden, id])
+    hiddenNodes.push(id)
   }
 
   const links: GenomeDataLink[] = []

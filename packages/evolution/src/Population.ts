@@ -160,7 +160,7 @@ export class Population<
     } else {
       // New organism is not compatible with any existing species, create a new one
       species = new Species<GO, GD, G>(this.populationOptions)
-      // If during reproduction, the species is locked so that the new organism avoids parent selection
+      // During reproduction the species is locked so that the new organism avoids parent selection
       if (lockNew) {
         species.lock()
       }
