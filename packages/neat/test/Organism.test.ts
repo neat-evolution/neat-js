@@ -7,9 +7,7 @@ import { createConfig } from '../src/createConfig.js'
 import { createGenome } from '../src/createGenome.js'
 import { createState } from '../src/createState.js'
 import { type DefaultNEATGenome } from '../src/DefaultNEATGenome.js'
-import { fromSharedBuffer } from '../src/fromSharedBuffer.js'
 import { defaultNEATGenomeOptions } from '../src/NEATGenomeOptions.js'
-import { toSharedBuffer } from '../src/toSharedBuffer.js'
 
 describe('Organism class', () => {
   let state: DefaultNEATGenome['state']
@@ -18,9 +16,9 @@ describe('Organism class', () => {
   let genome: DefaultNEATGenome
   let generation: number
 
-  let createSeasonedGenome: () => DefaultNEATGenome
+  let createSeasonedGenome: () => Promise<DefaultNEATGenome>
 
-  beforeEach(() => {
+  beforeEach(async () => {
     state = createState()
     initConfig = {
       inputs: 1,
@@ -30,7 +28,7 @@ describe('Organism class', () => {
       ...defaultNEATGenomeOptions,
       ...initConfig,
     }
-    createSeasonedGenome = () => {
+    createSeasonedGenome = async () => {
       const options = {
         ...defaultNEATConfigOptions,
         addNodeProbability: 1,
@@ -41,11 +39,11 @@ describe('Organism class', () => {
       }
       const genome = createGenome(createConfig(options), state, genomeOptions)
       for (let i = 0; i < 50; i++) {
-        genome.mutate()
+        await genome.mutate()
       }
       return genome
     }
-    genome = createSeasonedGenome()
+    genome = await createSeasonedGenome()
     generation = 0
   })
 
@@ -147,10 +145,10 @@ describe('Organism class', () => {
   })
 
   describe('Organism mutate', () => {
-    test('should change the genome after mutation', () => {
+    test('should change the genome after mutation', async () => {
       const organism = new Organism(genome)
       const size = organism.genome.hiddenNodes.size + organism.genome.links.size
-      organism.mutate()
+      await organism.mutate()
       const mutatedSize =
         organism.genome.hiddenNodes.size + organism.genome.links.size
       expect(mutatedSize).not.toEqual(size)

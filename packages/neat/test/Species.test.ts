@@ -25,13 +25,13 @@ describe('Species class', () => {
   let configProvider: NEATConfig
   let options: NEATGenomeOptions
   let stateProvider: NEATState
-  let createSeasonedGenome: () => DefaultNEATGenome
+  let createSeasonedGenome: () => Promise<DefaultNEATGenome>
 
   beforeEach(() => {
     configProvider = createConfig(defaultNEATConfigOptions)
     options = defaultNEATGenomeOptions
     stateProvider = createState()
-    createSeasonedGenome = () => {
+    createSeasonedGenome = async () => {
       const configOptions = {
         ...defaultNEATConfigOptions,
         addNodeProbability: 1,
@@ -46,7 +46,7 @@ describe('Species class', () => {
         options
       )
       for (let i = 0; i < 50; i++) {
-        genome.mutate()
+        await genome.mutate()
       }
       return genome
     }
@@ -65,13 +65,13 @@ describe('Species class', () => {
   })
 
   describe('Species push', () => {
-    test('should add organism to species', () => {
+    test('should add organism to species', async () => {
       const species = new Species<
         NEATGenomeOptions,
         DefaultNEATGenomeData,
         DefaultNEATGenome
       >(defaultSpeciesOptions)
-      const genome = createSeasonedGenome()
+      const genome = await createSeasonedGenome()
       const organism = new Organism(genome)
       species.push(organism)
       expect(species.organisms.length).toBe(1)
@@ -79,7 +79,7 @@ describe('Species class', () => {
   })
 
   describe('Species isCompatible', () => {
-    test('should return true if they are not compatible', () => {
+    test('should return true if they are not compatible', async () => {
       const options: SpeciesOptions = {
         ...defaultSpeciesOptions,
         speciationThreshold: 1,
@@ -89,8 +89,8 @@ describe('Species class', () => {
         DefaultNEATGenomeData,
         DefaultNEATGenome
       >(options)
-      const genome1 = createSeasonedGenome()
-      const genome2 = createSeasonedGenome()
+      const genome1 = await createSeasonedGenome()
+      const genome2 = await createSeasonedGenome()
       const organism1 = new Organism(genome1)
       const organism2 = new Organism(genome2)
       species.push(organism1)
@@ -98,7 +98,7 @@ describe('Species class', () => {
       expect(result).toBe(true)
     })
 
-    test('should return false if they are not compatible', () => {
+    test('should return false if they are not compatible', async () => {
       const options: SpeciesOptions = {
         ...defaultSpeciesOptions,
         speciationThreshold: 0,
@@ -108,8 +108,8 @@ describe('Species class', () => {
         DefaultNEATGenomeData,
         DefaultNEATGenome
       >(options)
-      const genome1 = createSeasonedGenome()
-      const genome2 = createSeasonedGenome()
+      const genome1 = await createSeasonedGenome()
+      const genome2 = await createSeasonedGenome()
       const organism1 = new Organism(genome1)
       const organism2 = new Organism(genome2)
       species.push(organism1)

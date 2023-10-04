@@ -4,10 +4,9 @@ import {
   NodeType,
   nodeRefsToLinkKey,
   nodeRefToKey,
-  type GenomeDataLinkEntry,
   type GenomeDataLink,
   type NodeRef,
-  type GenomeDataNodeEntry,
+  type GenomeDataNode,
   type Action,
   type Connection,
   type Activation,
@@ -15,6 +14,7 @@ import {
   type Phenotype,
   type PhenotypeLinkAction,
   type PhenotypeActivationAction,
+  type NodeKey,
 } from '@neat-js/core'
 import type {
   DefaultNEATGenome,
@@ -22,12 +22,12 @@ import type {
 } from '@neat-js/neat'
 
 const knownNodes = new Set<string>()
-const linksMap = new Map<string, GenomeDataLink<DefaultNEATGenome>>()
-const hiddenNodes: Array<GenomeDataNodeEntry<DefaultNEATGenome>> = []
-const links: Array<GenomeDataLinkEntry<DefaultNEATGenome>> = []
+const linksMap = new Map<string, GenomeDataLink>()
+const hiddenNodes: GenomeDataNode[] = []
+const links: GenomeDataLink[] = []
 
 export let genomeFitness: number | null = null
-export const genomeConnections: Array<Connection<NodeRef, number>> = []
+export const genomeConnections: Array<Connection<NodeKey, number>> = []
 export const genomeActions: Action[] = []
 export const genomeFactoryOptions: DefaultNEATGenomeFactoryOptions = {
   hiddenNodes,
@@ -161,24 +161,23 @@ for (const line of lines) {
 
       if (fromNode.type === NodeType.Hidden && !knownNodes.has(from)) {
         knownNodes.add(from)
-        const type = NodeType.Hidden
         const id = Number(from.slice(1))
-        hiddenNodes.push([nodeRefToKey(fromNode), { type, id }])
+        hiddenNodes.push(id)
       }
       if (to.startsWith('H') && !knownNodes.has(to)) {
         knownNodes.add(to)
         const type = NodeType.Hidden
         const id = Number(to.slice(1))
-        hiddenNodes.push([nodeRefToKey(toNode), { type, id }])
+        hiddenNodes.push(id)
       }
       const linkKey = nodeRefsToLinkKey(fromNode, toNode)
-      const genomeDataLink: GenomeDataLink<DefaultNEATGenome> = [
+      const genomeDataLink: GenomeDataLink = [
         nodeRefToKey(fromNode),
         nodeRefToKey(toNode),
         parseFloat(weight),
         parseInt(innovation, 10),
       ]
-      links.push([linkKey, genomeDataLink])
+      links.push(genomeDataLink)
       linksMap.set(linkKey, genomeDataLink)
     }
   }
@@ -205,7 +204,11 @@ for (const line of lines) {
       }
       const linkKey = nodeRefsToLinkKey(fromRef, toRef)
       const link = linksMap.get(linkKey)
-      genomeConnections.push([fromRef, toRef, link?.[2] ?? 0])
+      genomeConnections.push([
+        nodeRefToKey(fromRef),
+        nodeRefToKey(toRef),
+        link?.[2] ?? 0,
+      ])
     }
   }
 
@@ -220,13 +223,17 @@ for (const line of lines) {
       if (value == null) {
         throw new Error('Invalid node.')
       }
-      genomeActions.push([value])
+      genomeActions.push([nodeRefToKey(value)])
     } else if (line.startsWith('E')) {
       const value = actionStringToLinkRef(line)
       if (value == null) {
         throw new Error('Invalid link.')
       }
-      genomeActions.push(value)
+      genomeActions.push([
+        nodeRefToKey(value[0]),
+        nodeRefToKey(value[1]),
+        value[2],
+      ])
     }
   }
 

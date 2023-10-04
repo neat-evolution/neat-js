@@ -4,12 +4,17 @@ import {
   defaultDatasetOptions,
   loadDataset,
 } from '@neat-js/dataset-environment'
-import { AsyncEvaluator, type FitnessData } from '@neat-js/evaluator'
 import {
-  Population,
+  AsyncEvaluator,
+  type FitnessData,
+  type GenomeEntry,
+} from '@neat-js/evaluator'
+import {
+  createReproducer,
   defaultEvolutionOptions,
   defaultPopulationOptions,
   evolve,
+  Population,
   type PopulationOptions,
 } from '@neat-js/evolution'
 import { createExecutor } from '@neat-js/executor'
@@ -63,12 +68,11 @@ describe('PopulationFactory', () => {
       validationFraction: 0.1,
       testFraction: 0.1,
     }
+    algorithm = NEATAlgorithm
 
     const dataset = await loadDataset(datasetOptions)
     const environment = new DatasetEnvironment(dataset)
-    evaluator = new AsyncEvaluator(environment, createExecutor)
-
-    algorithm = NEATAlgorithm
+    evaluator = new AsyncEvaluator(algorithm, environment, createExecutor)
 
     configProvider = algorithm.createConfig(defaultNEATConfigOptions)
     populationOptions = { ...defaultPopulationOptions }
@@ -79,10 +83,12 @@ describe('PopulationFactory', () => {
     }
     // 1. Create a population
     population = new Population(
+      createReproducer,
       evaluator,
       algorithm,
       configProvider,
       populationOptions,
+      undefined,
       genomeOptions
     )
 
@@ -94,7 +100,7 @@ describe('PopulationFactory', () => {
 
     // 2. Mutate it 50 times
     for (let i = 0; i < 50; i++) {
-      population.mutate()
+      await population.mutate()
     }
 
     // 3. Evolve it for 10 iterations
@@ -119,10 +125,12 @@ describe('PopulationFactory', () => {
   test('hydrate population from factoryOptions', () => {
     const factoryOptions = population.toFactoryOptions()
     const hydratedPopulation: NEATPopulation = new Population(
+      createReproducer,
       evaluator,
       algorithm,
       configProvider,
       populationOptions,
+      undefined,
       genomeOptions,
       factoryOptions
     )
@@ -135,10 +143,12 @@ describe('PopulationFactory', () => {
   test('hydrate population from data', () => {
     const data = population.toJSON()
     const hydratedPopulation: NEATPopulation = new Population(
+      createReproducer,
       evaluator,
       algorithm,
       configProvider,
       populationOptions,
+      undefined,
       genomeOptions,
       data
     )
@@ -179,13 +189,9 @@ describe('PopulationFactory', () => {
     const actions = Array.from(genome.connections.sortTopologically())
     expect(actions).toHaveLength(genomeActions.length)
 
-    // phenotype
-    const phenotype = algorithm.createPhenotype(genome)
-    expect(phenotype.actions).toHaveLength(genomePhenotype.actions.length)
-
     // evaluate
     const fitnessResults: FitnessData[] = []
-    for await (const fitnessData of evaluator.evaluate([[0, 0, phenotype]])) {
+    for await (const fitnessData of evaluator.evaluate([[0, 0, genome]])) {
       fitnessResults.push(fitnessData)
     }
 
@@ -199,14 +205,15 @@ describe('PopulationFactory', () => {
     if (!genome) {
       throw new Error('hydratedGenome is undefined')
     }
-    const phenotype = algorithm.createPhenotype(genome)
 
     const factoryOptions = population.toFactoryOptions()
     const hydratedPopulation: NEATPopulation = new Population(
+      createReproducer,
       evaluator,
       algorithm,
       configProvider,
       populationOptions,
+      undefined,
       genomeOptions,
       factoryOptions
     )
@@ -215,10 +222,13 @@ describe('PopulationFactory', () => {
     if (!hydratedGenome) {
       throw new Error('hydratedGenome is undefined')
     }
-    const hydratedPhenotype = algorithm.createPhenotype(hydratedGenome)
 
-    const phenotypeData: PhenotypeData = [0, 0, phenotype]
-    const hydratedPhenotypeData: PhenotypeData = [1, 1, hydratedPhenotype]
+    const phenotypeData: GenomeEntry<DefaultNEATGenome> = [0, 0, genome]
+    const hydratedPhenotypeData: GenomeEntry<DefaultNEATGenome> = [
+      1,
+      1,
+      hydratedGenome,
+    ]
 
     const fitnessResults: FitnessData[] = []
     for await (const fitnessData of evaluator.evaluate([

@@ -21,7 +21,7 @@ describe('NEATNode class', () => {
     })
 
     test('should return string', () => {
-      expect(node.toString()).toBe('Input[1]')
+      expect(node.toString()).toBe('I[1]')
     })
   })
 

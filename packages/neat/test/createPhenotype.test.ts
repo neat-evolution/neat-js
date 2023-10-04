@@ -1,9 +1,4 @@
-import {
-  defaultNEATConfigOptions,
-  isPhenotypeLinkAction,
-  phenotypeDataFromSharedBuffer,
-  phenotypeDataToSharedBuffer,
-} from '@neat-js/core'
+import { defaultNEATConfigOptions, isPhenotypeLinkAction } from '@neat-js/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
@@ -25,7 +20,7 @@ describe('createPhenotype', () => {
    * Creates a genome that has been mutated 50 times
    * @returns {DefaultNEATGenome} seasoned genome
    */
-  let createSeasonedGenome: () => DefaultNEATGenome
+  let createSeasonedGenome: () => Promise<DefaultNEATGenome>
 
   beforeEach(async () => {
     genomeOptions = {
@@ -35,7 +30,7 @@ describe('createPhenotype', () => {
     }
     stateProvider = createState()
 
-    createSeasonedGenome = () => {
+    createSeasonedGenome = async () => {
       const configOptions = {
         ...defaultNEATConfigOptions,
         // always mutates
@@ -51,14 +46,14 @@ describe('createPhenotype', () => {
         genomeOptions
       )
       for (let i = 0; i < 50; i++) {
-        genome.mutate()
+        await genome.mutate()
       }
       return genome
     }
   })
 
-  test('should create a valid phenotype', () => {
-    const genome = createSeasonedGenome()
+  test('should create a valid phenotype', async () => {
+    const genome = await createSeasonedGenome()
     const phenotype = createPhenotype(genome)
     expect(
       phenotype.actions.some((action) => {
@@ -75,13 +70,5 @@ describe('createPhenotype', () => {
     expect(phenotype.inputs.length).toBe(4)
     expect(phenotype.outputs.length).toBe(3)
     expect(phenotype.actions.length).toBeGreaterThan(0)
-  })
-  test('should serialize and deserialize', () => {
-    const genome = createSeasonedGenome()
-    const phenotype = createPhenotype(genome)
-    const serializedPhenotype = phenotypeDataToSharedBuffer([0, 0, phenotype])
-    expect(serializedPhenotype).toBeInstanceOf(SharedArrayBuffer)
-    const hydratedPhenotype = phenotypeDataFromSharedBuffer(serializedPhenotype)
-    expect(hydratedPhenotype).toEqual([0, 0, phenotype])
   })
 })

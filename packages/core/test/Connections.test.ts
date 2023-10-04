@@ -1,29 +1,29 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { Connections } from '../src/genome/Connections.js'
-import { NodeType, type NodeRef } from '../src/index.js'
+import { NodeType, type NodeKey, toNodeKey } from '../src/index.js'
 
 describe('Connections', () => {
   describe('Connections constructor', () => {
     test('should instantiate without errors', () => {
-      const instance = new Connections<NodeRef, number>()
+      const instance = new Connections<NodeKey, number>()
       expect(instance).not.toBeNull()
     })
   })
 
   describe('Connections add method', () => {
-    let connections: Connections<NodeRef, number>
-    let node1: NodeRef
-    let node2: NodeRef
-    let node3: NodeRef
-    let node4: NodeRef
+    let connections: Connections<NodeKey, number>
+    let node1: NodeKey
+    let node2: NodeKey
+    let node3: NodeKey
+    let node4: NodeKey
 
     beforeEach(() => {
       connections = new Connections()
-      node1 = { type: NodeType.Input, id: 0 }
-      node2 = { type: NodeType.Hidden, id: 0 }
-      node3 = { type: NodeType.Hidden, id: 1 }
-      node4 = { type: NodeType.Output, id: 0 }
+      node1 = toNodeKey(NodeType.Input, 0)
+      node2 = toNodeKey(NodeType.Hidden, 0)
+      node3 = toNodeKey(NodeType.Hidden, 1)
+      node4 = toNodeKey(NodeType.Output, 0)
     })
 
     test('should add a new connection when connections is empty', () => {
@@ -63,16 +63,16 @@ describe('Connections', () => {
   })
 
   describe('Connections setEdge method', () => {
-    let connections: Connections<NodeRef, number>
-    let node1: NodeRef
-    let node2: NodeRef
-    let node3: NodeRef
+    let connections: Connections<NodeKey, number>
+    let node1: NodeKey
+    let node2: NodeKey
+    let node3: NodeKey
 
     beforeEach(() => {
       connections = new Connections()
-      node1 = { type: NodeType.Input, id: 0 }
-      node2 = { type: NodeType.Hidden, id: 0 }
-      node3 = { type: NodeType.Hidden, id: 1 }
+      node1 = toNodeKey(NodeType.Input, 0)
+      node2 = toNodeKey(NodeType.Hidden, 0)
+      node3 = toNodeKey(NodeType.Hidden, 1)
     })
 
     test('should update the edge of an existing connection', () => {
@@ -103,16 +103,16 @@ describe('Connections', () => {
   })
 
   describe('Connections getEdge method', () => {
-    let connections: Connections<NodeRef, number>
-    let node1: NodeRef
-    let node2: NodeRef
-    let node3: NodeRef
+    let connections: Connections<NodeKey, number>
+    let node1: NodeKey
+    let node2: NodeKey
+    let node3: NodeKey
 
     beforeEach(() => {
       connections = new Connections()
-      node1 = { type: NodeType.Input, id: 0 }
-      node2 = { type: NodeType.Hidden, id: 0 }
-      node3 = { type: NodeType.Hidden, id: 1 }
+      node1 = toNodeKey(NodeType.Input, 0)
+      node2 = toNodeKey(NodeType.Hidden, 0)
+      node3 = toNodeKey(NodeType.Hidden, 1)
     })
 
     test('should retrieve the edge of an existing connection', () => {
@@ -142,18 +142,18 @@ describe('Connections', () => {
   })
 
   describe('Connections.connections method', () => {
-    let connections: Connections<NodeRef, number>
-    let node1: NodeRef
-    let node2: NodeRef
-    let node3: NodeRef
-    let node4: NodeRef
+    let connections: Connections<NodeKey, number>
+    let node1: NodeKey
+    let node2: NodeKey
+    let node3: NodeKey
+    let node4: NodeKey
 
     beforeEach(() => {
       connections = new Connections()
-      node1 = { type: NodeType.Input, id: 0 }
-      node2 = { type: NodeType.Hidden, id: 0 }
-      node3 = { type: NodeType.Hidden, id: 1 }
-      node4 = { type: NodeType.Output, id: 0 }
+      node1 = toNodeKey(NodeType.Input, 0)
+      node2 = toNodeKey(NodeType.Hidden, 0)
+      node3 = toNodeKey(NodeType.Hidden, 1)
+      node4 = toNodeKey(NodeType.Output, 0)
     })
 
     test('should return an empty list for an empty graph', () => {
@@ -199,15 +199,15 @@ describe('Connections', () => {
   })
 
   describe('Connections remove method', () => {
-    let connections: Connections<NodeRef, number>
-    let node1: NodeRef
-    let node2: NodeRef
-    let node3: NodeRef
+    let connections: Connections<NodeKey, number>
+    let node1: NodeKey
+    let node2: NodeKey
+    let node3: NodeKey
     beforeEach(() => {
       connections = new Connections()
-      node1 = { type: NodeType.Input, id: 0 }
-      node2 = { type: NodeType.Hidden, id: 0 }
-      node3 = { type: NodeType.Output, id: 0 }
+      node1 = toNodeKey(NodeType.Input, 0)
+      node2 = toNodeKey(NodeType.Hidden, 0)
+      node3 = toNodeKey(NodeType.Output, 0)
     })
 
     test('should remove a connection without errors', () => {
@@ -245,15 +245,15 @@ describe('Connections', () => {
   })
 
   describe('Connections removeNode method', () => {
-    let connections: Connections<NodeRef, number>
-    let node1: NodeRef
-    let node2: NodeRef
-    let node3: NodeRef
+    let connections: Connections<NodeKey, number>
+    let node1: NodeKey
+    let node2: NodeKey
+    let node3: NodeKey
     beforeEach(() => {
       connections = new Connections()
-      node1 = { type: NodeType.Input, id: 0 }
-      node2 = { type: NodeType.Hidden, id: 1 }
-      node3 = { type: NodeType.Output, id: 2 }
+      node1 = toNodeKey(NodeType.Input, 0)
+      node2 = toNodeKey(NodeType.Hidden, 1)
+      node3 = toNodeKey(NodeType.Output, 2)
     })
 
     test('should remove a node without errors', () => {
@@ -287,7 +287,7 @@ describe('Connections', () => {
     })
 
     test('should return all removed connections', () => {
-      const node4: NodeRef = { type: NodeType.Output, id: 3 }
+      const node4: NodeKey = toNodeKey(NodeType.Output, 3)
 
       connections.add(node1, node2, 1)
       connections.add(node2, node3, 2)
@@ -303,18 +303,18 @@ describe('Connections', () => {
   })
 
   describe('Connections createsCycle method', () => {
-    let connections: Connections<NodeRef, number>
-    let node1: NodeRef
-    let node2: NodeRef
-    let node3: NodeRef
-    let node4: NodeRef
+    let connections: Connections<NodeKey, number>
+    let node1: NodeKey
+    let node2: NodeKey
+    let node3: NodeKey
+    let node4: NodeKey
 
     beforeEach(() => {
       connections = new Connections()
-      node1 = { type: NodeType.Input, id: 0 }
-      node2 = { type: NodeType.Hidden, id: 0 }
-      node3 = { type: NodeType.Hidden, id: 1 }
-      node4 = { type: NodeType.Output, id: 0 }
+      node1 = toNodeKey(NodeType.Input, 0)
+      node2 = toNodeKey(NodeType.Hidden, 0)
+      node3 = toNodeKey(NodeType.Hidden, 1)
+      node4 = toNodeKey(NodeType.Output, 0)
     })
 
     test('should return false when the graph is empty', () => {
@@ -334,18 +334,18 @@ describe('Connections', () => {
   })
 
   describe('Connections sortTopologically method', () => {
-    let connections: Connections<NodeRef, number>
-    let node1: NodeRef
-    let node2: NodeRef
-    let node3: NodeRef
-    let node4: NodeRef
+    let connections: Connections<NodeKey, number>
+    let node1: NodeKey
+    let node2: NodeKey
+    let node3: NodeKey
+    let node4: NodeKey
 
     beforeEach(() => {
       connections = new Connections()
-      node1 = { type: NodeType.Input, id: 1 }
-      node2 = { type: NodeType.Hidden, id: 2 }
-      node3 = { type: NodeType.Hidden, id: 3 }
-      node4 = { type: NodeType.Output, id: 4 }
+      node1 = toNodeKey(NodeType.Input, 1)
+      node2 = toNodeKey(NodeType.Hidden, 2)
+      node3 = toNodeKey(NodeType.Hidden, 3)
+      node4 = toNodeKey(NodeType.Output, 4)
     })
 
     test('should return empty array for empty graph', () => {
