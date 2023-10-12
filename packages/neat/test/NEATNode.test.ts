@@ -9,11 +9,7 @@ describe('NEATNode class', () => {
     let node: NEATNode
 
     beforeEach(() => {
-      node = createNode(NodeType.Input, 1, null, null)
-    })
-
-    test('should return itself', () => {
-      expect(node.neat()).toBe(node)
+      node = createNode({ type: NodeType.Input, id: 1 }, null, null)
     })
 
     test('should return 0', () => {
@@ -30,8 +26,8 @@ describe('NEATNode class', () => {
     let node2: NEATNode
 
     beforeEach(() => {
-      node1 = createNode(NodeType.Input, 1, null, null)
-      node2 = createNode(NodeType.Input, 1, null, null)
+      node1 = createNode({ type: NodeType.Input, id: 1 }, null, null)
+      node2 = createNode({ type: NodeType.Input, id: 1 }, null, null)
     })
 
     test('should successfully perform crossover when both nodes have the same type and ID', () => {
@@ -41,14 +37,14 @@ describe('NEATNode class', () => {
     })
 
     test('should throw an error for mismatched node types', () => {
-      node2 = createNode(NodeType.Output, 1, null, null)
+      node2 = createNode({ type: NodeType.Output, id: 1 }, null, null)
       expect(() => {
         node1.crossover(node2, 10, 5)
       }).toThrowError('Mismatch in crossover')
     })
 
     test('should throw an error for mismatched node IDs', () => {
-      node2 = createNode(NodeType.Input, 2, null, null)
+      node2 = createNode({ type: NodeType.Input, id: 2 }, null, null)
       expect(() => {
         node1.crossover(node2, 10, 5)
       }).toThrowError('Mismatch in crossover')
@@ -68,10 +64,9 @@ describe('NEATNode class', () => {
 
   describe('NEATNode toJSON', () => {
     test('should return a JSON representation of the node', () => {
-      const node = createNode(NodeType.Input, 1, null, null)
+      const node = createNode({ type: NodeType.Input, id: 1 }, null, null)
       expect(node.toJSON()).toEqual({
-        type: NodeType.Input,
-        id: 1,
+        factoryOptions: { type: NodeType.Input, id: 1 },
         config: null,
         state: null,
       })
@@ -84,7 +79,11 @@ describe('NEATNode class', () => {
         config: null,
         state: null,
       }
-      const node = createNode(data.type, data.id, data.config, data.state)
+      const node = createNode(
+        { type: data.type, id: data.id },
+        data.config,
+        data.state
+      )
       expect(node.id).toEqual(data.id)
       expect(node.type).toEqual(data.type)
       expect(node.config).toEqual(data.config)

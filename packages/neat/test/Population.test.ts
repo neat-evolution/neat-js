@@ -1,4 +1,8 @@
-import { defaultNEATConfigOptions } from '@neat-js/core'
+import {
+  defaultNEATConfigOptions,
+  type InitConfig,
+  type StateData,
+} from '@neat-js/core'
 import {
   defaultDatasetOptions,
   loadDataset,
@@ -26,8 +30,7 @@ import {
 import {
   createConfig,
   defaultNEATGenomeOptions,
-  type DefaultNEATGenome,
-  type DefaultNEATGenomeData,
+  type NEATGenome,
   type NEATGenomeOptions,
   createState,
   createGenome,
@@ -35,6 +38,9 @@ import {
   type NEATConfig,
   type NEATPopulation,
   NEATAlgorithm,
+  type NEATHiddenNodeData,
+  type NEATLinkData,
+  type NEATGenomeFactoryOptions,
 } from '../src/index.js'
 
 const createEnvironment = async () => {
@@ -56,8 +62,13 @@ describe('Population class', () => {
   let environment: DatasetEnvironment
   let evaluator: Evaluator
 
+  const initConfig: InitConfig = {
+    inputs: 1,
+    outputs: 1,
+  }
+
   beforeEach(async () => {
-    configProvider = createConfig(defaultNEATConfigOptions)
+    configProvider = createConfig(defaultNEATConfigOptions, null, null)
     genomeOptions = defaultNEATGenomeOptions
     populationOptions = defaultPopulationOptions
     environment = await createEnvironment()
@@ -72,7 +83,8 @@ describe('Population class', () => {
       configProvider,
       populationOptions,
       undefined,
-      genomeOptions
+      genomeOptions,
+      initConfig
     )
 
     expect(population.species).toBeDefined()
@@ -88,7 +100,6 @@ describe('Population class', () => {
     expect(population.configProvider).toBe(configProvider)
     expect(population.genomeOptions).toEqual({
       ...genomeOptions,
-      ...evaluator.environment.description,
     })
   })
 
@@ -102,7 +113,8 @@ describe('Population class', () => {
         configProvider,
         populationOptions,
         undefined,
-        genomeOptions
+        genomeOptions,
+        initConfig
       )
     })
 
@@ -121,7 +133,8 @@ describe('Population class', () => {
         configProvider,
         populationOptions,
         undefined,
-        genomeOptions
+        genomeOptions,
+        initConfig
       )
       for (let i = 0; i < 100; i++) {
         await population.mutate()
@@ -139,7 +152,8 @@ describe('Population class', () => {
           configProvider,
           populationOptions,
           undefined,
-          genomeOptions
+          genomeOptions,
+          initConfig
         )
         speciesCount += population.species.size
       }
@@ -169,7 +183,8 @@ describe('Population class', () => {
         configProvider,
         populationOptions,
         undefined,
-        genomeOptions
+        genomeOptions,
+        initConfig
       )
 
       // mutate all genomes 50 times
@@ -243,7 +258,16 @@ describe('Population class', () => {
 
     test('should update the number of new elites and offsprings for each species', async () => {
       const dataMap = new Map<
-        Species<NEATGenomeOptions, DefaultNEATGenomeData, DefaultNEATGenome>,
+        Species<
+          null,
+          null,
+          StateData,
+          NEATHiddenNodeData,
+          NEATLinkData,
+          NEATGenomeFactoryOptions,
+          NEATGenomeOptions,
+          NEATGenome
+        >,
         { elites: number; offsprings: number }
       >()
 

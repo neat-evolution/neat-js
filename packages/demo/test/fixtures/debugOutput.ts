@@ -4,9 +4,7 @@ import {
   NodeType,
   nodeRefsToLinkKey,
   nodeRefToKey,
-  type GenomeDataLink,
   type NodeRef,
-  type GenomeDataNode,
   type Action,
   type Connection,
   type Activation,
@@ -17,22 +15,22 @@ import {
   type NodeKey,
 } from '@neat-js/core'
 import type {
-  DefaultNEATGenome,
-  DefaultNEATGenomeFactoryOptions,
+  NEATGenomeFactoryOptions,
+  NEATHiddenNodeData,
+  NEATLinkData,
 } from '@neat-js/neat'
 
 const knownNodes = new Set<string>()
-const linksMap = new Map<string, GenomeDataLink>()
-const hiddenNodes: GenomeDataNode[] = []
-const links: GenomeDataLink[] = []
+const linksMap = new Map<string, NEATLinkData>()
+const hiddenNodes: NEATHiddenNodeData[] = []
+const links: NEATLinkData[] = []
 
 export let genomeFitness: number | null = null
 export const genomeConnections: Array<Connection<NodeKey, number>> = []
-export const genomeActions: Action[] = []
-export const genomeFactoryOptions: DefaultNEATGenomeFactoryOptions = {
+export const genomeActions: Array<Action<string, number>> = []
+export const genomeFactoryOptions: NEATGenomeFactoryOptions = {
   hiddenNodes,
   links,
-  isSafe: true,
 }
 export const genomePhenotype: Phenotype = {
   length: 0,
@@ -171,7 +169,7 @@ for (const line of lines) {
         hiddenNodes.push(id)
       }
       const linkKey = nodeRefsToLinkKey(fromNode, toNode)
-      const genomeDataLink: GenomeDataLink = [
+      const genomeDataLink: NEATLinkData = [
         nodeRefToKey(fromNode),
         nodeRefToKey(toNode),
         parseFloat(weight),

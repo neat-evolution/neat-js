@@ -7,7 +7,7 @@ import { createExecutor } from '@neat-js/executor'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { createPhenotype } from '../src/createPhenotype.js'
-import type { DefaultNEATGenome } from '../src/DefaultNEATGenome.js'
+import type { NEATGenome } from '../src/NEATGenome.js'
 
 import { testCases } from './fixtures/fitness/testCases.js'
 
@@ -25,7 +25,7 @@ const formattedTestCases = testCases.map(({ name, fitness, genome }) => [
   name,
   genome,
   fitness,
-]) as Array<[name: string, a: DefaultNEATGenome, expected: number]>
+]) as Array<[name: string, a: NEATGenome, expected: number]>
 
 describe('Genome fitness fixtures', () => {
   const datasetOptions = defaultDatasetOptions
@@ -45,7 +45,7 @@ describe('Genome fitness fixtures', () => {
 
   test.each(formattedTestCases)(
     '%s',
-    async (name: string, a: DefaultNEATGenome, expected: number) => {
+    async (name: string, a: NEATGenome, expected: number) => {
       const phenotype = createPhenotype(a)
       const executor = createExecutor(phenotype, environment.batchSize)
       const fitness = await environment.evaluate(executor)

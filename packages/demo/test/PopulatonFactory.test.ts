@@ -22,13 +22,9 @@ import {
   NEATAlgorithm,
   defaultNEATGenomeOptions,
   type NEATGenomeOptions,
-  type NEATNode,
-  type NEATLink,
-  type NEATState,
-  type DefaultNEATGenomeFactoryOptions,
-  type DefaultNEATGenomeData,
-  DefaultNEATGenome,
+  NEATGenome,
   type NEATConfig,
+  type NEATPopulation,
 } from '@neat-js/neat'
 import { beforeEach, describe, expect, test } from 'vitest'
 
@@ -37,27 +33,13 @@ import {
   genomeConnections,
   genomeFactoryOptions,
   genomeFitness,
-  genomePhenotype,
 } from './fixtures/debugOutput.js'
-
-type NEATPopulation = Population<
-  NEATNode,
-  NEATLink,
-  NEATConfig,
-  NEATState,
-  NEATGenomeOptions,
-  DefaultNEATGenomeFactoryOptions,
-  DefaultNEATGenomeData,
-  DefaultNEATGenome,
-  typeof NEATAlgorithm,
-  undefined
->
 
 describe('PopulationFactory', () => {
   let evaluator: AsyncEvaluator
   let algorithm: typeof NEATAlgorithm
   let configProvider: NEATConfig
-  let population: NEATPopulation
+  let population: NEATPopulation<undefined>
   let populationOptions: PopulationOptions
   let genomeOptions: NEATGenomeOptions
 
@@ -74,12 +56,15 @@ describe('PopulationFactory', () => {
     const environment = new DatasetEnvironment(dataset)
     evaluator = new AsyncEvaluator(algorithm, environment, createExecutor)
 
-    configProvider = algorithm.createConfig(defaultNEATConfigOptions)
+    configProvider = algorithm.createConfig(
+      defaultNEATConfigOptions,
+      null,
+      null
+    )
     populationOptions = { ...defaultPopulationOptions }
 
     genomeOptions = {
       ...defaultNEATGenomeOptions,
-      ...evaluator.environment.description,
     }
     // 1. Create a population
     population = new Population(
@@ -89,7 +74,8 @@ describe('PopulationFactory', () => {
       configProvider,
       populationOptions,
       undefined,
-      genomeOptions
+      genomeOptions,
+      evaluator.environment.description
     )
 
     const evolutionOptions = {
@@ -124,7 +110,7 @@ describe('PopulationFactory', () => {
 
   test('hydrate population from factoryOptions', () => {
     const factoryOptions = population.toFactoryOptions()
-    const hydratedPopulation: NEATPopulation = new Population(
+    const hydratedPopulation: NEATPopulation<undefined> = new Population(
       createReproducer,
       evaluator,
       algorithm,
@@ -132,17 +118,20 @@ describe('PopulationFactory', () => {
       populationOptions,
       undefined,
       genomeOptions,
+      evaluator.environment.description,
       factoryOptions
     )
     const data = population.toJSON()
     const hydratedData = hydratedPopulation.toJSON()
-    expect(hydratedData.species).toEqual(data.species)
+    expect(hydratedData.factoryOptions.species).toEqual(
+      data.factoryOptions.species
+    )
     expect(hydratedPopulation.toJSON()).toEqual(population.toJSON())
   })
 
   test('hydrate population from data', () => {
     const data = population.toJSON()
-    const hydratedPopulation: NEATPopulation = new Population(
+    const hydratedPopulation: NEATPopulation<undefined> = new Population(
       createReproducer,
       evaluator,
       algorithm,
@@ -150,27 +139,30 @@ describe('PopulationFactory', () => {
       populationOptions,
       undefined,
       genomeOptions,
-      data
+      evaluator.environment.description,
+      data.factoryOptions
     )
     const hydratedData = hydratedPopulation.toJSON()
     expect(hydratedData).toEqual(data)
   })
 
   test('hydrate genome from data', () => {
-    const genome = new DefaultNEATGenome(
+    const genome = new NEATGenome(
       configProvider,
       algorithm.createState(),
       genomeOptions,
+      evaluator.environment.description,
       genomeFactoryOptions
     )
     expect(genome.toFactoryOptions()).toEqual(genomeFactoryOptions)
   })
 
   test('hydrate actions from data', async () => {
-    const genome = new DefaultNEATGenome(
+    const genome = new NEATGenome(
       configProvider,
       algorithm.createState(),
       genomeOptions,
+      evaluator.environment.description,
       genomeFactoryOptions
     )
     // hidden nodes
@@ -207,7 +199,7 @@ describe('PopulationFactory', () => {
     }
 
     const factoryOptions = population.toFactoryOptions()
-    const hydratedPopulation: NEATPopulation = new Population(
+    const hydratedPopulation: NEATPopulation<undefined> = new Population(
       createReproducer,
       evaluator,
       algorithm,
@@ -215,6 +207,7 @@ describe('PopulationFactory', () => {
       populationOptions,
       undefined,
       genomeOptions,
+      evaluator.environment.description,
       factoryOptions
     )
     const hydratedGenome = hydratedPopulation.best()?.genome
@@ -223,8 +216,8 @@ describe('PopulationFactory', () => {
       throw new Error('hydratedGenome is undefined')
     }
 
-    const phenotypeData: GenomeEntry<DefaultNEATGenome> = [0, 0, genome]
-    const hydratedPhenotypeData: GenomeEntry<DefaultNEATGenome> = [
+    const phenotypeData: GenomeEntry<NEATGenome> = [0, 0, genome]
+    const hydratedPhenotypeData: GenomeEntry<NEATGenome> = [
       1,
       1,
       hydratedGenome,
