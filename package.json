@@ -11,13 +11,13 @@
     "build": "turbo run --concurrency=4 build",
     "clean": "turbo run clean",
     "coverage": "turbo run --concurrency=4 coverage -- --run",
-    "coverage:ci": "turbo run --concurrency=2 coverage -- --run --maxWorkers=2 --forceExit",
+    "coverage:ci": "turbo run --concurrency=2 coverage -- --run",
     "format": "turbo run --concurrency=4 format",
     "lint": "turbo run --concurrency=4 lint",
     "postinstall": "husky install",
     "release": "yarn build && changeset publish",
     "test": "turbo run --concurrency=4 test -- --passWithNoTests --run",
-    "test:ci": "turbo run --concurrency=2 test -- --passWithNoTests --run --maxWorkers=2 --forceExit",
+    "test:ci": "turbo run --concurrency=2 test -- --passWithNoTests --run",
     "version": "changeset version && yarn install"
   },
   "dependencies": {
