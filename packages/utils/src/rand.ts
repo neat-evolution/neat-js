@@ -3,6 +3,7 @@ import seedrandom from 'seedrandom'
 export interface RNG {
   gen: () => number
   genRange: (min: number, max: number) => number
+  genBool: () => boolean
 }
 
 export const createRNG = (seed?: string): RNG => {
@@ -16,6 +17,7 @@ export const createRNG = (seed?: string): RNG => {
       const range = max - min
       return Math.floor(rng() * range) + min
     },
+    genBool: (): boolean => rng() < 0.5,
   }
 }
 
