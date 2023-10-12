@@ -1,16 +1,13 @@
-import type { LinkConfig } from '../config/ExtendedConfig.js'
-import type { NodeKey } from '../node/nodeRefToKey.js'
-import type { LinkState } from '../state/ExtendedState.js'
+import type { ConfigOptions } from '../config/ConfigOptions.js'
 
-export interface LinkRef {
-  from: NodeKey
-  to: NodeKey
-}
+import type { LinkFactoryOptions } from './LinkFactoryOptions.js'
 
-export interface LinkData<LC extends LinkConfig, LS extends LinkState>
-  extends LinkRef {
-  weight: number
-  innovation: number
-  config: LC
-  state: LS
+export interface LinkData<
+  LFO extends LinkFactoryOptions,
+  LCO extends ConfigOptions,
+  LSD
+> {
+  config: LCO
+  state: LSD
+  factoryOptions: LFO
 }

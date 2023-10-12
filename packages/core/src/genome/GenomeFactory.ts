@@ -1,29 +1,48 @@
+import type { ConfigOptions } from '../config/ConfigOptions.js'
 import type { ConfigProvider } from '../config/ConfigProvider.js'
-import type { StateProvider } from '../state/StateProvider.js'
+import type { StateData } from '../state/StateData.js'
+import type { ExtendedState, StateProvider } from '../state/StateProvider.js'
 
 import type { Genome } from './Genome.js'
-import type { GenomeData } from './GenomeData.js'
+import type { GenomeFactoryOptions } from './GenomeFactoryOptions.js'
 import type { GenomeOptions } from './GenomeOptions.js'
-
-export type GenomeFactoryOptions<
-  C extends ConfigProvider<any, any>,
-  S extends StateProvider<any, any, S>,
-  GO extends GenomeOptions,
-  GFO extends GenomeFactoryOptions<C, S, GO, GFO, GD, G>,
-  GD extends GenomeData<GO, G>,
-  G extends Genome<any, any, C, S, GO, GFO, GD, G>
-> = Omit<GD, 'config' | 'state' | 'genomeOptions'>
+import type { InitConfig } from './InitConfig.js'
 
 export type GenomeFactory<
-  C extends ConfigProvider<any, any>,
-  S extends StateProvider<any, any, S>,
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
+  C extends ConfigProvider<NCO, LCO>,
+  NSD,
+  LSD,
+  NS extends ExtendedState<NSD>,
+  LS extends ExtendedState<LSD>,
+  SD extends StateData,
+  S extends StateProvider<NSD, LSD, NS, LS, SD>,
+  HND,
+  LD,
+  GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
-  GFO extends GenomeFactoryOptions<C, S, GO, GFO, GD, G>,
-  GD extends GenomeData<GO, G>,
-  G extends Genome<any, any, C, S, GO, GFO, GD, G>
+  G extends Genome<
+    NCO,
+    LCO,
+    C,
+    NSD,
+    LSD,
+    NS,
+    LS,
+    SD,
+    S,
+    HND,
+    LD,
+    GFO,
+    GO,
+    any,
+    G
+  >
 > = (
   configProvider: C,
   stateProvider: S,
   genomeOptions: GO,
+  initConfig: InitConfig,
   genomeFactoryOptions?: GFO
 ) => G

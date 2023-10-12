@@ -1,33 +1,53 @@
+import type { ConfigOptions } from '../config/ConfigOptions.js'
 import type { ConfigProvider } from '../config/ConfigProvider.js'
-import type { LinkExtension } from '../link/LinkExtension.js'
-import type { NodeExtension } from '../node/NodeExtension.js'
-import type { StateProvider } from '../state/StateProvider.js'
+import type { StateData } from '../state/StateData.js'
+import type { ExtendedState, StateProvider } from '../state/StateProvider.js'
 
 import type { GenomeData } from './GenomeData.js'
-import type { GenomeFactoryOptions } from './GenomeFactory.js'
-import type { GenomeOptions } from './GenomeOptions.js'
+import type { GenomeFactoryOptions } from './GenomeFactoryOptions.js'
+import { type GenomeOptions } from './GenomeOptions.js'
 
 export interface Genome<
-  N extends NodeExtension<any, any, N>,
-  L extends LinkExtension<any, any, L>,
-  C extends ConfigProvider<N['config'], L['config']>,
-  S extends StateProvider<N['state'], L['state'], G['state']>,
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
+  C extends ConfigProvider<NCO, LCO>,
+  NSD,
+  LSD,
+  NS extends ExtendedState<NSD>,
+  LS extends ExtendedState<LSD>,
+  SD extends StateData,
+  S extends StateProvider<NSD, LSD, NS, LS, SD>,
+  HND,
+  LD,
+  GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
-  GFO extends GenomeFactoryOptions<C, S, GO, GFO, GD, G>,
-  GD extends GenomeData<GO, G>,
-  G extends Genome<N, L, C, S, GO, GFO, GD, G>
+  GD extends GenomeData<NCO, LCO, SD, HND, LD, GFO, GO>,
+  G extends Genome<
+    NCO,
+    LCO,
+    C,
+    NSD,
+    LSD,
+    NS,
+    LS,
+    SD,
+    S,
+    HND,
+    LD,
+    GFO,
+    GO,
+    GD,
+    G
+  >
 > {
   readonly config: C
   readonly state: S
   readonly genomeOptions: GO
 
   clone: () => G
-
   crossover: (other: G, fitness: number, otherFitness: number) => G
   mutate: () => Promise<void>
   distance: (other: G) => number
-
-  // Stats
   toJSON: () => GD
   toFactoryOptions: () => GFO
 }

@@ -1,108 +1,45 @@
-import type { LinkConfig } from '../config/ExtendedConfig.js'
-import type { NodeKey } from '../node/nodeRefToKey.js'
-import type { LinkState } from '../state/ExtendedState.js'
+import type { ConfigOptions } from '../config/ConfigOptions.js'
+import type { ExtendedState } from '../state/StateProvider.js'
 
 import type { LinkData } from './LinkData.js'
-import type { LinkExtension } from './LinkExtension.js'
-import type { LinkFactory, LinkFactoryOptions } from './LinkFactory.js'
-import { toLinkKey } from './linkRefToKey.js'
-export class Link<
-  LC extends LinkConfig,
-  LS extends LinkState,
-  L extends Link<LC, LS, L>
-> implements LinkExtension<LC, LS, L>
-{
-  public readonly from: NodeKey
-  public readonly to: NodeKey
-  public weight: number
-  public readonly innovation: number
+import type { LinkFactory } from './LinkFactory.js'
+import type { LinkFactoryOptions } from './LinkFactoryOptions.js'
+import type { LinkRef } from './LinkRef.js'
 
-  public readonly config: LC
-  public readonly state: LS
-  public readonly createLink: LinkFactory<LC, LS, L>
+export interface Link<
+  LFO extends LinkFactoryOptions,
+  LCO extends ConfigOptions,
+  LSD,
+  LS extends ExtendedState<LSD>,
+  L extends Link<LFO, LCO, LSD, LS, L>
+> extends LinkRef {
+  // Link
+  weight: number
+  readonly innovation: number
 
-  constructor(
-    from: NodeKey,
-    to: NodeKey,
-    weight: number,
-    innovation: number,
-    config: LC,
-    state: LS,
-    createLink: LinkFactory<LC, LS, L>
-  ) {
-    this.from = from
-    this.to = to
-    this.weight = weight
-    this.innovation = innovation
-    this.config = config
-    this.state = state
-    this.createLink = createLink
-  }
+  // LinkExtension
+  readonly config: LCO
+  readonly state: LS
 
-  public neat(): LinkExtension<LC, LS, L> {
-    return this
-  }
+  // LinkFactory
+  createLink: LinkFactory<LFO, LCO, LSD, LS, L>
 
-  public identity(neat: L): L {
-    return neat
-  }
+  /**
+   * @deprecated remove in favor of inheritance; only useful in des-hyperneat
+   */
+  neat: () => Link<LFO, LCO, LSD, LS, L>
 
-  public cloneWith(neat: L): L {
-    return neat
-  }
+  /** only useful in des-hyperneat */
+  identity: (neat: L) => L
 
-  public clone(): L {
-    return this.createLink(
-      this.from,
-      this.to,
-      this.weight,
-      this.innovation,
-      this.config,
-      this.state
-    )
-  }
+  /** only useful in des-hyperneat */
+  cloneWith: (neat: L) => L
 
-  crossover(other: L, _fitness: number, _otherFitness: number): L {
-    if (
-      this.from !== other.from ||
-      this.to !== other.to ||
-      this.innovation !== other.innovation
-    ) {
-      throw new Error('Mismatch in crossover')
-    }
+  clone: () => L
 
-    return this.createLink(
-      this.from,
-      this.to,
-      (this.weight + other.weight) / 2,
-      this.innovation,
-      this.config,
-      this.state
-    )
-  }
+  crossover: (other: L, fitness: number, otherFitness: number) => L
+  distance: (other: L) => number
 
-  distance(other: L): number {
-    return Math.tanh(Math.abs(this.weight - other.weight))
-  }
-
-  toString(): string {
-    return toLinkKey(this.from, this.to)
-  }
-
-  toJSON(): LinkData<LC, LS> {
-    return {
-      from: this.from,
-      to: this.to,
-      weight: this.weight,
-      innovation: this.innovation,
-      // FIXME: this.config.toJSON()
-      config: this.config,
-      // FIXME: this.state.toJSON()
-      state: this.state,
-    }
-  }
-
-  toFactoryOptions(): LinkFactoryOptions {
-    return [this.from, this.to, this.weight, this.innovation]
-  }
+  toJSON: () => LinkData<LFO, LCO, LSD>
+  toFactoryOptions: () => LFO
 }

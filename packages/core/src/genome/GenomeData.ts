@@ -1,32 +1,21 @@
-import type { NodeKey } from '../node/nodeRefToKey.js'
+import type { ConfigData } from '../config/ConfigData.js'
+import type { ConfigOptions } from '../config/ConfigOptions.js'
+import type { StateData } from '../state/StateData.js'
 
-import type { Genome } from './Genome.js'
+import type { GenomeFactoryOptions } from './GenomeFactoryOptions.js'
 import type { GenomeOptions } from './GenomeOptions.js'
 
-/** Node.id; implied to be NodeType.Hidden */
-export type GenomeDataNode = number
-
-export type GenomeDataLink = [
-  fromKey: NodeKey,
-  toKey: NodeKey,
-  weight: number,
-  innovation: number
-]
-
-// FIXME: Do we need to add NLCS here?
 export interface GenomeData<
-  GO extends GenomeOptions,
-  G extends Genome<any, any, any, any, GO, any, any, G>
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
+  SD extends StateData,
+  HND,
+  LD,
+  GFO extends GenomeFactoryOptions<HND, LD>,
+  GO extends GenomeOptions
 > {
-  // shared state
-  config: ReturnType<G['config']['toJSON']>
-  state: ReturnType<G['state']['toJSON']>
+  config: ConfigData<NCO, LCO>
+  state: SD
   genomeOptions: GO
-
-  // factory options
-  hiddenNodes: GenomeDataNode[]
-  links: GenomeDataLink[]
-
-  /** links are acyclic; skips check for cycles; for performance */
-  isSafe: boolean
+  factoryOptions: GFO
 }

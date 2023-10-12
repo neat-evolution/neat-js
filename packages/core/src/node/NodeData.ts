@@ -1,13 +1,13 @@
-import type { NodeConfig } from '../config/ExtendedConfig.js'
-import type { NodeState } from '../state/ExtendedState.js'
+import type { ConfigOptions } from '../config/ConfigOptions.js'
 
-import { type NodeRef } from './NodeRef.js'
+import type { NodeFactoryOptions } from './NodeFactoryOptions.js'
 
-export interface NodeData<C extends NodeConfig, S extends NodeState>
-  extends NodeRef {
-  // FIXME: this should be NodeConfigData
-  config: C
-
-  // FIXME: this should be NodeStateData
-  state: S
+export interface NodeData<
+  NFO extends NodeFactoryOptions,
+  NCO extends ConfigOptions,
+  NSD
+> {
+  config: NCO
+  state: NSD
+  factoryOptions: NFO
 }

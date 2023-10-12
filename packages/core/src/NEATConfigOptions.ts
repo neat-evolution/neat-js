@@ -1,3 +1,4 @@
+// FIXME: Rename this to CoreOptions
 export interface NEATConfigOptions {
   addNodeProbability: number
   addLinkProbability: number

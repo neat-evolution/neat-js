@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 
-import { Connections } from '../src/genome/Connections.js'
+import { Connections } from '../src/Connections.js'
 import { NodeType, type NodeKey, toNodeKey } from '../src/index.js'
 
 describe('Connections', () => {
