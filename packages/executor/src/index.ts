@@ -1,4 +1,5 @@
 export * from './createExecutor.js'
+export * from './createSyncExecutor.js'
 export * from './Executor.js'
 export * from './ExecutorFactory.js'
 export * from './toActivationFunction.js'
