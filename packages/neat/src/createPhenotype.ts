@@ -12,10 +12,10 @@ import {
 } from '@neat-js/core'
 import { PhenotypeActionType } from '@neat-js/core'
 
-import type { DefaultNEATGenome } from './DefaultNEATGenome.js'
+import type { NEATGenome } from './NEATGenome.js'
 
-export const createPhenotype: PhenotypeFactory<DefaultNEATGenome> = (
-  genome: DefaultNEATGenome
+export const createPhenotype: PhenotypeFactory<NEATGenome> = (
+  genome: NEATGenome
 ): Phenotype => {
   // Sort genomes network topologically
   const order = new Set(genome.connections.sortTopologically())
