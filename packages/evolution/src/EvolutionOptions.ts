@@ -5,7 +5,6 @@ export interface EvolutionOptions {
   secondsLimit: number
   logInterval: number
   logSecInterval: number
-  dbLog: boolean
 }
 
 export const defaultEvolutionOptions: EvolutionOptions = {
@@ -15,5 +14,4 @@ export const defaultEvolutionOptions: EvolutionOptions = {
   secondsLimit: 0,
   logInterval: 10,
   logSecInterval: 0,
-  dbLog: false,
 }

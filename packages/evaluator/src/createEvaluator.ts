@@ -8,7 +8,27 @@ import type { EvaluatorFactory } from './EvaluatorFactory.js'
 export type AsyncEvaluatorFactoryOptions = ExecutorFactory
 
 export const createEvaluator: EvaluatorFactory<AsyncEvaluatorFactoryOptions> = (
-  algorithm: Algorithm<any, any, any, any, any, any, any, any>,
+  algorithm: Algorithm<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >,
   environment: Environment,
   createExecutor: AsyncEvaluatorFactoryOptions
 ) => {
