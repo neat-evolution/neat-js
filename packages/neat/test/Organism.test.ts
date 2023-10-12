@@ -6,17 +6,20 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { createConfig } from '../src/createConfig.js'
 import { createGenome } from '../src/createGenome.js'
 import { createState } from '../src/createState.js'
-import { type DefaultNEATGenome } from '../src/DefaultNEATGenome.js'
-import { defaultNEATGenomeOptions } from '../src/NEATGenomeOptions.js'
+import { type NEATGenome } from '../src/NEATGenome.js'
+import {
+  defaultNEATGenomeOptions,
+  type NEATGenomeOptions,
+} from '../src/NEATGenomeOptions.js'
 
 describe('Organism class', () => {
-  let state: DefaultNEATGenome['state']
+  let state: NEATGenome['state']
   let initConfig: InitConfig
-  let genomeOptions: DefaultNEATGenome['genomeOptions']
-  let genome: DefaultNEATGenome
+  let genomeOptions: NEATGenomeOptions
+  let genome: NEATGenome
   let generation: number
 
-  let createSeasonedGenome: () => Promise<DefaultNEATGenome>
+  let createSeasonedGenome: () => Promise<NEATGenome>
 
   beforeEach(async () => {
     state = createState()
@@ -26,7 +29,6 @@ describe('Organism class', () => {
     }
     genomeOptions = {
       ...defaultNEATGenomeOptions,
-      ...initConfig,
     }
     createSeasonedGenome = async () => {
       const options = {
@@ -37,7 +39,12 @@ describe('Organism class', () => {
         removeNodeProbability: 0,
         mutateLinkWeightProbability: 0,
       }
-      const genome = createGenome(createConfig(options), state, genomeOptions)
+      const genome = createGenome(
+        createConfig(options, null, null),
+        state,
+        genomeOptions,
+        initConfig
+      )
       for (let i = 0; i < 50; i++) {
         await genome.mutate()
       }

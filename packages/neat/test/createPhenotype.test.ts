@@ -1,8 +1,12 @@
-import { defaultNEATConfigOptions, isPhenotypeLinkAction } from '@neat-js/core'
+import {
+  defaultNEATConfigOptions,
+  isPhenotypeLinkAction,
+  type InitConfig,
+} from '@neat-js/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
-  type DefaultNEATGenome,
+  type NEATGenome,
   createConfig,
   createGenome,
   createPhenotype,
@@ -15,18 +19,20 @@ import {
 describe('createPhenotype', () => {
   let stateProvider: NEATState
   let genomeOptions: NEATGenomeOptions
+  const initConfig: InitConfig = {
+    inputs: 4,
+    outputs: 3,
+  }
 
   /**
    * Creates a genome that has been mutated 50 times
-   * @returns {DefaultNEATGenome} seasoned genome
+   * @returns {NEATGenome} seasoned genome
    */
-  let createSeasonedGenome: () => Promise<DefaultNEATGenome>
+  let createSeasonedGenome: () => Promise<NEATGenome>
 
   beforeEach(async () => {
     genomeOptions = {
       ...defaultNEATGenomeOptions,
-      inputs: 4,
-      outputs: 3,
     }
     stateProvider = createState()
 
@@ -41,9 +47,10 @@ describe('createPhenotype', () => {
         mutateLinkWeightProbability: 0,
       }
       const genome = createGenome(
-        createConfig(configOptions),
+        createConfig(configOptions, null, null),
         stateProvider,
-        genomeOptions
+        genomeOptions,
+        initConfig
       )
       for (let i = 0; i < 50; i++) {
         await genome.mutate()

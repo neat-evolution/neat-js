@@ -1,4 +1,10 @@
-import { NodeType, type NodeKey, type LinkData, toNodeKey } from '@neat-js/core'
+import {
+  NodeType,
+  type NodeKey,
+  type LinkData,
+  toNodeKey,
+  type LinkFactoryOptions,
+} from '@neat-js/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createLink } from '../src/createLink.js'
@@ -13,7 +19,8 @@ describe('NEATLink class', () => {
     beforeEach(() => {
       from = toNodeKey(NodeType.Input, 0)
       to = toNodeKey(NodeType.Output, 1)
-      link = createLink(from, to, 0.5, 1, null, null)
+      const factoryOptions = { from, to, weight: 0.5, innovation: 1 }
+      link = createLink(factoryOptions, null, null)
     })
 
     test('should return itself', () => {
@@ -42,8 +49,8 @@ describe('NEATLink class', () => {
     beforeEach(() => {
       from = toNodeKey(NodeType.Input, 0)
       to = toNodeKey(NodeType.Output, 1)
-      link1 = createLink(from, to, 0.5, 1, null, null)
-      link2 = createLink(from, to, 0.7, 1, null, null)
+      link1 = createLink({ from, to, weight: 0.5, innovation: 1 }, null, null)
+      link2 = createLink({ from, to, weight: 0.7, innovation: 1 }, null, null)
     })
 
     test('should successfully perform crossover with identical links', () => {
@@ -55,7 +62,11 @@ describe('NEATLink class', () => {
     })
 
     test('should throw an error for mismatched from node', () => {
-      link2 = createLink(toNodeKey(NodeType.Hidden, 3), to, 0.7, 1, null, null)
+      link2 = createLink(
+        { from: toNodeKey(NodeType.Hidden, 3), to, weight: 0.7, innovation: 1 },
+        null,
+        null
+      )
       expect(() => {
         link1.crossover(link2, 10, 5)
       }).toThrowError('Mismatch in crossover')
@@ -63,10 +74,7 @@ describe('NEATLink class', () => {
 
     test('should throw an error for mismatched to node', () => {
       link2 = createLink(
-        from,
-        toNodeKey(NodeType.Hidden, 3),
-        0.7,
-        1,
+        { from, to: toNodeKey(NodeType.Hidden, 3), weight: 0.7, innovation: 1 },
         null,
         null
       )
@@ -76,7 +84,7 @@ describe('NEATLink class', () => {
     })
 
     test('should throw an error for mismatched innovation numbers', () => {
-      link2 = createLink(from, to, 0.7, 2, null, null)
+      link2 = createLink({ from, to, weight: 0.7, innovation: 2 }, null, null)
       expect(() => {
         link1.crossover(link2, 10, 5)
       }).toThrowError('Mismatch in crossover')
@@ -98,18 +106,26 @@ describe('NEATLink class', () => {
     beforeEach(() => {
       from = toNodeKey(NodeType.Input, 0)
       to = toNodeKey(NodeType.Output, 1)
-      link1 = createLink(from, to, 0.5, 1, null, null)
-      link2 = createLink(from, to, 0.7, 1, null, null)
+      link1 = createLink({ from, to, weight: 0.5, innovation: 1 }, null, null)
+      link2 = createLink({ from, to, weight: 0.7, innovation: 1 }, null, null)
     })
 
     test('should return zero distance for identical weights', () => {
-      const link2 = createLink(from, to, 0.5, 1, null, null)
+      const link2 = createLink(
+        { from, to, weight: 0.5, innovation: 1 },
+        null,
+        null
+      )
       const distance = link1.distance(link2)
       expect(distance).toBeCloseTo(0)
     })
 
     test('should return small positive distance for slightly different weights', () => {
-      const link2 = createLink(from, to, 0.6, 1, null, null)
+      const link2 = createLink(
+        { from, to, weight: 0.6, innovation: 1 },
+        null,
+        null
+      )
       const distance = link1.distance(link2)
       expect(distance).toBeGreaterThan(0)
       expect(distance).toBeLessThan(1)
@@ -139,38 +155,39 @@ describe('NEATLink class', () => {
     })
 
     test('should return a JSON representation of the link', () => {
-      link = createLink(from, to, 0.5, 1, null, null)
+      link = createLink({ from, to, weight: 0.5, innovation: 1 }, null, null)
       expect(link.toJSON()).toEqual({
-        from: link.from,
-        to: link.to,
-        weight: link.weight,
-        innovation: link.innovation,
+        factoryOptions: {
+          from: link.from,
+          to: link.to,
+          weight: link.weight,
+          innovation: link.innovation,
+        },
         config: link.config,
         state: link.state,
       })
     })
 
     test('should create a link from JSON data', () => {
-      const data: LinkData<null, null> = {
-        from,
-        to,
-        weight: 0.5,
-        innovation: 1,
+      const data: LinkData<LinkFactoryOptions, null, null> = {
+        factoryOptions: { from, to, weight: 0.5, innovation: 1 },
         config: null,
         state: null,
       }
       link = createLink(
-        data.from,
-        data.to,
-        data.weight,
-        data.innovation,
+        {
+          from: data.factoryOptions.from,
+          to: data.factoryOptions.to,
+          weight: data.factoryOptions.weight,
+          innovation: data.factoryOptions.innovation,
+        },
         data.config,
         data.state
       )
-      expect(link.from).toEqual(data.from)
-      expect(link.to).toEqual(data.to)
-      expect(link.weight).toEqual(data.weight)
-      expect(link.innovation).toEqual(data.innovation)
+      expect(link.from).toEqual(data.factoryOptions.from)
+      expect(link.to).toEqual(data.factoryOptions.to)
+      expect(link.weight).toEqual(data.factoryOptions.weight)
+      expect(link.innovation).toEqual(data.factoryOptions.innovation)
       expect(link.config).toEqual(data.config)
       expect(link.state).toEqual(data.state)
     })

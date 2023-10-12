@@ -1,7 +1,7 @@
-import type { GenomeDataLink } from '@neat-js/core'
 import { describe, expect, test } from 'vitest'
 
-import type { DefaultNEATGenome } from '../src/DefaultNEATGenome.js'
+import type { NEATGenome } from '../src/NEATGenome.js'
+import type { NEATLinkData } from '../src/NEATGenomeFactoryOptions.js'
 
 import { testCases } from './fixtures/crossover/testCases.js'
 
@@ -17,11 +17,11 @@ const formattedTestCases = testCases.map(
 ) as Array<
   [
     name: string,
-    a: DefaultNEATGenome,
-    b: DefaultNEATGenome,
+    a: NEATGenome,
+    b: NEATGenome,
     fitness1: number,
     fitness2: number,
-    expected: DefaultNEATGenome
+    expected: NEATGenome
   ]
 >
 
@@ -30,22 +30,22 @@ describe('Genome crossover fixtures', () => {
     '%s',
     (
       name: string,
-      a: DefaultNEATGenome,
-      b: DefaultNEATGenome,
+      a: NEATGenome,
+      b: NEATGenome,
       fitness1: number,
       fitness2: number,
-      expected: DefaultNEATGenome
+      expected: NEATGenome
     ) => {
       const result = a.crossover(b, fitness1, fitness2)
       const resultJSON = JSON.parse(JSON.stringify(result.toJSON()))
       const expectedJSON = JSON.parse(JSON.stringify(expected.toJSON()))
 
       // sort links by innovation
-      resultJSON.links.sort(
-        (a: GenomeDataLink, b: GenomeDataLink) => a[3] - b[3]
+      resultJSON.factoryOptions.links.sort(
+        (a: NEATLinkData, b: NEATLinkData) => a[3] - b[3]
       )
-      expectedJSON.links.sort(
-        (a: GenomeDataLink, b: GenomeDataLink) => a[3] - b[3]
+      expectedJSON.factoryOptions.links.sort(
+        (a: NEATLinkData, b: NEATLinkData) => a[3] - b[3]
       )
       expect(resultJSON).toEqual(expectedJSON)
     }

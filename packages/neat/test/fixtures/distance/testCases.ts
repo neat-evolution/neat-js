@@ -33,7 +33,7 @@ export interface TestCaseData {
   genome2: TestCaseGenomeData
 }
 
-const configProvider = createConfig(defaultNEATConfigOptions)
+const configProvider = createConfig(defaultNEATConfigOptions, null, null)
 const state = createState()
 
 // Helper function to format hidden nodes
@@ -82,11 +82,11 @@ const createTestGenome = (genomeData: TestCaseGenomeData) => {
   const genome = createGenome(
     configProvider,
     state,
-    { inputs: 4, outputs: 3, outputActivation: Activation.Sigmoid },
+    { outputActivation: Activation.Sigmoid },
+    { inputs: 4, outputs: 3 },
     {
       hiddenNodes: formatHiddenNodes(genomeData.hidden_nodes),
       links: formatLinks(genomeData.links),
-      isSafe: true,
     }
   )
   return genome
