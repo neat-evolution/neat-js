@@ -6,7 +6,27 @@ import { WorkerEvaluator } from './WorkerEvaluator.js'
 import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'
 
 export const createEvaluator: EvaluatorFactory<WorkerEvaluatorOptions> = (
-  algorithm: Algorithm<any, any, any, any, any, any, any, any>,
+  algorithm: Algorithm<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >,
   environment: Environment,
   options: WorkerEvaluatorOptions
 ) => {

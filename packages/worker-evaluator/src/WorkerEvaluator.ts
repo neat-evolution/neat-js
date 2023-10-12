@@ -3,6 +3,7 @@ import type {
   ConfigData,
   GenomeFactoryOptions,
   GenomeOptions,
+  InitConfig,
 } from '@neat-js/core'
 import type { Environment } from '@neat-js/environment'
 import type {
@@ -24,7 +25,28 @@ import {
 import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'
 
 export class WorkerEvaluator implements Evaluator {
-  public readonly algorithm: Algorithm<any, any, any, any, any, any, any, any>
+  public readonly algorithm: Algorithm<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >
+
   public readonly environment: Environment
 
   public readonly taskCount: number
@@ -38,7 +60,27 @@ export class WorkerEvaluator implements Evaluator {
   private readonly requestMap = new Map<Worker, RequestMapValue>()
 
   constructor(
-    algorithm: Algorithm<any, any, any, any, any, any, any, any>,
+    algorithm: Algorithm<
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any
+    >,
     environment: Environment,
     options: WorkerEvaluatorOptions
   ) {
@@ -132,7 +174,8 @@ export class WorkerEvaluator implements Evaluator {
 
   async initGenomeFactory(
     configData: ConfigData<any, any>,
-    genomeOptions: GenomeOptions
+    genomeOptions: GenomeOptions,
+    initConfig: InitConfig
   ) {
     await this.initPromise
     for (const worker of this.workers) {
@@ -140,6 +183,7 @@ export class WorkerEvaluator implements Evaluator {
         createAction(ActionType.INIT_GENOME_FACTORY, {
           configData,
           genomeOptions,
+          initConfig,
         })
       )
     }
@@ -206,7 +250,7 @@ export class WorkerEvaluator implements Evaluator {
 
   private async requestEvaluateGenome(
     worker: Worker,
-    genomeFactoryOptions: GenomeFactoryOptions<any, any, any, any, any, any>
+    genomeFactoryOptions: GenomeFactoryOptions<any, any>
   ): Promise<number> {
     return await new Promise((resolve, reject) => {
       const customResolve = (value: number | PromiseLike<number>) => {

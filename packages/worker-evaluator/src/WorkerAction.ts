@@ -1,9 +1,9 @@
 import type {
   ConfigData,
+  ConfigOptions,
   GenomeFactoryOptions,
   GenomeOptions,
-  LinkConfig,
-  NodeConfig,
+  InitConfig,
 } from '@neat-js/core'
 
 export enum ActionType {
@@ -29,12 +29,13 @@ export interface InitPayload {
 }
 
 export interface InitGenomeFactoryPayload<
-  NC extends NodeConfig,
-  LC extends LinkConfig,
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
   GO extends GenomeOptions
 > {
-  configData: ConfigData<NC, LC>
+  configData: ConfigData<NCO, LCO>
   genomeOptions: GO
+  initConfig: InitConfig
 }
 
 export type InitAction = Action<InitPayload>
@@ -48,14 +49,7 @@ export interface PayloadMap {
   [ActionType.INIT_EVALUATOR_SUCCESS]: null
   [ActionType.INIT_GENOME_FACTORY]: InitGenomeFactoryPayload<any, any, any>
   [ActionType.INIT_GENOME_FACTORY_SUCCESS]: null
-  [ActionType.REQUEST_EVALUATE_GENOME]: GenomeFactoryOptions<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >
+  [ActionType.REQUEST_EVALUATE_GENOME]: GenomeFactoryOptions<any, any>
   [ActionType.RESPOND_EVALUATE_GENOME]: number
   [ActionType.TERMINATE]: null
 }

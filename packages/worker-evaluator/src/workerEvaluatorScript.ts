@@ -4,6 +4,7 @@ import type {
   GenomeFactory,
   GenomeFactoryOptions,
   GenomeOptions,
+  InitConfig,
   PhenotypeFactory,
   StateFactory,
   StateProvider,
@@ -24,19 +25,32 @@ import {
 interface ThreadInfo {
   createConfig: ConfigFactory<any, any, any>
   createExecutor: ExecutorFactory
-  createGenome: GenomeFactory<any, any, any, any, any, any>
+  createGenome: GenomeFactory<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >
   createPhenotype: PhenotypeFactory<any>
-  createState: StateFactory<any, any, any>
+  createState: StateFactory<any, any, any, any, any, any>
   environment: Environment
-  fromSharedBuffer: (
-    buffer: SharedArrayBuffer
-  ) => GenomeFactoryOptions<any, any, any, any, any, any>
 }
 
 interface GenomeFactoryConfig {
   configProvider: ConfigProvider<any, any>
-  stateProvider: StateProvider<any, any, any>
+  stateProvider: StateProvider<any, any, any, any, any>
   genomeOptions: GenomeOptions
+  initConfig: InitConfig
 }
 
 let threadInfo: ThreadInfo | null = null
@@ -48,13 +62,8 @@ async function handleInitEvaluator({
   createExecutorPathname,
   environmentData,
 }: InitPayload) {
-  const {
-    createConfig,
-    createGenome,
-    createPhenotype,
-    createState,
-    fromSharedBuffer,
-  } = await import(algorithmPathname)
+  const { createConfig, createGenome, createPhenotype, createState } =
+    await import(algorithmPathname)
   const { createEnvironment } = await import(createEnvironmentPathname)
   const environment = createEnvironment(environmentData)
 
@@ -70,7 +79,6 @@ async function handleInitEvaluator({
     createPhenotype,
     createState,
     environment,
-    fromSharedBuffer,
   }
   workerContext.postMessage(
     createAction(ActionType.INIT_EVALUATOR_SUCCESS, null)
@@ -80,6 +88,7 @@ async function handleInitEvaluator({
 async function handleInitGenomeFactory({
   configData,
   genomeOptions,
+  initConfig,
 }: InitGenomeFactoryPayload<any, any, any>) {
   if (threadInfo == null) {
     throw new Error('threadInfo not initialized')
@@ -99,6 +108,7 @@ async function handleInitGenomeFactory({
     configProvider,
     stateProvider,
     genomeOptions,
+    initConfig,
   }
   workerContext.postMessage(
     createAction(ActionType.INIT_GENOME_FACTORY_SUCCESS, null)
@@ -106,7 +116,7 @@ async function handleInitGenomeFactory({
 }
 
 const handleEvaluateGenome = async (
-  genomeFactoryOptions: GenomeFactoryOptions<any, any, any, any, any, any>
+  genomeFactoryOptions: GenomeFactoryOptions<any, any>
 ) => {
   if (threadInfo == null) {
     throw new Error('threadInfo not initialized')
@@ -119,11 +129,13 @@ const handleEvaluateGenome = async (
   }
 
   // hydrate the genome
-  const { configProvider, stateProvider, genomeOptions } = genomeFactoryConfig
+  const { configProvider, stateProvider, genomeOptions, initConfig } =
+    genomeFactoryConfig
   const genome = threadInfo.createGenome(
     configProvider,
     stateProvider,
     genomeOptions,
+    initConfig,
     genomeFactoryOptions
   )
 
