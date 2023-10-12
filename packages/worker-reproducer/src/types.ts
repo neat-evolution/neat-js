@@ -1,4 +1,4 @@
-import type { Genome } from '@neat-js/core'
+import type { CoreGenome } from '@neat-js/core'
 import type { Population } from '@neat-js/evolution'
 
 import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
@@ -9,8 +9,39 @@ export interface RequestMapValue<V> {
 }
 
 export type AnyPopulation<
-  G extends Genome<any, any, any, any, any, any, any, G>
+  G extends CoreGenome<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    G
+  >
 > = Population<
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
   any,
   any,
   any,

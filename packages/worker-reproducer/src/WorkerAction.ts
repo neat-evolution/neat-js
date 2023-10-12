@@ -1,10 +1,10 @@
 import type {
   ConfigData,
+  ConfigOptions,
   GenomeFactoryOptions,
   GenomeOptions,
+  InitConfig,
   Innovation,
-  LinkConfig,
-  NodeConfig,
 } from '@neat-js/core'
 import type {
   OrganismFactoryOptions,
@@ -35,13 +35,14 @@ export enum ActionType {
 }
 
 export interface InitReproducerPayload<
-  NC extends NodeConfig,
-  LC extends LinkConfig,
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
   GO extends GenomeOptions
 > {
   populationOptions: PopulationOptions
-  configData: ConfigData<NC, LC>
+  configData: ConfigData<NCO, LCO>
   genomeOptions: GO
+  initConfig: InitConfig
   algorithmPathname: string
 }
 
@@ -64,9 +65,7 @@ export interface EmptyPayload {
   requestId: number
 }
 
-export interface OrganismPayload<
-  GFO extends GenomeFactoryOptions<any, any, any, any, any, any>
-> {
+export interface OrganismPayload<GFO extends GenomeFactoryOptions<any, any>> {
   requestId: number
   genome: GFO
   organismState: OrganismFactoryOptions
