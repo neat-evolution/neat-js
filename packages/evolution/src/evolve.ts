@@ -3,7 +3,29 @@ import type { Organism } from './Organism.js'
 import { type Population } from './Population.js'
 
 export const evolve = async <
-  P extends Population<any, any, any, any, any, any, any, any, any, any>,
+  P extends Population<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >,
   O extends EvolutionOptions = EvolutionOptions
 >(
   population: P,
@@ -33,7 +55,16 @@ export const evolve = async <
       break
     }
     if (i % 10 === 0) {
-      const best = population.best() as Organism<any>
+      const best = population.best() as Organism<
+        any,
+        any,
+        any,
+        any,
+        any,
+        any,
+        any,
+        any
+      >
       console.log(`fitness: ${best.fitness ?? 0}`)
       console.log('genome:')
       console.log(` hiddenNodes: ${best.genome.hiddenNodes.size}`)

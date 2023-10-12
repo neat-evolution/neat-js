@@ -1,12 +1,12 @@
 import type {
   ConfigData,
-  Genome,
-  GenomeData,
+  ConfigOptions,
+  GenomeFactoryOptions,
   GenomeOptions,
   StateData,
 } from '@neat-js/core'
 
-import type { OrganismState } from './OrganismData.js'
+import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
 import type { SpeciesOptions } from './SpeciesOptions.js'
 
 export interface SpeciesState {
@@ -24,25 +24,27 @@ export interface SpeciesState {
 }
 
 export interface SpeciesDataOrganism<
-  GO extends GenomeOptions,
-  GD extends GenomeData<GO, G>,
-  G extends Genome<any, any, any, any, GO, any, GD, G>
+  HND,
+  LD,
+  GFO extends GenomeFactoryOptions<HND, LD>
 > {
-  genome: Omit<GD, 'config' | 'state' | 'genomeOptions'>
-  organismState: OrganismState
+  genome: GFO
+  organismState: OrganismFactoryOptions
 }
 
 export interface SpeciesData<
-  GO extends GenomeOptions,
-  GD extends GenomeData<GO, G>,
-  G extends Genome<any, any, any, any, GO, any, GD, G>
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
+  SD extends StateData,
+  HND,
+  LD,
+  GFO extends GenomeFactoryOptions<HND, LD>,
+  GO extends GenomeOptions
 > {
-  // shared state for all genomes
-  config: ConfigData<any, any> | null
-  state: StateData<any, any> | null
-  genomeOptions: G['genomeOptions'] | null
-
-  organisms: Array<SpeciesDataOrganism<GO, GD, G>>
+  config: ConfigData<NCO, LCO> | null
+  state: SD | null
+  genomeOptions: GO | null
   speciesOptions: SpeciesOptions
+  organisms: Array<SpeciesDataOrganism<HND, LD, GFO>>
   speciesState: SpeciesState
 }

@@ -1,26 +1,32 @@
 import {
-  type Genome,
   type GenomeFactoryOptions,
   type GenomeOptions,
   type GenomeData,
-  type ConfigProvider,
-  type NodeExtension,
-  type LinkExtension,
-  type StateProvider,
   type Algorithm,
+  type InitConfig,
+  type CoreGenome,
+  type CoreLink,
+  type LinkFactoryOptions,
+  type CoreNode,
+  type NodeFactoryOptions,
+  type CoreState,
+  type StateData,
+  type ExtendedState,
+  type CoreConfig,
+  type ConfigOptions,
 } from '@neat-js/core'
 import type { Evaluator, GenomeEntry } from '@neat-js/evaluator'
 import { threadRNG } from '@neat-js/utils'
 
 import { Organism } from './Organism.js'
-import type { OrganismState } from './OrganismData.js'
+import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
+import { type PopulationData } from './PopulationData.js'
 import {
   toPopulationDataSpecies,
-  type PopulationData,
-  type PopulationDataSpeciesEntry,
   type PopulationDataSpecies,
-} from './PopulationData.js'
-import type { PopulationFactoryOptions } from './PopulationFactoryOptions.js'
+  type PopulationDataSpeciesEntry,
+  type PopulationFactoryOptions,
+} from './PopulationFactoryOptions.js'
 import type { PopulationOptions } from './PopulationOptions.js'
 import type { Reproducer } from './reproducer/Reproducer.js'
 import type { ReproducerFactory } from './reproducer/ReproducerFactory.js'
@@ -28,76 +34,171 @@ import type { ReproducerFactoryOptions } from './reproducer/ReproducerFactoryOpt
 import { Species } from './Species.js'
 
 export class Population<
-  N extends NodeExtension<any, any, N>,
-  L extends LinkExtension<any, any, L>,
-  C extends ConfigProvider<N['config'], L['config']>,
-  S extends StateProvider<N['state'], L['state'], S>,
+  // Genome
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
+  C extends CoreConfig<NCO, LCO>,
+  NSD,
+  LSD,
+  NS extends ExtendedState<NSD>,
+  LS extends ExtendedState<LSD>,
+  SD extends StateData,
+  S extends CoreState<NSD, LSD, NS, LS, SD>,
+  HND,
+  LD,
+  GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
-  GFO extends GenomeFactoryOptions<C, S, GO, GFO, GD, G>,
-  GD extends GenomeData<GO, G>,
-  G extends Genome<N, L, C, S, GO, GFO, GD, G>,
-  A extends Algorithm<N, L, C, S, GO, GFO, GD, G>,
+  GD extends GenomeData<NCO, LCO, SD, HND, LD, GFO, GO>,
+  // CoreNode
+  NFO extends NodeFactoryOptions,
+  N extends CoreNode<NFO, NCO, NSD, NS, N>,
+  // CoreLink
+  LFO extends LinkFactoryOptions,
+  L extends CoreLink<LFO, LCO, LSD, LS, L>,
+  // CoreGenome
+  G extends CoreGenome<
+    NCO,
+    LCO,
+    C,
+    NSD,
+    LSD,
+    NS,
+    LS,
+    SD,
+    S,
+    HND,
+    LD,
+    GFO,
+    GO,
+    GD,
+    NFO,
+    N,
+    LFO,
+    L,
+    G
+  >,
+  // Algorithm
+  A extends Algorithm<
+    NCO,
+    LCO,
+    C,
+    NSD,
+    LSD,
+    NS,
+    LS,
+    SD,
+    S,
+    HND,
+    LD,
+    GFO,
+    GO,
+    GD,
+    NFO,
+    N,
+    LFO,
+    L,
+    G
+  >,
   RFO extends ReproducerFactoryOptions
 > {
   public readonly evaluator: Evaluator
   public readonly reproducer: Reproducer<G>
   public readonly algorithm: A
-  public readonly configProvider: G['config']
-  public readonly stateProvider: G['state']
+  public readonly configProvider: C
+  public readonly stateProvider: S
 
-  public readonly species: Map<number, Species<GO, GD, G>>
-  public readonly extinctSpecies: Map<number, Species<GO, GD, G>>
+  public readonly species: Map<
+    number,
+    Species<NCO, LCO, SD, HND, LD, GFO, GO, G>
+  >
+
+  public readonly extinctSpecies: Map<
+    number,
+    Species<NCO, LCO, SD, HND, LD, GFO, GO, G>
+  >
+
   private nextId: number
 
   public readonly populationOptions: PopulationOptions
   public readonly genomeOptions: GO
+  public readonly initConfig: InitConfig
   public readonly evaluatorReady: Promise<void>
 
   constructor(
     createReproducer: ReproducerFactory<
       G,
-      Population<N, L, C, S, GO, GFO, GD, G, A, RFO>,
+      Population<
+        NCO,
+        LCO,
+        C,
+        NSD,
+        LSD,
+        NS,
+        LS,
+        SD,
+        S,
+        HND,
+        LD,
+        GFO,
+        GO,
+        GD,
+        NFO,
+        N,
+        LFO,
+        L,
+        G,
+        A,
+        RFO
+      >,
       RFO
     >,
     evaluator: Evaluator,
     algorithm: A,
-    configProvider: G['config'],
+    configProvider: C,
     populationOptions: PopulationOptions,
     reproducerOptions: RFO,
     genomeOptions: GO,
-    populationFactoryOptions?: PopulationFactoryOptions<GO, GD, G>
+    initConfig: InitConfig,
+    populationFactoryOptions?: PopulationFactoryOptions<
+      NCO,
+      LCO,
+      SD,
+      HND,
+      LD,
+      GFO,
+      GO
+    >
   ) {
     this.evaluator = evaluator
     this.algorithm = algorithm
     this.configProvider = configProvider
-    this.stateProvider = algorithm.createState(
-      populationFactoryOptions?.state.neat
-    )
+    this.stateProvider = algorithm.createState(populationFactoryOptions?.state)
 
-    this.species = new Map<number, Species<GO, GD, G>>()
+    this.species = new Map<number, Species<NCO, LCO, SD, HND, LD, GFO, GO, G>>()
 
-    this.extinctSpecies = new Map<number, Species<GO, GD, G>>()
+    this.extinctSpecies = new Map<
+      number,
+      Species<NCO, LCO, SD, HND, LD, GFO, GO, G>
+    >()
     this.nextId = populationFactoryOptions?.nextId ?? 0
 
     this.populationOptions = populationOptions
-    this.genomeOptions = {
-      ...genomeOptions,
-      // InitConfig
-      ...this.evaluator.environment.description,
-    } as unknown as GO
+    this.genomeOptions = genomeOptions
+    this.initConfig = initConfig
 
     if (populationFactoryOptions != null) {
       const hydrateOrganism = (
         genomeFactoryOptions: GFO,
-        organismFactoryOptions: OrganismState
-      ) => {
+        organismFactoryOptions: OrganismFactoryOptions
+      ): Organism<NCO, LCO, SD, HND, LD, GFO, GO, G> => {
         const genome = algorithm.createGenome(
           configProvider,
           this.stateProvider,
           this.genomeOptions,
+          initConfig,
           genomeFactoryOptions
         )
-        const organism = new Organism(
+        const organism = new Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>(
           genome,
           organismFactoryOptions.generation,
           organismFactoryOptions
@@ -105,17 +206,17 @@ export class Population<
         return organism
       }
       const hydrateSpecies = (
-        speciesMap: Map<number, Species<GO, GD, G>>,
+        speciesMap: Map<number, Species<NCO, LCO, SD, HND, LD, GFO, GO, G>>,
         id: number,
-        speciesData: PopulationDataSpecies<GO, GD, G>
+        speciesData: PopulationDataSpecies<NCO, LCO, SD, HND, LD, GFO, GO>
       ) => {
-        const organisms = []
+        const organisms: Array<Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>> = []
         for (const {
           genome: genomeFactoryOptions,
           organismState: organismFactoryOptions,
         } of speciesData.organisms) {
           organisms.push(
-            hydrateOrganism(genomeFactoryOptions as GFO, organismFactoryOptions)
+            hydrateOrganism(genomeFactoryOptions, organismFactoryOptions)
           )
         }
         const speciesFactoryOptions = {
@@ -138,9 +239,13 @@ export class Population<
         const genome = algorithm.createGenome(
           configProvider,
           this.stateProvider,
-          this.genomeOptions
+          this.genomeOptions,
+          this.initConfig
         )
-        this.push(new Organism<G>(genome), false)
+        this.push(
+          new Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>(genome),
+          false
+        )
       }
     }
 
@@ -148,18 +253,24 @@ export class Population<
     this.reproducer = createReproducer(this, reproducerOptions)
     this.evaluatorReady = this.evaluator.initGenomeFactory(
       this.configProvider.toJSON(),
-      this.genomeOptions
+      this.genomeOptions,
+      this.initConfig
     )
   }
 
   /// Add organism to population
-  push(organism: Organism<G>, lockNew: boolean): void {
+  push(
+    organism: Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>,
+    lockNew: boolean
+  ): void {
     let species = this.compatibleSpecies(organism)
     if (species != null) {
       species.push(organism)
     } else {
       // New organism is not compatible with any existing species, create a new one
-      species = new Species<GO, GD, G>(this.populationOptions)
+      species = new Species<NCO, LCO, SD, HND, LD, GFO, GO, G>(
+        this.populationOptions
+      )
       // During reproduction the species is locked so that the new organism avoids parent selection
       if (lockNew) {
         species.lock()
@@ -171,7 +282,9 @@ export class Population<
   }
 
   /// Find first species compatible with organism
-  compatibleSpecies(organism: Organism<G>): Species<GO, GD, G> | null {
+  compatibleSpecies(
+    organism: Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>
+  ): Species<NCO, LCO, SD, HND, LD, GFO, GO, G> | null {
     for (const species of this.species.values()) {
       if (species.isCompatible(organism)) {
         return species
@@ -220,8 +333,26 @@ export class Population<
 
     // Sort species based on closeness to additional offspring (lowest first)
     speciesIds.sort((a, b) => {
-      const speciesA = this.species.get(a) as Species<GO, GD, G>
-      const speciesB = this.species.get(b) as Species<GO, GD, G>
+      const speciesA = this.species.get(a) as Species<
+        NCO,
+        LCO,
+        SD,
+        HND,
+        LD,
+        GFO,
+        GO,
+        G
+      >
+      const speciesB = this.species.get(b) as Species<
+        NCO,
+        LCO,
+        SD,
+        HND,
+        LD,
+        GFO,
+        GO,
+        G
+      >
       const aValue = 1.0 - (speciesA.offsprings % 1.0)
       const bValue = 1.0 - (speciesB.offsprings % 1.0)
       const compare = aValue < bValue ? -1 : aValue > bValue ? 1 : 0
@@ -232,7 +363,16 @@ export class Population<
     // in order of floating distance from additional offspring
     while (newPopulationSize < this.populationOptions.populationSize) {
       for (const speciesId of speciesIds) {
-        const species = this.species.get(speciesId) as Species<GO, GD, G>
+        const species = this.species.get(speciesId) as Species<
+          NCO,
+          LCO,
+          SD,
+          HND,
+          LD,
+          GFO,
+          GO,
+          G
+        >
         species.offsprings = Math.floor(species.offsprings) + 1
         newPopulationSize++
 
@@ -244,8 +384,26 @@ export class Population<
 
     // Sort species based on bestFitness (best first)
     speciesIds.sort((a, b) => {
-      const speciesA = this.species.get(a) as Species<GO, GD, G>
-      const speciesB = this.species.get(b) as Species<GO, GD, G>
+      const speciesA = this.species.get(a) as Species<
+        NCO,
+        LCO,
+        SD,
+        HND,
+        LD,
+        GFO,
+        GO,
+        G
+      >
+      const speciesB = this.species.get(b) as Species<
+        NCO,
+        LCO,
+        SD,
+        HND,
+        LD,
+        GFO,
+        GO,
+        G
+      >
       const aValue = speciesA.bestFitness ?? -Infinity
       const bValue = speciesB.bestFitness ?? -Infinity
       const compare = aValue < bValue ? 1 : aValue > bValue ? -1 : 0
@@ -257,7 +415,16 @@ export class Population<
     // Distribute elites
     while (elitesDistributed < this.populationOptions.globalElites) {
       for (const speciesId of speciesIds) {
-        const species = this.species.get(speciesId) as Species<GO, GD, G>
+        const species = this.species.get(speciesId) as Species<
+          NCO,
+          LCO,
+          SD,
+          HND,
+          LD,
+          GFO,
+          GO,
+          G
+        >
         if (species.elites < species.size) {
           species.elites++
           elitesDistributed++
@@ -290,7 +457,9 @@ export class Population<
     }
 
     // Perform copyElites and reproduce simultaneously
-    const promises: Array<Promise<Array<Organism<G>>>> = []
+    const promises: Array<
+      Promise<Array<Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>>>
+    > = []
 
     // Directly copy elites, without crossover or mutation
     promises.push(this.reproducer.copyElites(speciesIds))
@@ -307,7 +476,16 @@ export class Population<
 
     // Remove extinct species
     for (const i of speciesIds) {
-      const species = this.species.get(i) as Species<GO, GD, G>
+      const species = this.species.get(i) as Species<
+        NCO,
+        LCO,
+        SD,
+        HND,
+        LD,
+        GFO,
+        GO,
+        G
+      >
       if (species.extinct) {
         this.species.delete(i)
         this.extinctSpecies.set(i, species)
@@ -345,7 +523,7 @@ export class Population<
   }
 
   /// Get random organism from population
-  randomOrganism(): Organism<G> | null {
+  randomOrganism(): Organism<NCO, LCO, SD, HND, LD, GFO, GO, G> | null {
     const len = this.size
 
     if (len === 0) {
@@ -364,8 +542,10 @@ export class Population<
   }
 
   /// Use tournament selection to select an organism
-  tournamentSelect(k: number): Organism<G> | null {
-    let best: Organism<G> | null = null
+  tournamentSelect(
+    k: number
+  ): Organism<NCO, LCO, SD, HND, LD, GFO, GO, G> | null {
+    let best: Organism<NCO, LCO, SD, HND, LD, GFO, GO, G> | null = null
     let bestFitness: number | null = null
 
     for (let i = 0; i < k; i++) {
@@ -413,7 +593,9 @@ export class Population<
   }
 
   /// Iterate organisms. Adheres to lock.
-  *organismValues(): IterableIterator<Organism<G>> {
+  *organismValues(): IterableIterator<
+    Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>
+  > {
     for (const species of this.species.values()) {
       yield* species.organismValues()
     }
@@ -428,7 +610,7 @@ export class Population<
     }
   }
 
-  best(): Organism<G> | null {
+  best(): Organism<NCO, LCO, SD, HND, LD, GFO, GO, G> | null {
     let best = null
     for (const organism of this.organismValues()) {
       if (best == null) {
@@ -440,39 +622,26 @@ export class Population<
     return best
   }
 
-  toJSON(): PopulationData<GO, GD, G> {
-    const speciesData: Array<PopulationDataSpeciesEntry<GO, GD, G>> = []
-    for (const [id, species] of this.species.entries()) {
-      speciesData.push([id, toPopulationDataSpecies(species)])
-    }
-    const extinctSpeciesData: Array<PopulationDataSpeciesEntry<GO, GD, G>> = []
-    for (const [id, species] of this.extinctSpecies.entries()) {
-      extinctSpeciesData.push([id, toPopulationDataSpecies(species)])
-    }
+  toJSON(): PopulationData<NCO, LCO, SD, HND, LD, GFO, GO> {
     return {
       algorithmName: this.algorithm.name,
-
-      // shared state
       config: this.configProvider.toJSON(),
-      state: this.stateProvider.toJSON(), // created by population
       genomeOptions: this.genomeOptions,
-
-      // shared with species
       populationOptions: this.populationOptions,
-
-      // population state
-      species: speciesData,
-      extinctSpecies: extinctSpeciesData,
-      nextId: this.nextId,
+      factoryOptions: this.toFactoryOptions(),
     }
   }
 
-  toFactoryOptions(): PopulationFactoryOptions<GO, GD, G> {
-    const speciesData: Array<PopulationDataSpeciesEntry<GO, GD, G>> = []
+  toFactoryOptions(): PopulationFactoryOptions<NCO, LCO, SD, HND, LD, GFO, GO> {
+    const speciesData: Array<
+      PopulationDataSpeciesEntry<NCO, LCO, SD, HND, LD, GFO, GO>
+    > = []
     for (const [id, species] of this.species.entries()) {
       speciesData.push([id, toPopulationDataSpecies(species)])
     }
-    const extinctSpeciesData: Array<PopulationDataSpeciesEntry<GO, GD, G>> = []
+    const extinctSpeciesData: Array<
+      PopulationDataSpeciesEntry<NCO, LCO, SD, HND, LD, GFO, GO>
+    > = []
     for (const [id, species] of this.extinctSpecies.entries()) {
       extinctSpeciesData.push([id, toPopulationDataSpecies(species)])
     }
