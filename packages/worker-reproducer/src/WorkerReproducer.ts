@@ -1,4 +1,4 @@
-import { nodeKeyToRef, type Genome, type Innovation } from '@neat-js/core'
+import { nodeKeyToRef, type Innovation, type CoreGenome } from '@neat-js/core'
 import { Organism, type Reproducer, type Species } from '@neat-js/evolution'
 import { Worker } from '@neat-js/worker-threads'
 import { Sema } from 'async-sema'
@@ -24,7 +24,27 @@ const nextRequestId = () => {
 }
 
 export class WorkerReproducer<
-  G extends Genome<any, any, any, any, any, any, any, G>
+  G extends CoreGenome<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    G
+  >
 > implements Reproducer<G>
 {
   public readonly population: AnyPopulation<G>
@@ -148,6 +168,7 @@ export class WorkerReproducer<
             populationOptions: this.population.populationOptions,
             configData: this.population.configProvider.toJSON(),
             genomeOptions: this.population.genomeOptions,
+            initConfig: this.population.initConfig,
             algorithmPathname: this.population.algorithm.pathname,
           }
 
@@ -222,6 +243,11 @@ export class WorkerReproducer<
     const species = this.population.species.get(speciesId) as Species<
       any,
       any,
+      any,
+      any,
+      any,
+      any,
+      any,
       G
     >
     const organism = species.tournamentSelect(
@@ -276,10 +302,23 @@ export class WorkerReproducer<
     )
   }
 
-  async copyElites(speciesIds: number[]): Promise<Array<Organism<G>>> {
-    const promises: Array<Promise<Organism<G>>> = []
+  async copyElites(
+    speciesIds: number[]
+  ): Promise<Array<Organism<any, any, any, any, any, any, any, G>>> {
+    const promises: Array<
+      Promise<Organism<any, any, any, any, any, any, any, G>>
+    > = []
     for (const i of speciesIds) {
-      const species = this.population.species.get(i) as Species<any, any, G>
+      const species = this.population.species.get(i) as Species<
+        any,
+        any,
+        any,
+        any,
+        any,
+        any,
+        any,
+        G
+      >
       // Steal elites from number of offsprings
       const elitesTakenFromOffspring = Math.min(
         this.population.populationOptions.elitesFromOffspring,
@@ -290,14 +329,25 @@ export class WorkerReproducer<
 
       // Directly copy elites, without crossover or mutation
       for (let j = 0; j < species.elites; j++) {
-        const organism = species.organisms[j % species.size] as Organism<G>
+        const organism = species.organisms[j % species.size] as Organism<
+          any,
+          any,
+          any,
+          any,
+          any,
+          any,
+          any,
+          G
+        >
         promises.push(this.eliteOrganism(organism))
       }
     }
     return await Promise.all(promises)
   }
 
-  async eliteOrganism(organism: Organism<G>): Promise<Organism<G>> {
+  async eliteOrganism(
+    organism: Organism<any, any, any, any, any, any, any, G>
+  ): Promise<Organism<any, any, any, any, any, any, any, G>> {
     await this.initPromise
     await this.semaphore.acquire()
     const worker = this.workers.pop()
@@ -306,13 +356,14 @@ export class WorkerReproducer<
       this.semaphore.release()
       throw new Error('No worker available')
     }
-    let elite: Organism<G>
+    let elite: Organism<any, any, any, any, any, any, any, G>
     try {
       const data = await this.requestEliteOrganism(worker, organism)
       const genome = this.population.algorithm.createGenome(
         this.population.configProvider,
         this.population.stateProvider,
         this.population.genomeOptions,
+        this.population.initConfig,
         data.genome
       )
       elite = new Organism(
@@ -330,7 +381,7 @@ export class WorkerReproducer<
 
   protected async requestEliteOrganism(
     worker: Worker,
-    organism: Organism<G>
+    organism: Organism<any, any, any, any, any, any, any, G>
   ): Promise<OrganismPayload<any>> {
     return await new Promise((resolve, reject) => {
       const customResolve = (
@@ -354,7 +405,9 @@ export class WorkerReproducer<
     })
   }
 
-  async reproduce(speciesIds: number[]): Promise<Array<Organism<G>>> {
+  async reproduce(
+    speciesIds: number[]
+  ): Promise<Array<Organism<any, any, any, any, any, any, any, G>>> {
     const result = await Promise.all(
       speciesIds.map(
         async (speciesId) => await this.reproduceSpecies(speciesId)
@@ -363,22 +416,33 @@ export class WorkerReproducer<
     return result.flat()
   }
 
-  async reproduceSpecies(speciesId: number): Promise<Array<Organism<G>>> {
+  async reproduceSpecies(
+    speciesId: number
+  ): Promise<Array<Organism<any, any, any, any, any, any, any, G>>> {
     const species = this.population.species.get(speciesId) as Species<
+      any,
+      any,
+      any,
+      any,
+      any,
       any,
       any,
       G
     >
     const reproductions = Math.floor(species.offsprings)
 
-    const promises: Array<Promise<Organism<G>>> = []
+    const promises: Array<
+      Promise<Organism<any, any, any, any, any, any, any, G>>
+    > = []
     for (let _ = 0; _ < reproductions; _++) {
       promises.push(this.breedOrganism(speciesId))
     }
     return await Promise.all(promises)
   }
 
-  async breedOrganism(speciesId: number): Promise<Organism<G>> {
+  async breedOrganism(
+    speciesId: number
+  ): Promise<Organism<any, any, any, any, any, any, any, G>> {
     await this.initPromise
     await this.semaphore.acquire()
     const worker = this.workers.pop()
@@ -388,13 +452,14 @@ export class WorkerReproducer<
       throw new Error('No worker available')
     }
 
-    let organism: Organism<G>
+    let organism: Organism<any, any, any, any, any, any, any, G>
     try {
       const data = await this.requestBreedOrganism(worker, speciesId)
       const genome = this.population.algorithm.createGenome(
         this.population.configProvider,
         this.population.stateProvider,
         this.population.genomeOptions,
+        this.population.initConfig,
         data.genome
       )
       organism = new Organism(

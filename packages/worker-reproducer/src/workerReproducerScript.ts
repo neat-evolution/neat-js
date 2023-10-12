@@ -5,10 +5,9 @@ import {
   type GenomeFactory,
   type GenomeOptions,
   type Innovation,
-  type LinkConfig,
-  type NodeConfig,
   type NodeRef,
-  type GenomeFactoryOptions,
+  type InitConfig,
+  type ConfigOptions,
 } from '@neat-js/core'
 import { Organism } from '@neat-js/evolution'
 import type { PopulationOptions } from '@neat-js/evolution'
@@ -30,25 +29,35 @@ import { WorkerState } from './WorkerState.js'
 // FIXME: types
 interface PartialAlgorithm {
   createConfig: ConfigFactory<any, any, any>
-  createGenome: GenomeFactory<any, any, any, any, any, any>
-  fromSharedBuffer: (
-    buffer: SharedArrayBuffer
-  ) => GenomeFactoryOptions<any, any, any, any, any, any>
-  toSharedBuffer: (
-    data: GenomeFactoryOptions<any, any, any, any, any, any>
-  ) => SharedArrayBuffer
+  createGenome: GenomeFactory<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >
 }
 
 // FIXME: types
 interface ThreadInfo<
-  NC extends NodeConfig,
-  LC extends LinkConfig,
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
   GO extends GenomeOptions
 > {
   populationOptions: PopulationOptions
-  stateProvider: WorkerState<any, any>
-  configProvider: ConfigData<NC, LC>
+  stateProvider: WorkerState<any, any, any, any, any>
+  configProvider: ConfigData<NCO, LCO>
   genomeOptions: GO
+  initConfig: InitConfig
   algorithm: PartialAlgorithm
 }
 
@@ -72,15 +81,12 @@ const initThread = async (payload: InitReproducerPayload<any, any, any>) => {
   if (workerContext == null) {
     throw new Error('Worker must be created with a parent port')
   }
-  const stateProvider = new WorkerState<any, any>(
+  // FIXME: enable node state and link state
+  const stateProvider = new WorkerState<any, any, any, any, any>(
     getSplitInnovation,
-    getConnectInnovation,
-    // FIXME: enable node state and link state
-    null,
-    null
+    getConnectInnovation
   )
-  const { createConfig, createGenome, fromSharedBuffer, toSharedBuffer } =
-    await import(payload.algorithmPathname)
+  const { createConfig, createGenome } = await import(payload.algorithmPathname)
   const configProvider = createConfig(
     payload.configData.neat,
     payload.configData.node,
@@ -91,11 +97,10 @@ const initThread = async (payload: InitReproducerPayload<any, any, any>) => {
     stateProvider,
     configProvider,
     genomeOptions: payload.genomeOptions,
+    initConfig: payload.initConfig,
     algorithm: {
       createConfig,
       createGenome,
-      fromSharedBuffer,
-      toSharedBuffer,
     },
   }
   workerContext.postMessage(
@@ -103,7 +108,9 @@ const initThread = async (payload: InitReproducerPayload<any, any, any>) => {
   )
 }
 
-const populationTournamentSelect = async (): Promise<Organism<any>> => {
+const populationTournamentSelect = async (): Promise<
+  Organism<any, any, any, any, any, any, any, any>
+> => {
   if (threadInfo == null) {
     throw new Error('threadInfo not initialized')
   }
@@ -126,6 +133,7 @@ const populationTournamentSelect = async (): Promise<Organism<any>> => {
     threadInfo.configProvider,
     threadInfo.stateProvider,
     threadInfo.genomeOptions,
+    threadInfo.initConfig,
     data.genome
   )
   const organism = new Organism(
@@ -138,7 +146,7 @@ const populationTournamentSelect = async (): Promise<Organism<any>> => {
 
 const speciesTournamentSelect = async (
   speciesId: number
-): Promise<Organism<any>> => {
+): Promise<Organism<any, any, any, any, any, any, any, any>> => {
   if (threadInfo == null) {
     throw new Error('threadInfo not initialized')
   }
@@ -162,6 +170,7 @@ const speciesTournamentSelect = async (
     threadInfo.configProvider,
     threadInfo.stateProvider,
     threadInfo.genomeOptions,
+    threadInfo.initConfig,
     data.genome
   )
   const organism = new Organism(
@@ -229,6 +238,7 @@ const eliteOrganism = (payload: OrganismPayload<any>) => {
     threadInfo.configProvider,
     threadInfo.stateProvider,
     threadInfo.genomeOptions,
+    threadInfo.initConfig,
     payload.genome
   )
   const organism = new Organism(
@@ -264,7 +274,7 @@ const breedOrganism = async (payload: SpeciesPayload) => {
     throw new Error('Unable to gather father organism')
   }
 
-  let child: Organism<any>
+  let child: Organism<any, any, any, any, any, any, any, any>
   if (rng.gen() < threadInfo.populationOptions.asexualReproductionProbability) {
     child = father.asElite()
   } else {

@@ -1,24 +1,26 @@
 import {
-  type NodeState,
-  type LinkState,
-  type StateFactoryOptions,
   type Innovation,
   type NodeRef,
   type StateProvider,
   type StateData,
+  type ExtendedState,
+  type NEATState,
+  InnovationLog,
 } from '@neat-js/core'
 
 type GetSplitInnovationFn = (linkInnovation: number) => Promise<Innovation>
 type GetConnectInnovationFn = (from: NodeRef, to: NodeRef) => Promise<number>
 
-export class WorkerState<NS extends NodeState, LS extends LinkState>
-  implements StateProvider<NS, LS, WorkerState<NS, LS>>
+export class WorkerState<
+  NSD,
+  LSD,
+  NS extends ExtendedState<NSD>,
+  LS extends ExtendedState<LSD>,
+  SD extends StateData
+> implements StateProvider<NSD, LSD, NS, LS, SD>
 {
-  /** only used in DES-HyperNEAT */
-  public readonly nodeState: NS
-
-  /** only used in DES-HyperNEAT */
-  public readonly linkState: LS
+  public readonly innovationLog: InnovationLog
+  public readonly nextInnovation: Innovation
 
   protected readonly getSplitInnovationFn: GetSplitInnovationFn
   protected readonly getConnectInnovationFn: GetConnectInnovationFn
@@ -26,14 +28,15 @@ export class WorkerState<NS extends NodeState, LS extends LinkState>
   constructor(
     getSplitInnovationFn: GetSplitInnovationFn,
     getConnectInnovationFn: GetConnectInnovationFn,
-    nodeState: NS,
-    linkState: LS,
-    _stateFactoryOptions?: StateFactoryOptions<NS, LS>
+    _stateFactoryOptions?: SD
   ) {
     this.getSplitInnovationFn = getSplitInnovationFn
     this.getConnectInnovationFn = getConnectInnovationFn
-    this.nodeState = nodeState
-    this.linkState = linkState
+    this.innovationLog = new InnovationLog()
+    this.nextInnovation = {
+      nodeNumber: 0,
+      innovationNumber: 0,
+    }
   }
 
   async getSplitInnovation(linkInnovation: number): Promise<Innovation> {
@@ -44,36 +47,28 @@ export class WorkerState<NS extends NodeState, LS extends LinkState>
     return await this.getConnectInnovationFn(from, to)
   }
 
-  neat(): this {
+  neat(): NEATState {
     return this
   }
 
   node(): NS {
-    // FIXME: how to support in worker thread?
-    return this.nodeState
+    // throw new Error('Not implemented')
+    // @ts-expect-error not implemented custom state
+    return null // this.nodeState
   }
 
   link(): LS {
-    // FIXME: how to support in worker thread?
-    return this.linkState
+    // throw new Error('Not implemented')
+    // @ts-expect-error not implemented custom state
+    return null // this.linkState
   }
 
-  toJSON(): StateData<NS, LS> {
+  toJSON(): SD {
     return {
       neat: {
-        innovationLog: {
-          hiddenNodeInnovations: [],
-          splitInnovations: [],
-          connectInnovations: [],
-          reverseConnectInnovations: [],
-        },
-        nextInnovation: {
-          nodeNumber: -1,
-          innovationNumber: -1,
-        },
+        innovationLog: this.innovationLog.toJSON(),
+        nextInnovation: this.nextInnovation,
       },
-      node: this.nodeState,
-      link: this.linkState,
-    }
+    } as unknown as SD
   }
 }
