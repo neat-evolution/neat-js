@@ -1,15 +1,22 @@
-import type { Genome, GenomeData, InitConfig } from '@neat-js/core'
+import type {
+  ConfigOptions,
+  GenomeData,
+  GenomeFactoryOptions,
+  GenomeOptions,
+  StateData,
+} from '@neat-js/core'
 
-export interface OrganismState {
-  fitness: number | null
-  adjustedFitness: number | null
-  generation: number
-}
+import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
 
 export interface OrganismData<
-  GO extends InitConfig,
-  G extends Genome<any, any, any, any, GO, any, any, G>
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
+  SD extends StateData,
+  HND,
+  LD,
+  GFO extends GenomeFactoryOptions<HND, LD>,
+  GO extends GenomeOptions
 > {
-  genome: GenomeData<GO, G>
-  organismState: OrganismState
+  genome: GenomeData<NCO, LCO, SD, HND, LD, GFO, GO>
+  organismState: OrganismFactoryOptions
 }

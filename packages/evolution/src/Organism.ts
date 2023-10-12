@@ -1,9 +1,40 @@
-import type { Genome } from '@neat-js/core'
+import type {
+  ConfigOptions,
+  Genome,
+  GenomeFactoryOptions,
+  GenomeOptions,
+  StateData,
+} from '@neat-js/core'
 
 import type { OrganismData } from './OrganismData.js'
 import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
 
-export class Organism<G extends Genome<any, any, any, any, any, any, any, G>> {
+export class Organism<
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
+  SD extends StateData,
+  HND,
+  LD,
+  GFO extends GenomeFactoryOptions<HND, LD>,
+  GO extends GenomeOptions,
+  G extends Genome<
+    NCO,
+    LCO,
+    any,
+    any,
+    any,
+    any,
+    any,
+    SD,
+    any,
+    HND,
+    LD,
+    GFO,
+    GO,
+    any,
+    G
+  >
+> {
   public readonly genome: G
   public readonly generation: number
 
@@ -17,14 +48,15 @@ export class Organism<G extends Genome<any, any, any, any, any, any, any, G>> {
   ) {
     this.genome = genome
     this.generation = generation ?? 0
-
     this.fitness = organismFactoryOptions?.fitness ?? null
     this.adjustedFitness = organismFactoryOptions?.adjustedFitness ?? null
   }
 
   // Breed organism with other organism
-  crossover(other: Organism<G>): Organism<G> {
-    return new Organism<G>(
+  crossover(
+    other: Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>
+  ): Organism<NCO, LCO, SD, HND, LD, GFO, GO, G> {
+    return new Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>(
       this.genome.crossover(
         other.genome,
         // FIXME: is it correct to cast to zero here?
@@ -41,23 +73,22 @@ export class Organism<G extends Genome<any, any, any, any, any, any, any, G>> {
   }
 
   // Genetic distance to other organism
-  distance(other: Organism<G>): number {
+  distance(other: Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>): number {
     return this.genome.distance(other.genome)
   }
 
   // Produce an elite for the next generation
-  asElite(): Organism<G> {
-    return new Organism<G>(this.genome.clone(), this.generation + 1)
+  asElite(): Organism<NCO, LCO, SD, HND, LD, GFO, GO, G> {
+    return new Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>(
+      this.genome.clone(),
+      this.generation + 1
+    )
   }
 
-  toJSON(): OrganismData<any, G> {
+  toJSON(): OrganismData<NCO, LCO, SD, HND, LD, GFO, GO> {
     return {
       genome: this.genome.toJSON(),
-      organismState: {
-        generation: this.generation,
-        fitness: this.fitness,
-        adjustedFitness: this.adjustedFitness,
-      },
+      organismState: this.toFactoryOptions(),
     }
   }
 

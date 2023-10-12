@@ -1,3 +1,5 @@
-import type { OrganismData } from './OrganismData.js'
-
-export type OrganismFactoryOptions = OrganismData<any, any>['organismState']
+export interface OrganismFactoryOptions {
+  fitness: number | null
+  adjustedFitness: number | null
+  generation: number
+}
