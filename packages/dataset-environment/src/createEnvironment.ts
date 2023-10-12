@@ -3,7 +3,6 @@ import type { EnvironmentFactory } from '@neat-js/environment'
 import { DatasetEnvironment } from './DatasetEnvironment.js'
 import { datasetFromSharedBuffer } from './datasetFromSharedBuffer.js'
 
-// FIXME: EnvironmentFactoryOptions
 export const createEnvironment: EnvironmentFactory = (
   environmentData: SharedArrayBuffer | null
 ) => {
