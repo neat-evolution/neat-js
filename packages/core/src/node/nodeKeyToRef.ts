@@ -1,12 +1,13 @@
 import type { NodeRef, NodeRefTuple } from './NodeRef.js'
+import type { NodeKey } from './nodeRefToKey.js'
 import type { NodeType } from './NodeType.js'
 import { nodeTypeToNumber, nodeNumberToType } from './nodeTypeToNumber.js'
 
 /**
- * @param {string} key a node key in the form of `${type}[${id}]`
+ * @param {NodeKey} key a node key in the form of `${type}[${id}]`
  * @returns {NodeRef} a node ref
  */
-export const nodeKeyToRef = (key: string): NodeRef => {
+export const nodeKeyToRef = (key: NodeKey): NodeRef => {
   const [type, id] = key.split('[') as [type: string, id: string]
   return {
     type: type as NodeType,
@@ -14,18 +15,23 @@ export const nodeKeyToRef = (key: string): NodeRef => {
   }
 }
 
-export const nodeKeyToRefTuple = (key: string): NodeRefTuple => {
+export const nodeKeyToType = (key: NodeKey): NodeType => {
+  const [type] = key.split('[') as [type: string, id: string]
+  return type as NodeType
+}
+
+export const nodeKeyToRefTuple = (key: NodeKey): NodeRefTuple => {
   const [type, id] = key.split('[') as [type: string, id: string]
   return [type as NodeType, Number(id.slice(0, -1))]
 }
 
 /**
  * Used in toSharedBuffer
- * @param {string} key  a node key in the form of `${type}[${id}]`
+ * @param {NodeKey} key  a node key in the form of `${type}[${id}]`
  * @returns {[type: number, id: number]} a tuple of node type and id
  */
 export const nodeKeyToNumericTuple = (
-  key: string
+  key: NodeKey
 ): [type: number, id: number] => {
   const [type, id] = key.split('[') as [type: string, id: string]
   return [nodeTypeToNumber(type as NodeType), Number(id.slice(0, -1))]
@@ -39,4 +45,4 @@ export const nodeKeyToNumericTuple = (
 export const tupleToNodeKey = ([type, id]: [
   type: number,
   id: number
-]): string => `${nodeNumberToType(type)}[${id}]`
+]): NodeKey => `${nodeNumberToType(type)}[${id}]`

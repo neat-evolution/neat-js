@@ -1,20 +1,20 @@
-import { toLinkKey, type LinkKey } from '../link/linkRefToKey.js'
-import type { NodeKey } from '../node/nodeRefToKey.js'
+import { toLinkKey, type LinkKey } from './link/linkRefToKey.js'
+import type { NodeKey } from './node/nodeRefToKey.js'
 
-/** weight */
-export type Edge = number
+/** weight for phenotype, null for substrate */
+export type Edge = number | null
 
 export type Connection<N extends NodeKey, E extends Edge> = [
   from: N,
   to: N,
-  /** weight */
+  /** weight for phenotype, null for substrate */
   edge: E
 ]
 
 export interface Target<N extends NodeKey, E extends Edge> {
   /** to */
   node: N
-  /** weight */
+  /** weight for phenotype, null for substrate */
   edge: E
 }
 
@@ -24,26 +24,37 @@ export interface ConnectionInfo<N extends NodeKey, E extends Edge> {
   targets: Array<Target<N, E>>
 }
 
-export type ConnectionData = [from: NodeKey, to: NodeKey, edge: Edge]
+export type ConnectionData<N extends NodeKey, E extends Edge> = [
+  from: N,
+  to: N,
+  /** weight for phenotype, null for substrate */
+  edge: E
+]
 
-export interface ConnectionsData {
-  nodes: Record<NodeKey, NodeKey>
-  connections: ConnectionData[]
+export interface ConnectionsData<N extends NodeKey, E extends Edge> {
+  nodes: N[]
+  connections: Array<ConnectionData<N, E>>
 }
 
-export type ActionEdge = Connection<NodeKey, Edge>
-export type ActionNode = [nodeKey: NodeKey]
-export type Action = ActionEdge | ActionNode
+export type ActionEdge<N extends NodeKey, E extends Edge> = Connection<N, E>
+export type ActionNode<N extends NodeKey> = [nodeKey: N]
+export type Action<N extends NodeKey, E extends Edge> =
+  | ActionEdge<N, E>
+  | ActionNode<N>
 
-export const isActionEdge = (action: Action): action is ActionEdge => {
-  return (action as ActionEdge).length === 3
+export const isActionEdge = <N extends NodeKey, E extends Edge>(
+  action: Action<N, E>
+): action is ActionEdge<N, E> => {
+  return action.length === 3
 }
 
-export const isActionNode = (action: Action): action is ActionNode => {
-  return (action as ActionNode).length === 1
+export const isActionNode = <N extends NodeKey, E extends Edge>(
+  action: Action<N, E>
+): action is ActionNode<N> => {
+  return action.length === 1
 }
 
-export class Connections<N extends NodeKey = NodeKey, E extends Edge = Edge> {
+export class Connections<N extends NodeKey, E extends Edge> {
   private readonly connectionMap: Map<NodeKey, ConnectionInfo<N, E>>
 
   private readonly nodeKeyCache = new Set<NodeKey>()
@@ -273,27 +284,28 @@ export class Connections<N extends NodeKey = NodeKey, E extends Edge = Edge> {
     return false
   }
 
-  toJSON(): ConnectionsData {
-    const nodes: Record<NodeKey, NodeKey> = {}
-    const connections: ConnectionData[] = []
+  // FIXME: is this used anywhere?
+  toJSON(): ConnectionsData<N, E> {
+    const nodes = new Set<N>()
+    const connections: Array<ConnectionData<N, E>> = []
 
     for (const [from, to, edge] of this.connections()) {
-      if (nodes[from] === undefined) {
-        nodes[from] = from
+      if (!nodes.has(from)) {
+        nodes.add(from)
       }
-      if (nodes[to] === undefined) {
-        nodes[to] = to
+      if (!nodes.has(to)) {
+        nodes.add(to)
       }
       connections.push([from, to, edge])
     }
 
     return {
-      nodes,
+      nodes: Array.from(nodes),
       connections,
     }
   }
 
-  *sortTopologically(): Generator<Action, void, undefined> {
+  *sortTopologically(): Generator<Action<N, E>, void, undefined> {
     // Store number of incoming connections for all nodes
     const backwardCount = new Map<NodeKey, number>()
 

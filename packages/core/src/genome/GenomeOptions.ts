@@ -1,3 +1,4 @@
-import type { InitConfig } from './InitConfig.js'
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GenomeOptions {}
 
-export type GenomeOptions = InitConfig
+export const defaultGenomeOptions: GenomeOptions = {}

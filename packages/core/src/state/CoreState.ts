@@ -3,40 +3,37 @@ import type { NodeRef } from '../node/NodeRef.js'
 import { nodeRefToKey, toNodeKey } from '../node/nodeRefToKey.js'
 import { NodeType } from '../node/NodeType.js'
 
-import type { LinkState, NodeState } from './ExtendedState.js'
 import { type Innovation, InnovationLog } from './InnovationLog.js'
 import type { StateData } from './StateData.js'
-import type { StateFactoryOptions } from './StateFactory.js'
-import type { StateProvider } from './StateProvider.js'
+import type {
+  ExtendedState,
+  NEATState,
+  StateProvider,
+} from './StateProvider.js'
 
-export class State<
-  NS extends NodeState,
-  LS extends LinkState,
-  S extends State<NS, LS, S>
-> implements StateProvider<NS, LS, S>
+export class CoreState<
+  NSD,
+  LSD,
+  NS extends ExtendedState<NSD>,
+  LS extends ExtendedState<LSD>,
+  SD extends StateData
+> implements StateProvider<NSD, LSD, NS, LS, SD>
 {
   public readonly innovationLog: InnovationLog
   public readonly nextInnovation: Innovation
 
-  /** only used in DES-HyperNEAT */
-  public readonly nodeState: NS
+  // public readonly nodeState: NS
+  // public readonly linkState: LS
 
-  /** only used in DES-HyperNEAT */
-  public readonly linkState: LS
-
-  constructor(
-    nodeState: NS,
-    linkState: LS,
-    stateFactoryOptions?: StateFactoryOptions<NS, LS>
-  ) {
-    this.innovationLog = new InnovationLog(stateFactoryOptions?.innovationLog)
+  constructor(factoryOptions?: SD) {
+    this.innovationLog = new InnovationLog(factoryOptions?.neat.innovationLog)
     this.nextInnovation = {
-      nodeNumber: stateFactoryOptions?.nextInnovation.nodeNumber ?? 0,
+      nodeNumber: factoryOptions?.neat.nextInnovation.nodeNumber ?? 0,
       innovationNumber:
-        stateFactoryOptions?.nextInnovation.innovationNumber ?? 0,
+        factoryOptions?.neat.nextInnovation.innovationNumber ?? 0,
     }
-    this.nodeState = nodeState
-    this.linkState = linkState
+    // this.nodeState = factoryOptions?.node ?? null
+    // this.linkState = factoryOptions?.link ?? null
   }
 
   getSplitInnovation(linkInnovation: number): Innovation {
@@ -110,26 +107,26 @@ export class State<
     return this.innovationLog.connectInnovations.get(linkKey) as number
   }
 
-  neat(): this {
+  neat(): NEATState {
     return this
   }
 
   node(): NS {
-    return this.nodeState
+    throw new Error('Not implemented')
+    // return this.nodeState
   }
 
   link(): LS {
-    return this.linkState
+    throw new Error('Not implemented')
+    // return this.linkState
   }
 
-  toJSON(): StateData<NS, LS> {
+  toJSON(): SD {
     return {
       neat: {
         innovationLog: this.innovationLog.toJSON(),
         nextInnovation: this.nextInnovation,
       },
-      node: this.nodeState,
-      link: this.linkState,
-    }
+    } as unknown as SD
   }
 }

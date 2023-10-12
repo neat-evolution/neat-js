@@ -1,28 +1,28 @@
 import type { NEATConfigOptions } from '../NEATConfigOptions.js'
 
 import type { ConfigData } from './ConfigData.js'
+import type { ConfigOptions } from './ConfigOptions.js'
 import type { ConfigProvider } from './ConfigProvider.js'
-import type { LinkConfig, NodeConfig } from './ExtendedConfig.js'
 
-export class Config<NC extends NodeConfig, LC extends LinkConfig>
-  implements ConfigProvider<NC, LC>
+export class CoreConfig<NCO extends ConfigOptions, LCO extends ConfigOptions>
+  implements ConfigProvider<NCO, LCO>
 {
-  public readonly config: NEATConfigOptions
-  public readonly nodeConfig: NC
-  public readonly linkConfig: LC
+  public readonly neatConfig: NEATConfigOptions
+  public readonly nodeConfig: NCO
+  public readonly linkConfig: LCO
 
   constructor(
     configOptions: NEATConfigOptions,
-    nodeConfig: NC,
-    linkConfig: LC
+    nodeConfig: NCO,
+    linkConfig: LCO
   ) {
-    this.config = configOptions
+    this.neatConfig = configOptions
     this.nodeConfig = nodeConfig
     this.linkConfig = linkConfig
   }
 
   neat() {
-    return this.config
+    return this.neatConfig
   }
 
   node() {
@@ -33,9 +33,9 @@ export class Config<NC extends NodeConfig, LC extends LinkConfig>
     return this.linkConfig
   }
 
-  toJSON(): ConfigData<NC, LC> {
+  toJSON(): ConfigData<NCO, LCO> {
     return {
-      neat: this.config,
+      neat: this.neatConfig,
       node: this.nodeConfig,
       link: this.linkConfig,
     }

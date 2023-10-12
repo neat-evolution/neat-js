@@ -1,61 +1,134 @@
 import { binarySearchFirst, shuffle, threadRNG } from '@neat-js/utils'
 
-import type { Config } from './config/Config.js'
-import { Connections } from './genome/Connections.js'
+import type { ConfigOptions } from './config/ConfigOptions.js'
+import type { CoreConfig } from './config/CoreConfig.js'
+import { Connections } from './Connections.js'
 import type { Genome } from './genome/Genome.js'
-import { type GenomeDataLink } from './genome/GenomeData.js'
+import type { GenomeData } from './genome/GenomeData.js'
 import type { GenomeFactory } from './genome/GenomeFactory.js'
+import type { GenomeFactoryOptions } from './genome/GenomeFactoryOptions.js'
 import type { GenomeOptions } from './genome/GenomeOptions.js'
-import type { Link } from './link/Link.js'
+import type { InitConfig } from './genome/InitConfig.js'
+import type { CoreLink } from './link/CoreLink.js'
 import type { LinkFactory } from './link/LinkFactory.js'
+import type { LinkFactoryOptions } from './link/LinkFactoryOptions.js'
 import { linkRefToKey, toLinkKey, type LinkKey } from './link/linkRefToKey.js'
-import type { NEATGenomeData } from './NEATGenomeData.js'
-import type { NEATGenomeFactoryOptions } from './NEATGenomeFactoryOptions.js'
-import type { Node } from './node/Node.js'
+import type { CoreNode } from './node/CoreNode.js'
 import type { NodeFactory } from './node/NodeFactory.js'
+import type { NodeFactoryOptions } from './node/NodeFactoryOptions.js'
 import { nodeKeyToRef } from './node/nodeKeyToRef.js'
 import type { NodeRef } from './node/NodeRef.js'
 import { nodeRefToKey, type NodeKey, toNodeKey } from './node/nodeRefToKey.js'
 import { NodeType } from './node/NodeType.js'
-import type { StateProvider } from './state/StateProvider.js'
+import type { CoreState } from './state/CoreState.js'
+import type { StateData } from './state/StateData.js'
+import type { ExtendedState } from './state/StateProvider.js'
 
-// FIXME: rename to CoreGenome
-export class NEATGenome<
-  N extends Node<any, any, N>,
-  L extends Link<any, any, L>,
-  C extends Config<N['config'], L['config']>,
-  S extends StateProvider<N['state'], L['state'], S>,
+export class CoreGenome<
+  // Genome
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
+  C extends CoreConfig<NCO, LCO>,
+  NSD,
+  LSD,
+  NS extends ExtendedState<NSD>,
+  LS extends ExtendedState<LSD>,
+  SD extends StateData,
+  S extends CoreState<NSD, LSD, NS, LS, SD>,
+  HND,
+  LD,
+  GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
-  GFO extends NEATGenomeFactoryOptions<N, L, C, S, GO, GFO, GD, G>,
-  GD extends NEATGenomeData<N, L, C, S, GO, GFO, GD, G>,
-  G extends NEATGenome<N, L, C, S, GO, GFO, GD, G>
-> implements Genome<N, L, C, S, GO, GFO, GD, G>
+  GD extends GenomeData<NCO, LCO, SD, HND, LD, GFO, GO>,
+  // CoreNode
+  NFO extends NodeFactoryOptions,
+  N extends CoreNode<NFO, NCO, NSD, NS, N>,
+  // CoreLink
+  LFO extends LinkFactoryOptions,
+  L extends CoreLink<LFO, LCO, LSD, LS, L>,
+  // CoreGenome
+  G extends CoreGenome<
+    NCO,
+    LCO,
+    C,
+    NSD,
+    LSD,
+    NS,
+    LS,
+    SD,
+    S,
+    HND,
+    LD,
+    GFO,
+    GO,
+    GD,
+    NFO,
+    N,
+    LFO,
+    L,
+    G
+  >
+> implements
+    Genome<NCO, LCO, C, NSD, LSD, NS, LS, SD, S, HND, LD, GFO, GO, GD, G>
 {
   public readonly config: C
   public readonly state: S
   public readonly genomeOptions: GO
+  public readonly initConfig: InitConfig
 
   public readonly inputs: Map<NodeKey, N>
   public readonly hiddenNodes: Map<NodeKey, N>
   public readonly outputs: Map<NodeKey, N>
   public readonly links: Map<LinkKey, L>
-  public readonly connections: Connections<NodeKey>
+  public readonly connections: Connections<NodeKey, number>
 
-  private readonly createNode: NodeFactory<N['config'], N['state'], N>
-  private readonly createLink: LinkFactory<L['config'], L['state'], L>
-  private readonly createGenome: GenomeFactory<C, S, GO, GFO, GD, G>
+  protected readonly createNode: NodeFactory<NFO, NCO, NSD, NS, N>
+  protected readonly createLink: LinkFactory<LFO, LCO, LSD, LS, L>
+  protected readonly createGenome: GenomeFactory<
+    NCO,
+    LCO,
+    C,
+    NSD,
+    LSD,
+    NS,
+    LS,
+    SD,
+    S,
+    HND,
+    LD,
+    GFO,
+    GO,
+    G
+  >
 
   constructor(
     config: C,
     state: S,
     genomeOptions: GO,
-    createNode: NodeFactory<N['config'], N['state'], N>,
-    createLink: LinkFactory<L['config'], L['state'], L>,
-    createGenome: GenomeFactory<C, S, GO, GFO, GD, G>,
+    initConfig: InitConfig,
+    createNode: NodeFactory<NFO, NCO, NSD, NS, N>,
+    createLink: LinkFactory<LFO, LCO, LSD, LS, L>,
+    createGenome: GenomeFactory<
+      NCO,
+      LCO,
+      C,
+      NSD,
+      LSD,
+      NS,
+      LS,
+      SD,
+      S,
+      HND,
+      LD,
+      GFO,
+      GO,
+      G
+    >,
     factoryOptions?: GFO
   ) {
     this.config = config
     this.genomeOptions = genomeOptions
+    this.initConfig = initConfig
     this.state = state
     this.createNode = createNode
     this.createLink = createLink
@@ -65,22 +138,20 @@ export class NEATGenome<
     this.hiddenNodes = new Map<NodeKey, N>()
     this.outputs = new Map<NodeKey, N>()
     this.links = new Map<LinkKey, L>()
-    this.connections = new Connections<NodeKey>()
+    this.connections = new Connections<NodeKey, number>()
 
-    for (let i = 0; i < genomeOptions.inputs; i++) {
+    for (let i = 0; i < initConfig.inputs; i++) {
       const node = this.createNode(
-        NodeType.Input,
-        i,
+        { type: NodeType.Input, id: i },
         this.config.node(),
         this.state.node()
       )
       this.inputs.set(nodeRefToKey(node), node)
     }
 
-    for (let i = 0; i < genomeOptions.outputs; i++) {
+    for (let i = 0; i < initConfig.outputs; i++) {
       const node = this.createNode(
-        NodeType.Output,
-        i,
+        { type: NodeType.Output, id: i },
         this.config.node(),
         this.state.node()
       )
@@ -88,27 +159,12 @@ export class NEATGenome<
     }
 
     if (factoryOptions != null) {
-      for (const id of factoryOptions.hiddenNodes) {
-        const node = this.createNode(
-          NodeType.Hidden,
-          id,
-          this.config.node(),
-          this.state.node()
-        )
-        this.hiddenNodes.set(nodeRefToKey(node), node)
-      }
-      for (const [fromKey, toKey, weight, innovation] of factoryOptions.links) {
-        const link = this.createLink(
-          fromKey,
-          toKey,
-          weight,
-          innovation,
-          this.config.link(),
-          this.state.link()
-        )
-        this.insertLink(link, factoryOptions.isSafe)
-      }
+      this.init(factoryOptions)
     }
+  }
+
+  protected init(_factoryOptions: GFO): void {
+    throw new Error('init not implemented.')
   }
 
   clone(): G {
@@ -116,6 +172,7 @@ export class NEATGenome<
       this.config,
       this.state,
       this.genomeOptions,
+      this.initConfig,
       this.toFactoryOptions()
     )
   }
@@ -236,7 +293,8 @@ export class NEATGenome<
     const genome = this.createGenome(
       this.config,
       this.state,
-      this.genomeOptions
+      this.genomeOptions,
+      this.initConfig
     )
 
     // Copy links only in fitter parent, perform crossover if in both parents
@@ -250,7 +308,7 @@ export class NEATGenome<
     }
 
     // Copy nodes only in fitter parent, perform crossover if in both parents
-    if (parent1.genomeOptions.inputs !== parent2.genomeOptions.inputs) {
+    if (parent1.initConfig.inputs !== parent2.initConfig.inputs) {
       for (const [nodeKey, node] of parent1.inputs.entries()) {
         const node2 = parent2.inputs.get(nodeKey)
         if (node2 != null) {
@@ -276,7 +334,7 @@ export class NEATGenome<
       }
     }
 
-    if (parent1.genomeOptions.outputs !== parent2.genomeOptions.outputs) {
+    if (parent1.initConfig.outputs !== parent2.initConfig.outputs) {
       for (const [nodeKey, node] of parent1.outputs.entries()) {
         const node2 = parent2.outputs.get(nodeKey)
         if (node2 != null) {
@@ -344,8 +402,7 @@ export class NEATGenome<
     const newNode =
       this.hiddenNodes.get(newNodeKey) ??
       this.createNode(
-        NodeType.Hidden,
-        nodeNumber,
+        { type: NodeType.Hidden, id: nodeNumber },
         this.config.node(),
         this.state.node()
       )
@@ -365,27 +422,31 @@ export class NEATGenome<
       link2Details = [newNodeKey, to, innovationNumber + 1]
     }
 
-    // FIXME: why?
+    const link1FactoryOptions: LinkFactoryOptions = {
+      from: link1Details[0],
+      to: link1Details[1],
+      weight: 1.0,
+      innovation: link1Details[2],
+    }
     const link1 = link.identity(
       this.createLink(
-        link1Details[0],
-        link1Details[1],
-        1.0,
-        link1Details[2],
-        this.config.node(),
-        this.state.node()
+        link1FactoryOptions,
+        this.config.link(),
+        this.state.link()
       )
     )
 
-    // FIXME: why?
+    const link2FactoryOptions: LinkFactoryOptions = {
+      from: link2Details[0],
+      to: link2Details[1],
+      weight: link.weight,
+      innovation: link2Details[2],
+    }
     const link2 = link.cloneWith(
       this.createLink(
-        link2Details[0],
-        link2Details[1],
-        link.neat().weight,
-        link2Details[2],
-        this.config.node(),
-        this.state.node()
+        link2FactoryOptions,
+        this.config.link(),
+        this.state.link()
       )
     )
     this.insertLink(link1, isSafe)
@@ -523,11 +584,14 @@ export class NEATGenome<
         const weight =
           (rng.gen() - 0.5) * 2.0 * this.config.neat().initialLinkWeightSize
 
-        const link = this.createLink(
-          sourceKey,
-          targetKey,
+        const linkFactoryOptions: LinkFactoryOptions = {
+          from: sourceKey,
+          to: targetKey,
           weight,
           innovation,
+        }
+        const link = this.createLink(
+          linkFactoryOptions,
           this.config.link(),
           this.state.link()
         )
@@ -578,30 +642,10 @@ export class NEATGenome<
   }
 
   toJSON(): GD {
-    return {
-      config: this.config.toJSON(),
-      state: this.state.toJSON(),
-      genomeOptions: this.genomeOptions,
-      ...this.toFactoryOptions(),
-    } as unknown as GD
+    throw new Error('toJSON not implemented.')
   }
 
   toFactoryOptions(): GFO {
-    const hiddenNodes: number[] = []
-    const links: GenomeDataLink[] = []
-
-    for (const node of this.hiddenNodes.values()) {
-      hiddenNodes.push(node.id)
-    }
-
-    for (const link of this.links.values()) {
-      links.push([link.from, link.to, link.weight, link.innovation])
-    }
-
-    return {
-      hiddenNodes,
-      links,
-      isSafe: true,
-    } as unknown as GFO
+    throw new Error('toFactoryOptions not implemented.')
   }
 }

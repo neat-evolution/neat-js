@@ -1,7 +1,7 @@
 import type { NodeRef } from '../node/NodeRef.js'
 import { nodeRefToKey, type NodeKey } from '../node/nodeRefToKey.js'
 
-import type { LinkRef } from './LinkData.js'
+import type { LinkRef } from './LinkRef.js'
 
 /** `${toNodeKey(fromType, fromId)} -> ${toNodeKey(toType, toId)}` */
 export type LinkKey = string

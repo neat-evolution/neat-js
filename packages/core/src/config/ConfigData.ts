@@ -1,10 +1,12 @@
 import type { NEATConfigOptions } from '../NEATConfigOptions.js'
 
-import type { LinkConfig, NodeConfig } from './ExtendedConfig.js'
+import type { ConfigOptions } from './ConfigOptions.js'
 
-export interface ConfigData<NC extends NodeConfig, LC extends LinkConfig> {
+export interface ConfigData<
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions
+> {
   neat: NEATConfigOptions
-  // FIXME: this needs to be NCO and LCO (maybe?)
-  node: NC
-  link: LC
+  node: NCO
+  link: LCO
 }

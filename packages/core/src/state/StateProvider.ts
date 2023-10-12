@@ -1,29 +1,32 @@
-import type { NodeRef } from '../index.js'
+import type { NodeRef } from '../node/NodeRef.js'
 
-import type { LinkState, NodeState } from './ExtendedState.js'
-import type { Innovation } from './InnovationLog.js'
+import type { Innovation, InnovationLog } from './InnovationLog.js'
 import type { StateData } from './StateData.js'
 
-export interface StateProvider<
-  NS extends NodeState,
-  LS extends LinkState,
-  S extends StateProvider<NS, LS, S>
-> {
-  readonly nodeState: NS
-  readonly linkState: LS
+export interface State<D> {
+  toJSON: () => D
+}
 
+export type ExtendedState<D> = State<D> | null
+
+export interface NEATState extends State<StateData> {
+  innovationLog: InnovationLog
+  nextInnovation: Innovation
   getSplitInnovation: (
     linkInnovation: number
   ) => Innovation | Promise<Innovation>
   getConnectInnovation: (from: NodeRef, to: NodeRef) => number | Promise<number>
+}
 
-  neat: () => this
-
-  /** only useful in des-hyperneat */
+export interface StateProvider<
+  NSD,
+  LSD,
+  NS extends ExtendedState<NSD>,
+  LS extends ExtendedState<LSD>,
+  SD extends StateData
+> {
+  neat: () => NEATState
   node: () => NS
-
-  /** only useful in des-hyperneat */
   link: () => LS
-
-  toJSON: () => StateData<NS, LS>
+  toJSON: () => SD
 }

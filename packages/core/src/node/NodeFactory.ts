@@ -1,14 +1,16 @@
-import type { NodeConfig } from '../config/ExtendedConfig.js'
-import type { NodeState } from '../state/ExtendedState.js'
+import type { ConfigOptions } from '../config/ConfigOptions.js'
+import type { ExtendedState } from '../state/StateProvider.js'
 
-import type { NodeExtension } from './NodeExtension.js'
-import type { NodeRefTuple } from './NodeRef.js'
-import type { NodeType } from './NodeType.js'
+import type { Node } from './Node.js'
+import type { NodeFactoryOptions } from './NodeFactoryOptions.js'
 
-export type NodeFactoryOptions = NodeRefTuple
-
-export type NodeFactory<
-  NC extends NodeConfig,
-  NS extends NodeState,
-  N extends NodeExtension<NC, NS, N>
-> = (type: NodeType, id: number, config: NC, state: NS) => N
+export interface NodeFactory<
+  NFO extends NodeFactoryOptions,
+  NCO extends ConfigOptions,
+  NSD,
+  NS extends ExtendedState<NSD>,
+  N extends Node<NFO, NCO, NSD, NS, N>
+> {
+  (factoryOptions: NodeFactoryOptions, config: NCO, state: NS): N
+  (factoryOptions: NodeFactoryOptions & Partial<NFO>, config: NCO, state: NS): N
+}
