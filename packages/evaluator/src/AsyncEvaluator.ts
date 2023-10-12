@@ -6,12 +6,53 @@ import { type Evaluator, type FitnessData } from './Evaluator.js'
 import type { GenomeEntries, GenomeEntry } from './GenomeEntries.js'
 
 export class AsyncEvaluator implements Evaluator {
-  public readonly algorithm: Algorithm<any, any, any, any, any, any, any, any>
+  public readonly algorithm: Algorithm<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >
+
   public readonly environment: Environment
   public readonly createExecutor: ExecutorFactory
 
   constructor(
-    algorithm: Algorithm<any, any, any, any, any, any, any, any>,
+    algorithm: Algorithm<
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any,
+      any
+    >,
     environment: Environment,
     createExecutor: ExecutorFactory
   ) {
