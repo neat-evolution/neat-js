@@ -49,7 +49,6 @@
     "@neat-js/evolution": "^0.0.1",
     "@neat-js/executor": "^0.0.1",
     "@neat-js/neat": "^0.0.1",
-    "@neat-js/phenotype": "^0.0.1",
     "@swc/helpers": "^0.5.1"
   },
   "devDependencies": {
