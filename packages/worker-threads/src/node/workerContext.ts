@@ -1,4 +1,3 @@
-// @ts-expect-error parentPort is exported by node:worker_threads
 import { parentPort, type MessagePort } from 'node:worker_threads'
 
 import type { ContextEventTypes } from '../EventTypes.js'
