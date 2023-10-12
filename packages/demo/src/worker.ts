@@ -2,7 +2,6 @@ import type { Algorithm } from '@neat-js/core'
 import type { Environment } from '@neat-js/environment'
 import type { EvaluatorFactory } from '@neat-js/evaluator'
 import type { ReproducerFactory } from '@neat-js/evolution'
-import { type DefaultNEATGenome, type NEATPopulation } from '@neat-js/neat'
 import {
   createEvaluator as createWorkerEvaluator,
   type WorkerEvaluator,
@@ -18,13 +17,11 @@ import { demo } from './demo.js'
 const workerThreadLimit = hardwareConcurrency - 1
 
 const evaluators = new Set<WorkerEvaluator>()
-const reproducers = new Set<WorkerReproducer<DefaultNEATGenome>>()
+const reproducers = new Set<WorkerReproducer<any>>()
 
-const createReproducer: ReproducerFactory<
-  DefaultNEATGenome,
-  NEATPopulation<undefined>,
-  undefined
-> = (population) => {
+const createReproducer: ReproducerFactory<any, any, undefined> = (
+  population
+) => {
   const reproducer = createWorkerReproducer(population, {
     threadCount: workerThreadLimit,
   })
@@ -33,7 +30,27 @@ const createReproducer: ReproducerFactory<
 }
 
 const createEvaluator: EvaluatorFactory<null> = (
-  algorithm: Algorithm<any, any, any, any, any, any, any, any>,
+  algorithm: Algorithm<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >,
   environment: Environment
 ) => {
   const evaluator = createWorkerEvaluator(algorithm, environment, {

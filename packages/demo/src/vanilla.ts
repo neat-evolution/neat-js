@@ -8,7 +8,27 @@ import { createExecutor } from '@neat-js/executor'
 import { demo } from './demo.js'
 
 const createEvaluator: EvaluatorFactory<null> = (
-  algorithm: Algorithm<any, any, any, any, any, any, any, any>,
+  algorithm: Algorithm<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >,
   environment: Environment
 ) => {
   // FIXME: make createExecutor an env variable
