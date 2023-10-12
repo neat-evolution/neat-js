@@ -1,4 +1,9 @@
-import type { Algorithm } from '@neat-js/core'
+import type {
+  Algorithm,
+  LinkFactoryOptions,
+  NodeFactoryOptions,
+  StateData,
+} from '@neat-js/core'
 
 import { createConfig } from './createConfig.js'
 import { createGenome } from './createGenome.js'
@@ -6,13 +11,14 @@ import { createLink } from './createLink.js'
 import { createNode } from './createNode.js'
 import { createPhenotype } from './createPhenotype.js'
 import { createState } from './createState.js'
-import {
-  type DefaultNEATGenome,
-  type DefaultNEATGenomeData,
-  type DefaultNEATGenomeFactoryOptions,
-} from './DefaultNEATGenome.js'
-import { fromSharedBuffer } from './fromSharedBuffer.js'
 import type { NEATConfig } from './NEATConfig.js'
+import type { NEATGenome } from './NEATGenome.js'
+import type { NEATGenomeData } from './NEATGenomeData.js'
+import type {
+  NEATGenomeFactoryOptions,
+  NEATHiddenNodeData,
+  NEATLinkData,
+} from './NEATGenomeFactoryOptions.js'
 import {
   defaultNEATGenomeOptions,
   type NEATGenomeOptions,
@@ -20,17 +26,27 @@ import {
 import type { NEATLink } from './NEATLink.js'
 import type { NEATNode } from './NEATNode.js'
 import type { NEATState } from './NEATState.js'
-import { toSharedBuffer } from './toSharedBuffer.js'
 
 export const NEATAlgorithm: Algorithm<
-  NEATNode,
-  NEATLink,
+  null,
+  null,
   NEATConfig,
+  null,
+  null,
+  null,
+  null,
+  StateData,
   NEATState,
+  NEATHiddenNodeData,
+  NEATLinkData,
+  NEATGenomeFactoryOptions,
   NEATGenomeOptions,
-  DefaultNEATGenomeFactoryOptions,
-  DefaultNEATGenomeData,
-  DefaultNEATGenome
+  NEATGenomeData,
+  NodeFactoryOptions,
+  NEATNode,
+  LinkFactoryOptions,
+  NEATLink,
+  NEATGenome
 > = {
   name: 'NEAT',
   pathname: '@neat-js/neat',
@@ -41,6 +57,4 @@ export const NEATAlgorithm: Algorithm<
   createNode,
   createPhenotype,
   createState,
-  toSharedBuffer,
-  fromSharedBuffer,
 }
