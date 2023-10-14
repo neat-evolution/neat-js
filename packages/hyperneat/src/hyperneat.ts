@@ -78,9 +78,11 @@ export const hyperneat = async <RFO extends ReproducerFactoryOptions>(
     null
   )
 
-  // FIXME: this is messy
+  // capture the real initConfig for createPhenotype later
   genomeOptions.initConfig = evaluator.environment.description
-  const initConfig: InitConfig = {
+
+  // force initConfig to be 4, 2
+  const cppnInitConfig: InitConfig = {
     inputs: 4,
     outputs: 2,
   }
@@ -93,7 +95,7 @@ export const hyperneat = async <RFO extends ReproducerFactoryOptions>(
     populationOptions,
     reproducerOptions,
     genomeOptions,
-    initConfig
+    cppnInitConfig
   )
 
   await evolve(population, evolutionOptions)
