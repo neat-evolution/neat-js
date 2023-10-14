@@ -1,0 +1,164 @@
+import {
+  Connections,
+  isActionEdge,
+  PhenotypeActionType,
+  type PhenotypeAction,
+  type PhenotypeFactory,
+} from '@neat-js/core'
+import { createPhenotype as createCPPNPhenotype } from '@neat-js/cppn'
+import type { CPPNGenome, CPPNGenomeOptions } from '@neat-js/cppn'
+import { createSyncExecutor } from '@neat-js/executor'
+import {
+  parseNodes,
+  toPointKey,
+  type PointKey,
+  fromPointKey,
+  type Point,
+} from '@neat-js/hyperneat'
+
+import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
+import { exploreSubstrate } from './search/exploreSubstrate.js'
+
+export const createPhenotype: PhenotypeFactory<
+  CPPNGenome<ESHyperNEATGenomeOptions>
+> = (genome) => {
+  const initConfig = genome.genomeOptions.initConfig
+  if (initConfig == null) {
+    throw new Error('initConfig is required')
+  }
+  const inputNodes = parseNodes(
+    genome.genomeOptions.inputConfig,
+    genome.genomeOptions.resolution,
+    initConfig.inputs,
+    -1.0
+  )
+  const outputNodes = parseNodes(
+    genome.genomeOptions.outputConfig,
+    genome.genomeOptions.resolution,
+    initConfig.outputs,
+    1.0
+  )
+  const depth = genome.genomeOptions.iterationLevel + 1
+
+  const phenotype = createCPPNPhenotype(
+    genome as unknown as CPPNGenome<CPPNGenomeOptions>
+  )
+  const cppn = createSyncExecutor(phenotype)
+
+  const [layers, forwardConnections] = exploreSubstrate(
+    inputNodes,
+    outputNodes,
+    cppn,
+    depth,
+    false,
+    false,
+    genome.genomeOptions
+  )
+
+  const [reverseLayers, reverseConnections] = exploreSubstrate(
+    outputNodes,
+    inputNodes,
+    cppn,
+    1,
+    true,
+    false,
+    genome.genomeOptions
+  )
+
+  const connections = new Connections<PointKey, number>(forwardConnections)
+  connections.extend(new Connections<PointKey, number>(reverseConnections))
+
+  const inputNodeKeys: PointKey[] = []
+  const nodes: PointKey[] = []
+  for (const node of inputNodes) {
+    const nodeKey = toPointKey(node)
+    inputNodeKeys.push(nodeKey)
+    nodes.push(nodeKey)
+  }
+  const outputNodeKeys: PointKey[] = []
+  for (const node of outputNodes) {
+    outputNodeKeys.push(toPointKey(node))
+  }
+
+  const prunedSet = new Set(
+    connections.prune(inputNodeKeys, outputNodeKeys, true)
+  )
+
+  for (let i = 1; i < layers.length; i++) {
+    const layer = layers[i] as Point[]
+    for (const node of layer) {
+      const nodeKey = toPointKey(node)
+      if (!prunedSet.has(nodeKey)) {
+        nodes.push(nodeKey)
+      }
+    }
+  }
+
+  for (const layer of reverseLayers) {
+    for (const node of layer) {
+      const nodeKey = toPointKey(node)
+      if (!prunedSet.has(nodeKey)) {
+        nodes.push(nodeKey)
+      }
+    }
+  }
+
+  for (const node of outputNodes) {
+    nodes.push(toPointKey(node))
+  }
+
+  const firstOutputId = nodes.length - outputNodes.length
+  const inputs = []
+  for (let i = 0; i < inputNodes.length; i++) {
+    inputs.push(i)
+  }
+
+  const outputs = []
+  for (let i = firstOutputId; i < firstOutputId + outputNodes.length; i++) {
+    outputs.push(i)
+  }
+
+  const nodeMapping = new Map<PointKey, number>()
+  for (let i = 0; i < nodes.length; i++) {
+    nodeMapping.set(nodes[i] as string, i)
+  }
+
+  const actions: PhenotypeAction[] = []
+  for (const action of connections.sortTopologically()) {
+    if (isActionEdge(action)) {
+      const fromIndex = nodeMapping.get(action[0]) as number
+      const toIndex = nodeMapping.get(action[1]) as number
+      actions.push({
+        type: PhenotypeActionType.Link,
+        from: fromIndex,
+        to: toIndex,
+        weight: action[2],
+      })
+    } else {
+      const nodeIndex = nodeMapping.get(action[0]) as number
+      const [x, y] = fromPointKey(action[0])
+      const [, bias] = cppn([
+        0.0,
+        0.0,
+        x / genome.genomeOptions.resolution,
+        y / genome.genomeOptions.resolution,
+      ]) as [weight: number, bias: number]
+      actions.push({
+        type: PhenotypeActionType.Activation,
+        node: nodeIndex,
+        bias,
+        activation:
+          nodeIndex < firstOutputId
+            ? genome.genomeOptions.hiddenActivation
+            : genome.genomeOptions.outputActivation,
+      })
+    }
+  }
+
+  return {
+    length: nodes.length,
+    inputs,
+    outputs,
+    actions,
+  }
+}
