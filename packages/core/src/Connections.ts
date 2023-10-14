@@ -60,8 +60,13 @@ export class Connections<N extends NodeKey, E extends Edge> {
   private readonly nodeKeyCache = new Set<NodeKey>()
   private readonly linkKeyCache = new Set<LinkKey>()
 
-  constructor() {
+  constructor(factoryOptions?: Array<Connection<N, E>>) {
     this.connectionMap = new Map<NodeKey, ConnectionInfo<N, E>>()
+    if (factoryOptions !== undefined) {
+      for (const [from, to, edge] of factoryOptions) {
+        this.add(from, to, edge, true)
+      }
+    }
   }
 
   rebuildNodeKeyCache() {
@@ -102,6 +107,14 @@ export class Connections<N extends NodeKey, E extends Edge> {
     this.nodeKeyCache.add(from)
     this.nodeKeyCache.add(to)
     this.linkKeyCache.add(toLinkKey(from, to))
+  }
+
+  extend(other: Connections<N, E>) {
+    for (const { node: source, targets } of other.connectionMap.values()) {
+      for (const { node, edge } of targets) {
+        this.add(source, node, edge)
+      }
+    }
   }
 
   setEdge(from: N, to: N, edge: E) {
@@ -284,26 +297,26 @@ export class Connections<N extends NodeKey, E extends Edge> {
     return false
   }
 
-  // FIXME: is this used anywhere?
-  toJSON(): ConnectionsData<N, E> {
-    const nodes = new Set<N>()
-    const connections: Array<ConnectionData<N, E>> = []
+  // // FIXME: is this used anywhere?
+  // toJSON(): ConnectionsData<N, E> {
+  //   const nodes = new Set<N>()
+  //   const connections: Array<ConnectionData<N, E>> = []
 
-    for (const [from, to, edge] of this.connections()) {
-      if (!nodes.has(from)) {
-        nodes.add(from)
-      }
-      if (!nodes.has(to)) {
-        nodes.add(to)
-      }
-      connections.push([from, to, edge])
-    }
+  //   for (const [from, to, edge] of this.connections()) {
+  //     if (!nodes.has(from)) {
+  //       nodes.add(from)
+  //     }
+  //     if (!nodes.has(to)) {
+  //       nodes.add(to)
+  //     }
+  //     connections.push([from, to, edge])
+  //   }
 
-    return {
-      nodes: Array.from(nodes),
-      connections,
-    }
-  }
+  //   return {
+  //     nodes: Array.from(nodes),
+  //     connections,
+  //   }
+  // }
 
   *sortTopologically(): Generator<Action<N, E>, void, undefined> {
     // Store number of incoming connections for all nodes
@@ -347,5 +360,125 @@ export class Connections<N extends NodeKey, E extends Edge> {
         }
       }
     }
+  }
+
+  prune(inputs: N[], outputs: N[], collect: boolean): N[] {
+    const pruned = this.pruneDanglingInputs(inputs, collect)
+    pruned.push(...this.pruneDanglingOutputs(outputs, collect))
+    this.rebuildNodeKeyCache()
+    this.rebuildLinkKeyCache()
+    return pruned
+  }
+
+  pruneDanglingInputs(
+    inputs: N[],
+    collect: boolean,
+    rebuildCache = false
+  ): N[] {
+    const backwardCount = new Map<string, number>()
+    for (const { targets } of this.connectionMap.values()) {
+      for (const target of targets) {
+        backwardCount.set(
+          target.node,
+          (backwardCount.get(target.node) ?? 0) + 1
+        )
+      }
+    }
+
+    const pruned: N[] = []
+    const inputsSet = new Set(inputs) // Convert inputs to a Set for faster lookup
+
+    let done = false
+    while (!done) {
+      const danglingInputs: N[] = []
+      for (const connection of this.connectionMap.values()) {
+        const node = connection.node
+        if (!inputsSet.has(node) && (backwardCount.get(node) ?? 0) === 0) {
+          danglingInputs.push(node)
+        }
+      }
+      if (danglingInputs.length === 0) {
+        done = true
+      }
+      for (const node of danglingInputs) {
+        const targets = this.connectionMap.get(node)?.targets
+        backwardCount.delete(node)
+        this.connectionMap.delete(node)
+        if (targets === undefined) {
+          continue
+        }
+        for (const target of targets) {
+          const count = backwardCount.get(target.node)
+          if (count !== undefined) {
+            backwardCount.set(target.node, count - 1)
+          }
+        }
+      }
+      if (collect) {
+        for (const danglingInput of danglingInputs) {
+          pruned.push(danglingInput)
+        }
+      }
+    }
+    if (rebuildCache) {
+      this.rebuildNodeKeyCache()
+      this.rebuildLinkKeyCache()
+    }
+    return pruned
+  }
+
+  pruneDanglingOutputs(
+    outputs: N[],
+    collect: boolean,
+    rebuildCache = false
+  ): N[] {
+    const pruned = new Set<N>()
+    const outputsSet = new Set(outputs)
+
+    let done = false
+    while (!done) {
+      let deletedNode = false
+
+      for (const source of this.connectionMap.keys()) {
+        const targets = this.connectionMap.get(source)?.targets ?? []
+        let allTargetsToDelete = true
+        const deleteIndexes: number[] = []
+
+        for (let i = 0; i < targets.length; i++) {
+          const node = (targets[i] as Target<N, E>).node
+          if (!outputsSet.has(node) && !this.connectionMap.has(node)) {
+            deleteIndexes.push(i)
+            if (collect) {
+              pruned.add(node)
+            }
+          } else {
+            allTargetsToDelete = false
+          }
+        }
+
+        if (deleteIndexes.length > 0) {
+          deletedNode = true
+
+          if (allTargetsToDelete) {
+            this.connectionMap.delete(source)
+          } else {
+            // Remove targets from end to start to prevent index shifting
+            for (let i = deleteIndexes.length - 1; i >= 0; i--) {
+              targets.splice(deleteIndexes[i] as number, 1)
+            }
+          }
+        }
+      }
+
+      if (!deletedNode) {
+        done = true
+      }
+    }
+
+    if (rebuildCache) {
+      this.rebuildNodeKeyCache()
+      this.rebuildLinkKeyCache()
+    }
+    return Array.from(pruned)
   }
 }
