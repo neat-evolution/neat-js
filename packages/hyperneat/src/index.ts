@@ -1,6 +1,13 @@
 export { createConfig, createLink, createState } from '@neat-js/neat'
 export { createNode } from '@neat-js/cppn'
 
+export * from './substrate/createSubstrate.js'
+export * from './substrate/horizontalRows.js'
+export * from './substrate/layered.js'
+export * from './substrate/layeredFromLayers.js'
+export * from './substrate/load.js'
+export * from './substrate/parseHiddenNodes.js'
+export * from './substrate/parseNodes.js'
 export * from './createGenome.js'
 export * from './createPhenotype.js'
 export * from './hyperneat.js'

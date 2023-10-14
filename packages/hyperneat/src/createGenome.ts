@@ -15,9 +15,8 @@ export const createGenome: CPPNGenomeFactory<HyperNEATGenomeOptions> = (
   _initConfig: InitConfig,
   genomeFactoryOptions?: CPPNGenomeFactoryOptions
 ) => {
-  // FIXME: this is messy
   // force initConfig to be 4, 2
-  const cppnInitConfig = {
+  const cppnInitConfig: InitConfig = {
     inputs: 4,
     outputs: 2,
   }
