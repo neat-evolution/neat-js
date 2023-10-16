@@ -4,21 +4,18 @@ import { toPointKey, fromPointKey, type Point } from '../src/Point.js'
 
 const fromPointKeySplit = (key: string): Point => {
   const [x, y] = key.split(',') as [string, string]
-  return [parseInt(x, 10), parseInt(y, 10)]
+  return [+x, +y]
 }
 
 const regex = /^(\d+),(\d+)$/
 const fromPointKeyRegExp = (key: string): Point => {
   const [, x, y] = key.match(regex) as [string, string, string]
-  return [parseInt(x, 10), parseInt(y, 10)]
+  return [+x, +y]
 }
 
 const fromPointKeySubstring = (key: string): Point => {
   const commaIndex = key.indexOf(',')
-  return [
-    parseInt(key.substring(0, commaIndex), 10),
-    parseInt(key.substring(commaIndex + 1), 10),
-  ]
+  return [+key.substring(0, commaIndex), +key.substring(commaIndex + 1)]
 }
 
 const fromPointKeyManual = (key: string): Point => {
@@ -40,10 +37,7 @@ const fromPointKeyManualCharCode = (key: string): Point => {
       break
     }
   }
-  return [
-    parseInt(key.slice(0, commaIndex), 10),
-    parseInt(key.slice(commaIndex + 1), 10),
-  ]
+  return [+key.slice(0, commaIndex), +key.slice(commaIndex + 1)]
 }
 
 const fromPointKeyManualParseInt = (key: string): Point => {
@@ -54,10 +48,7 @@ const fromPointKeyManualParseInt = (key: string): Point => {
       break
     }
   }
-  return [
-    parseInt(key.slice(0, commaIndex), 10),
-    parseInt(key.slice(commaIndex + 1), 10),
-  ]
+  return [+key.slice(0, commaIndex), +key.slice(commaIndex + 1)]
 }
 
 const key = toPointKey([1, 2])
