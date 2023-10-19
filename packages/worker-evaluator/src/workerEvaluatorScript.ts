@@ -23,9 +23,10 @@ import {
 } from './WorkerAction.js'
 
 interface ThreadInfo {
-  createConfig: ConfigFactory<any, any, any>
+  createConfig: ConfigFactory<any, any, any, any, any>
   createExecutor: ExecutorFactory
   createGenome: GenomeFactory<
+    any,
     any,
     any,
     any,
@@ -47,7 +48,7 @@ interface ThreadInfo {
 }
 
 interface GenomeFactoryConfig {
-  configProvider: ConfigProvider<any, any>
+  configProvider: ConfigProvider<any, any, any>
   stateProvider: StateProvider<any, any, any, any, any>
   genomeOptions: GenomeOptions
   initConfig: InitConfig
@@ -89,7 +90,7 @@ async function handleInitGenomeFactory({
   configData,
   genomeOptions,
   initConfig,
-}: InitGenomeFactoryPayload<any, any, any>) {
+}: InitGenomeFactoryPayload<any, any>) {
   if (threadInfo == null) {
     throw new Error('threadInfo not initialized')
   }
@@ -97,11 +98,7 @@ async function handleInitGenomeFactory({
     throw new Error('Worker must be created with a parent port')
   }
 
-  const configProvider = threadInfo.createConfig(
-    configData.neat,
-    configData.node,
-    configData.link
-  )
+  const configProvider = threadInfo.createConfig(configData)
   const stateProvider = threadInfo.createState()
 
   genomeFactoryConfig = {

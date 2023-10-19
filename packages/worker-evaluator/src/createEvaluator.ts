@@ -25,6 +25,8 @@ export const createEvaluator: EvaluatorFactory<WorkerEvaluatorOptions> = (
     any,
     any,
     any,
+    any,
+    any,
     any
   >,
   environment: Environment,
