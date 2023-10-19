@@ -16,12 +16,14 @@ export type GenomeEntry<
     any,
     any,
     any,
+    any,
     G
   >
 > = [speciesIndex: number, organismIndex: number, genome: G]
 
 export type GenomeEntries<
   G extends Genome<
+    any,
     any,
     any,
     any,
