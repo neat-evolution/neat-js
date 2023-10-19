@@ -44,6 +44,8 @@ export class WorkerEvaluator implements Evaluator {
     any,
     any,
     any,
+    any,
+    any,
     any
   >
 
@@ -61,6 +63,8 @@ export class WorkerEvaluator implements Evaluator {
 
   constructor(
     algorithm: Algorithm<
+      any,
+      any,
       any,
       any,
       any,
@@ -172,8 +176,8 @@ export class WorkerEvaluator implements Evaluator {
     await Promise.allSettled(initPromises)
   }
 
-  async initGenomeFactory(
-    configData: ConfigData<any, any>,
+  async initGenomeFactory<CD extends ConfigData>(
+    configData: CD,
     genomeOptions: GenomeOptions,
     initConfig: InitConfig
   ) {

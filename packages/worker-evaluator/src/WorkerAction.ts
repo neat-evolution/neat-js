@@ -1,6 +1,5 @@
 import type {
   ConfigData,
-  ConfigOptions,
   GenomeFactoryOptions,
   GenomeOptions,
   InitConfig,
@@ -29,11 +28,10 @@ export interface InitPayload {
 }
 
 export interface InitGenomeFactoryPayload<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
+  CD extends ConfigData,
   GO extends GenomeOptions
 > {
-  configData: ConfigData<NCO, LCO>
+  configData: CD
   genomeOptions: GO
   initConfig: InitConfig
 }
@@ -47,7 +45,7 @@ export type TerminateAction = Action<null>
 export interface PayloadMap {
   [ActionType.INIT_EVALUATOR]: InitPayload
   [ActionType.INIT_EVALUATOR_SUCCESS]: null
-  [ActionType.INIT_GENOME_FACTORY]: InitGenomeFactoryPayload<any, any, any>
+  [ActionType.INIT_GENOME_FACTORY]: InitGenomeFactoryPayload<any, any>
   [ActionType.INIT_GENOME_FACTORY_SUCCESS]: null
   [ActionType.REQUEST_EVALUATE_GENOME]: GenomeFactoryOptions<any, any>
   [ActionType.RESPOND_EVALUATE_GENOME]: number
