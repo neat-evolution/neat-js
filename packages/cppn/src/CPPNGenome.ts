@@ -8,6 +8,8 @@ import {
   type StateData,
   type LinkFactoryOptions,
   nodeRefToKey,
+  type ConfigFactoryOptions,
+  type ConfigData,
 } from '@neat-js/core'
 import {
   createLink,
@@ -30,8 +32,10 @@ import { type CPPNGenomeFactory } from './createGenome.js'
 import { createNodeFactory } from './createNode.js'
 
 export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
+  ConfigFactoryOptions,
   null,
   null,
+  ConfigData,
   NEATConfig,
   null,
   null,

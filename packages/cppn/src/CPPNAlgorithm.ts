@@ -1,4 +1,10 @@
-import type { Algorithm, LinkFactoryOptions, StateData } from '@neat-js/core'
+import type {
+  Algorithm,
+  ConfigData,
+  ConfigFactoryOptions,
+  LinkFactoryOptions,
+  StateData,
+} from '@neat-js/core'
 import { createConfig, createLink, createState } from '@neat-js/neat'
 import type {
   NEATConfig,
@@ -24,8 +30,10 @@ import { createNode } from './createNode.js'
 import { createPhenotype } from './createPhenotype.js'
 
 export const CPPNAlgorithm: Algorithm<
+  ConfigFactoryOptions,
   null,
   null,
+  ConfigData,
   NEATConfig,
   null,
   null,

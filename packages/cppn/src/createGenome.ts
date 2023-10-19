@@ -1,4 +1,9 @@
-import type { GenomeFactory, InitConfig, StateData } from '@neat-js/core'
+import type {
+  ConfigData,
+  GenomeFactory,
+  InitConfig,
+  StateData,
+} from '@neat-js/core'
 import type { NEATConfig, NEATLinkData, NEATState } from '@neat-js/neat'
 
 import { CPPNGenome } from './CPPNGenome.js'
@@ -11,6 +16,7 @@ import type { CPPNGenomeOptions } from './CPPNGenomeOptions.js'
 export type CPPNGenomeFactory<GO extends CPPNGenomeOptions> = GenomeFactory<
   null,
   null,
+  ConfigData,
   NEATConfig,
   null,
   null,

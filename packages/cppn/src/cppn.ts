@@ -1,5 +1,6 @@
 import type {
-  InitConfig,
+  ConfigData,
+  ConfigFactoryOptions,
   LinkFactoryOptions,
   NEATConfigOptions,
   StateData,
@@ -32,8 +33,10 @@ import type { CPPNNode } from './CPPNNode.js'
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
 
 export type CPPNPopulation<RFO extends ReproducerFactoryOptions> = Population<
+  ConfigFactoryOptions,
   null,
   null,
+  ConfigData,
   NEATConfig,
   null,
   null,
@@ -65,13 +68,11 @@ export const cppn = async <RFO extends ReproducerFactoryOptions>(
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   reproducerOptions: RFO,
-  genomeOptions: Omit<CPPNGenomeOptions, keyof InitConfig>
+  genomeOptions: CPPNGenomeOptions
 ) => {
-  const configProvider = CPPNAlgorithm.createConfig(
-    neatConfigOptions ?? defaultNEATConfigOptions,
-    null,
-    null
-  )
+  const configProvider = CPPNAlgorithm.createConfig({
+    neat: neatConfigOptions ?? defaultNEATConfigOptions,
+  })
 
   const initConfig = evaluator.environment.description
 
