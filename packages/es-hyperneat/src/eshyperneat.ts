@@ -1,4 +1,6 @@
 import type {
+  ConfigData,
+  ConfigFactoryOptions,
   InitConfig,
   LinkFactoryOptions,
   NEATConfigOptions,
@@ -33,8 +35,10 @@ import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
 
 export type ESHyperNEATPopulation<RFO extends ReproducerFactoryOptions> =
   Population<
+    ConfigFactoryOptions,
     null,
     null,
+    ConfigData,
     NEATConfig,
     null,
     null,
@@ -70,13 +74,11 @@ export const eshyperneat = async <RFO extends ReproducerFactoryOptions>(
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   reproducerOptions: RFO,
-  genomeOptions: Omit<ESHyperNEATGenomeOptions, keyof InitConfig>
+  genomeOptions: ESHyperNEATGenomeOptions
 ) => {
-  const configProvider = ESHyperNEATAlgorithm.createConfig(
-    neatConfigOptions ?? defaultNEATConfigOptions,
-    null,
-    null
-  )
+  const configProvider = ESHyperNEATAlgorithm.createConfig({
+    neat: neatConfigOptions ?? defaultNEATConfigOptions,
+  })
 
   // capture the real initConfig for createPhenotype later
   genomeOptions.initConfig = evaluator.environment.description
