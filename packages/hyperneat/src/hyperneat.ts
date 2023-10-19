@@ -1,4 +1,6 @@
 import type {
+  ConfigData,
+  ConfigFactoryOptions,
   InitConfig,
   LinkFactoryOptions,
   NEATConfigOptions,
@@ -33,8 +35,10 @@ import type { HyperNEATGenomeOptions } from './HyperNEATGenomeOptions.js'
 
 export type HyperNEATPopulation<RFO extends ReproducerFactoryOptions> =
   Population<
+    ConfigFactoryOptions,
     null,
     null,
+    ConfigData,
     NEATConfig,
     null,
     null,
@@ -70,13 +74,11 @@ export const hyperneat = async <RFO extends ReproducerFactoryOptions>(
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   reproducerOptions: RFO,
-  genomeOptions: Omit<HyperNEATGenomeOptions, keyof InitConfig>
+  genomeOptions: HyperNEATGenomeOptions
 ) => {
-  const configProvider = HyperNEATAlgorithm.createConfig(
-    neatConfigOptions ?? defaultNEATConfigOptions,
-    null,
-    null
-  )
+  const configProvider = HyperNEATAlgorithm.createConfig({
+    neat: neatConfigOptions ?? defaultNEATConfigOptions,
+  })
 
   // capture the real initConfig for createPhenotype later
   genomeOptions.initConfig = evaluator.environment.description
