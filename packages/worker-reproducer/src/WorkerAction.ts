@@ -1,6 +1,5 @@
 import type {
   ConfigData,
-  ConfigOptions,
   GenomeFactoryOptions,
   GenomeOptions,
   InitConfig,
@@ -35,12 +34,11 @@ export enum ActionType {
 }
 
 export interface InitReproducerPayload<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
+  CD extends ConfigData,
   GO extends GenomeOptions
 > {
   populationOptions: PopulationOptions
-  configData: ConfigData<NCO, LCO>
+  configData: CD
   genomeOptions: GO
   initConfig: InitConfig
   algorithmPathname: string
@@ -77,7 +75,7 @@ export interface SpeciesPayload {
 }
 
 export interface PayloadMap {
-  [ActionType.INIT_REPRODUCER]: InitReproducerPayload<any, any, any>
+  [ActionType.INIT_REPRODUCER]: InitReproducerPayload<any, any>
   [ActionType.INIT_REPRODUCER_SUCCESS]: null
   [ActionType.TERMINATE]: null
   [ActionType.REQUEST_ELITE_ORGANISM]: OrganismPayload<any>
