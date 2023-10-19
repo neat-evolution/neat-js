@@ -1,5 +1,7 @@
 import type {
   Algorithm,
+  ConfigData,
+  ConfigFactoryOptions,
   LinkFactoryOptions,
   NodeFactoryOptions,
   StateData,
@@ -28,8 +30,10 @@ import type { NEATNode } from './NEATNode.js'
 import type { NEATState } from './NEATState.js'
 
 export const NEATAlgorithm: Algorithm<
+  ConfigFactoryOptions,
   null,
   null,
+  ConfigData,
   NEATConfig,
   null,
   null,

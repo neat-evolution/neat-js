@@ -1,4 +1,9 @@
-import type { GenomeFactory, InitConfig, StateData } from '@neat-js/core'
+import type {
+  ConfigData,
+  GenomeFactory,
+  InitConfig,
+  StateData,
+} from '@neat-js/core'
 
 import type { NEATConfig } from './NEATConfig.js'
 import { NEATGenome } from './NEATGenome.js'
@@ -13,6 +18,7 @@ import type { NEATState } from './NEATState.js'
 export const createGenome: GenomeFactory<
   null,
   null,
+  ConfigData,
   NEATConfig,
   null,
   null,
