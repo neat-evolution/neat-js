@@ -25,9 +25,13 @@ export type ReproducerFactory<
     any,
     any,
     any,
+    any,
+    any,
     G
   >,
   P extends Population<
+    any,
+    any,
     any,
     any,
     any,

@@ -18,13 +18,14 @@ export interface Reproducer<
     any,
     any,
     any,
+    any,
     G
   >
 > {
   copyElites: (
     speciesIds: number[]
-  ) => Promise<Array<Organism<any, any, any, any, any, any, any, G>>>
+  ) => Promise<Array<Organism<any, any, any, any, any, any, G>>>
   reproduce: (
     speciesIds: number[]
-  ) => Promise<Array<Organism<any, any, any, any, any, any, any, G>>>
+  ) => Promise<Array<Organism<any, any, any, any, any, any, G>>>
 }

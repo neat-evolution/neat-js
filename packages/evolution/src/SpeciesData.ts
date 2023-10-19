@@ -1,6 +1,5 @@
 import type {
   ConfigData,
-  ConfigOptions,
   GenomeFactoryOptions,
   GenomeOptions,
   StateData,
@@ -33,15 +32,14 @@ export interface SpeciesDataOrganism<
 }
 
 export interface SpeciesData<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
+  CD extends ConfigData,
   SD extends StateData,
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions
 > {
-  config: ConfigData<NCO, LCO> | null
+  config: CD | null
   state: SD | null
   genomeOptions: GO | null
   speciesOptions: SpeciesOptions

@@ -24,6 +24,8 @@ export const evolve = async <
     any,
     any,
     any,
+    any,
+    any,
     any
   >,
   O extends EvolutionOptions = EvolutionOptions
@@ -56,7 +58,6 @@ export const evolve = async <
     }
     if (i % 10 === 0) {
       const best = population.best() as Organism<
-        any,
         any,
         any,
         any,
