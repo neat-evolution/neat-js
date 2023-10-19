@@ -7,7 +7,7 @@ import {
   type Innovation,
   type NodeRef,
   type InitConfig,
-  type ConfigOptions,
+  type ConfigProvider,
 } from '@neat-js/core'
 import { Organism } from '@neat-js/evolution'
 import type { PopulationOptions } from '@neat-js/evolution'
@@ -28,8 +28,9 @@ import { WorkerState } from './WorkerState.js'
 
 // FIXME: types
 interface PartialAlgorithm {
-  createConfig: ConfigFactory<any, any, any>
+  createConfig: ConfigFactory<any, any, any, any, any>
   createGenome: GenomeFactory<
+    any,
     any,
     any,
     any,
@@ -47,15 +48,10 @@ interface PartialAlgorithm {
   >
 }
 
-// FIXME: types
-interface ThreadInfo<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
-  GO extends GenomeOptions
-> {
+interface ThreadInfo<CD extends ConfigData, GO extends GenomeOptions> {
   populationOptions: PopulationOptions
   stateProvider: WorkerState<any, any, any, any, any>
-  configProvider: ConfigData<NCO, LCO>
+  configProvider: ConfigProvider<any, any, CD>
   genomeOptions: GO
   initConfig: InitConfig
   algorithm: PartialAlgorithm
@@ -63,7 +59,7 @@ interface ThreadInfo<
 
 const rng = threadRNG()
 
-let threadInfo: ThreadInfo<any, any, any> | null = null
+let threadInfo: ThreadInfo<any, any> | null = null
 
 let threadRequestId = 0
 const nextRequestId = () => {
@@ -77,21 +73,18 @@ const nextRequestId = () => {
 
 const requestMap = new Map<number, RequestMapValue<any>>()
 
-const initThread = async (payload: InitReproducerPayload<any, any, any>) => {
+const initThread = async (payload: InitReproducerPayload<any, any>) => {
   if (workerContext == null) {
     throw new Error('Worker must be created with a parent port')
   }
   // FIXME: enable node state and link state
+
   const stateProvider = new WorkerState<any, any, any, any, any>(
     getSplitInnovation,
     getConnectInnovation
   )
   const { createConfig, createGenome } = await import(payload.algorithmPathname)
-  const configProvider = createConfig(
-    payload.configData.neat,
-    payload.configData.node,
-    payload.configData.link
-  )
+  const configProvider = createConfig(payload.configData)
   threadInfo = {
     populationOptions: payload.populationOptions,
     stateProvider,
@@ -109,7 +102,7 @@ const initThread = async (payload: InitReproducerPayload<any, any, any>) => {
 }
 
 const populationTournamentSelect = async (): Promise<
-  Organism<any, any, any, any, any, any, any, any>
+  Organism<any, any, any, any, any, any, any>
 > => {
   if (threadInfo == null) {
     throw new Error('threadInfo not initialized')
@@ -146,7 +139,7 @@ const populationTournamentSelect = async (): Promise<
 
 const speciesTournamentSelect = async (
   speciesId: number
-): Promise<Organism<any, any, any, any, any, any, any, any>> => {
+): Promise<Organism<any, any, any, any, any, any, any>> => {
   if (threadInfo == null) {
     throw new Error('threadInfo not initialized')
   }
@@ -274,7 +267,7 @@ const breedOrganism = async (payload: SpeciesPayload) => {
     throw new Error('Unable to gather father organism')
   }
 
-  let child: Organism<any, any, any, any, any, any, any, any>
+  let child: Organism<any, any, any, any, any, any, any>
   if (rng.gen() < threadInfo.populationOptions.asexualReproductionProbability) {
     child = father.asElite()
   } else {
@@ -321,9 +314,9 @@ if (workerContext !== null) {
   workerContext.addEventListener('message', (action: Action<ActionType>) => {
     switch (action.type) {
       case ActionType.INIT_REPRODUCER:
-        initThread(
-          action.payload as InitReproducerPayload<any, any, any>
-        ).catch(handleError)
+        initThread(action.payload as InitReproducerPayload<any, any>).catch(
+          handleError
+        )
         break
       case ActionType.REQUEST_ELITE_ORGANISM:
         eliteOrganism(action.payload as OrganismPayload<any>)

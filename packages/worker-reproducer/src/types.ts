@@ -28,9 +28,13 @@ export type AnyPopulation<
     any,
     any,
     any,
+    any,
+    any,
     G
   >
 > = Population<
+  any,
+  any,
   any,
   any,
   any,
