@@ -1,4 +1,10 @@
-import type { Algorithm, LinkFactoryOptions, StateData } from '@neat-js/core'
+import type {
+  Algorithm,
+  ConfigData,
+  ConfigFactoryOptions,
+  LinkFactoryOptions,
+  StateData,
+} from '@neat-js/core'
 import {
   type CPPNNode,
   type CPPNNodeFactoryOptions,
@@ -24,8 +30,10 @@ import {
 } from './ESHyperNEATGenomeOptions.js'
 
 export const ESHyperNEATAlgorithm: Algorithm<
+  ConfigFactoryOptions,
   null,
   null,
+  ConfigData,
   NEATConfig,
   null,
   null,
@@ -44,7 +52,7 @@ export const ESHyperNEATAlgorithm: Algorithm<
   NEATLink,
   CPPNGenome<ESHyperNEATGenomeOptions>
 > = {
-  name: 'ESHyperNEAT',
+  name: 'ES-HyperNEAT',
   pathname: '@neat-js/es-hyperneat',
   defaultOptions: defaultESHyperNEATGenomeOptions,
   createConfig,
