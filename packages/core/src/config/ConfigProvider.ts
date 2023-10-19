@@ -5,10 +5,11 @@ import type { ConfigOptions } from './ConfigOptions.js'
 
 export interface ConfigProvider<
   NCO extends ConfigOptions,
-  LCO extends ConfigOptions
+  LCO extends ConfigOptions,
+  CD extends ConfigData
 > {
   neat: () => NEATConfigOptions
   node: () => NCO
   link: () => LCO
-  toJSON: () => ConfigData<NCO, LCO>
+  toJSON: () => CD
 }

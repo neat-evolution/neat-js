@@ -1,5 +1,5 @@
 import type { NEATConfigOptions } from '../NEATConfigOptions.js'
 
-export interface ConfigData {
+export interface ConfigFactoryOptions {
   neat: NEATConfigOptions
 }

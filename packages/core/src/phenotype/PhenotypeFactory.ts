@@ -18,6 +18,7 @@ export type PhenotypeFactory<
     any,
     any,
     any,
+    any,
     G
   >
 > = (genome: G) => Phenotype

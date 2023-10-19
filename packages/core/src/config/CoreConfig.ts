@@ -1,43 +1,39 @@
 import type { NEATConfigOptions } from '../NEATConfigOptions.js'
 
 import type { ConfigData } from './ConfigData.js'
+import type { ConfigFactoryOptions } from './ConfigFactoryOptions.js'
 import type { ConfigOptions } from './ConfigOptions.js'
 import type { ConfigProvider } from './ConfigProvider.js'
 
-export class CoreConfig<NCO extends ConfigOptions, LCO extends ConfigOptions>
-  implements ConfigProvider<NCO, LCO>
+export class CoreConfig<
+  CFO extends ConfigFactoryOptions,
+  NCO extends ConfigOptions,
+  LCO extends ConfigOptions,
+  CD extends ConfigData
+> implements ConfigProvider<NCO, LCO, CD>
 {
   public readonly neatConfig: NEATConfigOptions
-  public readonly nodeConfig: NCO
-  public readonly linkConfig: LCO
 
-  constructor(
-    configOptions: NEATConfigOptions,
-    nodeConfig: NCO,
-    linkConfig: LCO
-  ) {
-    this.neatConfig = configOptions
-    this.nodeConfig = nodeConfig
-    this.linkConfig = linkConfig
+  constructor(factoryOptions: CFO) {
+    this.neatConfig = factoryOptions.neat
   }
 
   neat() {
     return this.neatConfig
   }
 
-  node() {
-    return this.nodeConfig
+  node(): NCO {
+    throw new Error('Method not implemented.')
+    // return this.nodeConfig
   }
 
-  link() {
-    return this.linkConfig
+  link(): LCO {
+    throw new Error('Method not implemented.')
+    // return this.linkConfig
   }
 
-  toJSON(): ConfigData<NCO, LCO> {
-    return {
-      neat: this.neatConfig,
-      node: this.nodeConfig,
-      link: this.linkConfig,
-    }
+  toJSON(): CD {
+    throw new Error('Method not implemented.')
+    // return { neat: this.neatConfig }
   }
 }
