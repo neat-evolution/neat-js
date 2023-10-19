@@ -6,6 +6,8 @@ import {
   type NodeFactoryOptions,
   type StateData,
   nodeRefToKey,
+  type ConfigFactoryOptions,
+  type ConfigData,
 } from '@neat-js/core'
 
 import { createGenome } from './createGenome.js'
@@ -24,8 +26,10 @@ import type { NEATNode } from './NEATNode.js'
 import type { NEATState } from './NEATState.js'
 
 export class NEATGenome extends CoreGenome<
+  ConfigFactoryOptions,
   null,
   null,
+  ConfigData,
   NEATConfig,
   null,
   null,

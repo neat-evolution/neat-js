@@ -1,5 +1,6 @@
 import type {
-  InitConfig,
+  ConfigData,
+  ConfigFactoryOptions,
   LinkFactoryOptions,
   NEATConfigOptions,
   NodeFactoryOptions,
@@ -30,8 +31,10 @@ import type { NEATNode } from './NEATNode.js'
 import type { NEATState } from './NEATState.js'
 
 export type NEATPopulation<RFO extends ReproducerFactoryOptions> = Population<
+  ConfigFactoryOptions,
   null,
   null,
+  ConfigData,
   NEATConfig,
   null,
   null,
@@ -63,13 +66,11 @@ export const neat = async <RFO extends ReproducerFactoryOptions>(
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   reproducerOptions: RFO,
-  genomeOptions: Omit<NEATGenomeOptions, keyof InitConfig>
+  genomeOptions: NEATGenomeOptions
 ) => {
-  const configProvider = NEATAlgorithm.createConfig(
-    neatConfigOptions ?? defaultNEATConfigOptions,
-    null,
-    null
-  )
+  const configProvider = NEATAlgorithm.createConfig({
+    neat: neatConfigOptions ?? defaultNEATConfigOptions,
+  })
   const initConfig = evaluator.environment.description
   const population: NEATPopulation<RFO> = new Population(
     createReproducer,

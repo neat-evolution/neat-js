@@ -1,4 +1,4 @@
-import type { GenomeData, StateData } from '@neat-js/core'
+import type { ConfigData, GenomeData, StateData } from '@neat-js/core'
 
 import type {
   NEATGenomeFactoryOptions,
@@ -8,8 +8,7 @@ import type {
 import type { NEATGenomeOptions } from './NEATGenomeOptions.js'
 
 export type NEATGenomeData = GenomeData<
-  null,
-  null,
+  ConfigData,
   StateData,
   NEATHiddenNodeData,
   NEATLinkData,
