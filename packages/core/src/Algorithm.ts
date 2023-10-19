@@ -18,11 +18,15 @@ import type { StateData } from './state/StateData.js'
 import type { StateFactory } from './state/StateFactory.js'
 import type { ExtendedState } from './state/StateProvider.js'
 
+import type { ConfigData, ConfigFactoryOptions } from './index.js'
+
 export interface Algorithm<
   // Genome
+  CFO extends ConfigFactoryOptions,
   NCO extends ConfigOptions,
   LCO extends ConfigOptions,
-  C extends CoreConfig<NCO, LCO>,
+  CD extends ConfigData,
+  C extends CoreConfig<CFO, NCO, LCO, CD>,
   NSD,
   LSD,
   NS extends ExtendedState<NSD>,
@@ -33,7 +37,7 @@ export interface Algorithm<
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
-  GD extends GenomeData<NCO, LCO, SD, HND, LD, GFO, GO>,
+  GD extends GenomeData<CD, SD, HND, LD, GFO, GO>,
   // CoreNode
   NFO extends NodeFactoryOptions,
   N extends CoreNode<NFO, NCO, NSD, NS, N>,
@@ -42,8 +46,10 @@ export interface Algorithm<
   L extends CoreLink<LFO, LCO, LSD, LS, L>,
   // CoreGenome
   G extends CoreGenome<
+    CFO,
     NCO,
     LCO,
+    CD,
     C,
     NSD,
     LSD,
@@ -66,10 +72,11 @@ export interface Algorithm<
   name: string
   pathname: string
   defaultOptions: GO
-  createConfig: ConfigFactory<NCO, LCO, C>
+  createConfig: ConfigFactory<CFO, NCO, LCO, CD, C>
   createGenome: GenomeFactory<
     NCO,
     LCO,
+    CD,
     C,
     NSD,
     LSD,

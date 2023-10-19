@@ -33,28 +33,23 @@ export function exploreSubstrate(
   }
   const nodes: Point[][] = [inputs]
   const connections: Array<Connection<PointKey, number>> = []
-
   const resolutionReciprocal = 1 / options.resolution
 
   for (let d = 0; d < depth; d++) {
     const discoveries: Array<Connection<PointKey, number>> = []
-
-    const layer = nodes[d]
-    if (layer == null) {
-      continue
-    }
-
+    const layer = nodes[d] as Point[]
     // Search from all nodes within previous layer of discoveries
     for (const node of layer) {
       const [x, y] = node
-      const nodeKey = toPointKey(node)
-      for (const target of findConnections(
+      const targets = findConnections(
         x * resolutionReciprocal,
         y * resolutionReciprocal,
         cppn,
         reverse,
         options
-      )) {
+      )
+      const nodeKey = toPointKey(node)
+      for (const target of targets) {
         const targetPoint = fromPointKey(target.node)
         const targetNode: Point = [
           Math.floor(targetPoint[0] * options.resolution),
@@ -77,10 +72,13 @@ export function exploreSubstrate(
     // Collect all unique target nodes
     // Avoid further exploration from output nodes
     const nextNodes = new Set<PointKey>()
+    const nextLayer: Point[] = []
     for (const connection of discoveries) {
       const toKey = connection[1]
-      if (!outputSet.has(toKey)) {
+      if (!outputSet.has(toKey) && !nextNodes.has(toKey)) {
         nextNodes.add(toKey)
+        visited.add(toKey)
+        nextLayer.push(fromPointKey(toKey))
       }
     }
 
@@ -89,13 +87,6 @@ export function exploreSubstrate(
       break
     }
 
-    for (const node of nextNodes) {
-      visited.add(node)
-    }
-    const nextLayer: Point[] = []
-    for (const node of nextNodes) {
-      nextLayer.push(fromPointKey(node))
-    }
     nodes.push(nextLayer)
   }
 

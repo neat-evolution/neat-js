@@ -1,5 +1,6 @@
 import type { ConfigOptions } from '../config/ConfigOptions.js'
 import type { ConfigProvider } from '../config/ConfigProvider.js'
+import type { ConfigData } from '../index.js'
 import type { StateData } from '../state/StateData.js'
 import type { ExtendedState, StateProvider } from '../state/StateProvider.js'
 
@@ -10,7 +11,8 @@ import { type GenomeOptions } from './GenomeOptions.js'
 export interface Genome<
   NCO extends ConfigOptions,
   LCO extends ConfigOptions,
-  C extends ConfigProvider<NCO, LCO>,
+  CD extends ConfigData,
+  C extends ConfigProvider<NCO, LCO, CD>,
   NSD,
   LSD,
   NS extends ExtendedState<NSD>,
@@ -21,10 +23,11 @@ export interface Genome<
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
-  GD extends GenomeData<NCO, LCO, SD, HND, LD, GFO, GO>,
+  GD extends GenomeData<CD, SD, HND, LD, GFO, GO>,
   G extends Genome<
     NCO,
     LCO,
+    CD,
     C,
     NSD,
     LSD,

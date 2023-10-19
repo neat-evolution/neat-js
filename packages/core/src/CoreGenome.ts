@@ -1,5 +1,7 @@
 import { binarySearchFirst, shuffle, threadRNG } from '@neat-js/utils'
 
+import type { ConfigData } from './config/ConfigData.js'
+import type { ConfigFactoryOptions } from './config/ConfigFactoryOptions.js'
 import type { ConfigOptions } from './config/ConfigOptions.js'
 import type { CoreConfig } from './config/CoreConfig.js'
 import { Connections } from './Connections.js'
@@ -26,9 +28,11 @@ import type { ExtendedState } from './state/StateProvider.js'
 
 export class CoreGenome<
   // Genome
+  CFO extends ConfigFactoryOptions,
   NCO extends ConfigOptions,
   LCO extends ConfigOptions,
-  C extends CoreConfig<NCO, LCO>,
+  CD extends ConfigData,
+  C extends CoreConfig<CFO, NCO, LCO, CD>,
   NSD,
   LSD,
   NS extends ExtendedState<NSD>,
@@ -39,7 +43,7 @@ export class CoreGenome<
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
-  GD extends GenomeData<NCO, LCO, SD, HND, LD, GFO, GO>,
+  GD extends GenomeData<CD, SD, HND, LD, GFO, GO>,
   // CoreNode
   NFO extends NodeFactoryOptions,
   N extends CoreNode<NFO, NCO, NSD, NS, N>,
@@ -48,8 +52,10 @@ export class CoreGenome<
   L extends CoreLink<LFO, LCO, LSD, LS, L>,
   // CoreGenome
   G extends CoreGenome<
+    CFO,
     NCO,
     LCO,
+    CD,
     C,
     NSD,
     LSD,
@@ -69,7 +75,7 @@ export class CoreGenome<
     G
   >
 > implements
-    Genome<NCO, LCO, C, NSD, LSD, NS, LS, SD, S, HND, LD, GFO, GO, GD, G>
+    Genome<NCO, LCO, CD, C, NSD, LSD, NS, LS, SD, S, HND, LD, GFO, GO, GD, G>
 {
   public readonly config: C
   public readonly state: S
@@ -87,6 +93,7 @@ export class CoreGenome<
   protected readonly createGenome: GenomeFactory<
     NCO,
     LCO,
+    CD,
     C,
     NSD,
     LSD,
@@ -111,6 +118,7 @@ export class CoreGenome<
     createGenome: GenomeFactory<
       NCO,
       LCO,
+      CD,
       C,
       NSD,
       LSD,

@@ -28,15 +28,15 @@ export function findConnections(
 
   let leaves: QuadPoint[] = [root]
   while (leaves.length > 0) {
+    const newLeaves: QuadPoint[] = []
     for (const leaf of leaves) {
       const [mi, ma] = leaf.createChildren(f)
       minWeight = Math.min(minWeight, mi)
       maxWeight = Math.max(maxWeight, ma)
+      newLeaves.push(...leaf.expand(maxWeight - minWeight))
     }
-
-    leaves = leaves.flatMap((leaf) =>
-      Array.from(leaf.expand(maxWeight - minWeight))
-    )
+    leaves.length = 0 // Clear the array in-place
+    leaves.push(...newLeaves) // Populate with new leaves
   }
 
   // If all weight values are the same, no nodes will be collected.
@@ -50,9 +50,12 @@ export function findConnections(
     (options.maxDiscoveries === 0 ||
       connections.length < options.maxDiscoveries)
   ) {
-    leaves = leaves.flatMap((leaf) =>
-      Array.from(leaf.extract(f, connections, maxWeight - minWeight))
-    )
+    const newLeaves: QuadPoint[] = []
+    for (const leaf of leaves) {
+      newLeaves.push(...leaf.extract(f, connections, maxWeight - minWeight))
+    }
+    leaves.length = 0 // Clear the array in-place
+    leaves.push(...newLeaves) // Populate with new leaves
   }
 
   // If the collection was limited by maxDiscoveries, nodes at the current depth in the tree
@@ -66,6 +69,5 @@ export function findConnections(
     connections.sort((a, b) => Math.abs(b.edge) - Math.abs(a.edge))
     connections.length = options.maxOutgoing
   }
-
   return connections
 }

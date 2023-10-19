@@ -1,6 +1,7 @@
 // src/config/
 export * from './config/ConfigData.js'
 export * from './config/ConfigFactory.js'
+export * from './config/ConfigFactoryOptions.js'
 export * from './config/ConfigOptions.js'
 export * from './config/ConfigProvider.js'
 export * from './config/CoreConfig.js'
