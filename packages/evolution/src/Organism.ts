@@ -1,5 +1,5 @@
 import type {
-  ConfigOptions,
+  ConfigData,
   Genome,
   GenomeFactoryOptions,
   GenomeOptions,
@@ -10,16 +10,16 @@ import type { OrganismData } from './OrganismData.js'
 import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
 
 export class Organism<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
+  CD extends ConfigData,
   SD extends StateData,
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
   G extends Genome<
-    NCO,
-    LCO,
+    any,
+    any,
+    CD,
     any,
     any,
     any,
@@ -54,9 +54,9 @@ export class Organism<
 
   // Breed organism with other organism
   crossover(
-    other: Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>
-  ): Organism<NCO, LCO, SD, HND, LD, GFO, GO, G> {
-    return new Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>(
+    other: Organism<CD, SD, HND, LD, GFO, GO, G>
+  ): Organism<CD, SD, HND, LD, GFO, GO, G> {
+    return new Organism<CD, SD, HND, LD, GFO, GO, G>(
       this.genome.crossover(
         other.genome,
         // FIXME: is it correct to cast to zero here?
@@ -73,19 +73,19 @@ export class Organism<
   }
 
   // Genetic distance to other organism
-  distance(other: Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>): number {
+  distance(other: Organism<CD, SD, HND, LD, GFO, GO, G>): number {
     return this.genome.distance(other.genome)
   }
 
   // Produce an elite for the next generation
-  asElite(): Organism<NCO, LCO, SD, HND, LD, GFO, GO, G> {
-    return new Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>(
+  asElite(): Organism<CD, SD, HND, LD, GFO, GO, G> {
+    return new Organism<CD, SD, HND, LD, GFO, GO, G>(
       this.genome.clone(),
       this.generation + 1
     )
   }
 
-  toJSON(): OrganismData<NCO, LCO, SD, HND, LD, GFO, GO> {
+  toJSON(): OrganismData<CD, SD, HND, LD, GFO, GO> {
     return {
       genome: this.genome.toJSON(),
       organismState: this.toFactoryOptions(),

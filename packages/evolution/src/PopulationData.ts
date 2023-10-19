@@ -1,6 +1,5 @@
 import type {
   ConfigData,
-  ConfigOptions,
   GenomeFactoryOptions,
   GenomeOptions,
   StateData,
@@ -10,8 +9,7 @@ import type { PopulationFactoryOptions } from './PopulationFactoryOptions.js'
 import type { PopulationOptions } from './PopulationOptions.js'
 
 export interface PopulationData<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
+  CD extends ConfigData,
   SD extends StateData,
   HND,
   LD,
@@ -19,7 +17,7 @@ export interface PopulationData<
   GO extends GenomeOptions
 > {
   // shared state
-  config: ConfigData<any, any>
+  config: CD
   genomeOptions: GO
 
   // population state
@@ -27,5 +25,5 @@ export interface PopulationData<
   populationOptions: PopulationOptions
 
   // population factory
-  factoryOptions: PopulationFactoryOptions<NCO, LCO, SD, HND, LD, GFO, GO>
+  factoryOptions: PopulationFactoryOptions<CD, SD, HND, LD, GFO, GO>
 }

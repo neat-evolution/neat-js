@@ -29,9 +29,13 @@ export const createReproducer: ReproducerFactory<any, any, undefined> = <
     any,
     any,
     any,
+    any,
+    any,
     G
   >,
   P extends Population<
+    any,
+    any,
     any,
     any,
     any,
@@ -60,11 +64,9 @@ export const createReproducer: ReproducerFactory<any, any, undefined> = <
   const rng = threadRNG()
   return {
     copyElites: async (speciesIds: number[]) => {
-      const organisms: Array<Organism<any, any, any, any, any, any, any, G>> =
-        []
+      const organisms: Array<Organism<any, any, any, any, any, any, G>> = []
       for (const i of speciesIds) {
         const species = population.species.get(i) as Species<
-          any,
           any,
           any,
           any,
@@ -90,7 +92,6 @@ export const createReproducer: ReproducerFactory<any, any, undefined> = <
             any,
             any,
             any,
-            any,
             G
           >
           const elite = organism.asElite()
@@ -101,12 +102,10 @@ export const createReproducer: ReproducerFactory<any, any, undefined> = <
       return organisms
     },
     reproduce: async (speciesIds: number[]) => {
-      const organisms: Array<Organism<any, any, any, any, any, any, any, G>> =
-        []
+      const organisms: Array<Organism<any, any, any, any, any, any, G>> = []
 
       for (const i of speciesIds) {
         const species = population.species.get(i) as Species<
-          any,
           any,
           any,
           any,
@@ -135,7 +134,7 @@ export const createReproducer: ReproducerFactory<any, any, undefined> = <
             throw new Error('Unable to gather father organism')
           }
 
-          let child: Organism<any, any, any, any, any, any, any, G>
+          let child: Organism<any, any, any, any, any, any, G>
           if (
             rng.gen() <
             population.populationOptions.asexualReproductionProbability

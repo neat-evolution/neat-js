@@ -1,5 +1,5 @@
 import type {
-  ConfigOptions,
+  ConfigData,
   Genome,
   GenomeFactoryOptions,
   GenomeOptions,
@@ -10,16 +10,16 @@ import type { Organism } from './Organism.js'
 import type { SpeciesState } from './SpeciesData.js'
 
 export interface SpeciesFactoryOptions<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
+  CD extends ConfigData,
   SD extends StateData,
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
   G extends Genome<
-    NCO,
-    LCO,
+    any,
+    any,
+    CD,
     any,
     any,
     any,
@@ -35,6 +35,6 @@ export interface SpeciesFactoryOptions<
     G
   >
 > {
-  organisms: Array<Organism<NCO, LCO, SD, HND, LD, GFO, GO, G>>
+  organisms: Array<Organism<CD, SD, HND, LD, GFO, GO, G>>
   speciesState: SpeciesState
 }

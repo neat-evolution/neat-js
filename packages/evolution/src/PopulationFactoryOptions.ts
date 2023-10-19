@@ -1,5 +1,5 @@
 import type {
-  ConfigOptions,
+  ConfigData,
   Genome,
   GenomeFactoryOptions,
   GenomeOptions,
@@ -10,21 +10,19 @@ import type { Species } from './Species.js'
 import type { SpeciesData } from './SpeciesData.js'
 
 export type PopulationDataSpecies<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
+  CD extends ConfigData,
   SD extends StateData,
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions
 > = Omit<
-  SpeciesData<NCO, LCO, SD, HND, LD, GFO, GO>,
+  SpeciesData<CD, SD, HND, LD, GFO, GO>,
   'config' | 'state' | 'genomeOptions' | 'speciesOptions'
 >
 
 export type PopulationDataSpeciesEntry<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
+  CD extends ConfigData,
   SD extends StateData,
   HND,
   LD,
@@ -32,12 +30,11 @@ export type PopulationDataSpeciesEntry<
   GO extends GenomeOptions
 > = [
   speciesKey: number,
-  speciesValue: PopulationDataSpecies<NCO, LCO, SD, HND, LD, GFO, GO>
+  speciesValue: PopulationDataSpecies<CD, SD, HND, LD, GFO, GO>
 ]
 
 export interface PopulationFactoryOptions<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
+  CD extends ConfigData,
   SD extends StateData,
   HND,
   LD,
@@ -46,23 +43,21 @@ export interface PopulationFactoryOptions<
 > {
   state: SD
   nextId: number
-  species: Array<PopulationDataSpeciesEntry<NCO, LCO, SD, HND, LD, GFO, GO>>
-  extinctSpecies: Array<
-    PopulationDataSpeciesEntry<NCO, LCO, SD, HND, LD, GFO, GO>
-  >
+  species: Array<PopulationDataSpeciesEntry<CD, SD, HND, LD, GFO, GO>>
+  extinctSpecies: Array<PopulationDataSpeciesEntry<CD, SD, HND, LD, GFO, GO>>
 }
 
 export const toPopulationDataSpecies = <
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
+  CD extends ConfigData,
   SD extends StateData,
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
   G extends Genome<
-    NCO,
-    LCO,
+    any,
+    any,
+    CD,
     any,
     any,
     any,
@@ -78,8 +73,8 @@ export const toPopulationDataSpecies = <
     G
   >
 >(
-  species: Species<NCO, LCO, SD, HND, LD, GFO, GO, G>
-): PopulationDataSpecies<NCO, LCO, SD, HND, LD, GFO, GO> => {
+  species: Species<CD, SD, HND, LD, GFO, GO, G>
+): PopulationDataSpecies<CD, SD, HND, LD, GFO, GO> => {
   const data = species.toJSON()
   return {
     organisms: data.organisms,
