@@ -10,6 +10,19 @@ import {
   defaultDatasetOptions,
   loadDataset,
 } from '@neat-js/dataset-environment'
+import {
+  defaultDESHyperNEATGenomeOptions,
+  defaultTopologyOptions,
+  deshyperneat,
+  DESHyperNEATAlgorithm,
+  type DESHyperNEATReproducerFactory,
+} from '@neat-js/des-hyperneat'
+import {
+  defaultESHyperNEATGenomeOptions,
+  eshyperneat,
+  ESHyperNEATAlgorithm,
+  type ESHyperNEATReproducerFactory,
+} from '@neat-js/es-hyperneat'
 import type { EvaluatorFactory } from '@neat-js/evaluator'
 import {
   defaultEvolutionOptions,
@@ -38,7 +51,7 @@ enum Methods {
   DES_HyperNEAT = 'DES-HyperNEAT',
 }
 
-const method = Methods.HyperNEAT
+const method = Methods.ES_HyperNEAT
 
 export const demo = async (
   createReproducer: ReproducerFactory<any, any, any>,
@@ -100,8 +113,38 @@ export const demo = async (
           defaultHyperNEATGenomeOptions
         )
       }
-      default: {
-        throw new Error(`Unknown method: ${method}`)
+      case Methods.ES_HyperNEAT: {
+        const evaluator = createEvaluator(
+          ESHyperNEATAlgorithm,
+          environment,
+          null
+        )
+        return await eshyperneat(
+          createReproducer as ESHyperNEATReproducerFactory<undefined>,
+          evaluator,
+          evolutionOptions,
+          defaultNEATConfigOptions,
+          defaultPopulationOptions,
+          undefined,
+          defaultESHyperNEATGenomeOptions
+        )
+      }
+      case Methods.DES_HyperNEAT: {
+        const evaluator = createEvaluator(
+          DESHyperNEATAlgorithm,
+          environment,
+          null
+        )
+        return await deshyperneat(
+          createReproducer as DESHyperNEATReproducerFactory<undefined>,
+          evaluator,
+          evolutionOptions,
+          defaultTopologyOptions,
+          defaultNEATConfigOptions,
+          defaultPopulationOptions,
+          undefined,
+          defaultDESHyperNEATGenomeOptions
+        )
       }
     }
   }
