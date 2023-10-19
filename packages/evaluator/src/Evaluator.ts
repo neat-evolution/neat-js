@@ -11,6 +11,7 @@ export type FitnessData = [
 
 export interface Evaluator {
   environment: Environment
+
   /**
    * Used by worker-evaluator to hydrate the genome within the worker.
    * @param {ConfigData<any, any>} configData data from population.configProvider.toJSON()
@@ -18,10 +19,11 @@ export interface Evaluator {
    * @param {InitConfig} initConfig initConfig from population.initConfig
    * @returns {Promise<void>} void
    */
-  initGenomeFactory: (
-    configData: ConfigData<any, any>,
+  initGenomeFactory: <CD extends ConfigData>(
+    configData: CD,
     genomeOptions: GenomeOptions,
     initConfig: InitConfig
   ) => Promise<void>
+
   evaluate: (genomeEntries: GenomeEntries<any>) => AsyncIterable<FitnessData>
 }

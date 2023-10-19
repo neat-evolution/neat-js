@@ -23,6 +23,8 @@ export type EvaluatorFactory<O> = (
     any,
     any,
     any,
+    any,
+    any,
     any
   >,
   environment: Environment,

@@ -25,6 +25,8 @@ export class AsyncEvaluator implements Evaluator {
     any,
     any,
     any,
+    any,
+    any,
     any
   >
 
@@ -33,6 +35,8 @@ export class AsyncEvaluator implements Evaluator {
 
   constructor(
     algorithm: Algorithm<
+      any,
+      any,
       any,
       any,
       any,
