@@ -32,6 +32,8 @@ export interface ESHyperNEATGenomeOptions
 }
 
 export const defaultESHyperNEATGenomeOptions: ESHyperNEATGenomeOptions = {
+  ...defaultGenomeOptions,
+  ...defaultCPPNGenomeOptions,
   inputConfig: 'line',
   outputConfig: 'line',
   varianceThreshold: 0.2,
@@ -49,6 +51,4 @@ export const defaultESHyperNEATGenomeOptions: ESHyperNEATGenomeOptions = {
   relativeVariance: false,
   medianVariance: false,
   onlyLeafVariance: true,
-  ...defaultGenomeOptions,
-  ...defaultCPPNGenomeOptions,
 }
