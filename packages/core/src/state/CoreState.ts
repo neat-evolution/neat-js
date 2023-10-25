@@ -1,6 +1,5 @@
 import { toLinkKey } from '../link/linkRefToKey.js'
-import type { NodeRef } from '../node/NodeRef.js'
-import { nodeRefToKey, toNodeKey } from '../node/nodeRefToKey.js'
+import { toNodeKey, type NodeKey } from '../node/nodeRefToKey.js'
 import { NodeType } from '../node/NodeType.js'
 
 import { type Innovation, InnovationLog } from './InnovationLog.js'
@@ -17,7 +16,7 @@ export class CoreState<
   NS extends ExtendedState<NSD>,
   LS extends ExtendedState<LSD>,
   SD extends StateData
-> implements StateProvider<NSD, LSD, NS, LS, SD>
+> implements NEATState, StateProvider<NSD, LSD, NS, LS, SD>
 {
   public readonly innovationLog: InnovationLog
   public readonly nextInnovation: Innovation
@@ -36,7 +35,12 @@ export class CoreState<
     // this.linkState = factoryOptions?.link ?? null
   }
 
-  getSplitInnovation(linkInnovation: number): Innovation {
+  /**
+   * Async during worker reproduction (wrapped in WorkerState)
+   * @param {number} linkInnovation the innovation number of the link to split
+   * @returns {Innovation | Promise<Innovation>} the innovation for this link
+   */
+  getSplitInnovation(linkInnovation: number): Innovation | Promise<Innovation> {
     if (!this.innovationLog.splitInnovations.has(linkInnovation)) {
       const [from, to] = this.innovationLog.reverseConnectInnovations.get(
         linkInnovation
@@ -86,10 +90,14 @@ export class CoreState<
     return this.innovationLog.splitInnovations.get(linkInnovation) as Innovation
   }
 
-  getConnectInnovation(from: NodeRef, to: NodeRef): number {
-    const fromKey = nodeRefToKey(from)
-    const toKey = nodeRefToKey(to)
-    const linkKey = toLinkKey(fromKey, toKey)
+  /**
+   * Async during worker reproduction (wrapped in WorkerState)
+   * @param {NodeKey} from source node
+   * @param {NodeKey} to target node
+   * @returns {number} link innovation number
+   */
+  getConnectInnovation(from: NodeKey, to: NodeKey): number | Promise<number> {
+    const linkKey = toLinkKey(from, to)
 
     if (!this.innovationLog.connectInnovations.has(linkKey)) {
       this.innovationLog.connectInnovations.set(
@@ -98,7 +106,7 @@ export class CoreState<
       )
       this.innovationLog.reverseConnectInnovations.set(
         this.nextInnovation.innovationNumber,
-        [fromKey, toKey]
+        [from, to]
       )
       // Increase global innovation number
       this.nextInnovation.innovationNumber += 1

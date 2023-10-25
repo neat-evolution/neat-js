@@ -1,4 +1,4 @@
-import type { NodeRef } from '../node/NodeRef.js'
+import type { NodeKey } from '../node/nodeRefToKey.js'
 
 import type { Innovation, InnovationLog } from './InnovationLog.js'
 import type { StateData } from './StateData.js'
@@ -15,7 +15,7 @@ export interface NEATState extends State<StateData> {
   getSplitInnovation: (
     linkInnovation: number
   ) => Innovation | Promise<Innovation>
-  getConnectInnovation: (from: NodeRef, to: NodeRef) => number | Promise<number>
+  getConnectInnovation: (from: NodeKey, to: NodeKey) => number | Promise<number>
 }
 
 export interface StateProvider<
