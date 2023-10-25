@@ -1,16 +1,15 @@
 import {
   CoreLink,
   toLinkKey,
-  type InitConfig,
   type LinkFactory,
   type NEATConfigOptions,
+  type LinkFactoryOptions,
 } from '@neat-js/core'
 import {
   CPPNAlgorithm,
   type CPPNGenome,
   type CPPNGenomeOptions,
 } from '@neat-js/cppn'
-import { identityGenome } from '@neat-js/es-hyperneat'
 import { threadRNG } from '@neat-js/utils'
 
 import type { CustomState } from './CustomState.js'
@@ -18,6 +17,7 @@ import type { CustomStateData } from './CustomStateData.js'
 import type { DESHyperNEATGenomeOptions } from './DESHyperNEATGenomeOptions.js'
 import type { DESHyperNEATLinkFactoryOptions } from './DESHyperNEATLinkFactoryOptions.js'
 import { isCPPNGenome } from './DESHyperNEATNodeFactoryOptions.js'
+import { insertIdentity } from './genome/insertIdentity.js'
 
 export class DESHyperNEATLink extends CoreLink<
   DESHyperNEATLinkFactoryOptions,
@@ -48,77 +48,59 @@ export class DESHyperNEATLink extends CoreLink<
 
     let cppn: CPPNGenome<CPPNGenomeOptions>
 
-    const key = toLinkKey(this.from, this.to)
+    const linkKey = toLinkKey(this.from, this.to)
 
     if (factoryOptions.cppn != null && isCPPNGenome(factoryOptions.cppn)) {
       cppn = factoryOptions.cppn
-      if (!state.uniqueCPPNStates.has(key)) {
-        state.uniqueCPPNStates.set(key, cppn.state)
-      }
+      state.setState(linkKey, cppn.state)
     } else {
-      const cppnConfig = CPPNAlgorithm.createConfig({ neat: this.config })
-      const cppnState =
-        state.uniqueCPPNStates.get(key) ?? CPPNAlgorithm.createState()
-      const cppnInitConfig: InitConfig = { inputs: 4, outputs: 2 }
-
       cppn = CPPNAlgorithm.createGenome(
-        cppnConfig,
-        cppnState,
+        CPPNAlgorithm.createConfig({ neat: this.config }),
+        state.getOrCreateState(linkKey, this.options.singleCPPNState),
         options,
-        cppnInitConfig,
+        { inputs: 4, outputs: 2 },
         factoryOptions.cppn
       )
-
-      if (!state.uniqueCPPNStates.has(key)) {
-        state.uniqueCPPNStates.set(key, cppnState)
-      }
     }
 
     this.cppn = cppn
     this.depth = factoryOptions.depth ?? 1
   }
 
-  override identity(neat: DESHyperNEATLink): DESHyperNEATLink {
-    const [cppn, cppnState] = this.options.enableIdentityMapping
-      ? identityGenome(this.config, this.options)
-      : (() => {
-          const cppnConfig = CPPNAlgorithm.createConfig({ neat: this.config })
-          const cppnState = CPPNAlgorithm.createState()
-          const cppnInitConfig: InitConfig = { inputs: 4, outputs: 2 }
-          const cppn = CPPNAlgorithm.createGenome(
-            cppnConfig,
-            cppnState,
-            this.options,
-            cppnInitConfig
-          )
-          return [cppn, cppnState]
-        })()
+  override async identity(
+    linkFactoryOptions: LinkFactoryOptions
+  ): Promise<DESHyperNEATLink> {
+    // create a new link with a new cppn
+    const link = this.createLink(linkFactoryOptions, this.config, this.state)
 
-    const key = toLinkKey(neat.from, neat.to)
-    if (!this.state.uniqueCPPNStates.has(key)) {
-      this.state.uniqueCPPNStates.set(key, cppnState)
+    // initialize the new cppn with the identity function
+    if (this.options.enableIdentityMapping) {
+      await insertIdentity(link.cppn, 0)
     }
-    return this.createLink(
+    return link
+  }
+
+  override cloneWith(linkFactoryOptions: LinkFactoryOptions): DESHyperNEATLink {
+    // create a new link with a cloned cppn and depth
+    const cppn = this.cppn.clone()
+
+    // ensure the new link always references the original state
+    const key = toLinkKey(linkFactoryOptions.from, linkFactoryOptions.to)
+    const oldKey = toLinkKey(this.from, this.to)
+    this.state.cloneState(key, oldKey)
+
+    // the cloned cppn will have a reference to the original cppn state
+    const link = this.createLink(
       {
-        ...neat.toFactoryOptions(),
+        ...linkFactoryOptions,
         cppn,
-        depth: 1,
+        depth: this.depth,
       },
       this.config,
       this.state
     )
-  }
 
-  override cloneWith(neat: DESHyperNEATLink): DESHyperNEATLink {
-    const key = toLinkKey(neat.from, neat.to)
-    if (!this.state.cppnStateRedirects.has(key)) {
-      const oldKey = toLinkKey(neat.from, neat.to)
-      this.state.cppnStateRedirects.set(
-        key,
-        this.state.cppnStateRedirects.get(oldKey) ?? oldKey
-      )
-    }
-    return this.createLink(neat.toFactoryOptions(), this.config, this.state)
+    return link
   }
 
   override crossover(

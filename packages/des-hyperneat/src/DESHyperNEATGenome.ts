@@ -122,8 +122,6 @@ export class DESHyperNEATGenome extends CoreGenome<
     }
   }
 
-  initDESGenome(): void {}
-
   getNodeCPPN(node: NodeRef): CPPNGenome<CPPNGenomeOptions> | undefined {
     return this.getNode(node)?.cppn
   }
@@ -146,23 +144,6 @@ export class DESHyperNEATGenome extends CoreGenome<
     }
   }
 
-  // getNeat(): CoreGenome<Node, Link> {
-  //   return this
-  // }
-
-  // override crossover(
-  //   other: DESHyperNEATGenome,
-  //   fitness: number,
-  //   otherFitness: number
-  // ): DESHyperNEATGenome {
-  //   // this.createGenome
-  //   return new DESHyperNEATGenome(
-  //     config,
-  //     null, // Adjust as necessary
-  //     null // Adjust as necessary
-  //   )
-  // }
-
   override async mutate(): Promise<void> {
     await super.mutate()
     const rng = threadRNG()
@@ -173,11 +154,6 @@ export class DESHyperNEATGenome extends CoreGenome<
     for (const nodeMap of [this.hiddenNodes, this.inputs, this.outputs]) {
       for (const node of nodeMap.values()) {
         if (this.genomeOptions.mutateAllComponents || rng.gen() < nodeMutProb) {
-          // const state = this.genomeOptions.singleCPPNState
-          //   ? this.state.custom.singleCPPNState
-          //   : this.state.custom.uniqueCPPNStates.get(
-          //       nodeRefsToLinkKey(node, node)
-          //     )
           await node.cppn.mutate()
         }
       }
@@ -185,9 +161,6 @@ export class DESHyperNEATGenome extends CoreGenome<
 
     for (const link of this.links.values()) {
       if (this.genomeOptions.mutateAllComponents || rng.gen() < linkMutProb) {
-        // const state = this.genomeOptions.singleCPPNState
-        //   ? this.state.custom.singleCPPNState
-        //   : this.state.custom.uniqueCPPNStates.get(linkRefToKey(link))
         await link.cppn.mutate()
       }
     }
@@ -222,10 +195,6 @@ export class DESHyperNEATGenome extends CoreGenome<
       }
     }
   }
-
-  // override distance(other: DESHyperNEATGenome): number {
-  //   return super.distance(other)
-  // }
 
   mutateNodeDepth(node: DESHyperNEATNode, limit: number): void {
     const rng = threadRNG()
