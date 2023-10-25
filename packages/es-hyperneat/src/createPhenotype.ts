@@ -40,10 +40,9 @@ export const createPhenotype: PhenotypeFactory<
   )
   const depth = genome.genomeOptions.iterationLevel + 1
 
-  const phenotype = createCPPNPhenotype(
-    genome as unknown as CPPNGenome<CPPNGenomeOptions>
+  const cppn = createSyncExecutor(
+    createCPPNPhenotype(genome as unknown as CPPNGenome<CPPNGenomeOptions>)
   )
-  const cppn = createSyncExecutor(phenotype)
 
   const [layers, forwardConnections] = exploreSubstrate(
     inputNodes,
@@ -68,28 +67,26 @@ export const createPhenotype: PhenotypeFactory<
   const connections = new Connections<PointKey, number>(forwardConnections)
   connections.extend(new Connections<PointKey, number>(reverseConnections))
 
-  const inputNodeKeys: PointKey[] = []
-  const nodes: PointKey[] = []
+  const inputNodeKeys = new Set<PointKey>()
+  const nodes = new Set<PointKey>()
   for (const node of inputNodes) {
     const nodeKey = toPointKey(node)
-    inputNodeKeys.push(nodeKey)
-    nodes.push(nodeKey)
+    inputNodeKeys.add(nodeKey)
+    nodes.add(nodeKey)
   }
-  const outputNodeKeys: PointKey[] = []
+  const outputNodeKeys = new Set<PointKey>()
   for (const node of outputNodes) {
-    outputNodeKeys.push(toPointKey(node))
+    outputNodeKeys.add(toPointKey(node))
   }
 
-  const prunedSet = new Set(
-    connections.prune(inputNodeKeys, outputNodeKeys, true)
-  )
+  const pruned = connections.prune(inputNodeKeys, outputNodeKeys, true)
 
   for (let i = 1; i < layers.length; i++) {
     const layer = layers[i] as Point[]
     for (const node of layer) {
       const nodeKey = toPointKey(node)
-      if (!prunedSet.has(nodeKey)) {
-        nodes.push(nodeKey)
+      if (!pruned.has(nodeKey)) {
+        nodes.add(nodeKey)
       }
     }
   }
@@ -97,17 +94,17 @@ export const createPhenotype: PhenotypeFactory<
   for (const layer of reverseLayers) {
     for (const node of layer) {
       const nodeKey = toPointKey(node)
-      if (!prunedSet.has(nodeKey)) {
-        nodes.push(nodeKey)
+      if (!pruned.has(nodeKey)) {
+        nodes.add(nodeKey)
       }
     }
   }
 
   for (const node of outputNodes) {
-    nodes.push(toPointKey(node))
+    nodes.add(toPointKey(node))
   }
 
-  const firstOutputId = nodes.length - outputNodes.length
+  const firstOutputId = nodes.size - outputNodes.length
   const inputs = []
   for (let i = 0; i < inputNodes.length; i++) {
     inputs.push(i)
@@ -119,8 +116,10 @@ export const createPhenotype: PhenotypeFactory<
   }
 
   const nodeMapping = new Map<PointKey, number>()
-  for (let i = 0; i < nodes.length; i++) {
-    nodeMapping.set(nodes[i] as string, i)
+  let i = 0
+  for (const node of nodes) {
+    nodeMapping.set(node, i)
+    i++
   }
 
   const actions: PhenotypeAction[] = []
@@ -156,7 +155,7 @@ export const createPhenotype: PhenotypeFactory<
   }
 
   return {
-    length: nodes.length,
+    length: nodes.size,
     inputs,
     outputs,
     actions,
