@@ -90,7 +90,13 @@ export interface Algorithm<
     GO,
     G
   >
+  /**
+   * @deprecated use genome.createLink instead
+   */
   createLink: LinkFactory<LFO, LCO, LSD, LS, L>
+  /**
+   * @deprecated use genome.createNode instead
+   */
   createNode: NodeFactory<NFO, NCO, NSD, NS, N>
   createPhenotype: PhenotypeFactory<G>
   createState: StateFactory<NSD, LSD, NS, LS, SD, S>
