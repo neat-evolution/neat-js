@@ -9,6 +9,6 @@ export interface NEATGenomeOptions extends GenomeOptions {
 }
 
 export const defaultNEATGenomeOptions: NEATGenomeOptions = {
-  outputActivation: Activation.Sigmoid,
   ...defaultGenomeOptions,
+  outputActivation: Activation.Sigmoid,
 }

@@ -26,6 +26,8 @@ export interface HyperNEATGenomeOptions
 }
 
 export const defaultHyperNEATGenomeOptions: HyperNEATGenomeOptions = {
+  ...defaultGenomeOptions,
+  ...defaultCPPNGenomeOptions,
   weightThreshold: 0.1,
   hiddenActivation: Activation.None,
   outputActivation: Activation.Softmax,
@@ -34,6 +36,4 @@ export const defaultHyperNEATGenomeOptions: HyperNEATGenomeOptions = {
   hiddenLayerSizes: [4, 4],
   hiddenLayers: null,
   resolution: 1048576,
-  ...defaultGenomeOptions,
-  ...defaultCPPNGenomeOptions,
 }
