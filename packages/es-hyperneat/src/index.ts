@@ -1,10 +1,6 @@
 export { createConfig, createLink, createState } from '@neat-js/neat'
 export { createNode } from '@neat-js/cppn'
 
-export * from './genome/identityGenome.js'
-export * from './genome/insertIdentity.js'
-export * from './genome/insertLink.js'
-export * from './genome/splitLink.js'
 export * from './search/exploreSubstrate.js'
 export * from './search/findConnections.js'
 export * from './search/QuadPoint.js'
