@@ -1,4 +1,4 @@
-export interface TopologyOptions {
+export interface TopologyConfigOptions {
   addNodeProbability: number
   addLinkProbability: number
   initialLinkWeightSize: number
@@ -11,7 +11,7 @@ export interface TopologyOptions {
   mutateOnlyOneLink: boolean
 }
 
-export const defaultTopologyOptions: TopologyOptions = {
+export const defaultTopologyConfigOptions: TopologyConfigOptions = {
   addNodeProbability: 0.03,
   addLinkProbability: 0.2,
   initialLinkWeightSize: 0.5,
