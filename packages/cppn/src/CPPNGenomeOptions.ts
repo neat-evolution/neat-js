@@ -16,6 +16,8 @@ export interface CPPNGenomeOptions extends GenomeOptions, CPPNNodeOptions {
 }
 
 export const defaultCPPNGenomeOptions: CPPNGenomeOptions = {
+  ...defaultGenomeOptions,
+  ...defaultCPPNNodeOptions,
   mutateHiddenBiasProbability: 0.8,
   mutateHiddenBiasSize: 0.03,
   mutateHiddenActivationProbability: 0.1,
@@ -23,6 +25,4 @@ export const defaultCPPNGenomeOptions: CPPNGenomeOptions = {
   mutateOutputBiasSize: 0.03,
   mutateOutputActivationProbability: 0.1,
   padMissingOutputs: false,
-  ...defaultGenomeOptions,
-  ...defaultCPPNNodeOptions,
 }
