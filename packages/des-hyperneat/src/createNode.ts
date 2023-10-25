@@ -33,4 +33,7 @@ export const createNodeFactory =
     )
   }
 
+/**
+ * @deprecated Use `createNodeFactory` instead.
+ */
 export const createNode = createNodeFactory(defaultDESHyperNEATGenomeOptions)
