@@ -1,4 +1,4 @@
-import type { NEATConfigOptions } from '@neat-js/core'
+import type { InitConfig, NEATConfigOptions } from '@neat-js/core'
 import { defaultNEATConfigOptions } from '@neat-js/core'
 import type { Evaluator } from '@neat-js/evaluator'
 import type {
@@ -29,7 +29,9 @@ import type { DESHyperNEATNode } from './DESHyperNEATNode.js'
 import type { DESHyperNEATNodeFactoryOptions } from './DESHyperNEATNodeFactoryOptions.js'
 import type { DESHyperNEATState } from './DESHyperNEATState.js'
 import type { DESHyperNEATStateData } from './DESHyperNEATStateData.js'
-import type { TopologyOptions } from './TopologyOptions.js'
+import type { TopologyConfigOptions } from './TopologyConfigOptions.js'
+
+import { topologyInitConfig } from './index.js'
 
 export type DESHyperNEATPopulation<RFO extends ReproducerFactoryOptions> =
   Population<
@@ -66,7 +68,8 @@ export const deshyperneat = async <RFO extends ReproducerFactoryOptions>(
   createReproducer: DESHyperNEATReproducerFactory<RFO>,
   evaluator: Evaluator,
   evolutionOptions: EvolutionOptions,
-  topologyConfigOptions: TopologyOptions,
+  // FIXME: should be TopologyConfigOptions & Partial<NeatConfigOptions>
+  topologyConfigOptions: TopologyConfigOptions,
   cppnConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   reproducerOptions: RFO,
@@ -79,7 +82,16 @@ export const deshyperneat = async <RFO extends ReproducerFactoryOptions>(
     },
     cppn: cppnConfigOptions,
   })
-  const initConfig = evaluator.environment.description
+
+  // capture the real initConfig for createPhenotype later
+  genomeOptions.initConfig = evaluator.environment.description
+
+  // choose initConfig based on config options
+  const initConfig: InitConfig = topologyInitConfig(
+    evaluator.environment.description,
+    genomeOptions
+  )
+
   const population: DESHyperNEATPopulation<RFO> = new Population(
     createReproducer,
     evaluator,
