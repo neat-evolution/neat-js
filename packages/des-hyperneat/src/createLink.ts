@@ -33,4 +33,7 @@ export const createLinkFactory =
     )
   }
 
+/**
+ * @deprecated Use `createLinkFactory` instead.
+ */
 export const createLink = createLinkFactory(defaultDESHyperNEATGenomeOptions)
