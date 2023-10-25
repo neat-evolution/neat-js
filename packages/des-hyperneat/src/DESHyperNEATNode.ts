@@ -11,7 +11,6 @@ import {
   type CPPNGenome,
   type CPPNGenomeOptions,
 } from '@neat-js/cppn'
-import { type NEATState } from '@neat-js/neat'
 import { threadRNG } from '@neat-js/utils'
 
 import type { CustomState } from './CustomState.js'
@@ -49,42 +48,24 @@ export class DESHyperNEATNode extends CoreNode<
     super(factoryOptions, config, state, createNode)
     this.options = options
 
-    const cppnConfigProvider = CPPNAlgorithm.createConfig({ neat: config })
-    const cppnInitConfig = { inputs: 4, outputs: 2 }
-
-    const nodeKey = toNodeKey(factoryOptions.type, factoryOptions.id)
+    const nodeKey = toNodeKey(this.type, this.id)
     const linkKey = toLinkKey(nodeKey, nodeKey)
 
+    if (state === null || config === null) {
+      debugger
+    }
     let cppn: CPPNGenome<CPPNGenomeOptions>
     if (factoryOptions.cppn != null && isCPPNGenome(factoryOptions.cppn)) {
       cppn = factoryOptions.cppn
-    } else if (this.options.singleCPPNState) {
-      cppn = CPPNAlgorithm.createGenome(
-        cppnConfigProvider,
-        state.singleCPPNState,
-        this.options,
-        cppnInitConfig,
-        factoryOptions.cppn
-      )
-    } else if (state.uniqueCPPNStates.has(linkKey)) {
-      const cppnState = state.uniqueCPPNStates.get(linkKey) as NEATState
-      cppn = CPPNAlgorithm.createGenome(
-        cppnConfigProvider,
-        cppnState,
-        this.options,
-        cppnInitConfig,
-        factoryOptions.cppn
-      )
+      state.setState(linkKey, cppn.state)
     } else {
-      const cppnState = CPPNAlgorithm.createState()
       cppn = CPPNAlgorithm.createGenome(
-        cppnConfigProvider,
-        cppnState,
+        CPPNAlgorithm.createConfig({ neat: config }),
+        state.getOrCreateState(linkKey, this.options.singleCPPNState),
         this.options,
-        cppnInitConfig,
+        { inputs: 4, outputs: 2 },
         factoryOptions.cppn
       )
-      state.uniqueCPPNStates.set(linkKey, cppnState)
     }
 
     const maxSubstrateDepth =

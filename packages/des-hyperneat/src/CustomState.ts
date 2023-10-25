@@ -1,4 +1,5 @@
 import type { StateData, State, LinkKey } from '@neat-js/core'
+import { CPPNAlgorithm } from '@neat-js/cppn'
 import { NEATState } from '@neat-js/neat'
 
 import type { CustomStateData } from './CustomStateData.js'
@@ -10,13 +11,53 @@ export class CustomState implements State<CustomStateData> {
 
   constructor(factoryOptions?: CustomStateData) {
     this.singleCPPNState = new NEATState(factoryOptions?.singleCPPNState)
-    this.uniqueCPPNStates = new Map()
-    this.cppnStateRedirects = new Map(factoryOptions?.cppnStateRedirects)
+    this.uniqueCPPNStates = new Map<LinkKey, NEATState>()
+    this.cppnStateRedirects = new Map<LinkKey, LinkKey>(
+      factoryOptions?.cppnStateRedirects
+    )
 
     if (factoryOptions?.uniqueCPPNStates != null) {
       for (const [key, value] of factoryOptions.uniqueCPPNStates) {
         this.uniqueCPPNStates.set(key, new NEATState(value))
       }
+    }
+  }
+
+  getKey(key: LinkKey): LinkKey {
+    return this.cppnStateRedirects.get(key) ?? key
+  }
+
+  getState(key: LinkKey, singleCPPNState: boolean): NEATState | undefined {
+    if (singleCPPNState) {
+      return this.singleCPPNState
+    }
+    return this.uniqueCPPNStates.get(this.getKey(key))
+  }
+
+  getOrCreateState(key: LinkKey, singleCPPNState: boolean): NEATState {
+    if (singleCPPNState) {
+      return this.singleCPPNState
+    }
+    const cppnStateKey = this.getKey(key)
+    let state = this.uniqueCPPNStates.get(cppnStateKey)
+    if (state == null) {
+      state = CPPNAlgorithm.createState()
+      this.uniqueCPPNStates.set(cppnStateKey, state)
+    }
+    return state
+  }
+
+  setState(key: LinkKey, state: NEATState): void {
+    const cppnStateKey = this.getKey(key)
+    if (!this.uniqueCPPNStates.has(cppnStateKey)) {
+      this.uniqueCPPNStates.set(cppnStateKey, state)
+    }
+  }
+
+  cloneState(key: LinkKey, oldKey: LinkKey): void {
+    if (!this.cppnStateRedirects.has(key)) {
+      this.cppnStateRedirects.set(key, this.getKey(oldKey))
+      this.uniqueCPPNStates.delete(key)
     }
   }
 
