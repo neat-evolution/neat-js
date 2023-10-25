@@ -48,20 +48,16 @@ export class CoreLink<
   }
 
   /**
-   * FIXME: remove in favor of inheritance; only useful in des-hyperneat
-   * @deprecated
-   * @returns <Link<LFO, LCO, LSD, LS, L>> this
+   * Creates a new link; Only async in des-hyperneat
+   * @param {LinkFactoryOptions} linkFactoryOptions core link factory options with no extensions
+   * @returns {L | Promise<L>} a Link
    */
-  public neat(): Link<LFO, LCO, LSD, LS, L> {
-    return this
+  public identity(linkFactoryOptions: LinkFactoryOptions): L | Promise<L> {
+    return this.createLink(linkFactoryOptions, this.config, this.state)
   }
 
-  public identity(neat: L): L {
-    return neat
-  }
-
-  public cloneWith(neat: L): L {
-    return neat
+  public cloneWith(linkFactoryOptions: LinkFactoryOptions): L {
+    return this.createLink(linkFactoryOptions, this.config, this.state)
   }
 
   public clone(): L {

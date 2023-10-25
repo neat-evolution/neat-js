@@ -18,7 +18,7 @@ import { linkRefToKey, toLinkKey, type LinkKey } from './link/linkRefToKey.js'
 import type { CoreNode } from './node/CoreNode.js'
 import type { NodeFactory } from './node/NodeFactory.js'
 import type { NodeFactoryOptions } from './node/NodeFactoryOptions.js'
-import { nodeKeyToRef } from './node/nodeKeyToRef.js'
+import { nodeKeyToType } from './node/nodeKeyToRef.js'
 import type { NodeRef } from './node/NodeRef.js'
 import { nodeRefToKey, type NodeKey, toNodeKey } from './node/nodeRefToKey.js'
 import { NodeType } from './node/NodeType.js'
@@ -88,9 +88,9 @@ export class CoreGenome<
   public readonly links: Map<LinkKey, L>
   public readonly connections: Connections<NodeKey, number>
 
-  protected readonly createNode: NodeFactory<NFO, NCO, NSD, NS, N>
-  protected readonly createLink: LinkFactory<LFO, LCO, LSD, LS, L>
-  protected readonly createGenome: GenomeFactory<
+  public readonly createNode: NodeFactory<NFO, NCO, NSD, NS, N>
+  public readonly createLink: LinkFactory<LFO, LCO, LSD, LS, L>
+  public readonly createGenome: GenomeFactory<
     NCO,
     LCO,
     CD,
@@ -386,14 +386,14 @@ export class CoreGenome<
     }
   }
 
-  splitLink(
+  async splitLink(
     from: NodeKey,
     to: NodeKey,
     /** Innovation.nodeNumber */
     nodeNumber: number,
     /** Innovation.innovationNumber */
     innovationNumber: number
-  ): void {
+  ): Promise<void> {
     // Retrieve the link to be split
     const linkKey = toLinkKey(from, to)
     const link = this.links.get(linkKey) as L
@@ -422,41 +422,26 @@ export class CoreGenome<
     let link1Details: LinkDetails
     let link2Details: LinkDetails
 
-    if (nodeKeyToRef(from).type === NodeType.Input) {
+    if (nodeKeyToType(from) === NodeType.Input) {
       link1Details = [newNodeKey, to, innovationNumber + 1]
       link2Details = [from, newNodeKey, innovationNumber]
     } else {
       link1Details = [from, newNodeKey, innovationNumber]
       link2Details = [newNodeKey, to, innovationNumber + 1]
     }
-
-    const link1FactoryOptions: LinkFactoryOptions = {
+    // NOTE: only async in des-hyperneat
+    const link1 = await link.identity({
       from: link1Details[0],
       to: link1Details[1],
       weight: 1.0,
       innovation: link1Details[2],
-    }
-    const link1 = link.identity(
-      this.createLink(
-        link1FactoryOptions,
-        this.config.link(),
-        this.state.link()
-      )
-    )
-
-    const link2FactoryOptions: LinkFactoryOptions = {
+    })
+    const link2 = link.cloneWith({
       from: link2Details[0],
       to: link2Details[1],
       weight: link.weight,
       innovation: link2Details[2],
-    }
-    const link2 = link.cloneWith(
-      this.createLink(
-        link2FactoryOptions,
-        this.config.link(),
-        this.state.link()
-      )
-    )
+    })
     this.insertLink(link1, isSafe)
     this.insertLink(link2, isSafe)
   }
@@ -524,7 +509,7 @@ export class CoreGenome<
       const linkToKey = toLinkKey(newNodeKey, link.to)
 
       if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
-        this.splitLink(
+        await this.splitLink(
           link.from,
           link.to,
           innovation.nodeNumber,
@@ -588,7 +573,7 @@ export class CoreGenome<
       if (!this.connections.createsCycle(sourceKey, targetKey)) {
         const innovation = await this.state
           .neat()
-          .getConnectInnovation(source, target)
+          .getConnectInnovation(sourceKey, targetKey)
         const weight =
           (rng.gen() - 0.5) * 2.0 * this.config.neat().initialLinkWeightSize
 

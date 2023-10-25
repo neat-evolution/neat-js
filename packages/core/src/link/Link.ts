@@ -25,15 +25,18 @@ export interface Link<
   createLink: LinkFactory<LFO, LCO, LSD, LS, L>
 
   /**
-   * @deprecated remove in favor of inheritance; only useful in des-hyperneat
+   * Creates an algorithm link from the core link factory options
+   * @param {LinkFactoryOptions} linkFactoryOptions core link factory options with no extensions
+   * @returns a link for this algorithm
    */
-  neat: () => Link<LFO, LCO, LSD, LS, L>
+  identity: (linkFactoryOptions: LinkFactoryOptions) => L | Promise<L>
 
-  /** only useful in des-hyperneat */
-  identity: (neat: L) => L
-
-  /** only useful in des-hyperneat */
-  cloneWith: (neat: L) => L
+  /**
+   * Clones an algorithm link from the core link factory options
+   * @param linkFactoryOptions core link factory options with no extensions
+   * @returns a link for this algorithm
+   */
+  cloneWith: (linkFactoryOptions: LinkFactoryOptions) => L
 
   clone: () => L
 
