@@ -24,18 +24,6 @@ export interface ConnectionInfo<N extends NodeKey, E extends Edge> {
   targets: Array<Target<N, E>>
 }
 
-export type ConnectionData<N extends NodeKey, E extends Edge> = [
-  from: N,
-  to: N,
-  /** weight for phenotype, null for substrate */
-  edge: E
-]
-
-export interface ConnectionsData<N extends NodeKey, E extends Edge> {
-  nodes: N[]
-  connections: Array<ConnectionData<N, E>>
-}
-
 export type ActionEdge<N extends NodeKey, E extends Edge> = Connection<N, E>
 export type ActionNode<N extends NodeKey> = [nodeKey: N]
 export type Action<N extends NodeKey, E extends Edge> =
