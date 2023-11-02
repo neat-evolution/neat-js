@@ -6,31 +6,35 @@ import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
 import type { WeightFn } from './findConnections.js'
 import { quickSelectMedian } from './quickSelectMedian.js'
 
+function isWeightNumber(value: WeightFn | number): value is number {
+  return typeof value === 'number'
+}
+
 export class QuadPoint {
-  x: number
-  y: number
-  width: number
-  weight: number
-  depth: number
-  variance: number
-  children: QuadPoint[]
-  options: ESHyperNEATGenomeOptions
+  public readonly x: number
+  public readonly y: number
+  public readonly width: number
+  public readonly weight: number
+  public readonly depth: number
+  public variance: number
+  public children: null | QuadPoint[]
+  public readonly options: ESHyperNEATGenomeOptions
 
   constructor(
     x: number,
     y: number,
     width: number,
     depth: number,
-    f: WeightFn,
+    weightFn: WeightFn | number,
     options: ESHyperNEATGenomeOptions
   ) {
     this.x = x
     this.y = y
     this.width = width
-    this.weight = f(x, y)
+    this.weight = isWeightNumber(weightFn) ? weightFn : weightFn(x, y)
     this.depth = depth
     this.variance = 0.0
-    this.children = []
+    this.children = null
     this.options = options
   }
 
@@ -41,14 +45,13 @@ export class QuadPoint {
     root: boolean,
     internal: boolean
   ): void {
-    if (
-      (root && !this.options.onlyLeafVariance) ||
-      this.children.length === 0
-    ) {
+    if ((root && !this.options.onlyLeafVariance) || this.children === null) {
       weights.push(this.weight)
     }
-    for (const child of this.children.values()) {
-      child.collectLeafWeights(weights, internal, internal)
+    if (this.children !== null) {
+      for (const child of this.children.values()) {
+        child.collectLeafWeights(weights, internal, internal)
+      }
     }
   }
 
@@ -96,7 +99,7 @@ export class QuadPoint {
   }
 
   /// Creates the four children of a node. Returns their min and max weight value.
-  createChildren(f: WeightFn): [number, number] {
+  createChildren(f: WeightFn): [minWeight: number, maxWeight: number] {
     const width = this.width / 2.0
     const depth = this.depth + 1
 
@@ -133,9 +136,9 @@ export class QuadPoint {
         this.calcVariance(deltaWeight, true, true) >
           this.options.divisionThreshold)
 
-    if (expand && this.children.length > 0) {
-      for (const child of this.children) {
-        yield child
+    if (expand && this.children !== null && this.children.length > 0) {
+      for (let i = 0; i < Math.min(this.children.length, 4); i++) {
+        yield this.children[i] as QuadPoint
       }
     }
   }
@@ -149,25 +152,29 @@ export class QuadPoint {
   ): Iterable<QuadPoint> {
     const width = this.width
 
+    if (this.children === null) {
+      return
+    }
     for (const child of this.children) {
       if (
         child.calcVariance(deltaWeight, false, true) <=
         this.options.varianceThreshold
       ) {
-        const bandValue =
-          this.options.bandThreshold > 0.0
-            ? Math.max(
-                Math.min(
-                  Math.abs(child.weight - f(child.x - width, child.y)),
-                  Math.abs(child.weight - f(child.x + width, child.y))
-                ),
-                Math.min(
-                  Math.abs(child.weight - f(child.x, child.y - width)),
-                  Math.abs(child.weight - f(child.x, child.y + width))
-                )
-              )
-            : 0.0
+        let bandValue: number
+        if (this.options.bandThreshold > 0.0) {
+          const leftMinus = f(child.x - width, child.y)
+          const rightMinus = f(child.x + width, child.y)
+          const upMinus = f(child.x, child.y - width)
+          const downMinus = f(child.x, child.y + width)
 
+          const dLeft = Math.abs(child.weight - leftMinus)
+          const dRight = Math.abs(child.weight - rightMinus)
+          const dUp = Math.abs(child.weight - upMinus)
+          const dDown = Math.abs(child.weight - downMinus)
+          bandValue = Math.max(Math.min(dUp, dDown), Math.min(dLeft, dRight))
+        } else {
+          bandValue = 0.0
+        }
         if (bandValue >= this.options.bandThreshold) {
           connections.push({
             node: toPointKey([child.x, child.y]),
@@ -175,10 +182,7 @@ export class QuadPoint {
           })
         }
       }
-    }
-
-    // Use stored variance calculated in the previous loop
-    for (const child of this.children.values()) {
+      // Use stored variance
       if (child.variance > this.options.varianceThreshold) {
         yield child
       }
