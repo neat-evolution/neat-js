@@ -1,6 +1,5 @@
 import {
   NodeType,
-  type NodeRef,
   type Phenotype,
   type PhenotypeFactory,
   type NodeKey,
@@ -8,8 +7,6 @@ import {
   Connections,
   isActionEdge,
   type Connection,
-  nodeKeyToType,
-  nodeKeyToRefTuple,
   nodeKeyToRef,
   PhenotypeActionType,
   type PhenotypeAction,
@@ -25,51 +22,40 @@ import {
   type ESHyperNEATGenomeOptions,
 } from '@neat-js/es-hyperneat'
 import { createSyncExecutor } from '@neat-js/executor'
-import {
-  toPointKey,
-  type Point,
-  type PointKey,
-  fromPointKey,
-} from '@neat-js/hyperneat'
+import { toPointKey, type Point, type PointKey } from '@neat-js/hyperneat'
 
 import type { DESHyperNEATGenome } from './DESHyperNEATGenome.js'
 import type { DESHyperNEATLink } from './DESHyperNEATLink.js'
 import { parseNodes } from './developer/parseNodes.js'
 
-type NodePoint = [node: NodeRef, x: number, y: number]
+/** type NodePoint = [type: NodeType, id: number, x: number, y: number] */
 type NodePointKey = string
 
-const toNodePointKey = (node: NodeRef, x: number, y: number): NodePointKey => {
-  return `${node.type}[${node.id}]:${x},${y}`
+const toNodePointKey = (
+  type: NodeType,
+  id: number,
+  x: number,
+  y: number
+): NodePointKey => {
+  return `${type}[${id}]:${x},${y}`
 }
-
-const nodePointToKey = ([node, x, y]: NodePoint): NodePointKey => {
-  return toNodePointKey(node, x, y)
+const keysToNodePointKey = (
+  nodeKey: NodeKey,
+  pointKey: PointKey
+): NodePointKey => {
+  return `${nodeKey}:${pointKey}`
 }
-
-// const fromNodePointKey = (key: NodePointKey): NodePoint => {
-//   const [nodeType, id, x, y] = key.split(/[[\]:,]/) as [
-//     string,
-//     string,
-//     string,
-//     string
-//   ]
-//   return [
-//     { type: nodeType as NodeType, id: parseInt(id, 10) },
-//     parseFloat(x),
-//     parseFloat(y),
-//   ]
-// }
 
 export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
   genome
 ): Phenotype => {
-  const r = genome.genomeOptions.resolution
   const initConfig = genome.genomeOptions.initConfig
   if (initConfig == null) {
     throw new Error('initConfig is required')
   }
 
+  // from
+  const r = genome.genomeOptions.resolution
   const inputNodes = parseNodes(
     genome.genomeOptions.inputConfig,
     r,
@@ -81,50 +67,37 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
     initConfig.outputs
   )
 
-  const flattenedInputs: NodePointKey[] = []
-  const flattenedInputsHash = new Map<NodePointKey, NodePoint>()
+  const flattenedInputs = new Set<NodePointKey>()
   for (let i = 0; i < inputNodes.length; i++) {
     for (const node of inputNodes[i] as Point[]) {
-      const nodePoint: NodePoint = [
-        { type: NodeType.Input, id: i },
-        node[0],
-        node[1],
-      ]
-      const nodePointKey = nodePointToKey(nodePoint)
-      flattenedInputs.push(nodePointKey)
-      flattenedInputsHash.set(nodePointKey, nodePoint)
+      const nodePointKey = toNodePointKey(NodeType.Input, i, node[0], node[1])
+      flattenedInputs.add(nodePointKey)
     }
   }
 
-  const flattenedOutputs: NodePointKey[] = []
-  const flattenedOutputsHash = new Map<NodePointKey, NodePoint>()
-  for (let i = 0; i < outputNodes.length; i++) {
-    for (const node of outputNodes[i] as Point[]) {
-      const nodePoint: NodePoint = [
-        { type: NodeType.Output, id: i },
-        node[0],
-        node[1],
-      ]
-      const nodePointKey = nodePointToKey(nodePoint)
-      flattenedOutputs.push(nodePointKey)
-      flattenedInputsHash.set(nodePointKey, nodePoint)
-    }
-  }
-
+  const flattenedOutputs = new Set<NodePointKey>()
   const outputNodesHash: Array<Set<PointKey>> = []
-  for (const nodes of outputNodes) {
+  for (let i = 0; i < outputNodes.length; i++) {
     const pointKeys = new Set<PointKey>()
-    for (const node of nodes) {
-      pointKeys.add(toPointKey(node))
+    for (const node of outputNodes[i] as Point[]) {
+      const pointKey = toPointKey(node)
+      const nodePointKey = keysToNodePointKey(
+        toNodeKey(NodeType.Output, i),
+        pointKey
+      )
+      flattenedOutputs.add(nodePointKey)
+      pointKeys.add(pointKey)
     }
     outputNodesHash.push(pointKeys)
   }
 
-  // Not used
-  genome.initDESGenome()
+  // Let the genome prepare to provide cppns and depth
+  // deprecated genome.initDESGenome()
 
+  // Init assembled network
   const assembledConnections = new Connections<NodePointKey, number>()
 
+  // Init known nodes with the input and output nodes
   const substrateNodes = new Map<NodeKey, Map<PointKey, Point>>()
   for (const [i, nodes] of inputNodes.entries()) {
     const points = new Map<PointKey, Point>()
@@ -140,28 +113,34 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
     }
     substrateNodes.set(toNodeKey(NodeType.Output, i), points)
   }
+  // All hidden substrates are empty
   for (const nodeKey of genome.hiddenNodes.keys()) {
     substrateNodes.set(nodeKey, new Map())
   }
 
+  // Iterative network completion in topologically sorted order
   const order = genome.connections.sortTopologically()
   for (const action of order) {
     if (isActionEdge(action)) {
-      const [from, to] = action
+      const [sourceKey, targetKey] = action
+      // const sourceRef = nodeKeyToRef(sourceKey)
+      const targetRef = nodeKeyToRef(targetKey)
+
+      // Develop the link's cppn
       const cppn = createSyncExecutor(
         createCPPNPhenotype(
-          genome.getLinkCPPN(from, to) as CPPNGenome<CPPNGenomeOptions>
+          genome.getLinkCPPN(
+            sourceKey,
+            targetKey
+          ) as CPPNGenome<CPPNGenomeOptions>
         )
       )
 
+      // Search for connections
       let layers: Point[][]
       let connections: Array<Connection<PointKey, number>>
-      const sourceRef = nodeKeyToRef(from)
-      const targetRef = nodeKeyToRef(to)
-      if (targetRef.type === NodeType.Input) {
-        throw new Error('Input substrate cannot be a target connection')
-      } else if (targetRef.type === NodeType.Hidden) {
-        const points = substrateNodes.get(from) as Map<PointKey, Point>
+      if (targetRef.type === NodeType.Hidden) {
+        const points = substrateNodes.get(sourceKey) as Map<PointKey, Point>
         ;[layers, connections] = exploreSubstrate(
           Array.from(points.values()),
           [],
@@ -181,9 +160,11 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
           true,
           genome.genomeOptions as ESHyperNEATGenomeOptions
         )
-        if ((genome.getDepth(targetRef) as number) > 0) {
-          const points = substrateNodes.get(from) as Map<PointKey, Point>
-          ;[layers, connections] = exploreSubstrate(
+        if ((genome.getDepth(targetKey) as number) > 0) {
+          // When depth of output substrate is > 0, search for additional non-reverse connections.
+          // These can potentially be connected to the output when the output substrate is developed.
+          const points = substrateNodes.get(sourceKey) as Map<PointKey, Point>
+          const [layersForward, connectionsForward] = exploreSubstrate(
             Array.from(points.values()),
             [],
             cppn,
@@ -192,53 +173,83 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
             true,
             genome.genomeOptions as ESHyperNEATGenomeOptions
           )
-          layers[1] = (layers[1] as Point[]).filter(
-            (node) =>
-              !(outputNodesHash[targetRef.id] as Set<PointKey>).has(
-                toPointKey(node)
-              )
-          )
-          connections = connections.filter(
-            (connection) =>
-              !(outputNodesHash[targetRef.id] as Set<PointKey>).has(
-                connection[1]
-              )
-          )
-          layers = [[], [...layers[1], ...(layersReverse[1] as Point[])]]
-          connections.push(...connectionsReverse)
+
+          // If there are any connections to output nodes, these will also be
+          // present in the reverse search. Remove to avoid duplicates.
+          const filteredLayer1: Point[] = []
+          const outputSet = outputNodesHash[targetRef.id] as Set<PointKey>
+          if (layersForward.length > 1) {
+            for (const node of layersForward[1] as Point[]) {
+              if (!outputSet.has(toPointKey(node))) {
+                filteredLayer1.push(node)
+              }
+            }
+          }
+
+          const filteredConnections: Array<Connection<PointKey, number>> = []
+          for (const connection of connectionsForward) {
+            if (!outputSet.has(connection[1])) {
+              filteredConnections.push(connection)
+            }
+          }
+          connections = filteredConnections
+
+          // Merge the normal and reverse search.
+          const mergedLayers1: Point[] = []
+          for (const node of filteredLayer1) {
+            mergedLayers1.push(node)
+          }
+          for (const node of layersReverse[1] as Point[]) {
+            mergedLayers1.push(node)
+          }
+          layers = [[], mergedLayers1]
+          for (const connection of connectionsReverse) {
+            connections.push(connection)
+          }
         } else {
           layers = layersReverse
           connections = connectionsReverse
         }
+      } else {
+        throw new Error('target is input substrate or unknown node type')
+      }
 
-        const nodes = substrateNodes.get(to) as Map<PointKey, Point>
-        for (const node of layers[1] as Point[]) {
+      // Add discovered nodes to target substrate
+      const nodes = substrateNodes.get(targetKey) as Map<PointKey, Point>
+
+      // First layer contains source nodes
+      // Never more than a single layer of new nodes since depth = 1
+      if (layers[1] != null) {
+        for (const node of layers[1]) {
           nodes.set(toPointKey(node), node)
         }
-        for (const connection of connections) {
-          const [from, to, edge] = connection
-          const [x1, y1] = fromPointKey(from)
-          const [x2, y2] = fromPointKey(to)
-          const linkKey = toLinkKey(from, to)
-          const weight = (genome.links.get(linkKey) as DESHyperNEATLink).weight
-          assembledConnections.add(
-            toNodePointKey(sourceRef, x1, y1),
-            toNodePointKey(targetRef, x2, y2),
-            edge * weight
-          )
-        }
+      }
+
+      // Add discovered connections to assembled network
+      for (const connection of connections) {
+        const [from, to, edge] = connection
+        const linkKey = toLinkKey(sourceKey, targetKey)
+        const weight = (genome.links.get(linkKey) as DESHyperNEATLink).weight
+        assembledConnections.add(
+          keysToNodePointKey(sourceKey, from),
+          keysToNodePointKey(targetKey, to),
+          edge * weight
+        )
       }
     } else {
       const [nodeKey] = action
       const nodeRef = nodeKeyToRef(nodeKey)
-      const depth = genome.getDepth(nodeRef) as number
+
+      const depth = genome.getDepth(nodeKey) as number
       if (depth > 0) {
+        // Develop the node's cppn
         const cppn = createSyncExecutor(
           createCPPNPhenotype(
-            genome.getNodeCPPN(nodeRef) as CPPNGenome<CPPNGenomeOptions>
+            genome.getNodeCPPN(nodeKey) as CPPNGenome<CPPNGenomeOptions>
           )
         )
 
+        // Develop substrate
         let layers: Point[][]
         let connections: Array<Connection<NodePointKey, number>>
         if (
@@ -256,6 +267,7 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
             genome.genomeOptions as ESHyperNEATGenomeOptions
           )
         } else if (nodeRef.type === NodeType.Output) {
+          // Output substrates are searched in reverse, starting at the output nodes
           ;[layers, connections] = exploreSubstrate(
             outputNodes[nodeRef.id] as Point[],
             [],
@@ -269,19 +281,21 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
           throw new Error('Unknown node type')
         }
 
+        // Add discovered nodes to target substrate
         const nodes = substrateNodes.get(nodeKey) as Map<PointKey, Point>
-        for (const layer of layers.slice(1)) {
+        // First layer contains source nodes
+        for (let i = 1; i < layers.length; i++) {
+          const layer = layers[i] as Point[]
           for (const node of layer) {
             nodes.set(toPointKey(node), node)
           }
         }
+        // Add discovered connections to assembled network
         for (const connection of connections) {
           const [from, to, edge] = connection
-          const [x1, y1] = fromPointKey(from)
-          const [x2, y2] = fromPointKey(to)
           assembledConnections.add(
-            toNodePointKey(nodeRef, x1, y1),
-            toNodePointKey(nodeRef, x2, y2),
+            keysToNodePointKey(nodeKey, from),
+            keysToNodePointKey(nodeKey, to),
             edge
           )
         }
@@ -289,60 +303,78 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
     }
   }
 
-  const pruned = new Set(
-    assembledConnections.prune(flattenedInputs, flattenedOutputs, true)
+  // Remove any node not on a path between input and output nodes
+  const pruned = assembledConnections.prune(
+    flattenedInputs,
+    flattenedOutputs,
+    true
   )
 
+  // Collect all hidden nodes, in all hidden substrates and I/O substrates
   const hiddenNodes: NodePointKey[] = []
-  for (const nodeKey of genome.hiddenNodes.keys()) {
-    const nodeRef = nodeKeyToRef(nodeKey)
+  for (const [nodeKey, node] of genome.hiddenNodes.entries()) {
     const points = substrateNodes.get(nodeKey) as Map<PointKey, Point>
     for (const point of points.values()) {
-      const [x, y] = point
-      hiddenNodes.push(toNodePointKey(nodeRef, x, y))
+      hiddenNodes.push(toNodePointKey(node.type, node.id, point[0], point[1]))
     }
   }
-  for (const nodeKey of genome.inputs.keys()) {
-    const nodeRef = nodeKeyToRef(nodeKey)
+  for (const [nodeKey, node] of genome.inputs.entries()) {
     const points = substrateNodes.get(nodeKey) as Map<PointKey, Point>
     for (const point of points.values()) {
-      if (!flattenedInputsHash.has(nodeKey)) {
-        const [x, y] = point
-        hiddenNodes.push(toNodePointKey(nodeRef, x, y))
+      const nodePointKey = toNodePointKey(
+        node.type,
+        node.id,
+        point[0],
+        point[1]
+      )
+      if (!flattenedInputs.has(nodePointKey)) {
+        hiddenNodes.push(nodePointKey)
       }
     }
   }
-  for (const nodeKey of genome.outputs.keys()) {
-    const nodeRef = nodeKeyToRef(nodeKey)
+  for (const [nodeKey, node] of genome.outputs.entries()) {
     const points = substrateNodes.get(nodeKey) as Map<PointKey, Point>
     for (const point of points.values()) {
-      if (!flattenedOutputsHash.has(nodeKey)) {
-        const [x, y] = point
-        hiddenNodes.push(toNodePointKey(nodeRef, x, y))
+      const nodePointKey = toNodePointKey(
+        node.type,
+        node.id,
+        point[0],
+        point[1]
+      )
+      if (!flattenedOutputs.has(nodePointKey)) {
+        hiddenNodes.push(nodePointKey)
       }
     }
   }
 
-  const validHiddenNodes: NodePointKey[] = []
+  const flattenedHiddenNodes: NodePointKey[] = []
   for (const node of hiddenNodes) {
     if (!pruned.has(node)) {
-      validHiddenNodes.push(node)
+      flattenedHiddenNodes.push(node)
     }
   }
 
-  const nodes = [...flattenedInputs, ...validHiddenNodes, ...flattenedOutputs]
+  // Collect all nodes (in all substrates)
+  const nodes = [
+    ...flattenedInputs,
+    ...flattenedHiddenNodes,
+    ...flattenedOutputs,
+  ]
 
-  const firstOutputId = nodes.length - flattenedOutputs.length
-  const inputs = Array.from({ length: flattenedInputs.length }, (_, i) => i)
+  const firstOutputId = nodes.length - flattenedInputs.size + 1
+  const inputs = Array.from({ length: flattenedInputs.size }, (_, i) => i)
   const outputs = Array.from(
-    { length: flattenedOutputs.length },
+    { length: flattenedOutputs.size },
     (_, i) => i + firstOutputId
   )
 
-  const nodeMapping = new Map<NodePointKey, number>(
-    nodes.map((node, i) => [node, i])
-  )
+  // Create mapping from nodes to array index in Network's node vector
+  const nodeMapping = new Map<NodePointKey, number>()
+  for (let i = 0; i < nodes.length; i++) {
+    nodeMapping.set(nodes[i] as NodePointKey, i)
+  }
 
+  // Map topologically sorted order to neural network actions.
   const actions: PhenotypeAction[] = []
   for (const action of assembledConnections.sortTopologically()) {
     if (isActionEdge(action)) {
@@ -366,17 +398,6 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
             : genome.genomeOptions.outputActivation,
       })
     }
-  }
-
-  const hiddenSubstrateNodes = Array.from(assembledConnections.nodes())
-    .filter((node) => nodeKeyToType(node) === NodeType.Hidden)
-    .map((node) => nodeKeyToRefTuple(node)[1])
-  const hiddenSubstrateNodeCounts = new Map<number, number>()
-  for (const nodeId of hiddenSubstrateNodes) {
-    hiddenSubstrateNodeCounts.set(
-      nodeId,
-      (hiddenSubstrateNodeCounts.get(nodeId) ?? 0) + 1
-    )
   }
 
   return {
