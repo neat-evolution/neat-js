@@ -51,9 +51,6 @@ export class DESHyperNEATNode extends CoreNode<
     const nodeKey = toNodeKey(this.type, this.id)
     const linkKey = toLinkKey(nodeKey, nodeKey)
 
-    if (state === null || config === null) {
-      debugger
-    }
     let cppn: CPPNGenome<CPPNGenomeOptions>
     if (factoryOptions.cppn != null && isCPPNGenome(factoryOptions.cppn)) {
       cppn = factoryOptions.cppn
@@ -74,7 +71,8 @@ export class DESHyperNEATNode extends CoreNode<
         : this.type === NodeType.Output
         ? this.options.maxOutputSubstrateDepth
         : this.options.maxHiddenSubstrateDepth
-    const depth = Math.max(0, Math.min(1, maxSubstrateDepth))
+    const depth =
+      factoryOptions.depth ?? Math.max(Math.min(1, maxSubstrateDepth), 0)
 
     this.cppn = cppn
     this.depth = depth
