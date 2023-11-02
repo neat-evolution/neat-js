@@ -12,7 +12,7 @@ import {
 } from '@neat-js/dataset-environment'
 import {
   defaultDESHyperNEATGenomeOptions,
-  defaultTopologyOptions,
+  defaultTopologyConfigOptions,
   deshyperneat,
   DESHyperNEATAlgorithm,
   type DESHyperNEATReproducerFactory,
@@ -51,7 +51,7 @@ enum Methods {
   DES_HyperNEAT = 'DES-HyperNEAT',
 }
 
-const method = Methods.ES_HyperNEAT
+const method = Methods.DES_HyperNEAT
 
 export const demo = async (
   createReproducer: ReproducerFactory<any, any, any>,
@@ -139,7 +139,7 @@ export const demo = async (
           createReproducer as DESHyperNEATReproducerFactory<undefined>,
           evaluator,
           evolutionOptions,
-          defaultTopologyOptions,
+          defaultTopologyConfigOptions,
           defaultNEATConfigOptions,
           defaultPopulationOptions,
           undefined,
