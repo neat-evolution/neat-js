@@ -2,23 +2,24 @@ import {
   isActionNode,
   NodeType,
   type PhenotypeAction,
-  nodeKeyToRefTuple,
-  nodeTupleToKey,
-  type NodeRefTuple,
   type PhenotypeFactory,
   isActionEdge,
   PhenotypeActionType,
+  type NodeKey,
+  toNodeKey,
+  nodeKeyToType,
 } from '@neat-js/core'
 
 import type { CPPNGenome } from './CPPNGenome.js'
 import type { CPPNGenomeOptions } from './CPPNGenomeOptions.js'
+import type { CPPNNode } from './CPPNNode.js'
 
 export const createPhenotype: PhenotypeFactory<
   CPPNGenome<CPPNGenomeOptions>
 > = (genome) => {
   // Sort genome's network topologically
   const order = new Set(genome.connections.sortTopologically())
-  const nodes: NodeRefTuple[] = []
+  const nodes: NodeKey[] = []
 
   // Create array of all input node indexes, for insertion of neural network inputs
   const inputLength = genome.inputs.size
@@ -26,13 +27,13 @@ export const createPhenotype: PhenotypeFactory<
   for (let i = 0; i < inputLength; i++) {
     inputs[i] = i
     // Prepend input nodes to extraction of hidden nodes from topological sorting
-    nodes.push([NodeType.Input, i])
+    nodes.push(toNodeKey(NodeType.Input, i))
   }
 
   for (const action of order) {
-    const node = nodeKeyToRefTuple(action[0])
-    if (isActionNode(action) && node[0] === NodeType.Hidden) {
-      nodes.push([NodeType.Hidden, node[1]])
+    const nodeType = nodeKeyToType(action[0])
+    if (isActionNode(action) && nodeType === NodeType.Hidden) {
+      nodes.push(action[0])
     }
   }
 
@@ -43,24 +44,24 @@ export const createPhenotype: PhenotypeFactory<
   if (genome.genomeOptions.padMissingOutputs) {
     for (let i = 0; i < outputLength; i++) {
       outputs[i] = i + offset
-      // Append all output nodes
-      nodes.push([NodeType.Output, i])
+      nodes.push(toNodeKey(NodeType.Output, i))
     }
   } else {
-    // FIXME: what is the original code trying to do here? Why would output size not be correct?
-    let i = 0
-    for (const node of genome.outputs.values()) {
+    const outputNodes = Array.from(genome.outputs.values())
+    outputNodes.sort((a, b) => a.id - b.id)
+    for (let i = 0; i < outputNodes.length; i++) {
+      const node = outputNodes[i] as CPPNNode
       outputs[i] = i + offset
-      // Append all output nodes
-      nodes.push([NodeType.Output, node.id])
-      i++
+      nodes.push(toNodeKey(NodeType.Output, node.id))
     }
   }
 
   // Create mapping from NodeRef to array index in Network's node array
   const nodeMapping = new Map<string, number>()
-  for (const [i, node] of nodes.entries()) {
-    nodeMapping.set(nodeTupleToKey(node), i)
+  let i = 0
+  for (const node of nodes) {
+    nodeMapping.set(node, i)
+    i++
   }
 
   // Map topologically sorted order to neural network actions
