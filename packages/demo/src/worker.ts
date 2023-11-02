@@ -24,6 +24,7 @@ const createReproducer: ReproducerFactory<any, any, undefined> = (
 ) => {
   const reproducer = createWorkerReproducer(population, {
     threadCount: workerThreadLimit,
+    enableCustomState: population.algorithm.name === 'DES-HyperNEAT',
   })
   reproducers.add(reproducer)
   return reproducer
