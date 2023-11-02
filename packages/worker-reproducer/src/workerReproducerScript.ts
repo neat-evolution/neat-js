@@ -1,13 +1,13 @@
 import {
-  nodeRefToKey,
   type ConfigData,
   type ConfigFactory,
   type GenomeFactory,
   type GenomeOptions,
   type Innovation,
-  type NodeRef,
   type InitConfig,
   type ConfigProvider,
+  type LinkKey,
+  type NodeKey,
 } from '@neat-js/core'
 import { Organism } from '@neat-js/evolution'
 import type { PopulationOptions } from '@neat-js/evolution'
@@ -15,15 +15,19 @@ import { threadRNG } from '@neat-js/utils'
 import { workerContext } from '@neat-js/worker-threads'
 
 import type { RequestMapValue } from './types.js'
-import { ActionType, createAction } from './WorkerAction.js'
-import type {
-  Action,
-  InitReproducerPayload,
-  InnovationPayload,
-  OrganismPayload,
-  RespondSplitInnovationPayload,
-  SpeciesPayload,
+import {
+  ActionType,
+  createAction,
+  type EmptyPayload,
+  StateType,
+  type Action,
+  type InitReproducerPayload,
+  type InnovationPayload,
+  type OrganismPayload,
+  type RespondSplitInnovationPayload,
+  type SpeciesPayload,
 } from './WorkerAction.js'
+import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
 import { WorkerState } from './WorkerState.js'
 
 // FIXME: types
@@ -49,6 +53,7 @@ interface PartialAlgorithm {
 }
 
 interface ThreadInfo<CD extends ConfigData, GO extends GenomeOptions> {
+  reproducerOptions: WorkerReproducerOptions
   populationOptions: PopulationOptions
   stateProvider: WorkerState<any, any, any, any, any>
   configProvider: ConfigProvider<any, any, CD>
@@ -77,15 +82,20 @@ const initThread = async (payload: InitReproducerPayload<any, any>) => {
   if (workerContext == null) {
     throw new Error('Worker must be created with a parent port')
   }
-  // FIXME: enable node state and link state
 
   const stateProvider = new WorkerState<any, any, any, any, any>(
     getSplitInnovation,
-    getConnectInnovation
+    getConnectInnovation,
+    setCPPNStateRedirect,
+    StateType.NEAT,
+    null,
+    payload.reproducerOptions.enableCustomState,
+    payload.genomeOptions.singleCPPNState
   )
   const { createConfig, createGenome } = await import(payload.algorithmPathname)
   const configProvider = createConfig(payload.configData)
   threadInfo = {
+    reproducerOptions: payload.reproducerOptions,
     populationOptions: payload.populationOptions,
     stateProvider,
     configProvider,
@@ -174,10 +184,17 @@ const speciesTournamentSelect = async (
   return organism
 }
 
+const blockingRequests = new Set<Promise<any>>()
+
 const getSplitInnovation = async (
-  linkInnovation: number
+  linkInnovation: number,
+  stateType: StateType = StateType.NEAT,
+  stateKey: string | null = null
 ): Promise<Innovation> => {
   const requestId = nextRequestId()
+  if (stateType === StateType.UNIQUE_CPPN_STATES) {
+    await Promise.all(blockingRequests)
+  }
   const data = await new Promise<RespondSplitInnovationPayload>(
     (resolve, reject) => {
       requestMap.set(requestId, {
@@ -191,6 +208,8 @@ const getSplitInnovation = async (
         createAction(ActionType.REQUEST_SPLIT_INNOVATION, {
           requestId,
           innovation: linkInnovation,
+          stateType,
+          stateKey,
         })
       )
     }
@@ -199,10 +218,15 @@ const getSplitInnovation = async (
 }
 
 const getConnectInnovation = async (
-  from: NodeRef,
-  to: NodeRef
+  from: NodeKey,
+  to: NodeKey,
+  stateType: StateType = StateType.NEAT,
+  stateKey: string | null = null
 ): Promise<number> => {
   const requestId = nextRequestId()
+  if (stateType === StateType.UNIQUE_CPPN_STATES) {
+    await Promise.all(Array.from(blockingRequests))
+  }
   const data = await new Promise<InnovationPayload>((resolve, reject) => {
     requestMap.set(requestId, {
       resolve,
@@ -214,12 +238,40 @@ const getConnectInnovation = async (
     workerContext.postMessage(
       createAction(ActionType.REQUEST_CONNECT_INNOVATION, {
         requestId,
-        from: nodeRefToKey(from),
-        to: nodeRefToKey(to),
+        from,
+        to,
+        stateType,
+        stateKey,
       })
     )
   })
   return data.innovation
+}
+
+const setCPPNStateRedirect = (key: LinkKey, oldKey: LinkKey): void => {
+  const requestId = nextRequestId()
+
+  const response = new Promise<EmptyPayload>((resolve, reject) => {
+    requestMap.set(requestId, {
+      resolve,
+      reject,
+    })
+    if (workerContext == null) {
+      throw new Error('Worker must be created with a parent port')
+    }
+    workerContext.postMessage(
+      createAction(ActionType.REQUEST_SET_CPPN_STATE_REDIRECT, {
+        requestId,
+        key,
+        oldKey,
+      })
+    )
+  })
+  blockingRequests.add(
+    response.then(() => {
+      blockingRequests.delete(response)
+    })
+  )
 }
 
 const eliteOrganism = (payload: OrganismPayload<any>) => {
@@ -334,6 +386,9 @@ if (workerContext !== null) {
         handleResponse(action.payload)
         break
       case ActionType.RESPOND_CONNECT_INNOVATION:
+        handleResponse(action.payload)
+        break
+      case ActionType.RESPOND_SET_CPPN_STATE_REDIRECT:
         handleResponse(action.payload)
         break
       case ActionType.TERMINATE:

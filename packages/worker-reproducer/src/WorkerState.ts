@@ -1,15 +1,30 @@
 import {
   type Innovation,
-  type NodeRef,
   type StateProvider,
   type StateData,
   type ExtendedState,
   type NEATState,
   InnovationLog,
+  type LinkKey,
+  type NodeKey,
 } from '@neat-js/core'
 
-type GetSplitInnovationFn = (linkInnovation: number) => Promise<Innovation>
-type GetConnectInnovationFn = (from: NodeRef, to: NodeRef) => Promise<number>
+import { StateType } from './WorkerAction.js'
+import { WorkerCustomState } from './WorkerCustomState.js'
+
+export type GetSplitInnovationFn = (
+  linkInnovation: number,
+  stateType: StateType,
+  stateKey: string | null
+) => Promise<Innovation>
+export type GetConnectInnovationFn = (
+  from: NodeKey,
+  to: NodeKey,
+  stateType: StateType,
+  stateKey: string | null
+) => Promise<number>
+
+export type SetCPPNStateRedirectFn = (key: LinkKey, oldKey: LinkKey) => void
 
 export class WorkerState<
   NSD,
@@ -19,8 +34,12 @@ export class WorkerState<
   SD extends StateData
 > implements StateProvider<NSD, LSD, NS, LS, SD>
 {
+  public readonly stateType: StateType
+  public readonly stateKey: string | null
   public readonly innovationLog: InnovationLog
   public readonly nextInnovation: Innovation
+  public readonly enableCustomState: boolean
+  public readonly custom: WorkerCustomState | null
 
   protected readonly getSplitInnovationFn: GetSplitInnovationFn
   protected readonly getConnectInnovationFn: GetConnectInnovationFn
@@ -28,10 +47,29 @@ export class WorkerState<
   constructor(
     getSplitInnovationFn: GetSplitInnovationFn,
     getConnectInnovationFn: GetConnectInnovationFn,
-    _stateFactoryOptions?: SD
+    setCPPNStateRedirectFn: SetCPPNStateRedirectFn,
+    stateType: StateType = StateType.NEAT,
+    stateKey: string | null = null,
+    enableCustomState: boolean = false,
+    singleCPPNState: boolean | undefined
   ) {
     this.getSplitInnovationFn = getSplitInnovationFn
     this.getConnectInnovationFn = getConnectInnovationFn
+    this.enableCustomState = enableCustomState
+    this.stateType = stateType
+    this.stateKey = stateKey
+
+    if (enableCustomState) {
+      this.custom = new WorkerCustomState(
+        singleCPPNState === true,
+        getSplitInnovationFn,
+        getConnectInnovationFn,
+        setCPPNStateRedirectFn
+      )
+    } else {
+      this.custom = null
+    }
+    // dummy internal structure, do not use
     this.innovationLog = new InnovationLog()
     this.nextInnovation = {
       nodeNumber: 0,
@@ -40,11 +78,20 @@ export class WorkerState<
   }
 
   async getSplitInnovation(linkInnovation: number): Promise<Innovation> {
-    return await this.getSplitInnovationFn(linkInnovation)
+    return await this.getSplitInnovationFn(
+      linkInnovation,
+      this.stateType,
+      this.stateKey
+    )
   }
 
-  async getConnectInnovation(from: NodeRef, to: NodeRef): Promise<number> {
-    return await this.getConnectInnovationFn(from, to)
+  async getConnectInnovation(from: NodeKey, to: NodeKey): Promise<number> {
+    return await this.getConnectInnovationFn(
+      from,
+      to,
+      this.stateType,
+      this.stateKey
+    )
   }
 
   neat(): NEATState {
@@ -52,15 +99,11 @@ export class WorkerState<
   }
 
   node(): NS {
-    // throw new Error('Not implemented')
-    // @ts-expect-error not implemented custom state
-    return null // this.nodeState
+    return (this.enableCustomState ? this.custom : null) as NS
   }
 
   link(): LS {
-    // throw new Error('Not implemented')
-    // @ts-expect-error not implemented custom state
-    return null // this.linkState
+    return (this.enableCustomState ? this.custom : null) as LS
   }
 
   toJSON(): SD {
