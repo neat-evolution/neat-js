@@ -1,7 +1,6 @@
 import {
   CoreGenome,
   type NEATConfigOptions,
-  type NodeRef,
   type NodeKey,
   NodeType,
   type InitConfig,
@@ -79,51 +78,63 @@ export class DESHyperNEATGenome extends CoreGenome<
   }
 
   protected override init(
-    factoryOptions: DESHyperNEATGenomeFactoryOptions
+    factoryOptions?: DESHyperNEATGenomeFactoryOptions
   ): void {
-    for (const [id, cppn, depth] of factoryOptions.hiddenNodes) {
-      const node = this.createNode(
-        { type: NodeType.Hidden, id, cppn, depth },
-        this.config.node(),
-        this.state.node()
-      )
-      this.hiddenNodes.set(nodeRefToKey(node), node)
-    }
-    for (const [id, cppn, depth] of factoryOptions.outputs) {
-      const node = this.createNode(
-        { type: NodeType.Output, id, cppn, depth },
-        this.config.node(),
-        this.state.node()
-      )
-      this.outputs.set(nodeRefToKey(node), node)
-    }
-    for (const [
-      fromKey,
-      toKey,
-      weight,
-      innovation,
-      cppn,
-      depth,
-    ] of factoryOptions.links) {
-      const linkFactoryOptions: DESHyperNEATLinkFactoryOptions = {
-        from: fromKey,
-        to: toKey,
+    if (factoryOptions != null) {
+      for (const [id, cppn, depth] of factoryOptions.inputs) {
+        const node = this.createNode(
+          { type: NodeType.Input, id, cppn, depth },
+          this.config.node(),
+          this.state.node()
+        )
+        this.inputs.set(nodeRefToKey(node), node)
+      }
+      for (const [id, cppn, depth] of factoryOptions.hiddenNodes) {
+        const node = this.createNode(
+          { type: NodeType.Hidden, id, cppn, depth },
+          this.config.node(),
+          this.state.node()
+        )
+        this.hiddenNodes.set(nodeRefToKey(node), node)
+      }
+      for (const [id, cppn, depth] of factoryOptions.outputs) {
+        const node = this.createNode(
+          { type: NodeType.Output, id, cppn, depth },
+          this.config.node(),
+          this.state.node()
+        )
+        this.outputs.set(nodeRefToKey(node), node)
+      }
+      for (const [
+        fromKey,
+        toKey,
         weight,
         innovation,
         cppn,
         depth,
+      ] of factoryOptions.links) {
+        const linkFactoryOptions: DESHyperNEATLinkFactoryOptions = {
+          from: fromKey,
+          to: toKey,
+          weight,
+          innovation,
+          cppn,
+          depth,
+        }
+        const link = this.createLink(
+          linkFactoryOptions,
+          this.config.link(),
+          this.state.link()
+        )
+        this.insertLink(link, true)
       }
-      const link = this.createLink(
-        linkFactoryOptions,
-        this.config.link(),
-        this.state.link()
-      )
-      this.insertLink(link, true)
+    } else {
+      super.init(factoryOptions)
     }
   }
 
-  getNodeCPPN(node: NodeRef): CPPNGenome<CPPNGenomeOptions> | undefined {
-    return this.getNode(node)?.cppn
+  getNodeCPPN(node: NodeKey): CPPNGenome<CPPNGenomeOptions> | undefined {
+    return this.getNodeByKey(node)?.cppn
   }
 
   getLinkCPPN(
@@ -134,13 +145,13 @@ export class DESHyperNEATGenome extends CoreGenome<
     return this.links.get(linkKey)?.cppn
   }
 
-  getDepth(node: NodeRef): number | undefined {
+  getDepth(node: NodeKey): number | undefined {
     if (this.genomeOptions.staticSubstrateDepth >= 0) {
-      return node.type === NodeType.Hidden
+      return node[0] === NodeType.Hidden
         ? this.genomeOptions.staticSubstrateDepth
         : 0
     } else {
-      return this.getNode(node)?.depth
+      return this.getNodeByKey(node)?.depth
     }
   }
 
@@ -215,10 +226,13 @@ export class DESHyperNEATGenome extends CoreGenome<
   }
 
   override toFactoryOptions(): DESHyperNEATGenomeFactoryOptions {
+    const inputs: DESHyperNEATNodeData[] = []
     const hiddenNodes: DESHyperNEATNodeData[] = []
     const outputs: DESHyperNEATNodeData[] = []
     const links: DESHyperNEATLinkData[] = []
-
+    for (const node of this.inputs.values()) {
+      inputs.push([node.id, node.cppn.toFactoryOptions(), node.depth])
+    }
     for (const node of this.hiddenNodes.values()) {
       hiddenNodes.push([node.id, node.cppn.toFactoryOptions(), node.depth])
     }
@@ -237,6 +251,7 @@ export class DESHyperNEATGenome extends CoreGenome<
     }
 
     return {
+      inputs,
       hiddenNodes,
       outputs,
       links,

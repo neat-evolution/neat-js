@@ -148,7 +148,11 @@ export class CoreGenome<
     this.links = new Map<LinkKey, L>()
     this.connections = new Connections<NodeKey, number>()
 
-    for (let i = 0; i < initConfig.inputs; i++) {
+    this.init(factoryOptions)
+  }
+
+  protected init(_factoryOptions?: GFO): void {
+    for (let i = 0; i < this.initConfig.inputs; i++) {
       const node = this.createNode(
         { type: NodeType.Input, id: i },
         this.config.node(),
@@ -157,7 +161,7 @@ export class CoreGenome<
       this.inputs.set(nodeRefToKey(node), node)
     }
 
-    for (let i = 0; i < initConfig.outputs; i++) {
+    for (let i = 0; i < this.initConfig.outputs; i++) {
       const node = this.createNode(
         { type: NodeType.Output, id: i },
         this.config.node(),
@@ -165,14 +169,6 @@ export class CoreGenome<
       )
       this.outputs.set(nodeRefToKey(node), node)
     }
-
-    if (factoryOptions != null) {
-      this.init(factoryOptions)
-    }
-  }
-
-  protected init(_factoryOptions: GFO): void {
-    throw new Error('init not implemented.')
   }
 
   clone(): G {
@@ -359,6 +355,11 @@ export class CoreGenome<
     return genome
   }
 
+  /**
+   * @deprecated prefer getNodeByKey(nodeKey) to avoid unnecessary conversions
+   * @param {NodeRef} nodeRef the reference to the node
+   * @returns {N | undefined} a node or undefined
+   */
   getNode(nodeRef: NodeRef): N | undefined {
     switch (nodeRef.type) {
       case NodeType.Input:
@@ -375,11 +376,11 @@ export class CoreGenome<
   getNodeByKey(nodeKey: NodeKey): N | undefined {
     const type = nodeKey[0]
     switch (type) {
-      case 'I':
+      case NodeType.Input:
         return this.inputs.get(nodeKey)
-      case 'H':
+      case NodeType.Hidden:
         return this.hiddenNodes.get(nodeKey)
-      case 'O':
+      case NodeType.Output:
         return this.outputs.get(nodeKey)
       default:
         return undefined

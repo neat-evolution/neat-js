@@ -67,28 +67,31 @@ export class NEATGenome extends CoreGenome<
     )
   }
 
-  override init(factoryOptions: NEATGenomeFactoryOptions): void {
-    for (const id of factoryOptions.hiddenNodes) {
-      const node = this.createNode(
-        { type: NodeType.Hidden, id },
-        this.config.node(),
-        this.state.node()
-      )
-      this.hiddenNodes.set(nodeRefToKey(node), node)
-    }
-    for (const [fromKey, toKey, weight, innovation] of factoryOptions.links) {
-      const linkFactoryOptions: LinkFactoryOptions = {
-        from: fromKey,
-        to: toKey,
-        weight,
-        innovation,
+  override init(factoryOptions?: NEATGenomeFactoryOptions): void {
+    super.init(factoryOptions)
+    if (factoryOptions != null) {
+      for (const id of factoryOptions.hiddenNodes) {
+        const node = this.createNode(
+          { type: NodeType.Hidden, id },
+          this.config.node(),
+          this.state.node()
+        )
+        this.hiddenNodes.set(nodeRefToKey(node), node)
       }
-      const link = this.createLink(
-        linkFactoryOptions,
-        this.config.link(),
-        this.state.link()
-      )
-      this.insertLink(link, true)
+      for (const [fromKey, toKey, weight, innovation] of factoryOptions.links) {
+        const linkFactoryOptions: LinkFactoryOptions = {
+          from: fromKey,
+          to: toKey,
+          weight,
+          innovation,
+        }
+        const link = this.createLink(
+          linkFactoryOptions,
+          this.config.link(),
+          this.state.link()
+        )
+        this.insertLink(link, true)
+      }
     }
   }
 
