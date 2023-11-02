@@ -1,4 +1,4 @@
-import { nodeKeyToRef, type Innovation, type CoreGenome } from '@neat-js/core'
+import { type NEATState, type Innovation, type CoreGenome } from '@neat-js/core'
 import { Organism, type Reproducer, type Species } from '@neat-js/evolution'
 import { Worker } from '@neat-js/worker-threads'
 import { Sema } from 'async-sema'
@@ -10,6 +10,7 @@ import {
   createAction,
   type InitReproducerPayload,
   type OrganismPayload,
+  StateType,
 } from './WorkerAction.js'
 import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
 
@@ -52,6 +53,7 @@ export class WorkerReproducer<
   public readonly population: AnyPopulation<G>
   public readonly threadCount: number
   public readonly initPromise: Promise<void>
+  public readonly options: WorkerReproducerOptions
 
   private readonly workers: Worker[]
   private readonly semaphore: Sema
@@ -61,6 +63,7 @@ export class WorkerReproducer<
   >()
 
   constructor(population: AnyPopulation<G>, options: WorkerReproducerOptions) {
+    this.options = options
     this.population = population
     this.workers = []
     this.requestMap = new Map()
@@ -130,6 +133,13 @@ export class WorkerReproducer<
                 )
                 break
               }
+              case ActionType.REQUEST_SET_CPPN_STATE_REDIRECT: {
+                this.handleRequestSetCPPNStateRedirect(
+                  worker,
+                  action as Action<ActionType.REQUEST_SET_CPPN_STATE_REDIRECT>
+                )
+                break
+              }
               case ActionType.INIT_REPRODUCER_SUCCESS: {
                 this.workers.push(worker)
                 resolveWorkerInit()
@@ -167,6 +177,7 @@ export class WorkerReproducer<
 
           // FIXME: any, any, any
           const data: InitReproducerPayload<any, any> = {
+            reproducerOptions: this.options,
             populationOptions: this.population.populationOptions,
             configData: this.population.configProvider.toJSON(),
             genomeOptions: this.population.genomeOptions,
@@ -257,7 +268,6 @@ export class WorkerReproducer<
     if (organism == null) {
       throw new Error('No organism found')
     }
-    // FIXME: OrganismPayload<GFO>
     const payload: OrganismPayload<any> = {
       genome: organism.genome.toFactoryOptions(),
       organismState: organism.toFactoryOptions(),
@@ -272,9 +282,33 @@ export class WorkerReproducer<
     worker: Worker,
     action: Action<ActionType.REQUEST_SPLIT_INNOVATION>
   ) {
-    const innovation: Innovation = this.population.stateProvider
-      .neat()
-      .getSplitInnovation(action.payload.innovation)
+    const { stateType, stateKey } = action.payload
+    let state: NEATState
+    if (stateType === StateType.NEAT) {
+      state = this.population.stateProvider.neat()
+    } else if (stateType === StateType.SINGLE_CPPN_STATE) {
+      if (this.population.stateProvider.custom == null) {
+        throw new Error('State provider does not support custom state')
+      }
+      const stateProvider = this.population.stateProvider
+      state = stateProvider.custom.singleCPPNState
+    } else if (stateType === StateType.UNIQUE_CPPN_STATES && stateKey != null) {
+      if (this.population.stateProvider.custom == null) {
+        throw new Error('State provider does not support custom state')
+      }
+      const stateProvider = this.population.stateProvider
+      state = stateProvider.custom.getOrCreateState(
+        stateKey,
+        this.population.genomeOptions.singleCPPNState ?? false
+      )
+    } else {
+      throw new Error('Unknown state type')
+    }
+
+    const innovation = state.getSplitInnovation(
+      action.payload.innovation
+    ) as Innovation
+
     const payload = {
       requestId: action.payload.requestId,
       ...innovation,
@@ -288,18 +322,55 @@ export class WorkerReproducer<
     worker: Worker,
     action: Action<ActionType.REQUEST_CONNECT_INNOVATION>
   ) {
-    const innovation: number = this.population.stateProvider
-      .neat()
-      .getConnectInnovation(
-        nodeKeyToRef(action.payload.from),
-        nodeKeyToRef(action.payload.to)
+    const { stateType, stateKey } = action.payload
+    let state: NEATState
+    if (stateType === StateType.NEAT) {
+      state = this.population.stateProvider.neat()
+    } else if (stateType === StateType.SINGLE_CPPN_STATE) {
+      if (this.population.stateProvider.custom == null) {
+        throw new Error('State provider does not support custom state')
+      }
+      const stateProvider = this.population.stateProvider
+      state = stateProvider.custom.singleCPPNState
+    } else if (stateType === StateType.UNIQUE_CPPN_STATES && stateKey != null) {
+      if (this.population.stateProvider.custom == null) {
+        throw new Error('State provider does not support custom state')
+      }
+      const stateProvider = this.population.stateProvider
+      state = stateProvider.custom.getOrCreateState(
+        stateKey,
+        this.population.genomeOptions.singleCPPNState ?? false
       )
+    } else {
+      throw new Error('Unknown state type')
+    }
+    const innovation: number = state.getConnectInnovation(
+      action.payload.from,
+      action.payload.to
+    ) as number
     const payload = {
       requestId: action.payload.requestId,
       innovation,
     }
     worker.postMessage(
       createAction(ActionType.RESPOND_CONNECT_INNOVATION, payload)
+    )
+  }
+
+  protected handleRequestSetCPPNStateRedirect(
+    worker: Worker,
+    action: Action<ActionType.REQUEST_SET_CPPN_STATE_REDIRECT>
+  ) {
+    const state = this.population.stateProvider.neat()
+    if (state.custom?.cloneState == null) {
+      throw new Error('State provider does not support custom state')
+    }
+    state.custom.cloneState(action.payload.key, action.payload.oldKey)
+    const payload = {
+      requestId: action.payload.requestId,
+    }
+    worker.postMessage(
+      createAction(ActionType.RESPOND_SET_CPPN_STATE_REDIRECT, payload)
     )
   }
 
@@ -390,7 +461,6 @@ export class WorkerReproducer<
       }
       const requestId = nextRequestId()
       this.requestMap.set(worker, { resolve: customResolve, reject })
-      // FIXME: OrganismPayload<GFO>
       const payload: OrganismPayload<any> = {
         genome: organism.genome.toFactoryOptions(),
         organismState: organism.toFactoryOptions(),
