@@ -33,12 +33,12 @@ export function findConnections(
       const [mi, ma] = leaf.createChildren(f)
       minWeight = Math.min(minWeight, mi)
       maxWeight = Math.max(maxWeight, ma)
+    }
+    for (const leaf of leaves) {
       newLeaves.push(...leaf.expand(maxWeight - minWeight))
     }
-    leaves.length = 0 // Clear the array in-place
-    leaves.push(...newLeaves) // Populate with new leaves
+    leaves = [...newLeaves]
   }
-
   // If all weight values are the same, no nodes will be collected.
   if (minWeight === maxWeight) {
     return connections
@@ -54,8 +54,7 @@ export function findConnections(
     for (const leaf of leaves) {
       newLeaves.push(...leaf.extract(f, connections, maxWeight - minWeight))
     }
-    leaves.length = 0 // Clear the array in-place
-    leaves.push(...newLeaves) // Populate with new leaves
+    leaves = [...newLeaves]
   }
 
   // If the collection was limited by maxDiscoveries, nodes at the current depth in the tree
