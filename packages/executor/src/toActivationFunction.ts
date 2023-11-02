@@ -23,7 +23,7 @@ export function toActivationFunction(
     case Activation.Gaussian:
       return (x) => Math.exp(-2.5 * x * x)
     case Activation.OffsetGaussian:
-      return (x) => 2 * Math.exp(-2.5 * x * x) - 1
+      return (x) => 2 * (Math.expm1(-2.5 * x * x) + 0.5) // 2 * Math.exp(-2.5 * x * x) - 1
     case Activation.Sine:
       return (x) => Math.sin(2 * x)
     case Activation.Cos:

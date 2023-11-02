@@ -22,14 +22,15 @@ export const createSyncExecutor: SyncExecutorFactory = (
     // Do forward pass
     for (const action of phenotype.actions) {
       switch (action.type) {
-        case PhenotypeActionType.Link:
-          values[action.to] += (values[action.from] as number) * action.weight
+        case PhenotypeActionType.Link: {
+          const from = values[action.from] as number
+          values[action.to] += from * action.weight
           break
+        }
         case PhenotypeActionType.Activation: {
+          const node = values[action.node] as number
           const activation = toActivationFunction(action.activation)
-          values[action.node] = activation(
-            (values[action.node] as number) + action.bias
-          )
+          values[action.node] = activation(node + action.bias)
           break
         }
       }
@@ -38,9 +39,8 @@ export const createSyncExecutor: SyncExecutorFactory = (
     // Collect output
     const output: number[] = []
     for (const o of phenotype.outputs) {
-      output.push(
-        Number.isFinite(values[o] as number) ? (values[o] as number) : 0
-      )
+      const value = values[o] as number
+      output.push(Number.isFinite(value) ? value : 0)
     }
 
     return output
