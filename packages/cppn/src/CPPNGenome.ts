@@ -75,36 +75,56 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
     )
   }
 
-  protected override init(factoryOptions: CPPNGenomeFactoryOptions): void {
-    for (const [id, bias, activation] of factoryOptions.hiddenNodes) {
+  protected override init(factoryOptions?: CPPNGenomeFactoryOptions): void {
+    for (let i = 0; i < this.initConfig.inputs; i++) {
       const node = this.createNode(
-        { type: NodeType.Hidden, id, bias, activation },
+        { type: NodeType.Input, id: i },
         this.config.node(),
         this.state.node()
       )
-      this.hiddenNodes.set(nodeRefToKey(node), node)
+      this.inputs.set(nodeRefToKey(node), node)
     }
-    for (const [id, bias, activation] of factoryOptions.outputs) {
-      const node = this.createNode(
-        { type: NodeType.Output, id, bias, activation },
-        this.config.node(),
-        this.state.node()
-      )
-      this.outputs.set(nodeRefToKey(node), node)
-    }
-    for (const [fromKey, toKey, weight, innovation] of factoryOptions.links) {
-      const linkFactoryOptions: LinkFactoryOptions = {
-        from: fromKey,
-        to: toKey,
-        weight,
-        innovation,
+
+    if (factoryOptions != null) {
+      for (const [id, bias, activation] of factoryOptions.hiddenNodes) {
+        const node = this.createNode(
+          { type: NodeType.Hidden, id, bias, activation },
+          this.config.node(),
+          this.state.node()
+        )
+        this.hiddenNodes.set(nodeRefToKey(node), node)
       }
-      const link = this.createLink(
-        linkFactoryOptions,
-        this.config.link(),
-        this.state.link()
-      )
-      this.insertLink(link, true)
+      for (const [id, bias, activation] of factoryOptions.outputs) {
+        const node = this.createNode(
+          { type: NodeType.Output, id, bias, activation },
+          this.config.node(),
+          this.state.node()
+        )
+        this.outputs.set(nodeRefToKey(node), node)
+      }
+      for (const [fromKey, toKey, weight, innovation] of factoryOptions.links) {
+        const linkFactoryOptions: LinkFactoryOptions = {
+          from: fromKey,
+          to: toKey,
+          weight,
+          innovation,
+        }
+        const link = this.createLink(
+          linkFactoryOptions,
+          this.config.link(),
+          this.state.link()
+        )
+        this.insertLink(link, true)
+      }
+    } else {
+      for (let i = 0; i < this.initConfig.outputs; i++) {
+        const node = this.createNode(
+          { type: NodeType.Output, id: i },
+          this.config.node(),
+          this.state.node()
+        )
+        this.outputs.set(nodeRefToKey(node), node)
+      }
     }
   }
 
