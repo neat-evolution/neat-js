@@ -1,0 +1,23 @@
+{
+  "quad_point": {
+    "x": -0.6875,
+    "y": 0.3125,
+    "width": 0.0625,
+    "weight": -0.9999879802620447,
+    "depth": 5,
+    "variance": 0.0,
+    "children": null
+  },
+  "delta_weight": 1.999999343798443,
+  "root": false,
+  "branch": true,
+  "weights": [
+    -0.9999879802620447
+  ],
+  "centroid": -0.9999879802620447,
+  "dw": 1.0,
+  "squares": [
+    0.0
+  ],
+  "variance": 0.0
+}
