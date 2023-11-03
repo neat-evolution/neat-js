@@ -47,7 +47,7 @@ describe('createPhenotype', () => {
         mutateLinkWeightProbability: 0,
       }
       const genome = createGenome(
-        createConfig(configOptions, null, null),
+        createConfig({ neat: configOptions }),
         stateProvider,
         genomeOptions,
         initConfig

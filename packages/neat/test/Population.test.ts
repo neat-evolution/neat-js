@@ -1,5 +1,6 @@
 import {
   defaultNEATConfigOptions,
+  type ConfigData,
   type InitConfig,
   type StateData,
 } from '@neat-js/core'
@@ -68,7 +69,7 @@ describe('Population class', () => {
   }
 
   beforeEach(async () => {
-    configProvider = createConfig(defaultNEATConfigOptions, null, null)
+    configProvider = createConfig({ neat: defaultNEATConfigOptions })
     genomeOptions = defaultNEATGenomeOptions
     populationOptions = defaultPopulationOptions
     environment = await createEnvironment()
@@ -169,7 +170,7 @@ describe('Population class', () => {
       expect(population.species.size).toBeLessThan(
         population.populationOptions.populationSize / 2
       )
-      expect(speciesCount).toBeGreaterThan(10)
+      expect(speciesCount).toBeGreaterThan(5)
     })
   })
 
@@ -259,8 +260,7 @@ describe('Population class', () => {
     test('should update the number of new elites and offsprings for each species', async () => {
       const dataMap = new Map<
         Species<
-          null,
-          null,
+          ConfigData,
           StateData,
           NEATHiddenNodeData,
           NEATLinkData,

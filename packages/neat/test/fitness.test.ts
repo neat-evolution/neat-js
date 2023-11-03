@@ -45,7 +45,7 @@ describe('Genome fitness fixtures', () => {
 
   test.each(formattedTestCases)(
     '%s',
-    async (name: string, a: NEATGenome, expected: number) => {
+    async (_name: string, a: NEATGenome, expected: number) => {
       const phenotype = createPhenotype(a)
       const executor = createExecutor(phenotype, environment.batchSize)
       const fitness = await environment.evaluate(executor)

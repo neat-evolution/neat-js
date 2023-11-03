@@ -40,7 +40,7 @@ describe('Organism class', () => {
         mutateLinkWeightProbability: 0,
       }
       const genome = createGenome(
-        createConfig(options, null, null),
+        createConfig({ neat: options }),
         state,
         genomeOptions,
         initConfig

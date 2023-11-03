@@ -23,20 +23,22 @@ describe('NEATLink class', () => {
       link = createLink(factoryOptions, null, null)
     })
 
-    test('should return itself', () => {
-      expect(link.neat()).toBe(link)
-    })
-
     test('should return string', () => {
       expect(link.toString()).toBe('I[0] -> O[1]')
     })
 
     test('should return identity link', () => {
-      expect(link.identity(link)).toBe(link)
+      const factoryOptions = { from, to, weight: 0.5, innovation: 1 }
+      const expected = createLink(factoryOptions, null, null)
+      const result = link.identity(factoryOptions)
+      expect(result).toEqual(expected)
     })
 
     test('should return cloneWith link', () => {
-      expect(link.cloneWith(link)).toBe(link)
+      const factoryOptions = { from, to, weight: 0.5, innovation: 1 }
+      const expected = createLink(factoryOptions, null, null)
+      const result = link.cloneWith(factoryOptions)
+      expect(result).toEqual(expected)
     })
   })
 
