@@ -1,6 +1,7 @@
 import { type InitConfig } from '@neat-js/core'
 
 import type { DESHyperNEATGenomeOptions } from '../DESHyperNEATGenomeOptions.js'
+
 import { parseNumSubstrates } from './parseNumSubstrates.js'
 
 export const topologyInitConfig = (
