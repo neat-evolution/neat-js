@@ -1,0 +1,234 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H25": {
+          "neat": {
+            "node_ref": "H25"
+          },
+          "activation": "Tanh",
+          "bias": 0.06267529368575575
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "None",
+          "bias": -0.07413235886365316
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Gaussian",
+          "bias": -0.011477710519280513
+        }
+      },
+      "links": {
+        "I1->O0": {
+          "from": "I1",
+          "to": "O0",
+          "weight": -0.009835048788949918,
+          "innovation": 1
+        },
+        "I0->O1": {
+          "from": "I0",
+          "to": "O1",
+          "weight": 0.29840775468620273,
+          "innovation": 11
+        },
+        "H25->O1": {
+          "from": "H25",
+          "to": "O1",
+          "weight": 1.7333378742131182,
+          "innovation": 130
+        },
+        "I1->O1": {
+          "from": "I1",
+          "to": "O1",
+          "weight": 1.1773493226787692,
+          "innovation": 14
+        },
+        "I3->H25": {
+          "from": "I3",
+          "to": "H25",
+          "weight": -0.4340383266051694,
+          "innovation": 129
+        },
+        "H25->O0": {
+          "from": "H25",
+          "to": "O0",
+          "weight": 0.2861943513215126,
+          "innovation": 217
+        }
+      },
+      "connections": {
+        "connections": {
+          "I0": [
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "I3": [
+            {
+              "node": "H25",
+              "edge": null
+            }
+          ],
+          "H25": [
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 7,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      5,
+      6
+    ],
+    "actions": [
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          4,
+          -0.4340383266051694
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          0.06267529368575575,
+          "Tanh"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          6,
+          1.7333378742131182
+        ]
+      },
+      {
+        "Link": [
+          4,
+          5,
+          0.2861943513215126
+        ]
+      },
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          5,
+          -0.009835048788949918
+        ]
+      },
+      {
+        "Link": [
+          1,
+          6,
+          1.1773493226787692
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          -0.07413235886365316,
+          "None"
+        ]
+      },
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          6,
+          0.29840775468620273
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          -0.011477710519280513,
+          "Gaussian"
+        ]
+      }
+    ]
+  }
+}

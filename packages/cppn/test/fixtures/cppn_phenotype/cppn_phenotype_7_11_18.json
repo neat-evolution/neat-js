@@ -1,0 +1,328 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H1": {
+          "neat": {
+            "node_ref": "H1"
+          },
+          "activation": "Tanh",
+          "bias": -0.07805342778621825
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "ReLU",
+          "bias": -0.052019855339965455
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Step",
+          "bias": 0.15617155469264224
+        }
+      },
+      "links": {
+        "I1->H1": {
+          "from": "I1",
+          "to": "H1",
+          "weight": -0.12901705170292055,
+          "innovation": 29
+        },
+        "I0->O1": {
+          "from": "I0",
+          "to": "O1",
+          "weight": -0.8733551146132694,
+          "innovation": 5
+        },
+        "I0->H1": {
+          "from": "I0",
+          "to": "H1",
+          "weight": -0.4948552262616327,
+          "innovation": 25
+        },
+        "I2->O0": {
+          "from": "I2",
+          "to": "O0",
+          "weight": -0.3101900122451865,
+          "innovation": 3
+        },
+        "H1->O0": {
+          "from": "H1",
+          "to": "O0",
+          "weight": 0.5847212983694914,
+          "innovation": 21
+        },
+        "H1->O1": {
+          "from": "H1",
+          "to": "O1",
+          "weight": 1.0,
+          "innovation": 11
+        },
+        "I0->O0": {
+          "from": "I0",
+          "to": "O0",
+          "weight": 0.5703712154134114,
+          "innovation": 9
+        },
+        "I1->O1": {
+          "from": "I1",
+          "to": "O1",
+          "weight": 1.4979626943603537,
+          "innovation": 0
+        },
+        "I3->O0": {
+          "from": "I3",
+          "to": "O0",
+          "weight": 0.2732179848798131,
+          "innovation": 4
+        },
+        "I2->O1": {
+          "from": "I2",
+          "to": "O1",
+          "weight": 0.26646126493413447,
+          "innovation": 2
+        },
+        "I3->H1": {
+          "from": "I3",
+          "to": "H1",
+          "weight": -0.5342546409180202,
+          "innovation": 10
+        }
+      },
+      "connections": {
+        "connections": {
+          "H1": [
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I2": [
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I0": [
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "H1",
+              "edge": null
+            }
+          ],
+          "I3": [
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "H1",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "H1",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 7,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      5,
+      6
+    ],
+    "actions": [
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          6,
+          1.4979626943603537
+        ]
+      },
+      {
+        "Link": [
+          1,
+          4,
+          -0.12901705170292055
+        ]
+      },
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          5,
+          0.2732179848798131
+        ]
+      },
+      {
+        "Link": [
+          3,
+          4,
+          -0.5342546409180202
+        ]
+      },
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          6,
+          -0.8733551146132694
+        ]
+      },
+      {
+        "Link": [
+          0,
+          5,
+          0.5703712154134114
+        ]
+      },
+      {
+        "Link": [
+          0,
+          4,
+          -0.4948552262616327
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          -0.07805342778621825,
+          "Tanh"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          6,
+          1.0
+        ]
+      },
+      {
+        "Link": [
+          4,
+          5,
+          0.5847212983694914
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          6,
+          0.26646126493413447
+        ]
+      },
+      {
+        "Link": [
+          2,
+          5,
+          -0.3101900122451865
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          -0.052019855339965455,
+          "ReLU"
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          0.15617155469264224,
+          "Step"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H4": {
+          "neat": {
+            "node_ref": "H4"
+          },
+          "activation": "Sine",
+          "bias": 0.10377183199527866
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "Gaussian",
+          "bias": 0.05228733711083392
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "ReLU",
+          "bias": -0.04925277577331635
+        }
+      },
+      "links": {
+        "I2->H4": {
+          "from": "I2",
+          "to": "H4",
+          "weight": -0.8923862474813444,
+          "innovation": 35
+        }
+      },
+      "connections": {
+        "connections": {
+          "I2": [
+            {
+              "node": "H4",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 7,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      5,
+      6
+    ],
+    "actions": [
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          4,
+          -0.8923862474813444
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          0.10377183199527866,
+          "Sine"
+        ]
+      }
+    ]
+  }
+}

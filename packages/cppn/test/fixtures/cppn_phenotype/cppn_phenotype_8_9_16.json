@@ -1,0 +1,301 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H0": {
+          "neat": {
+            "node_ref": "H0"
+          },
+          "activation": "Square",
+          "bias": -0.02841928660529854
+        },
+        "H1": {
+          "neat": {
+            "node_ref": "H1"
+          },
+          "activation": "Tanh",
+          "bias": 0.07614582159163132
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "OffsetGaussian",
+          "bias": 0.07015508651262992
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Sigmoid",
+          "bias": -0.001951956392928511
+        }
+      },
+      "links": {
+        "I0->H1": {
+          "from": "I0",
+          "to": "H1",
+          "weight": -0.2899551828780358,
+          "innovation": 11
+        },
+        "I0->O0": {
+          "from": "I0",
+          "to": "O0",
+          "weight": -0.320904628149727,
+          "innovation": 0
+        },
+        "I2->H0": {
+          "from": "I2",
+          "to": "H0",
+          "weight": -7.359747844048016,
+          "innovation": 8
+        },
+        "H1->O0": {
+          "from": "H1",
+          "to": "O0",
+          "weight": 7.624436020564697,
+          "innovation": 6
+        },
+        "H0->O0": {
+          "from": "H0",
+          "to": "O0",
+          "weight": 7.7525856232563,
+          "innovation": 3
+        },
+        "I1->H1": {
+          "from": "I1",
+          "to": "H1",
+          "weight": 7.745030376011416,
+          "innovation": 5
+        },
+        "I2->H1": {
+          "from": "I2",
+          "to": "H1",
+          "weight": 0.4766933518504519,
+          "innovation": 10
+        },
+        "I0->H0": {
+          "from": "I0",
+          "to": "H0",
+          "weight": 6.50668171557221,
+          "innovation": 2
+        },
+        "I0->O1": {
+          "from": "I0",
+          "to": "O1",
+          "weight": 0.15721477882833834,
+          "innovation": 12
+        }
+      },
+      "connections": {
+        "connections": {
+          "I0": [
+            {
+              "node": "H0",
+              "edge": null
+            },
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "H1",
+              "edge": null
+            },
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "I2": [
+            {
+              "node": "H0",
+              "edge": null
+            },
+            {
+              "node": "H1",
+              "edge": null
+            }
+          ],
+          "H1": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "H1",
+              "edge": null
+            }
+          ],
+          "H0": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 8,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      6,
+      7
+    ],
+    "actions": [
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          4,
+          7.745030376011416
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          5,
+          -7.359747844048016
+        ]
+      },
+      {
+        "Link": [
+          2,
+          4,
+          0.4766933518504519
+        ]
+      },
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          5,
+          6.50668171557221
+        ]
+      },
+      {
+        "Link": [
+          0,
+          6,
+          -0.320904628149727
+        ]
+      },
+      {
+        "Link": [
+          0,
+          4,
+          -0.2899551828780358
+        ]
+      },
+      {
+        "Link": [
+          0,
+          7,
+          0.15721477882833834
+        ]
+      },
+      {
+        "Activation": [
+          7,
+          -0.001951956392928511,
+          "Sigmoid"
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          0.07614582159163132,
+          "Tanh"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          6,
+          7.624436020564697
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          -0.02841928660529854,
+          "Square"
+        ]
+      },
+      {
+        "Link": [
+          5,
+          6,
+          7.7525856232563
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          0.07015508651262992,
+          "OffsetGaussian"
+        ]
+      }
+    ]
+  }
+}

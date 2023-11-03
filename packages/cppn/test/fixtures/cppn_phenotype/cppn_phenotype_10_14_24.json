@@ -1,0 +1,427 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H7": {
+          "neat": {
+            "node_ref": "H7"
+          },
+          "activation": "Step",
+          "bias": -0.015082210540372993
+        },
+        "H10": {
+          "neat": {
+            "node_ref": "H10"
+          },
+          "activation": "Linear",
+          "bias": 0.0018060333800321675
+        },
+        "H2": {
+          "neat": {
+            "node_ref": "H2"
+          },
+          "activation": "Step",
+          "bias": 0.0
+        },
+        "H4": {
+          "neat": {
+            "node_ref": "H4"
+          },
+          "activation": "ReLU",
+          "bias": -0.04865752953230813
+        }
+      },
+      "outputs": {
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "OffsetGaussian",
+          "bias": -0.10904860642174373
+        },
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "None",
+          "bias": 0.13809037717268652
+        }
+      },
+      "links": {
+        "I0->H7": {
+          "from": "I0",
+          "to": "H7",
+          "weight": -0.8659794713289677,
+          "innovation": 33
+        },
+        "H4->H2": {
+          "from": "H4",
+          "to": "H2",
+          "weight": 0.015492995521305342,
+          "innovation": 69
+        },
+        "H7->O1": {
+          "from": "H7",
+          "to": "O1",
+          "weight": 0.4698271099778746,
+          "innovation": 54
+        },
+        "I0->O1": {
+          "from": "I0",
+          "to": "O1",
+          "weight": 0.01078790160379095,
+          "innovation": 5
+        },
+        "H10->O0": {
+          "from": "H10",
+          "to": "O0",
+          "weight": 1.1783421831566618,
+          "innovation": 51
+        },
+        "I2->H2": {
+          "from": "I2",
+          "to": "H2",
+          "weight": 0.18024245304964892,
+          "innovation": 15
+        },
+        "I2->H4": {
+          "from": "I2",
+          "to": "H4",
+          "weight": -1.4891326851741427,
+          "innovation": 38
+        },
+        "I0->H4": {
+          "from": "I0",
+          "to": "H4",
+          "weight": 0.7857767274343994,
+          "innovation": 42
+        },
+        "I3->H10": {
+          "from": "I3",
+          "to": "H10",
+          "weight": 0.15367298939145846,
+          "innovation": 50
+        },
+        "I1->H10": {
+          "from": "I1",
+          "to": "H10",
+          "weight": 0.1201510740113998,
+          "innovation": 67
+        },
+        "I0->H10": {
+          "from": "I0",
+          "to": "H10",
+          "weight": 0.3210388062658097,
+          "innovation": 156
+        },
+        "H7->O0": {
+          "from": "H7",
+          "to": "O0",
+          "weight": 1.0,
+          "innovation": 34
+        },
+        "I3->O0": {
+          "from": "I3",
+          "to": "O0",
+          "weight": 0.30563979067606006,
+          "innovation": 4
+        },
+        "H2->O1": {
+          "from": "H2",
+          "to": "O1",
+          "weight": 1.0,
+          "innovation": 16
+        }
+      },
+      "connections": {
+        "connections": {
+          "I3": [
+            {
+              "node": "H10",
+              "edge": null
+            },
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I2": [
+            {
+              "node": "H4",
+              "edge": null
+            },
+            {
+              "node": "H2",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "H10",
+              "edge": null
+            }
+          ],
+          "H10": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "H7": [
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "H4": [
+            {
+              "node": "H2",
+              "edge": null
+            }
+          ],
+          "I0": [
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "H10",
+              "edge": null
+            },
+            {
+              "node": "H4",
+              "edge": null
+            },
+            {
+              "node": "H7",
+              "edge": null
+            }
+          ],
+          "H2": [
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 10,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      8,
+      9
+    ],
+    "actions": [
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          9,
+          0.01078790160379095
+        ]
+      },
+      {
+        "Link": [
+          0,
+          7,
+          0.3210388062658097
+        ]
+      },
+      {
+        "Link": [
+          0,
+          5,
+          0.7857767274343994
+        ]
+      },
+      {
+        "Link": [
+          0,
+          4,
+          -0.8659794713289677
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          -0.015082210540372993,
+          "Step"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          8,
+          1.0
+        ]
+      },
+      {
+        "Link": [
+          4,
+          9,
+          0.4698271099778746
+        ]
+      },
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          7,
+          0.1201510740113998
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          5,
+          -1.4891326851741427
+        ]
+      },
+      {
+        "Link": [
+          2,
+          6,
+          0.18024245304964892
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          -0.04865752953230813,
+          "ReLU"
+        ]
+      },
+      {
+        "Link": [
+          5,
+          6,
+          0.015492995521305342
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          0.0,
+          "Step"
+        ]
+      },
+      {
+        "Link": [
+          6,
+          9,
+          1.0
+        ]
+      },
+      {
+        "Activation": [
+          9,
+          -0.10904860642174373,
+          "OffsetGaussian"
+        ]
+      },
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          7,
+          0.15367298939145846
+        ]
+      },
+      {
+        "Link": [
+          3,
+          8,
+          0.30563979067606006
+        ]
+      },
+      {
+        "Activation": [
+          7,
+          0.0018060333800321675,
+          "Linear"
+        ]
+      },
+      {
+        "Link": [
+          7,
+          8,
+          1.1783421831566618
+        ]
+      },
+      {
+        "Activation": [
+          8,
+          0.13809037717268652,
+          "None"
+        ]
+      }
+    ]
+  }
+}

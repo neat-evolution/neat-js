@@ -1,0 +1,479 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H1": {
+          "neat": {
+            "node_ref": "H1"
+          },
+          "activation": "Step",
+          "bias": 0.011584212754292667
+        },
+        "H22": {
+          "neat": {
+            "node_ref": "H22"
+          },
+          "activation": "Linear",
+          "bias": 0.013394530232843196
+        },
+        "H28": {
+          "neat": {
+            "node_ref": "H28"
+          },
+          "activation": "Gaussian",
+          "bias": 0.012802495504943785
+        }
+      },
+      "outputs": {
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Sine",
+          "bias": -0.04696409171026393
+        },
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "Sigmoid",
+          "bias": -0.0063929473624268415
+        }
+      },
+      "links": {
+        "H22->H1": {
+          "from": "H22",
+          "to": "H1",
+          "weight": 0.7490958872647835,
+          "innovation": 118
+        },
+        "I3->O1": {
+          "from": "I3",
+          "to": "O1",
+          "weight": 0.8205638901340379,
+          "innovation": 3
+        },
+        "I3->H22": {
+          "from": "I3",
+          "to": "H22",
+          "weight": -0.2860858305138365,
+          "innovation": 121
+        },
+        "H22->O0": {
+          "from": "H22",
+          "to": "O0",
+          "weight": -0.33483843793654544,
+          "innovation": 160
+        },
+        "I2->O1": {
+          "from": "I2",
+          "to": "O1",
+          "weight": -0.3383609787136045,
+          "innovation": 4
+        },
+        "I1->H28": {
+          "from": "I1",
+          "to": "H28",
+          "weight": -0.12290310714601027,
+          "innovation": 174
+        },
+        "I1->H1": {
+          "from": "I1",
+          "to": "H1",
+          "weight": 0.3858614144609105,
+          "innovation": 73
+        },
+        "H1->O0": {
+          "from": "H1",
+          "to": "O0",
+          "weight": 0.9760067736283092,
+          "innovation": 12
+        },
+        "I0->O0": {
+          "from": "I0",
+          "to": "O0",
+          "weight": 0.27464055600112114,
+          "innovation": 5
+        },
+        "I0->H22": {
+          "from": "I0",
+          "to": "H22",
+          "weight": 0.5557681453988977,
+          "innovation": 117
+        },
+        "I3->H1": {
+          "from": "I3",
+          "to": "H1",
+          "weight": 0.29064127662672934,
+          "innovation": 11
+        },
+        "I2->H28": {
+          "from": "I2",
+          "to": "H28",
+          "weight": 0.3157435498378435,
+          "innovation": 143
+        },
+        "H28->H22": {
+          "from": "H28",
+          "to": "H22",
+          "weight": 0.7708543841373543,
+          "innovation": 144
+        },
+        "I1->O0": {
+          "from": "I1",
+          "to": "O0",
+          "weight": 0.9905826644402022,
+          "innovation": 0
+        },
+        "I2->H1": {
+          "from": "I2",
+          "to": "H1",
+          "weight": 0.2632612447761893,
+          "innovation": 95
+        },
+        "H1->O1": {
+          "from": "H1",
+          "to": "O1",
+          "weight": 0.0040013608773806775,
+          "innovation": 14
+        },
+        "H28->O1": {
+          "from": "H28",
+          "to": "O1",
+          "weight": -0.14373426876011752,
+          "innovation": 164
+        },
+        "H28->H1": {
+          "from": "H28",
+          "to": "H1",
+          "weight": 0.14243851100023408,
+          "innovation": 195
+        }
+      },
+      "connections": {
+        "connections": {
+          "H22": [
+            {
+              "node": "H1",
+              "edge": null
+            },
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "H28": [
+            {
+              "node": "H22",
+              "edge": null
+            },
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "H1",
+              "edge": null
+            }
+          ],
+          "H1": [
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "I2": [
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "H1",
+              "edge": null
+            },
+            {
+              "node": "H28",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "H28",
+              "edge": null
+            },
+            {
+              "node": "H1",
+              "edge": null
+            }
+          ],
+          "I0": [
+            {
+              "node": "H22",
+              "edge": null
+            },
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I3": [
+            {
+              "node": "H1",
+              "edge": null
+            },
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "H22",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 9,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      7,
+      8
+    ],
+    "actions": [
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          6,
+          0.29064127662672934
+        ]
+      },
+      {
+        "Link": [
+          3,
+          8,
+          0.8205638901340379
+        ]
+      },
+      {
+        "Link": [
+          3,
+          5,
+          -0.2860858305138365
+        ]
+      },
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          5,
+          0.5557681453988977
+        ]
+      },
+      {
+        "Link": [
+          0,
+          7,
+          0.27464055600112114
+        ]
+      },
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          7,
+          0.9905826644402022
+        ]
+      },
+      {
+        "Link": [
+          1,
+          4,
+          -0.12290310714601027
+        ]
+      },
+      {
+        "Link": [
+          1,
+          6,
+          0.3858614144609105
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          8,
+          -0.3383609787136045
+        ]
+      },
+      {
+        "Link": [
+          2,
+          6,
+          0.2632612447761893
+        ]
+      },
+      {
+        "Link": [
+          2,
+          4,
+          0.3157435498378435
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          0.012802495504943785,
+          "Gaussian"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          5,
+          0.7708543841373543
+        ]
+      },
+      {
+        "Link": [
+          4,
+          8,
+          -0.14373426876011752
+        ]
+      },
+      {
+        "Link": [
+          4,
+          6,
+          0.14243851100023408
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          0.013394530232843196,
+          "Linear"
+        ]
+      },
+      {
+        "Link": [
+          5,
+          6,
+          0.7490958872647835
+        ]
+      },
+      {
+        "Link": [
+          5,
+          7,
+          -0.33483843793654544
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          0.011584212754292667,
+          "Step"
+        ]
+      },
+      {
+        "Link": [
+          6,
+          7,
+          0.9760067736283092
+        ]
+      },
+      {
+        "Link": [
+          6,
+          8,
+          0.0040013608773806775
+        ]
+      },
+      {
+        "Activation": [
+          8,
+          -0.04696409171026393,
+          "Sine"
+        ]
+      },
+      {
+        "Activation": [
+          7,
+          -0.0063929473624268415,
+          "Sigmoid"
+        ]
+      }
+    ]
+  }
+}

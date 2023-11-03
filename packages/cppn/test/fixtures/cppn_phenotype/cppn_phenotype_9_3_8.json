@@ -1,0 +1,195 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H1": {
+          "neat": {
+            "node_ref": "H1"
+          },
+          "activation": "Linear",
+          "bias": 0.026524084134736284
+        },
+        "H0": {
+          "neat": {
+            "node_ref": "H0"
+          },
+          "activation": "None",
+          "bias": -0.13896604111460611
+        },
+        "H7": {
+          "neat": {
+            "node_ref": "H7"
+          },
+          "activation": "Step",
+          "bias": 0.014877130553054566
+        },
+        "H2": {
+          "neat": {
+            "node_ref": "H2"
+          },
+          "activation": "Sigmoid",
+          "bias": -0.04605551300819981
+        }
+      },
+      "outputs": {
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Sine",
+          "bias": 0.07855321700627348
+        },
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "Linear",
+          "bias": 0.039033283909071764
+        }
+      },
+      "links": {
+        "I2->O1": {
+          "from": "I2",
+          "to": "O1",
+          "weight": 1.6867228024282759,
+          "innovation": 20
+        },
+        "H2->H7": {
+          "from": "H2",
+          "to": "H7",
+          "weight": 0.6338357071732439,
+          "innovation": 38
+        },
+        "H1->H2": {
+          "from": "H1",
+          "to": "H2",
+          "weight": 0.05900105833406788,
+          "innovation": 45
+        }
+      },
+      "connections": {
+        "connections": {
+          "I2": [
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "H2": [
+            {
+              "node": "H7",
+              "edge": null
+            }
+          ],
+          "H1": [
+            {
+              "node": "H2",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 9,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      7,
+      8
+    ],
+    "actions": [
+      {
+        "Activation": [
+          4,
+          0.026524084134736284,
+          "Linear"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          5,
+          0.05900105833406788
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          -0.04605551300819981,
+          "Sigmoid"
+        ]
+      },
+      {
+        "Link": [
+          5,
+          6,
+          0.6338357071732439
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          0.014877130553054566,
+          "Step"
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          8,
+          1.6867228024282759
+        ]
+      },
+      {
+        "Activation": [
+          8,
+          0.07855321700627348,
+          "Sine"
+        ]
+      }
+    ]
+  }
+}

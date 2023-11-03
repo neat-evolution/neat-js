@@ -1,0 +1,260 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H4": {
+          "neat": {
+            "node_ref": "H4"
+          },
+          "activation": "OffsetGaussian",
+          "bias": 0.028458824772344182
+        },
+        "H11": {
+          "neat": {
+            "node_ref": "H11"
+          },
+          "activation": "Tanh",
+          "bias": -0.04417346486301425
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "ReLU",
+          "bias": 0.033019634454863826
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Sigmoid",
+          "bias": 0.060470769699531815
+        }
+      },
+      "links": {
+        "I0->O0": {
+          "from": "I0",
+          "to": "O0",
+          "weight": -0.09403587426398996,
+          "innovation": 7
+        },
+        "H4->H11": {
+          "from": "H4",
+          "to": "H11",
+          "weight": 1.0,
+          "innovation": 60
+        },
+        "H4->O0": {
+          "from": "H4",
+          "to": "O0",
+          "weight": -0.2580786564980574,
+          "innovation": 25
+        },
+        "I2->H4": {
+          "from": "I2",
+          "to": "H4",
+          "weight": -0.33876110973946305,
+          "innovation": 35
+        },
+        "I0->H11": {
+          "from": "I0",
+          "to": "H11",
+          "weight": -0.19955742768430118,
+          "innovation": 67
+        },
+        "H11->O0": {
+          "from": "H11",
+          "to": "O0",
+          "weight": 0.9923991787423356,
+          "innovation": 61
+        },
+        "I3->H4": {
+          "from": "I3",
+          "to": "H4",
+          "weight": -0.5809187520073924,
+          "innovation": 24
+        }
+      },
+      "connections": {
+        "connections": {
+          "I3": [
+            {
+              "node": "H4",
+              "edge": null
+            }
+          ],
+          "I2": [
+            {
+              "node": "H4",
+              "edge": null
+            }
+          ],
+          "I0": [
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "H11",
+              "edge": null
+            }
+          ],
+          "H4": [
+            {
+              "node": "H11",
+              "edge": null
+            },
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "H11": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 8,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      6,
+      7
+    ],
+    "actions": [
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          6,
+          -0.09403587426398996
+        ]
+      },
+      {
+        "Link": [
+          0,
+          5,
+          -0.19955742768430118
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          4,
+          -0.33876110973946305
+        ]
+      },
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          4,
+          -0.5809187520073924
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          0.028458824772344182,
+          "OffsetGaussian"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          5,
+          1.0
+        ]
+      },
+      {
+        "Link": [
+          4,
+          6,
+          -0.2580786564980574
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          -0.04417346486301425,
+          "Tanh"
+        ]
+      },
+      {
+        "Link": [
+          5,
+          6,
+          0.9923991787423356
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          0.033019634454863826,
+          "ReLU"
+        ]
+      }
+    ]
+  }
+}

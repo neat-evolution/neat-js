@@ -1,0 +1,376 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H2": {
+          "neat": {
+            "node_ref": "H2"
+          },
+          "activation": "Linear",
+          "bias": -0.05676939949018328
+        },
+        "H1": {
+          "neat": {
+            "node_ref": "H1"
+          },
+          "activation": "Square",
+          "bias": -0.04739792051105925
+        },
+        "H10": {
+          "neat": {
+            "node_ref": "H10"
+          },
+          "activation": "Tanh",
+          "bias": -0.009206262962970564
+        },
+        "H0": {
+          "neat": {
+            "node_ref": "H0"
+          },
+          "activation": "Sine",
+          "bias": 0.048928903758090156
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "ReLU",
+          "bias": 0.037733053569451495
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "ReLU",
+          "bias": -0.005497460808991727
+        }
+      },
+      "links": {
+        "H0->H10": {
+          "from": "H0",
+          "to": "H10",
+          "weight": 1.0988146933838507,
+          "innovation": 53
+        },
+        "H1->O0": {
+          "from": "H1",
+          "to": "O0",
+          "weight": 0.016070804206880562,
+          "innovation": 6
+        },
+        "I0->H2": {
+          "from": "I0",
+          "to": "H2",
+          "weight": 7.099853517925245,
+          "innovation": 16
+        },
+        "I3->H10": {
+          "from": "I3",
+          "to": "H10",
+          "weight": -0.5408483207548457,
+          "innovation": 56
+        },
+        "H0->O1": {
+          "from": "H0",
+          "to": "O1",
+          "weight": -0.2797458189606309,
+          "innovation": 10
+        },
+        "H10->O0": {
+          "from": "H10",
+          "to": "O0",
+          "weight": 7.532751920078757,
+          "innovation": 54
+        },
+        "I1->H1": {
+          "from": "I1",
+          "to": "H1",
+          "weight": 7.368040042923008,
+          "innovation": 5
+        },
+        "H2->H0": {
+          "from": "H2",
+          "to": "H0",
+          "weight": 1.0,
+          "innovation": 17
+        },
+        "I3->H1": {
+          "from": "I3",
+          "to": "H1",
+          "weight": -8.593740318004652,
+          "innovation": 9
+        },
+        "I2->H0": {
+          "from": "I2",
+          "to": "H0",
+          "weight": -6.940741506883542,
+          "innovation": 8
+        },
+        "I1->O1": {
+          "from": "I1",
+          "to": "O1",
+          "weight": 0.01915607153478116,
+          "innovation": 13
+        }
+      },
+      "connections": {
+        "connections": {
+          "H1": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I3": [
+            {
+              "node": "H1",
+              "edge": null
+            },
+            {
+              "node": "H10",
+              "edge": null
+            }
+          ],
+          "H10": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I2": [
+            {
+              "node": "H0",
+              "edge": null
+            }
+          ],
+          "I0": [
+            {
+              "node": "H2",
+              "edge": null
+            }
+          ],
+          "H0": [
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "H10",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "H1",
+              "edge": null
+            },
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "H2": [
+            {
+              "node": "H0",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 10,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      8,
+      9
+    ],
+    "actions": [
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          7,
+          7.368040042923008
+        ]
+      },
+      {
+        "Link": [
+          1,
+          9,
+          0.01915607153478116
+        ]
+      },
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          4,
+          7.099853517925245
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          -0.05676939949018328,
+          "Linear"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          5,
+          1.0
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          5,
+          -6.940741506883542
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          0.048928903758090156,
+          "Sine"
+        ]
+      },
+      {
+        "Link": [
+          5,
+          9,
+          -0.2797458189606309
+        ]
+      },
+      {
+        "Link": [
+          5,
+          6,
+          1.0988146933838507
+        ]
+      },
+      {
+        "Activation": [
+          9,
+          -0.005497460808991727,
+          "ReLU"
+        ]
+      },
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          7,
+          -8.593740318004652
+        ]
+      },
+      {
+        "Link": [
+          3,
+          6,
+          -0.5408483207548457
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          -0.009206262962970564,
+          "Tanh"
+        ]
+      },
+      {
+        "Link": [
+          6,
+          8,
+          7.532751920078757
+        ]
+      },
+      {
+        "Activation": [
+          7,
+          -0.04739792051105925,
+          "Square"
+        ]
+      },
+      {
+        "Link": [
+          7,
+          8,
+          0.016070804206880562
+        ]
+      },
+      {
+        "Activation": [
+          8,
+          0.037733053569451495,
+          "ReLU"
+        ]
+      }
+    ]
+  }
+}
