@@ -1,0 +1,106 @@
+{
+  "inputs": [
+    [
+      262144,
+      262144
+    ],
+    [
+      -786432,
+      -262144
+    ],
+    [
+      786432,
+      786432
+    ]
+  ],
+  "outputs": [],
+  "cppn_genome": {
+    "neat": {
+      "inputs": {
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {},
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "Sigmoid",
+          "bias": -0.016682473813502352
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Tanh",
+          "bias": -0.0009730583817477223
+        }
+      },
+      "links": {},
+      "connections": {
+        "connections": {}
+      }
+    }
+  },
+  "phenotype": {
+    "length": 6,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      4,
+      5
+    ],
+    "actions": []
+  },
+  "depth": 1,
+  "reverse": false,
+  "allow_connections_to_input": true,
+  "nodes": [
+    [
+      [
+        262144,
+        262144
+      ],
+      [
+        -786432,
+        -262144
+      ],
+      [
+        786432,
+        786432
+      ]
+    ]
+  ],
+  "connections": []
+}

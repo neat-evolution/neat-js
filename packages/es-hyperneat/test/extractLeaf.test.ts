@@ -1,6 +1,4 @@
 import type { Target } from '@neat-js/core'
-import { createPhenotype } from '@neat-js/cppn'
-import { createSyncExecutor } from '@neat-js/executor'
 import type { PointKey } from '@neat-js/hyperneat'
 import { describe, expect, test } from 'vitest'
 
@@ -42,7 +40,7 @@ describe('QuadPoint.extract', () => {
 
   test.each([...testCases.entries()])(
     'should return the same band values for test case #%d',
-    (_index, testCase: TestCase) => {
+    async (_index, testCase: TestCase) => {
       const { args, bandValues } = testCase
       const f = args[0]
       for (const bandValue of bandValues) {
@@ -70,13 +68,10 @@ describe('QuadPoint.extract', () => {
 
   test.each([...testCases.entries()])(
     'should mutate connections for test case #%d',
-    (_index, testCase: TestCase) => {
+    async (_index, testCase: TestCase) => {
       const args = cloneArgs(testCase.args)
       expect(args[1]).toEqual(testCase.beforeConnections)
       Array.from(testCase.leaf.extract(...args))
-      // expect(args[1].length).toBe(testCase.afterConnections.length)
-      // const sortedTargets = sortTargets(testCase.args[1])
-      // const sortedAfterConnections = sortTargets(testCase.afterConnections)
       expect(args[1]).toEqual(testCase.afterConnections)
       for (const [i, target] of args[1].entries()) {
         const expected = testCase.afterConnections[i] as Target<string, number>

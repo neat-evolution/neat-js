@@ -1,0 +1,265 @@
+{
+  "inputs": [
+    [
+      -1048576,
+      0
+    ],
+    [
+      -815560,
+      0
+    ],
+    [
+      -582543,
+      0
+    ],
+    [
+      -349526,
+      0
+    ],
+    [
+      -116509,
+      0
+    ],
+    [
+      116508,
+      0
+    ],
+    [
+      349525,
+      0
+    ],
+    [
+      582542,
+      0
+    ],
+    [
+      815559,
+      0
+    ],
+    [
+      1048576,
+      0
+    ]
+  ],
+  "outputs": [],
+  "cppn_genome": {
+    "neat": {
+      "inputs": {
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H3": {
+          "neat": {
+            "node_ref": "H3"
+          },
+          "activation": "ReLU",
+          "bias": -0.008339448210489157
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "Tanh",
+          "bias": -0.0407138623704707
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Tanh",
+          "bias": -0.024291262023578605
+        }
+      },
+      "links": {
+        "I0->H3": {
+          "from": "I0",
+          "to": "H3",
+          "weight": 0.40505491101986746,
+          "innovation": 18
+        },
+        "I2->O1": {
+          "from": "I2",
+          "to": "O1",
+          "weight": -0.07686865776201635,
+          "innovation": 0
+        },
+        "I1->H3": {
+          "from": "I1",
+          "to": "H3",
+          "weight": 0.34568264100277957,
+          "innovation": 61
+        }
+      },
+      "connections": {
+        "connections": {
+          "I0": [
+            {
+              "node": "H3",
+              "edge": null
+            }
+          ],
+          "I2": [
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "H3",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 7,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      5,
+      6
+    ],
+    "actions": [
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          4,
+          0.34568264100277957
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          6,
+          -0.07686865776201635
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          -0.024291262023578605,
+          "Tanh"
+        ]
+      },
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          4,
+          0.40505491101986746
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          -0.008339448210489157,
+          "ReLU"
+        ]
+      }
+    ]
+  },
+  "depth": 1,
+  "reverse": true,
+  "allow_connections_to_input": true,
+  "nodes": [
+    [
+      [
+        -1048576,
+        0
+      ],
+      [
+        -815560,
+        0
+      ],
+      [
+        -582543,
+        0
+      ],
+      [
+        -349526,
+        0
+      ],
+      [
+        -116509,
+        0
+      ],
+      [
+        116508,
+        0
+      ],
+      [
+        349525,
+        0
+      ],
+      [
+        582542,
+        0
+      ],
+      [
+        815559,
+        0
+      ],
+      [
+        1048576,
+        0
+      ]
+    ]
+  ],
+  "connections": []
+}

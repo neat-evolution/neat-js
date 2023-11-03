@@ -1,0 +1,234 @@
+{
+  "inputs": [
+    [
+      -524288,
+      524288
+    ],
+    [
+      -524288,
+      -524288
+    ],
+    [
+      524288,
+      -524288
+    ],
+    [
+      524288,
+      524288
+    ]
+  ],
+  "outputs": [],
+  "cppn_genome": {
+    "neat": {
+      "inputs": {
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H3": {
+          "neat": {
+            "node_ref": "H3"
+          },
+          "activation": "Sine",
+          "bias": 0.010415313001547766
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "ReLU",
+          "bias": -0.17119161698855667
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Sigmoid",
+          "bias": 0.0674615854365875
+        }
+      },
+      "links": {
+        "I3->O0": {
+          "from": "I3",
+          "to": "O0",
+          "weight": 0.03979482201546114,
+          "innovation": 9
+        },
+        "H3->O1": {
+          "from": "H3",
+          "to": "O1",
+          "weight": 1.156177720412062,
+          "innovation": 19
+        },
+        "I1->O0": {
+          "from": "I1",
+          "to": "O0",
+          "weight": -0.5781731087700039,
+          "innovation": 4
+        },
+        "I1->H3": {
+          "from": "I1",
+          "to": "H3",
+          "weight": -0.5084833417993317,
+          "innovation": 18
+        }
+      },
+      "connections": {
+        "connections": {
+          "H3": [
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "H3",
+              "edge": null
+            }
+          ],
+          "I3": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 7,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      5,
+      6
+    ],
+    "actions": [
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          5,
+          0.03979482201546114
+        ]
+      },
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          5,
+          -0.5781731087700039
+        ]
+      },
+      {
+        "Link": [
+          1,
+          4,
+          -0.5084833417993317
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          0.010415313001547766,
+          "Sine"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          6,
+          1.156177720412062
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          0.0674615854365875,
+          "Sigmoid"
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          -0.17119161698855667,
+          "ReLU"
+        ]
+      }
+    ]
+  },
+  "depth": 2,
+  "reverse": false,
+  "allow_connections_to_input": false,
+  "nodes": [
+    [
+      [
+        -524288,
+        524288
+      ],
+      [
+        -524288,
+        -524288
+      ],
+      [
+        524288,
+        -524288
+      ],
+      [
+        524288,
+        524288
+      ]
+    ]
+  ],
+  "connections": []
+}
