@@ -38,6 +38,7 @@
     "dev:cjs": "mkdir -p dist/cjs && echo '{\"type\":\"commonjs\",\"main\":\"./index.js\"}' >> dist/cjs/package.json && swc --watch src -d dist/cjs --source-maps --copy-files -C module.type=commonjs",
     "dev:esm": "swc --watch src -d dist/esm --source-maps --copy-files -C module.type=es6",
     "dev:types": "tsc --watch --declaration --emitDeclarationOnly --project tsconfig.types.json --outDir dist/types",
+    "start": "caffeinate -s node ./dist/esm/worker.js",
     "format": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\" --fix",
     "lint": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\"",
     "precommit": "lint-staged",
