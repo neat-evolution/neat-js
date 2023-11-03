@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "build": "turbo run --concurrency=4 build",
+    "demo": "yarn build && yarn workspace @neat-js/demo start",
     "clean": "turbo run clean",
     "coverage": "turbo run --concurrency=4 coverage -- --run",
     "coverage:ci": "turbo run --concurrency=2 coverage -- --run",
