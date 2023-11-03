@@ -6,14 +6,6 @@ import type { WeightFn } from '../src/index.js'
 
 import { testCases, type TestCase } from './fixtures/extract_leaf/index.js'
 
-// const sortTargets = (
-//   targets: Array<Target<string, number>>
-// ): Array<Target<string, number>> => {
-//   return targets.sort((a, b) => {
-//     return a.node > b.node ? 1 : a.node < b.node ? -1 : a.edge - b.edge
-//   })
-// }
-
 const cloneArgs = (
   args: [
     f: WeightFn,
@@ -40,7 +32,7 @@ describe('QuadPoint.extract', () => {
 
   test.each([...testCases.entries()])(
     'should return the same band values for test case #%d',
-    async (_index, testCase: TestCase) => {
+    (_index, testCase: TestCase) => {
       const { args, bandValues } = testCase
       const f = args[0]
       for (const bandValue of bandValues) {
@@ -68,7 +60,7 @@ describe('QuadPoint.extract', () => {
 
   test.each([...testCases.entries()])(
     'should mutate connections for test case #%d',
-    async (_index, testCase: TestCase) => {
+    (_index, testCase: TestCase) => {
       const args = cloneArgs(testCase.args)
       expect(args[1]).toEqual(testCase.beforeConnections)
       Array.from(testCase.leaf.extract(...args))

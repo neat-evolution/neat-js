@@ -29,9 +29,11 @@ import {
 import type { DESHyperNEATState } from '../../../src/DESHyperNEATState.js'
 import { topologyInitConfig } from '../../../src/topology/topologyInitConfig.js'
 
-async function readJSONFile(filePath: string): Promise<any> {
+async function readJSONFile(
+  filePath: string
+): Promise<[filePath: string, data: DESHyperNEATGenomeActionsData]> {
   const data = await fs.readFile(filePath, 'utf-8')
-  return JSON.parse(data)
+  return [filePath, JSON.parse(data)]
 }
 
 const jsonDir = new URL('.', import.meta.url).pathname
@@ -274,36 +276,33 @@ const createConnections = (
 }
 
 const rawTestCases = await Promise.all(
-  jsonFiles.map(
-    (file) =>
-      readJSONFile(
-        new URL(`${jsonDir}/${file}`, import.meta.url).pathname
-      ) as Promise<DESHyperNEATGenomeActionsData>
+  jsonFiles.map((file) =>
+    readJSONFile(new URL(`${jsonDir}/${file}`, import.meta.url).pathname)
   )
 )
 
 export interface TestCase {
+  filePath: string
   genome: DESHyperNEATGenome
   connections: Array<Connection<NodeKey, null>>
   factoryOptions: DESHyperNEATGenomeFactoryOptions
   phenotype: Phenotype
 }
 
-const testCases: TestCase[] = rawTestCases.map(
-  (testCase: DESHyperNEATGenomeActionsData) => {
-    const { genome, phenotype } = testCase
-    return {
-      genome: createDESHyperNEATGenome(genome),
-      connections: createConnections(genome.neat.connections.connections),
-      factoryOptions: toDESHyperNEATFactoryOptions(genome),
-      phenotype: {
-        length: phenotype.length,
-        inputs: phenotype.inputs,
-        outputs: phenotype.outputs,
-        actions: createActions(phenotype.actions),
-      },
-    }
+const testCases: TestCase[] = rawTestCases.map(([filePath, testCase]) => {
+  const { genome, phenotype } = testCase
+  return {
+    filePath,
+    genome: createDESHyperNEATGenome(genome),
+    connections: createConnections(genome.neat.connections.connections),
+    factoryOptions: toDESHyperNEATFactoryOptions(genome),
+    phenotype: {
+      length: phenotype.length,
+      inputs: phenotype.inputs,
+      outputs: phenotype.outputs,
+      actions: createActions(phenotype.actions),
+    },
   }
-)
+})
 
 export { testCases }
