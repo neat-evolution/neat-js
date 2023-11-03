@@ -1,0 +1,1637 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "cppn": {
+            "neat": {
+              "inputs": {
+                "I1": {
+                  "neat": {
+                    "node_ref": "I1"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I3": {
+                  "neat": {
+                    "node_ref": "I3"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I2": {
+                  "neat": {
+                    "node_ref": "I2"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I0": {
+                  "neat": {
+                    "node_ref": "I0"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                }
+              },
+              "hidden_nodes": {},
+              "outputs": {
+                "O0": {
+                  "neat": {
+                    "node_ref": "O0"
+                  },
+                  "activation": "Linear",
+                  "bias": 0.004854562371340174
+                },
+                "O1": {
+                  "neat": {
+                    "node_ref": "O1"
+                  },
+                  "activation": "Tanh",
+                  "bias": 0.1332333515492696
+                }
+              },
+              "links": {},
+              "connections": {
+                "connections": {}
+              }
+            }
+          },
+          "depth": 0
+        }
+      },
+      "hidden_nodes": {
+        "H2": {
+          "neat": {
+            "node_ref": "H2"
+          },
+          "cppn": {
+            "neat": {
+              "inputs": {
+                "I2": {
+                  "neat": {
+                    "node_ref": "I2"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I1": {
+                  "neat": {
+                    "node_ref": "I1"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I3": {
+                  "neat": {
+                    "node_ref": "I3"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I0": {
+                  "neat": {
+                    "node_ref": "I0"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                }
+              },
+              "hidden_nodes": {
+                "H14": {
+                  "neat": {
+                    "node_ref": "H14"
+                  },
+                  "activation": "None",
+                  "bias": -0.07628656925480377
+                }
+              },
+              "outputs": {
+                "O1": {
+                  "neat": {
+                    "node_ref": "O1"
+                  },
+                  "activation": "Sigmoid",
+                  "bias": 0.014991039907812186
+                },
+                "O0": {
+                  "neat": {
+                    "node_ref": "O0"
+                  },
+                  "activation": "Step",
+                  "bias": 0.04587286069532122
+                }
+              },
+              "links": {
+                "I1->O1": {
+                  "from": "I1",
+                  "to": "O1",
+                  "weight": 0.0970166972811447,
+                  "innovation": 9
+                },
+                "I0->O0": {
+                  "from": "I0",
+                  "to": "O0",
+                  "weight": -0.029829853764654635,
+                  "innovation": 15
+                },
+                "I3->O0": {
+                  "from": "I3",
+                  "to": "O0",
+                  "weight": 0.3860609211276864,
+                  "innovation": 1
+                },
+                "I3->O1": {
+                  "from": "I3",
+                  "to": "O1",
+                  "weight": 0.15429054856211455,
+                  "innovation": 0
+                },
+                "H14->O1": {
+                  "from": "H14",
+                  "to": "O1",
+                  "weight": 1.329081221185387,
+                  "innovation": 81
+                },
+                "I0->H14": {
+                  "from": "I0",
+                  "to": "H14",
+                  "weight": -0.6440406333571598,
+                  "innovation": 80
+                },
+                "I2->H14": {
+                  "from": "I2",
+                  "to": "H14",
+                  "weight": 0.19828684102410488,
+                  "innovation": 85
+                },
+                "I1->O0": {
+                  "from": "I1",
+                  "to": "O0",
+                  "weight": -1.1240353679704769,
+                  "innovation": 7
+                }
+              },
+              "connections": {
+                "connections": {
+                  "I0": [
+                    {
+                      "node": "H14",
+                      "edge": null
+                    },
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ],
+                  "I1": [
+                    {
+                      "node": "O1",
+                      "edge": null
+                    },
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ],
+                  "I3": [
+                    {
+                      "node": "O1",
+                      "edge": null
+                    },
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ],
+                  "H14": [
+                    {
+                      "node": "O1",
+                      "edge": null
+                    }
+                  ],
+                  "I2": [
+                    {
+                      "node": "H14",
+                      "edge": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "depth": 1
+        },
+        "H0": {
+          "neat": {
+            "node_ref": "H0"
+          },
+          "cppn": {
+            "neat": {
+              "inputs": {
+                "I1": {
+                  "neat": {
+                    "node_ref": "I1"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I3": {
+                  "neat": {
+                    "node_ref": "I3"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I2": {
+                  "neat": {
+                    "node_ref": "I2"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I0": {
+                  "neat": {
+                    "node_ref": "I0"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                }
+              },
+              "hidden_nodes": {},
+              "outputs": {
+                "O0": {
+                  "neat": {
+                    "node_ref": "O0"
+                  },
+                  "activation": "Tanh",
+                  "bias": 0.025253590697442117
+                },
+                "O1": {
+                  "neat": {
+                    "node_ref": "O1"
+                  },
+                  "activation": "Tanh",
+                  "bias": -0.002999121863558614
+                }
+              },
+              "links": {
+                "I1->O0": {
+                  "from": "I1",
+                  "to": "O0",
+                  "weight": 0.09480644439745922,
+                  "innovation": 2
+                },
+                "I2->O0": {
+                  "from": "I2",
+                  "to": "O0",
+                  "weight": -0.16041464487741447,
+                  "innovation": 7
+                }
+              },
+              "connections": {
+                "connections": {
+                  "I1": [
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ],
+                  "I2": [
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "depth": 0
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "cppn": {
+            "neat": {
+              "inputs": {
+                "I2": {
+                  "neat": {
+                    "node_ref": "I2"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I0": {
+                  "neat": {
+                    "node_ref": "I0"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I3": {
+                  "neat": {
+                    "node_ref": "I3"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I1": {
+                  "neat": {
+                    "node_ref": "I1"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                }
+              },
+              "hidden_nodes": {
+                "H2": {
+                  "neat": {
+                    "node_ref": "H2"
+                  },
+                  "activation": "Tanh",
+                  "bias": 0.02630977329005694
+                },
+                "H20": {
+                  "neat": {
+                    "node_ref": "H20"
+                  },
+                  "activation": "ReLU",
+                  "bias": 0.17542725353179187
+                }
+              },
+              "outputs": {
+                "O1": {
+                  "neat": {
+                    "node_ref": "O1"
+                  },
+                  "activation": "Linear",
+                  "bias": 0.13529080412690053
+                },
+                "O0": {
+                  "neat": {
+                    "node_ref": "O0"
+                  },
+                  "activation": "Tanh",
+                  "bias": 0.03949119446509677
+                }
+              },
+              "links": {
+                "H2->O0": {
+                  "from": "H2",
+                  "to": "O0",
+                  "weight": -0.49688019077514645,
+                  "innovation": 19
+                },
+                "I3->O0": {
+                  "from": "I3",
+                  "to": "O0",
+                  "weight": 0.15448663898605908,
+                  "innovation": 5
+                },
+                "I3->O1": {
+                  "from": "I3",
+                  "to": "O1",
+                  "weight": -0.24182815361403642,
+                  "innovation": 6
+                },
+                "I3->H2": {
+                  "from": "I3",
+                  "to": "H2",
+                  "weight": 0.1248238700209735,
+                  "innovation": 103
+                },
+                "H20->O1": {
+                  "from": "H20",
+                  "to": "O1",
+                  "weight": -0.5617373565380097,
+                  "innovation": 122
+                },
+                "I2->H20": {
+                  "from": "I2",
+                  "to": "H20",
+                  "weight": -1.177895286065407,
+                  "innovation": 106
+                },
+                "H20->O0": {
+                  "from": "H20",
+                  "to": "O0",
+                  "weight": 0.3759104754875622,
+                  "innovation": 207
+                },
+                "I3->H20": {
+                  "from": "I3",
+                  "to": "H20",
+                  "weight": -0.17512992250541337,
+                  "innovation": 381
+                },
+                "H20->H2": {
+                  "from": "H20",
+                  "to": "H2",
+                  "weight": -0.22474703430258736,
+                  "innovation": 107
+                },
+                "I2->O1": {
+                  "from": "I2",
+                  "to": "O1",
+                  "weight": 0.27461864261744473,
+                  "innovation": 2
+                },
+                "I1->O0": {
+                  "from": "I1",
+                  "to": "O0",
+                  "weight": -0.36136198074825493,
+                  "innovation": 7
+                },
+                "I2->O0": {
+                  "from": "I2",
+                  "to": "O0",
+                  "weight": -0.21541904466154727,
+                  "innovation": 0
+                },
+                "H2->O1": {
+                  "from": "H2",
+                  "to": "O1",
+                  "weight": 1.5514432791724757,
+                  "innovation": 15
+                },
+                "I0->O1": {
+                  "from": "I0",
+                  "to": "O1",
+                  "weight": 1.5119484610456573,
+                  "innovation": 1
+                },
+                "I1->H2": {
+                  "from": "I1",
+                  "to": "H2",
+                  "weight": 1.63100088785934,
+                  "innovation": 67
+                },
+                "I2->H2": {
+                  "from": "I2",
+                  "to": "H2",
+                  "weight": 0.31615465990367175,
+                  "innovation": 14
+                },
+                "I0->O0": {
+                  "from": "I0",
+                  "to": "O0",
+                  "weight": -0.20143309353234296,
+                  "innovation": 4
+                }
+              },
+              "connections": {
+                "connections": {
+                  "I2": [
+                    {
+                      "node": "O0",
+                      "edge": null
+                    },
+                    {
+                      "node": "H2",
+                      "edge": null
+                    },
+                    {
+                      "node": "H20",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    }
+                  ],
+                  "I1": [
+                    {
+                      "node": "H2",
+                      "edge": null
+                    },
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ],
+                  "I0": [
+                    {
+                      "node": "O0",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    }
+                  ],
+                  "H2": [
+                    {
+                      "node": "O0",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    }
+                  ],
+                  "H20": [
+                    {
+                      "node": "O1",
+                      "edge": null
+                    },
+                    {
+                      "node": "O0",
+                      "edge": null
+                    },
+                    {
+                      "node": "H2",
+                      "edge": null
+                    }
+                  ],
+                  "I3": [
+                    {
+                      "node": "H2",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    },
+                    {
+                      "node": "H20",
+                      "edge": null
+                    },
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "depth": 0
+        }
+      },
+      "links": {
+        "I0->H2": {
+          "neat": {
+            "from": "I0",
+            "to": "H2",
+            "weight": -0.1879529772554217,
+            "innovation": 7
+          },
+          "cppn": {
+            "neat": {
+              "inputs": {
+                "I0": {
+                  "neat": {
+                    "node_ref": "I0"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I1": {
+                  "neat": {
+                    "node_ref": "I1"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I3": {
+                  "neat": {
+                    "node_ref": "I3"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I2": {
+                  "neat": {
+                    "node_ref": "I2"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                }
+              },
+              "hidden_nodes": {},
+              "outputs": {
+                "O0": {
+                  "neat": {
+                    "node_ref": "O0"
+                  },
+                  "activation": "Linear",
+                  "bias": 0.006187398444402443
+                },
+                "O1": {
+                  "neat": {
+                    "node_ref": "O1"
+                  },
+                  "activation": "Gaussian",
+                  "bias": -0.022832757554177876
+                }
+              },
+              "links": {},
+              "connections": {
+                "connections": {}
+              }
+            }
+          },
+          "depth": 1
+        },
+        "H2->O0": {
+          "neat": {
+            "from": "H2",
+            "to": "O0",
+            "weight": 0.07865234975145807,
+            "innovation": 10
+          },
+          "cppn": {
+            "neat": {
+              "inputs": {
+                "I2": {
+                  "neat": {
+                    "node_ref": "I2"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I1": {
+                  "neat": {
+                    "node_ref": "I1"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I3": {
+                  "neat": {
+                    "node_ref": "I3"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I0": {
+                  "neat": {
+                    "node_ref": "I0"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                }
+              },
+              "hidden_nodes": {},
+              "outputs": {
+                "O0": {
+                  "neat": {
+                    "node_ref": "O0"
+                  },
+                  "activation": "Tanh",
+                  "bias": -0.013355771500843772
+                },
+                "O1": {
+                  "neat": {
+                    "node_ref": "O1"
+                  },
+                  "activation": "Tanh",
+                  "bias": 0.04482512046351172
+                }
+              },
+              "links": {
+                "I2->O0": {
+                  "from": "I2",
+                  "to": "O0",
+                  "weight": 1.4423388416407157,
+                  "innovation": 7
+                }
+              },
+              "connections": {
+                "connections": {
+                  "I2": [
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "depth": 1
+        },
+        "I0->O0": {
+          "neat": {
+            "from": "I0",
+            "to": "O0",
+            "weight": 1.1357413524109712,
+            "innovation": 0
+          },
+          "cppn": {
+            "neat": {
+              "inputs": {
+                "I3": {
+                  "neat": {
+                    "node_ref": "I3"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I2": {
+                  "neat": {
+                    "node_ref": "I2"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I0": {
+                  "neat": {
+                    "node_ref": "I0"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I1": {
+                  "neat": {
+                    "node_ref": "I1"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                }
+              },
+              "hidden_nodes": {},
+              "outputs": {
+                "O0": {
+                  "neat": {
+                    "node_ref": "O0"
+                  },
+                  "activation": "OffsetGaussian",
+                  "bias": -0.03224672707286068
+                },
+                "O1": {
+                  "neat": {
+                    "node_ref": "O1"
+                  },
+                  "activation": "OffsetGaussian",
+                  "bias": -0.028822960629561932
+                }
+              },
+              "links": {
+                "I2->O1": {
+                  "from": "I2",
+                  "to": "O1",
+                  "weight": 1.7128548043297342,
+                  "innovation": 10
+                },
+                "I2->O0": {
+                  "from": "I2",
+                  "to": "O0",
+                  "weight": -0.966828676682333,
+                  "innovation": 1
+                },
+                "I0->O1": {
+                  "from": "I0",
+                  "to": "O1",
+                  "weight": -0.024012136284737973,
+                  "innovation": 9
+                }
+              },
+              "connections": {
+                "connections": {
+                  "I2": [
+                    {
+                      "node": "O0",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    }
+                  ],
+                  "I0": [
+                    {
+                      "node": "O1",
+                      "edge": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "depth": 1
+        },
+        "H2->H0": {
+          "neat": {
+            "from": "H2",
+            "to": "H0",
+            "weight": 3.1380715674147632,
+            "innovation": 8
+          },
+          "cppn": {
+            "neat": {
+              "inputs": {
+                "I0": {
+                  "neat": {
+                    "node_ref": "I0"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I1": {
+                  "neat": {
+                    "node_ref": "I1"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I2": {
+                  "neat": {
+                    "node_ref": "I2"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I3": {
+                  "neat": {
+                    "node_ref": "I3"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                }
+              },
+              "hidden_nodes": {
+                "H1": {
+                  "neat": {
+                    "node_ref": "H1"
+                  },
+                  "activation": "ReLU",
+                  "bias": -0.08202687486820849
+                },
+                "H0": {
+                  "neat": {
+                    "node_ref": "H0"
+                  },
+                  "activation": "Tanh",
+                  "bias": 0.008342831657033995
+                }
+              },
+              "outputs": {
+                "O1": {
+                  "neat": {
+                    "node_ref": "O1"
+                  },
+                  "activation": "OffsetGaussian",
+                  "bias": -0.10009895978411851
+                },
+                "O0": {
+                  "neat": {
+                    "node_ref": "O0"
+                  },
+                  "activation": "Tanh",
+                  "bias": -0.05865073285570464
+                }
+              },
+              "links": {
+                "I1->O0": {
+                  "from": "I1",
+                  "to": "O0",
+                  "weight": -0.06828396355181043,
+                  "innovation": 1
+                },
+                "H1->O1": {
+                  "from": "H1",
+                  "to": "O1",
+                  "weight": -0.09853757791432549,
+                  "innovation": 14
+                },
+                "I3->O1": {
+                  "from": "I3",
+                  "to": "O1",
+                  "weight": -0.5304431055861917,
+                  "innovation": 39
+                },
+                "H0->O0": {
+                  "from": "H0",
+                  "to": "O0",
+                  "weight": 9.57519344145693,
+                  "innovation": 3
+                },
+                "I0->O1": {
+                  "from": "I0",
+                  "to": "O1",
+                  "weight": 0.905176935308256,
+                  "innovation": 11
+                },
+                "I2->O1": {
+                  "from": "I2",
+                  "to": "O1",
+                  "weight": 0.22671980517165113,
+                  "innovation": 40
+                },
+                "I0->H0": {
+                  "from": "I0",
+                  "to": "H0",
+                  "weight": 6.874601256361928,
+                  "innovation": 2
+                },
+                "I1->H1": {
+                  "from": "I1",
+                  "to": "H1",
+                  "weight": 7.154879492737715,
+                  "innovation": 5
+                },
+                "I1->H0": {
+                  "from": "I1",
+                  "to": "H0",
+                  "weight": 0.39067568798552443,
+                  "innovation": 10
+                },
+                "H0->O1": {
+                  "from": "H0",
+                  "to": "O1",
+                  "weight": -0.20437908083625567,
+                  "innovation": 12
+                },
+                "I1->O1": {
+                  "from": "I1",
+                  "to": "O1",
+                  "weight": -0.22499609293545397,
+                  "innovation": 38
+                },
+                "I2->H0": {
+                  "from": "I2",
+                  "to": "H0",
+                  "weight": -7.134730946499298,
+                  "innovation": 8
+                },
+                "I2->H1": {
+                  "from": "I2",
+                  "to": "H1",
+                  "weight": 0.20144139440102116,
+                  "innovation": 16
+                },
+                "H1->H0": {
+                  "from": "H1",
+                  "to": "H0",
+                  "weight": -0.10003144337515146,
+                  "innovation": 13
+                },
+                "I3->H1": {
+                  "from": "I3",
+                  "to": "H1",
+                  "weight": -7.137533674101962,
+                  "innovation": 9
+                }
+              },
+              "connections": {
+                "connections": {
+                  "I2": [
+                    {
+                      "node": "H0",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    },
+                    {
+                      "node": "H1",
+                      "edge": null
+                    }
+                  ],
+                  "H0": [
+                    {
+                      "node": "O0",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    }
+                  ],
+                  "H1": [
+                    {
+                      "node": "O1",
+                      "edge": null
+                    },
+                    {
+                      "node": "H0",
+                      "edge": null
+                    }
+                  ],
+                  "I1": [
+                    {
+                      "node": "H1",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    },
+                    {
+                      "node": "O0",
+                      "edge": null
+                    },
+                    {
+                      "node": "H0",
+                      "edge": null
+                    }
+                  ],
+                  "I3": [
+                    {
+                      "node": "H1",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    }
+                  ],
+                  "I0": [
+                    {
+                      "node": "H0",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "depth": 1
+        },
+        "H0->O0": {
+          "neat": {
+            "from": "H0",
+            "to": "O0",
+            "weight": -0.1719967114766563,
+            "innovation": 2
+          },
+          "cppn": {
+            "neat": {
+              "inputs": {
+                "I1": {
+                  "neat": {
+                    "node_ref": "I1"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I3": {
+                  "neat": {
+                    "node_ref": "I3"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I0": {
+                  "neat": {
+                    "node_ref": "I0"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I2": {
+                  "neat": {
+                    "node_ref": "I2"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                }
+              },
+              "hidden_nodes": {},
+              "outputs": {
+                "O1": {
+                  "neat": {
+                    "node_ref": "O1"
+                  },
+                  "activation": "Linear",
+                  "bias": -0.01642253593669781
+                },
+                "O0": {
+                  "neat": {
+                    "node_ref": "O0"
+                  },
+                  "activation": "Sine",
+                  "bias": 0.015343615295075164
+                }
+              },
+              "links": {
+                "I1->O0": {
+                  "from": "I1",
+                  "to": "O0",
+                  "weight": -0.25481100635366993,
+                  "innovation": 1
+                },
+                "I0->O0": {
+                  "from": "I0",
+                  "to": "O0",
+                  "weight": 0.6652070877733351,
+                  "innovation": 0
+                },
+                "I2->O0": {
+                  "from": "I2",
+                  "to": "O0",
+                  "weight": -0.7832499846625832,
+                  "innovation": 24
+                },
+                "I2->O1": {
+                  "from": "I2",
+                  "to": "O1",
+                  "weight": -0.369078381349053,
+                  "innovation": 15
+                },
+                "I0->O1": {
+                  "from": "I0",
+                  "to": "O1",
+                  "weight": -0.4357332677445962,
+                  "innovation": 29
+                }
+              },
+              "connections": {
+                "connections": {
+                  "I0": [
+                    {
+                      "node": "O1",
+                      "edge": null
+                    },
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ],
+                  "I1": [
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ],
+                  "I2": [
+                    {
+                      "node": "O1",
+                      "edge": null
+                    },
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "depth": 1
+        },
+        "I0->H0": {
+          "neat": {
+            "from": "I0",
+            "to": "H0",
+            "weight": 0.2512009518946295,
+            "innovation": 1
+          },
+          "cppn": {
+            "neat": {
+              "inputs": {
+                "I1": {
+                  "neat": {
+                    "node_ref": "I1"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I3": {
+                  "neat": {
+                    "node_ref": "I3"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I2": {
+                  "neat": {
+                    "node_ref": "I2"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                },
+                "I0": {
+                  "neat": {
+                    "node_ref": "I0"
+                  },
+                  "activation": "None",
+                  "bias": 0.0
+                }
+              },
+              "hidden_nodes": {
+                "H9": {
+                  "neat": {
+                    "node_ref": "H9"
+                  },
+                  "activation": "None",
+                  "bias": -0.010303573368309955
+                },
+                "H8": {
+                  "neat": {
+                    "node_ref": "H8"
+                  },
+                  "activation": "None",
+                  "bias": -0.10044128154049584
+                }
+              },
+              "outputs": {
+                "O0": {
+                  "neat": {
+                    "node_ref": "O0"
+                  },
+                  "activation": "Linear",
+                  "bias": -0.031586716955481375
+                },
+                "O1": {
+                  "neat": {
+                    "node_ref": "O1"
+                  },
+                  "activation": "OffsetGaussian",
+                  "bias": -0.02493360452800423
+                }
+              },
+              "links": {
+                "I3->O1": {
+                  "from": "I3",
+                  "to": "O1",
+                  "weight": -0.06231295708139084,
+                  "innovation": 4
+                },
+                "I2->H8": {
+                  "from": "I2",
+                  "to": "H8",
+                  "weight": -0.35823238668950974,
+                  "innovation": 37
+                },
+                "I3->H8": {
+                  "from": "I3",
+                  "to": "H8",
+                  "weight": 0.30461717122861653,
+                  "innovation": 111
+                },
+                "I1->H9": {
+                  "from": "I1",
+                  "to": "H9",
+                  "weight": -0.14501729532023278,
+                  "innovation": 46
+                },
+                "I3->O0": {
+                  "from": "I3",
+                  "to": "O0",
+                  "weight": 0.7189430074195434,
+                  "innovation": 0
+                },
+                "H9->O0": {
+                  "from": "H9",
+                  "to": "O0",
+                  "weight": 1.0,
+                  "innovation": 47
+                },
+                "H9->O1": {
+                  "from": "H9",
+                  "to": "O1",
+                  "weight": 0.32841659596604444,
+                  "innovation": 97
+                }
+              },
+              "connections": {
+                "connections": {
+                  "I1": [
+                    {
+                      "node": "H9",
+                      "edge": null
+                    }
+                  ],
+                  "I2": [
+                    {
+                      "node": "H8",
+                      "edge": null
+                    }
+                  ],
+                  "I3": [
+                    {
+                      "node": "H8",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    },
+                    {
+                      "node": "O0",
+                      "edge": null
+                    }
+                  ],
+                  "H9": [
+                    {
+                      "node": "O0",
+                      "edge": null
+                    },
+                    {
+                      "node": "O1",
+                      "edge": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "depth": 1
+        }
+      },
+      "connections": {
+        "connections": {
+          "H2": [
+            {
+              "node": "H0",
+              "edge": null
+            },
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I0": [
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "H0",
+              "edge": null
+            },
+            {
+              "node": "H2",
+              "edge": null
+            }
+          ],
+          "H0": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 15,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      12,
+      13,
+      14
+    ],
+    "actions": [
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          4,
+          -0.10082246471536725
+        ]
+      },
+      {
+        "Link": [
+          1,
+          5,
+          0.07977670310640972
+        ]
+      },
+      {
+        "Link": [
+          1,
+          6,
+          0.07977670310640972
+        ]
+      },
+      {
+        "Link": [
+          1,
+          7,
+          -0.10082246471536725
+        ]
+      },
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          4,
+          -0.10082246471536725
+        ]
+      },
+      {
+        "Link": [
+          3,
+          5,
+          0.07977670310640972
+        ]
+      },
+      {
+        "Link": [
+          3,
+          6,
+          0.07977670310640972
+        ]
+      },
+      {
+        "Link": [
+          3,
+          7,
+          -0.10082246471536725
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          4,
+          -0.10082246471536725
+        ]
+      },
+      {
+        "Link": [
+          2,
+          5,
+          0.07977670310640972
+        ]
+      },
+      {
+        "Link": [
+          2,
+          6,
+          0.07977670310640972
+        ]
+      },
+      {
+        "Link": [
+          2,
+          7,
+          -0.10082246471536725
+        ]
+      },
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          4,
+          -0.10082246471536725
+        ]
+      },
+      {
+        "Link": [
+          0,
+          5,
+          0.07977670310640972
+        ]
+      },
+      {
+        "Link": [
+          0,
+          6,
+          0.07977670310640972
+        ]
+      },
+      {
+        "Link": [
+          0,
+          7,
+          -0.10082246471536725
+        ]
+      },
+      {
+        "Activation": [
+          7,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          7,
+          12,
+          -0.10054933503759851
+        ]
+      },
+      {
+        "Link": [
+          7,
+          14,
+          0.0993465706877887
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          6,
+          13,
+          -0.0734287231104804
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          5,
+          12,
+          -0.10777129582837569
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          12,
+          -0.15947046224257394
+        ]
+      },
+      {
+        "Link": [
+          4,
+          13,
+          0.06375059379485847
+        ]
+      },
+      {
+        "Link": [
+          4,
+          14,
+          0.16001825123702654
+        ]
+      },
+      {
+        "Activation": [
+          14,
+          0.0,
+          "Softmax"
+        ]
+      },
+      {
+        "Activation": [
+          13,
+          0.0,
+          "Softmax"
+        ]
+      },
+      {
+        "Activation": [
+          12,
+          0.0,
+          "Softmax"
+        ]
+      }
+    ]
+  }
+}

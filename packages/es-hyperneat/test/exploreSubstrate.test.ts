@@ -1,5 +1,3 @@
-import { unlink } from 'node:fs/promises'
-
 import { createPhenotype } from '@neat-js/cppn'
 import { type Point } from '@neat-js/hyperneat'
 import { describe, expect, test } from 'vitest'
@@ -48,7 +46,7 @@ describe('exploreSubstrate', () => {
 
   test.each([...testCases.entries()])(
     'should return connections for test case #%d',
-    async (_index, testCase: TestCase) => {
+    (_index, testCase: TestCase) => {
       const [, connections] = exploreSubstrate(...testCase.args)
       for (const [i, connection] of connections.entries()) {
         const expected = testCase.connections[i] as [string, string, number]

@@ -1,3 +1,5 @@
+import { unlink } from 'node:fs/promises'
+
 import { toLinkKey, type LinkKey } from '@neat-js/core'
 import { describe, expect, test } from 'vitest'
 
@@ -41,7 +43,6 @@ describe('createPhenotype', () => {
     (_index, testCase: TestCase) => {
       const { genome, phenotype } = testCase
       const result = createPhenotype(genome)
-      console.log(result)
       expect(result.length).toEqual(phenotype.length)
       expect(result.inputs).toEqual(phenotype.inputs)
       expect(result.outputs).toEqual(phenotype.outputs)
