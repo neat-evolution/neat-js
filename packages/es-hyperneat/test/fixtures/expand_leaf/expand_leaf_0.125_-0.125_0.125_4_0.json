@@ -1,0 +1,50 @@
+{
+  "leaf": {
+    "x": 0.125,
+    "y": -0.125,
+    "width": 0.125,
+    "weight": -0.5191187334299361,
+    "depth": 4,
+    "variance": 0.0,
+    "children": [
+      {
+        "x": 0.0625,
+        "y": -0.1875,
+        "width": 0.0625,
+        "weight": 0.9572678798790467,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      },
+      {
+        "x": 0.0625,
+        "y": -0.0625,
+        "width": 0.0625,
+        "weight": -0.5102150395563859,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      },
+      {
+        "x": 0.1875,
+        "y": -0.0625,
+        "width": 0.0625,
+        "weight": -0.4772487886807027,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      },
+      {
+        "x": 0.1875,
+        "y": -0.1875,
+        "width": 0.0625,
+        "weight": 0.9674237734488389,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      }
+    ]
+  },
+  "delta_weight": 1.8160993452208505,
+  "expanded_leaves": []
+}
