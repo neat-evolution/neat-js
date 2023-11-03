@@ -1,0 +1,66 @@
+{
+  "quad_point": {
+    "x": -0.375,
+    "y": -0.375,
+    "width": 0.125,
+    "weight": 1.0,
+    "depth": 4,
+    "variance": 1.0,
+    "children": [
+      {
+        "x": -0.4375,
+        "y": -0.4375,
+        "width": 0.0625,
+        "weight": 1.0,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      },
+      {
+        "x": -0.4375,
+        "y": -0.3125,
+        "width": 0.0625,
+        "weight": -1.0,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      },
+      {
+        "x": -0.3125,
+        "y": -0.3125,
+        "width": 0.0625,
+        "weight": -1.0,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      },
+      {
+        "x": -0.3125,
+        "y": -0.4375,
+        "width": 0.0625,
+        "weight": 1.0,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      }
+    ]
+  },
+  "delta_weight": 2.0,
+  "root": false,
+  "branch": true,
+  "weights": [
+    1.0,
+    -1.0,
+    -1.0,
+    1.0
+  ],
+  "centroid": 0.0,
+  "dw": 1.0,
+  "squares": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "variance": 1.0
+}

@@ -1,0 +1,66 @@
+{
+  "quad_point": {
+    "x": -0.625,
+    "y": -0.375,
+    "width": 0.125,
+    "weight": -1.0,
+    "depth": 4,
+    "variance": 0.8515163819809484,
+    "children": [
+      {
+        "x": -0.6875,
+        "y": -0.4375,
+        "width": 0.0625,
+        "weight": 1.0,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      },
+      {
+        "x": -0.6875,
+        "y": -0.3125,
+        "width": 0.0625,
+        "weight": -0.6595740885055988,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      },
+      {
+        "x": -0.5625,
+        "y": -0.3125,
+        "width": 0.0625,
+        "weight": 1.0,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      },
+      {
+        "x": -0.5625,
+        "y": -0.4375,
+        "width": 0.0625,
+        "weight": -1.0,
+        "depth": 5,
+        "variance": 0.0,
+        "children": null
+      }
+    ]
+  },
+  "delta_weight": 2.0,
+  "root": false,
+  "branch": true,
+  "weights": [
+    1.0,
+    -0.6595740885055988,
+    1.0,
+    -1.0
+  ],
+  "centroid": 0.08510647787360026,
+  "dw": 1.0,
+  "squares": [
+    0.8370301568288491,
+    0.5545491459428448,
+    0.8370301568288491,
+    1.1774560683232504
+  ],
+  "variance": 0.8515163819809484
+}
