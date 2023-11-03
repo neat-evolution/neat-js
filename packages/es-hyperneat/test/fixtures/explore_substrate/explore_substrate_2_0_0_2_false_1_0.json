@@ -1,0 +1,236 @@
+{
+  "inputs": [
+    [
+      -524288,
+      524288
+    ],
+    [
+      -524288,
+      -524288
+    ]
+  ],
+  "outputs": [],
+  "cppn_genome": {
+    "neat": {
+      "inputs": {
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {},
+      "outputs": {
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "OffsetGaussian",
+          "bias": 0.018361947901694448
+        },
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "None",
+          "bias": -0.12375521292955159
+        }
+      },
+      "links": {
+        "I0->O1": {
+          "from": "I0",
+          "to": "O1",
+          "weight": -1.8866474890826868,
+          "innovation": 0
+        },
+        "I1->O0": {
+          "from": "I1",
+          "to": "O0",
+          "weight": 1.827128857509912,
+          "innovation": 7
+        },
+        "I2->O1": {
+          "from": "I2",
+          "to": "O1",
+          "weight": 0.15068763574440625,
+          "innovation": 11
+        },
+        "I1->O1": {
+          "from": "I1",
+          "to": "O1",
+          "weight": -0.40178035132333645,
+          "innovation": 9
+        },
+        "I3->O0": {
+          "from": "I3",
+          "to": "O0",
+          "weight": 0.010577832687868383,
+          "innovation": 6
+        }
+      },
+      "connections": {
+        "connections": {
+          "I3": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "I2": [
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "I0": [
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 6,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      4,
+      5
+    ],
+    "actions": [
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          5,
+          -1.8866474890826868
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          5,
+          0.15068763574440625
+        ]
+      },
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          4,
+          1.827128857509912
+        ]
+      },
+      {
+        "Link": [
+          1,
+          5,
+          -0.40178035132333645
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          0.018361947901694448,
+          "OffsetGaussian"
+        ]
+      },
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          4,
+          0.010577832687868383
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          -0.12375521292955159,
+          "None"
+        ]
+      }
+    ]
+  },
+  "depth": 2,
+  "reverse": false,
+  "allow_connections_to_input": false,
+  "nodes": [
+    [
+      [
+        -524288,
+        524288
+      ],
+      [
+        -524288,
+        -524288
+      ]
+    ]
+  ],
+  "connections": []
+}

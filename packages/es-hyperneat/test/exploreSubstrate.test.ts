@@ -1,13 +1,12 @@
+import { unlink } from 'node:fs/promises'
+
 import { createPhenotype } from '@neat-js/cppn'
 import { type Point } from '@neat-js/hyperneat'
 import { describe, expect, test } from 'vitest'
 
 import { exploreSubstrate } from '../src/index.js'
 
-import {
-  testCases,
-  type TestCase,
-} from './fixtures/explore_substrates/index.js'
+import { testCases, type TestCase } from './fixtures/explore_substrate/index.js'
 
 const sortLayers = (layers: Point[][]): Point[][] => {
   return layers.map((layer) => {
@@ -49,7 +48,7 @@ describe('exploreSubstrate', () => {
 
   test.each([...testCases.entries()])(
     'should return connections for test case #%d',
-    (_index, testCase: TestCase) => {
+    async (_index, testCase: TestCase) => {
       const [, connections] = exploreSubstrate(...testCase.args)
       for (const [i, connection] of connections.entries()) {
         const expected = testCase.connections[i] as [string, string, number]

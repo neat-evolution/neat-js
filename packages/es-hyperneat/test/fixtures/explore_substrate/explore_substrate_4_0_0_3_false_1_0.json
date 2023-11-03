@@ -1,0 +1,150 @@
+{
+  "inputs": [
+    [
+      -524288,
+      -524288
+    ],
+    [
+      -524288,
+      524288
+    ],
+    [
+      524288,
+      524288
+    ],
+    [
+      524288,
+      -524288
+    ]
+  ],
+  "outputs": [],
+  "cppn_genome": {
+    "neat": {
+      "inputs": {
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {},
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "Linear",
+          "bias": -0.019513371355413388
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "None",
+          "bias": 0.13939325738486488
+        }
+      },
+      "links": {
+        "I3->O0": {
+          "from": "I3",
+          "to": "O0",
+          "weight": 0.38123540312582815,
+          "innovation": 0
+        }
+      },
+      "connections": {
+        "connections": {
+          "I3": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 6,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      4,
+      5
+    ],
+    "actions": [
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          4,
+          0.38123540312582815
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          -0.019513371355413388,
+          "Linear"
+        ]
+      }
+    ]
+  },
+  "depth": 3,
+  "reverse": false,
+  "allow_connections_to_input": false,
+  "nodes": [
+    [
+      [
+        -524288,
+        -524288
+      ],
+      [
+        -524288,
+        524288
+      ],
+      [
+        524288,
+        524288
+      ],
+      [
+        524288,
+        -524288
+      ]
+    ]
+  ],
+  "connections": []
+}
