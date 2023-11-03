@@ -1,0 +1,222 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H3": {
+          "neat": {
+            "node_ref": "H3"
+          },
+          "activation": "None",
+          "bias": -0.010645725794810148
+        },
+        "H5": {
+          "neat": {
+            "node_ref": "H5"
+          },
+          "activation": "None",
+          "bias": 0.021350595171687095
+        }
+      },
+      "outputs": {
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Linear",
+          "bias": -0.02224409077008678
+        },
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "None",
+          "bias": -0.035345576580277455
+        }
+      },
+      "links": {
+        "I0->O1": {
+          "from": "I0",
+          "to": "O1",
+          "weight": -0.1831846691441642,
+          "innovation": 5
+        },
+        "I1->O0": {
+          "from": "I1",
+          "to": "O0",
+          "weight": 0.5741889207190205,
+          "innovation": 6
+        },
+        "I3->O0": {
+          "from": "I3",
+          "to": "O0",
+          "weight": -0.1294615510671835,
+          "innovation": 4
+        },
+        "I1->H5": {
+          "from": "I1",
+          "to": "H5",
+          "weight": 0.4187741131163172,
+          "innovation": 31
+        },
+        "I1->O1": {
+          "from": "I1",
+          "to": "O1",
+          "weight": -0.7057308162146673,
+          "innovation": 3
+        }
+      },
+      "connections": {
+        "connections": {
+          "I0": [
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "O0",
+              "edge": null
+            },
+            {
+              "node": "O1",
+              "edge": null
+            },
+            {
+              "node": "H5",
+              "edge": null
+            }
+          ],
+          "I3": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 7,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      5,
+      6
+    ],
+    "actions": [
+      {
+        "Activation": [
+          3,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          3,
+          5,
+          -0.1294615510671835
+        ]
+      },
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          5,
+          0.5741889207190205
+        ]
+      },
+      {
+        "Link": [
+          1,
+          6,
+          -0.7057308162146673
+        ]
+      },
+      {
+        "Link": [
+          1,
+          4,
+          0.4187741131163172
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          0.021350595171687095,
+          "None"
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          -0.035345576580277455,
+          "None"
+        ]
+      },
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          6,
+          -0.1831846691441642
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          -0.02224409077008678,
+          "Linear"
+        ]
+      }
+    ]
+  }
+}

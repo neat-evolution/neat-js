@@ -1,0 +1,141 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H3": {
+          "neat": {
+            "node_ref": "H3"
+          },
+          "activation": "None",
+          "bias": 0.015224175825912803
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "Tanh",
+          "bias": -0.027124049028170998
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "Tanh",
+          "bias": 0.02651124644010333
+        }
+      },
+      "links": {
+        "H3->O1": {
+          "from": "H3",
+          "to": "O1",
+          "weight": 0.744752699421213,
+          "innovation": 19
+        },
+        "I1->H3": {
+          "from": "I1",
+          "to": "H3",
+          "weight": -0.6030789765413113,
+          "innovation": 18
+        }
+      },
+      "connections": {
+        "connections": {
+          "H3": [
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ],
+          "I1": [
+            {
+              "node": "H3",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 7,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      5,
+      6
+    ],
+    "actions": [
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          4,
+          -0.6030789765413113
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          0.015224175825912803,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          6,
+          0.744752699421213
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          0.02651124644010333,
+          "Tanh"
+        ]
+      }
+    ]
+  }
+}

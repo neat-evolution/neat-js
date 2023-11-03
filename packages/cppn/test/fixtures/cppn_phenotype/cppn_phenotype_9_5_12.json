@@ -1,0 +1,240 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H0": {
+          "neat": {
+            "node_ref": "H0"
+          },
+          "activation": "Square",
+          "bias": 0.07695294832160296
+        },
+        "H5": {
+          "neat": {
+            "node_ref": "H5"
+          },
+          "activation": "Sine",
+          "bias": 0.0
+        },
+        "H1": {
+          "neat": {
+            "node_ref": "H1"
+          },
+          "activation": "Gaussian",
+          "bias": -0.052350271289338626
+        }
+      },
+      "outputs": {
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "OffsetGaussian",
+          "bias": -0.01857242425846489
+        },
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "Tanh",
+          "bias": 0.035081273626595036
+        }
+      },
+      "links": {
+        "H1->O0": {
+          "from": "H1",
+          "to": "O0",
+          "weight": 7.954866627889224,
+          "innovation": 6
+        },
+        "H5->H0": {
+          "from": "H5",
+          "to": "H0",
+          "weight": 1.0,
+          "innovation": 36
+        },
+        "I0->H0": {
+          "from": "I0",
+          "to": "H0",
+          "weight": 7.538623775665595,
+          "innovation": 2
+        },
+        "I1->H1": {
+          "from": "I1",
+          "to": "H1",
+          "weight": 7.777560531707843,
+          "innovation": 5
+        },
+        "I2->H5": {
+          "from": "I2",
+          "to": "H5",
+          "weight": -8.038068053926075,
+          "innovation": 35
+        }
+      },
+      "connections": {
+        "connections": {
+          "I1": [
+            {
+              "node": "H1",
+              "edge": null
+            }
+          ],
+          "H5": [
+            {
+              "node": "H0",
+              "edge": null
+            }
+          ],
+          "H1": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I2": [
+            {
+              "node": "H5",
+              "edge": null
+            }
+          ],
+          "I0": [
+            {
+              "node": "H0",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 9,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      7,
+      8
+    ],
+    "actions": [
+      {
+        "Activation": [
+          0,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          0,
+          5,
+          7.538623775665595
+        ]
+      },
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          4,
+          -8.038068053926075
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          0.0,
+          "Sine"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          5,
+          1.0
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          0.07695294832160296,
+          "Square"
+        ]
+      },
+      {
+        "Activation": [
+          1,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          1,
+          6,
+          7.777560531707843
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          -0.052350271289338626,
+          "Gaussian"
+        ]
+      },
+      {
+        "Link": [
+          6,
+          7,
+          7.954866627889224
+        ]
+      },
+      {
+        "Activation": [
+          7,
+          0.035081273626595036,
+          "Tanh"
+        ]
+      }
+    ]
+  }
+}

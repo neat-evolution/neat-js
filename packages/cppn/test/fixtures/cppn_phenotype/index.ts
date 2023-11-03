@@ -19,9 +19,11 @@ import {
   type CPPNNodeData,
 } from '../../../src/index.js'
 
-async function readJSONFile(filePath: string): Promise<any> {
+async function readJSONFile(
+  filePath: string
+): Promise<[filePath: string, data: CPPNPhenotypeData]> {
   const data = await fs.readFile(filePath, 'utf-8')
-  return JSON.parse(data)
+  return [filePath, JSON.parse(data)]
 }
 
 const jsonDir = new URL('.', import.meta.url).pathname
@@ -167,25 +169,24 @@ export const createActions = (actions: ActionJSONData[]): PhenotypeAction[] => {
 }
 
 const rawTestCases = await Promise.all(
-  jsonFiles.map(
-    (file) =>
-      readJSONFile(
-        new URL(`${jsonDir}/${file}`, import.meta.url).pathname
-      ) as Promise<CPPNPhenotypeData>
+  jsonFiles.map((file) =>
+    readJSONFile(new URL(`${jsonDir}/${file}`, import.meta.url).pathname)
   )
 )
 
 export interface TestCase {
+  filePath: string
   genome: CPPNGenome<CPPNGenomeOptions>
   factoryOptions: CPPNGenomeFactoryOptions
   phenotype: Phenotype
 }
 
 export const testCases: TestCase[] = rawTestCases.map(
-  (testCase: CPPNPhenotypeData): TestCase => {
+  ([filePath, testCase]): TestCase => {
     const { genome, phenotype } = testCase
 
     return {
+      filePath,
       genome: createCPPNGenome(genome),
       factoryOptions: toCPPNFactoryOptions(genome),
       phenotype: {

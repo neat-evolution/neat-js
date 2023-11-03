@@ -1,0 +1,148 @@
+{
+  "genome": {
+    "neat": {
+      "inputs": {
+        "I0": {
+          "neat": {
+            "node_ref": "I0"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I2": {
+          "neat": {
+            "node_ref": "I2"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I3": {
+          "neat": {
+            "node_ref": "I3"
+          },
+          "activation": "None",
+          "bias": 0.0
+        },
+        "I1": {
+          "neat": {
+            "node_ref": "I1"
+          },
+          "activation": "None",
+          "bias": 0.0
+        }
+      },
+      "hidden_nodes": {
+        "H12": {
+          "neat": {
+            "node_ref": "H12"
+          },
+          "activation": "Linear",
+          "bias": -0.0067596691383500235
+        }
+      },
+      "outputs": {
+        "O0": {
+          "neat": {
+            "node_ref": "O0"
+          },
+          "activation": "Sigmoid",
+          "bias": 0.02286207375220323
+        },
+        "O1": {
+          "neat": {
+            "node_ref": "O1"
+          },
+          "activation": "OffsetGaussian",
+          "bias": 0.021876402963157147
+        }
+      },
+      "links": {
+        "H12->O0": {
+          "from": "H12",
+          "to": "O0",
+          "weight": 0.6043562640422628,
+          "innovation": 56
+        },
+        "I2->O1": {
+          "from": "I2",
+          "to": "O1",
+          "weight": -0.22969425231296714,
+          "innovation": 4
+        }
+      },
+      "connections": {
+        "connections": {
+          "H12": [
+            {
+              "node": "O0",
+              "edge": null
+            }
+          ],
+          "I2": [
+            {
+              "node": "O1",
+              "edge": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "phenotype": {
+    "length": 7,
+    "inputs": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outputs": [
+      5,
+      6
+    ],
+    "actions": [
+      {
+        "Activation": [
+          2,
+          0.0,
+          "None"
+        ]
+      },
+      {
+        "Link": [
+          2,
+          6,
+          -0.22969425231296714
+        ]
+      },
+      {
+        "Activation": [
+          6,
+          0.021876402963157147,
+          "OffsetGaussian"
+        ]
+      },
+      {
+        "Activation": [
+          4,
+          -0.0067596691383500235,
+          "Linear"
+        ]
+      },
+      {
+        "Link": [
+          4,
+          5,
+          0.6043562640422628
+        ]
+      },
+      {
+        "Activation": [
+          5,
+          0.02286207375220323,
+          "Sigmoid"
+        ]
+      }
+    ]
+  }
+}
