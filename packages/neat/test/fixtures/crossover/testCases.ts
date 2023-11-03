@@ -35,7 +35,7 @@ export interface TestCaseData {
   result: TestCaseGenomeData
 }
 
-const configProvider = createConfig(defaultNEATConfigOptions, null, null)
+const configProvider = createConfig({ neat: defaultNEATConfigOptions })
 const state = createState()
 
 // Helper function to format hidden nodes

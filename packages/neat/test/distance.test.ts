@@ -10,7 +10,7 @@ const formattedTestCases = testCases.map(
 describe('Genome distance fixtures', () => {
   test.each(formattedTestCases)(
     '%s',
-    (name: string, a: NEATGenome, b: NEATGenome, expected: number) => {
+    (_name: string, a: NEATGenome, b: NEATGenome, expected: number) => {
       expect(a.distance(b)).toBeCloseTo(expected, 15)
     }
   )

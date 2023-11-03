@@ -36,7 +36,7 @@ describe('NEATGenome class', () => {
   let createSeasonedGenome: () => Promise<NEATGenome>
 
   beforeEach(() => {
-    configProvider = createConfig(defaultNEATConfigOptions, null, null)
+    configProvider = createConfig({ neat: defaultNEATConfigOptions })
     state = createState()
     initConfig = {
       inputs: 1,
@@ -63,7 +63,7 @@ describe('NEATGenome class', () => {
         removeNodeProbability: 0,
         mutateLinkWeightProbability: 0,
       }
-      const config = createConfig(options, null, null)
+      const config = createConfig({ neat: options })
       const genome = createGenome(config, state, genomeOptions, initConfig)
       for (let i = 0; i < 50; i++) {
         await genome.mutate()

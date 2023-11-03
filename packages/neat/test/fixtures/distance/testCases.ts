@@ -1,6 +1,6 @@
-import fs from 'fs/promises'
+import fs from 'node:fs/promises'
 
-import { Activation, NodeType, defaultNEATConfigOptions } from '@neat-js/core'
+import { Activation, defaultNEATConfigOptions } from '@neat-js/core'
 
 import { createConfig, createGenome, createState } from '../../../src/index.js'
 
@@ -33,7 +33,7 @@ export interface TestCaseData {
   genome2: TestCaseGenomeData
 }
 
-const configProvider = createConfig(defaultNEATConfigOptions, null, null)
+const configProvider = createConfig({ neat: defaultNEATConfigOptions })
 const state = createState()
 
 // Helper function to format hidden nodes

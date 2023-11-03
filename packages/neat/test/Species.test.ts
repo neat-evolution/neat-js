@@ -10,7 +10,6 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { createConfig } from '../src/createConfig.js'
 import { createGenome } from '../src/createGenome.js'
 import { createState } from '../src/createState.js'
-import type { NEATConfig } from '../src/NEATConfig.js'
 import type { NEATGenome } from '../src/NEATGenome.js'
 import type {
   NEATGenomeFactoryOptions,
@@ -41,7 +40,7 @@ describe('Species class', () => {
         mutateLinkWeightProbability: 0,
       }
       const genome = createGenome(
-        createConfig(configOptions, null, null),
+        createConfig({ neat: configOptions }),
         stateProvider,
         options,
         {

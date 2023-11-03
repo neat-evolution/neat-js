@@ -56,11 +56,7 @@ describe('PopulationFactory', () => {
     const environment = new DatasetEnvironment(dataset)
     evaluator = new AsyncEvaluator(algorithm, environment, createExecutor)
 
-    configProvider = algorithm.createConfig(
-      defaultNEATConfigOptions,
-      null,
-      null
-    )
+    configProvider = algorithm.createConfig({ neat: defaultNEATConfigOptions })
     populationOptions = { ...defaultPopulationOptions }
 
     genomeOptions = {

@@ -29,7 +29,7 @@ describe('Genome crossover fixtures', () => {
   test.each(formattedTestCases)(
     '%s',
     (
-      name: string,
+      _name: string,
       a: NEATGenome,
       b: NEATGenome,
       fitness1: number,

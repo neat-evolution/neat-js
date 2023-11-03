@@ -28,10 +28,14 @@ describe('Connections.prune', () => {
       connections.add(14, 12, undefined)
     })
     test('should not collect pruned dangling inputs', () => {
-      expect(connections.pruneDanglingInputs([3], false)).toEqual([])
+      expect(connections.pruneDanglingInputs(new Set([3]), false)).toEqual(
+        new Set()
+      )
     })
     test('should prune dangling inputs', () => {
-      const nodes = connections.pruneDanglingInputs([3], true, true)
+      const nodes = Array.from(
+        connections.pruneDanglingInputs(new Set([3]), true, true)
+      )
       nodes.sort((a, b) => a - b) // Ensure nodes are sorted for comparison
       expect(nodes).toEqual([0, 1, 2, 4, 5, 6, 7, 14])
 
@@ -69,10 +73,14 @@ describe('Connections.prune', () => {
       connections.add(12, 14, undefined)
     })
     test('should not collect pruned dangling outputs', () => {
-      expect(connections.pruneDanglingOutputs([3], false)).toEqual([])
+      expect(connections.pruneDanglingOutputs(new Set([3]), false)).toEqual(
+        new Set()
+      )
     })
     test('should prune dangling outputs', () => {
-      const nodes = connections.pruneDanglingOutputs([3], true, true)
+      const nodes = Array.from(
+        connections.pruneDanglingOutputs(new Set([3]), true, undefined, true)
+      )
       nodes.sort((a, b) => a - b) // Ensure nodes are sorted for comparison
       expect(nodes).toEqual([0, 1, 2, 4, 5, 6, 7, 14])
 
