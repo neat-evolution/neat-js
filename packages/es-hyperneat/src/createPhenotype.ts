@@ -127,12 +127,7 @@ export const createPhenotype: PhenotypeFactory<
     if (isActionEdge(action)) {
       const fromIndex = nodeMapping.get(action[0]) as number
       const toIndex = nodeMapping.get(action[1]) as number
-      actions.push({
-        type: PhenotypeActionType.Link,
-        from: fromIndex,
-        to: toIndex,
-        weight: action[2],
-      })
+      actions.push([PhenotypeActionType.Link, fromIndex, toIndex, action[2]])
     } else {
       const nodeIndex = nodeMapping.get(action[0]) as number
       const [x, y] = fromPointKey(action[0])
@@ -142,15 +137,14 @@ export const createPhenotype: PhenotypeFactory<
         x / genome.genomeOptions.resolution,
         y / genome.genomeOptions.resolution,
       ]) as [weight: number, bias: number]
-      actions.push({
-        type: PhenotypeActionType.Activation,
-        node: nodeIndex,
+      actions.push([
+        PhenotypeActionType.Activation,
+        nodeIndex,
         bias,
-        activation:
-          nodeIndex < firstOutputId
-            ? genome.genomeOptions.hiddenActivation
-            : genome.genomeOptions.outputActivation,
-      })
+        nodeIndex < firstOutputId
+          ? genome.genomeOptions.hiddenActivation
+          : genome.genomeOptions.outputActivation,
+      ])
     }
   }
 

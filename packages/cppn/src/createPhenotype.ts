@@ -69,20 +69,20 @@ export const createPhenotype: PhenotypeFactory<
   for (const action of order) {
     if (isActionEdge(action)) {
       const [from, to, weight] = action
-      actions.push({
-        type: PhenotypeActionType.Link,
-        from: nodeMapping.get(from) as number,
-        to: nodeMapping.get(to) as number,
+      actions.push([
+        PhenotypeActionType.Link,
+        nodeMapping.get(from) as number,
+        nodeMapping.get(to) as number,
         weight,
-      })
+      ])
     } else {
       const [node] = action
-      actions.push({
-        type: PhenotypeActionType.Activation,
-        node: nodeMapping.get(node) as number,
-        bias: genome.getBias(node),
-        activation: genome.getActivation(node),
-      })
+      actions.push([
+        PhenotypeActionType.Activation,
+        nodeMapping.get(node) as number,
+        genome.getBias(node),
+        genome.getActivation(node),
+      ])
     }
   }
 

@@ -38,12 +38,7 @@ export const createPhenotype: PhenotypeFactory<
       const { from, to, x0, y0, x1, y1 } = action
       const [weight] = cppn([x0, y0, x1, y1]) as [weight: number, bias: number]
       if (Math.abs(weight) > genome.genomeOptions.weightThreshold) {
-        actions.push({
-          type: PhenotypeActionType.Link,
-          from,
-          to,
-          weight,
-        })
+        actions.push([PhenotypeActionType.Link, from, to, weight])
       }
     } else {
       const { node, x, y } = action
@@ -53,12 +48,7 @@ export const createPhenotype: PhenotypeFactory<
         : substrate.outputs.includes(node)
         ? genome.genomeOptions.outputActivation
         : genome.genomeOptions.hiddenActivation
-      actions.push({
-        type: PhenotypeActionType.Activation,
-        node,
-        bias,
-        activation,
-      })
+      actions.push([PhenotypeActionType.Activation, node, bias, activation])
     }
   }
 
