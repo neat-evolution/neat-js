@@ -42,7 +42,7 @@
     "format": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\" --fix",
     "lint": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\"",
     "precommit": "lint-staged",
-    "test": "vitest"
+    "test": "node ./scripts/iris.js && vitest"
   },
   "dependencies": {
     "@neat-evolution/core": "^0.0.1",
