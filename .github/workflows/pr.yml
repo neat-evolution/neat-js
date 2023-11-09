@@ -32,7 +32,7 @@ jobs:
       run: yarn install --immutable --refresh-lockfile
 
     - name: Check packages (manypkg)
-      run: yarn check:maynpkg
+      run: yarn check:manypkg
 
     - name: Check change files (beachball)
       run: yarn check:beachball
