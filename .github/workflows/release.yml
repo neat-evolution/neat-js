@@ -87,3 +87,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # After publishing, install dependencies to update the yarn.lock file
+      - name: Update yarn.lock
+        run: yarn install --no-immutable --mode=update-lockfile
+
+      # Check for changes in the yarn.lock file
+      - name: Check for yarn.lock changes
+        id: lockfile
+        run: |
+          if [[ `git status --porcelain` ]]; then
+            echo "::set-output name=modified::true"
+          fi
+
+      # Commit and push the updated yarn.lock file, if it has changed
+      - name: Commit yarn.lock changes
+        if: steps.lockfile.outputs.modified == 'true'
+        run: |
+          git add yarn.lock
+          git commit -m "chore: update yarn.lock [skip ci]"
+          git push
