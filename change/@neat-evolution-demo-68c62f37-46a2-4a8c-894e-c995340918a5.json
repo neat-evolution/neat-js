@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat: improve demo",
-  "packageName": "@neat-evolution/demo",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

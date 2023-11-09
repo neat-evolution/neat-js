@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/worker-reproducer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -44,12 +44,12 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@neat-evolution/core": "^0.1.0",
-    "@neat-evolution/evaluator": "^0.1.0",
-    "@neat-evolution/evolution": "^0.1.0",
-    "@neat-evolution/executor": "^0.1.0",
-    "@neat-evolution/utils": "^0.1.0",
-    "@neat-evolution/worker-threads": "^0.1.0",
+    "@neat-evolution/core": "^0.2.0",
+    "@neat-evolution/evaluator": "^0.2.0",
+    "@neat-evolution/evolution": "^0.2.0",
+    "@neat-evolution/executor": "^0.2.0",
+    "@neat-evolution/utils": "^0.2.0",
+    "@neat-evolution/worker-threads": "^0.2.0",
     "@swc/helpers": "^0.5.3",
     "async-sema": "^3.1.1"
   },

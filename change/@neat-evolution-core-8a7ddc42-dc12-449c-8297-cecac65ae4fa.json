@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat: rework types, rename NEATGenome to CoreGenome",
-  "packageName": "@neat-evolution/core",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

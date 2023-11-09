@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat: dataset environment",
-  "packageName": "@neat-evolution/dataset-environment",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

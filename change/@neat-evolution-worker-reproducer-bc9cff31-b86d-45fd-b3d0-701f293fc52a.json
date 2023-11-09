@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat: worker-reproducer",
-  "packageName": "@neat-evolution/worker-reproducer",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

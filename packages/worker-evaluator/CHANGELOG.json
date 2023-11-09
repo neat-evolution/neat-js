@@ -1,0 +1,68 @@
+{
+  "name": "@neat-evolution/worker-evaluator",
+  "entries": [
+    {
+      "date": "Thu, 09 Nov 2023 08:12:03 GMT",
+      "version": "0.2.0",
+      "tag": "@neat-evolution/worker-evaluator_v0.2.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-evaluator",
+            "commit": "55910432a0dcc2d6a1a1ad76aaa81f36b456b3af",
+            "comment": "feat: worker-evaluator"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/core to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/environment to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/evaluator to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/executor to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/worker-threads to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/dataset-environment to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/evolution to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/neat to v0.2.0",
+            "commit": "not available"
+          }
+        ]
+      }
+    }
+  ]
+}

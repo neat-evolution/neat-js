@@ -1,0 +1,44 @@
+{
+  "name": "@neat-evolution/evolution",
+  "entries": [
+    {
+      "date": "Thu, 09 Nov 2023 08:12:03 GMT",
+      "version": "0.2.0",
+      "tag": "@neat-evolution/evolution_v0.2.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/evolution",
+            "commit": "55910432a0dcc2d6a1a1ad76aaa81f36b456b3af",
+            "comment": "feat: evolution"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evolution",
+            "comment": "Bump @neat-evolution/core to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evolution",
+            "comment": "Bump @neat-evolution/evaluator to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evolution",
+            "comment": "Bump @neat-evolution/executor to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evolution",
+            "comment": "Bump @neat-evolution/utils to v0.2.0",
+            "commit": "not available"
+          }
+        ]
+      }
+    }
+  ]
+}

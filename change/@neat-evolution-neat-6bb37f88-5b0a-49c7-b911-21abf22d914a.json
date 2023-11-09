@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat: neat algorithm",
-  "packageName": "@neat-evolution/neat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

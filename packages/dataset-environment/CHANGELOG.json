@@ -1,0 +1,50 @@
+{
+  "name": "@neat-evolution/dataset-environment",
+  "entries": [
+    {
+      "date": "Thu, 09 Nov 2023 08:12:03 GMT",
+      "version": "0.2.0",
+      "tag": "@neat-evolution/dataset-environment_v0.2.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/dataset-environment",
+            "commit": "55910432a0dcc2d6a1a1ad76aaa81f36b456b3af",
+            "comment": "feat: dataset environment"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/dataset-environment",
+            "comment": "Bump @neat-evolution/core to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/dataset-environment",
+            "comment": "Bump @neat-evolution/environment to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/dataset-environment",
+            "comment": "Bump @neat-evolution/evolution to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/dataset-environment",
+            "comment": "Bump @neat-evolution/executor to v0.2.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/dataset-environment",
+            "comment": "Bump @neat-evolution/utils to v0.2.0",
+            "commit": "not available"
+          }
+        ]
+      }
+    }
+  ]
+}

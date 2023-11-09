@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat: executor",
-  "packageName": "@neat-evolution/executor",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat: hyperneat algorithm",
-  "packageName": "@neat-evolution/hyperneat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

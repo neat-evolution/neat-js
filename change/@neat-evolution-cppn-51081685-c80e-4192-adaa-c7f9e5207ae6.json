@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat: cppn algorithm",
-  "packageName": "@neat-evolution/cppn",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

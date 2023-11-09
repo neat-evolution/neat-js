@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat: evaluator",
-  "packageName": "@neat-evolution/evaluator",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}
