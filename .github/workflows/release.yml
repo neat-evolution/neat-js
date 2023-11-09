@@ -1,33 +1,56 @@
-# https://github.com/changesets/action#with-publishing
 name: Release
 
-on:
-  push:
-    branches:
-      - main
+# Enabled permissions on GITHUB_TOKEN
+permissions:
+  # To be able to create packages
+  packages: write
+  # To be able to push to the repo
+  contents: write
+  # To update the pr description with canary info
+  pull-requests: write
+  # For pr-check to create a status
+  statuses: write
+  # Needed to create PR statuses/checks
+  checks: write
+  # To post comments on PRs
+  issues: write
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+on:
+  # Release on push to main
+  push:
+    branches: [main]
 
 jobs:
   release:
-    name: Release
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Check out code
+        uses: actions/checkout@v4
         with:
-          node-version: 16
+          # Prevent the action from storing credentials in a way that's hard to override
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
           cache: 'yarn'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@heygrady'
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@neat-evolution"
+      
       - name: Setup .yarnrc.yml
         run: |
+          yarn config set npmScopes.neat-evolution.npmRegistryServer "https://npm.pkg.github.com"
+          yarn config set npmScopes.neat-evolution.npmAlwaysAuth true
+          yarn config set npmScopes.neat-evolution.npmAuthToken $NPM_AUTH_TOKEN
           yarn config set npmScopes.heygrady.npmRegistryServer "https://npm.pkg.github.com"
           yarn config set npmScopes.heygrady.npmAlwaysAuth true
           yarn config set npmScopes.heygrady.npmAuthToken $NPM_AUTH_TOKEN
         env:
           NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Cache node_modules and yarn cache
+
+      - name: Cache node modules
         uses: actions/cache@v3
         with:
           path: |
@@ -36,22 +59,29 @@ jobs:
             packages/*/node_modules
             scripts/*/node_modules
             .yarn/cache
-          key: root-node-modules-folder-v1
+          key: yarn-deps-${{ hashFiles('yarn.lock') }}
           restore-keys: |
-            root-node-modules-folder-
-      - run: yarn install
-      # FIXME: run yarn lint and yarn test before releasing
-      - name: Create Release Pull Request or Publish to Github Package Registry
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          # This expects you to have a script called version which updates the lockfile after calling `changeset version`.
-          version: yarn version
-          # This expects you to have a script called release which builds your packages and then calls `changeset publish`.
-          publish: yarn release
+            yarn-deps-${{ hashFiles('yarn.lock') }}
+
+      # Set the name, email, and URL with PAT
+      - name: Set git credentials
+        run: |
+          git config user.name "Release Bot"
+          git config user.email "info@neat-evolution.ai"
+          git remote set-url origin "https://$BEACHBALL_GH_TOKEN@github.com/neat-evolution/web-app"
+        env:
+          BEACHBALL_GH_TOKEN: ${{ secrets.BEACHBALL_GH_TOKEN }}
+
+      - name: Install dependencies
+        run: yarn install --immutable --refresh-lockfile
+
+      - name: Build (all)
+        run: yarn build:ci
+
+      # Pass the token on the command line for publishing
+      - name: Publish
+        run: 'yarn beachball publish --message "chore: publish [skip ci]" --token "$NPM_TOKEN"'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#example-workflow
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          YARN_ENABLE_IMMUTABLE_INSTALLS: false
