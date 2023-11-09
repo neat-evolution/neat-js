@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "feat: environment",
+  "packageName": "@neat-evolution/environment",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
