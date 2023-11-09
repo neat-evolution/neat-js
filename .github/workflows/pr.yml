@@ -1,0 +1,49 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+
+jobs:
+  build-test-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'yarn'
+        registry-url: "https://npm.pkg.github.com"
+        scope: "@neat-evolution"
+
+    - name: Setup .yarnrc.yml
+      run: |
+        yarn config set npmScopes.neat-evolution.npmRegistryServer "https://npm.pkg.github.com"
+        yarn config set npmScopes.neat-evolution.npmAlwaysAuth true
+        yarn config set npmScopes.neat-evolution.npmAuthToken $NPM_AUTH_TOKEN
+        yarn config set npmScopes.heygrady.npmRegistryServer "https://npm.pkg.github.com"
+        yarn config set npmScopes.heygrady.npmAlwaysAuth true
+        yarn config set npmScopes.heygrady.npmAuthToken $NPM_AUTH_TOKEN
+      env:
+        NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Install dependencies (yarn)
+      run: yarn install --immutable --refresh-lockfile
+
+    - name: Check packages (manypkg)
+      run: yarn check:maynpkg
+
+    - name: Check change files (beachball)
+      run: yarn check:beachball
+
+    # TODO: filter to only this branch
+    - name: Build (all)
+      run: yarn build:ci
+
+    # TODO: run in parallel to tests
+    - name: Lint (all)
+      run: yarn lint:ci
+
+    - name: Test (all)
+      run: yarn test:ci
