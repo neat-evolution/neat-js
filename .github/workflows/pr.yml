@@ -31,12 +31,6 @@ jobs:
     - name: Install dependencies (yarn)
       run: yarn install --immutable --refresh-lockfile
 
-    - name: Check packages (manypkg)
-      run: yarn check:manypkg
-
-    - name: Check change files (beachball)
-      run: yarn check:beachball
-
     # TODO: filter to only this branch
     - name: Build (all)
       run: yarn build:ci
@@ -47,3 +41,9 @@ jobs:
 
     - name: Test (all)
       run: yarn test:ci
+        
+    - name: Check packages (manypkg)
+      run: yarn check:manypkg
+
+    - name: Check change files (beachball)
+      run: yarn check:beachball
