@@ -1,11 +1,11 @@
-# @neat-js/dataset-environment
+# @neat-evolution/dataset-environment
 
 The default environment ported from the original Rust implementation. Loads CSV-like training data into memory and returns fitness scores for executors.
 
 This is where the fitness evaluation happens.
 
 ```sh
-yarn add @neat-js/dataset-environment
+yarn add @neat-evolution/dataset-environment
 ```
 
 ## Example
@@ -16,14 +16,14 @@ The environment works hand-in-hand with the evaluator to train networks.
 2. Set up your evaluator
 
 ```ts
-import { createEvaluator } from '@neat-js/evaluator'
-import { createExecutor } from '@neat-js/executor'
+import { createEvaluator } from '@neat-evolution/evaluator'
+import { createExecutor } from '@neat-evolution/executor'
 
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
-} from '@neat-js/dataset-environment'
+} from '@neat-evolution/dataset-environment'
 
 const datasetOptions = {
   ...defaultDatasetOptions,

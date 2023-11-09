@@ -3,10 +3,10 @@ import {
   defaultGenomeOptions,
   type GenomeOptions,
   type InitConfig,
-} from '@neat-js/core'
-import { defaultCPPNGenomeOptions } from '@neat-js/cppn'
-import type { CPPNGenomeOptions } from '@neat-js/cppn'
-import type { IOConfig } from '@neat-js/hyperneat'
+} from '@neat-evolution/core'
+import { defaultCPPNGenomeOptions } from '@neat-evolution/cppn'
+import type { CPPNGenomeOptions } from '@neat-evolution/cppn'
+import type { IOConfig } from '@neat-evolution/hyperneat'
 
 export interface ESHyperNEATGenomeOptions
   extends GenomeOptions,

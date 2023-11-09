@@ -1,9 +1,9 @@
-# @neat-js/utils
+# @neat-evolution/utils
 
-Utility functions used in @neat-js.
+Utility functions used in @neat-evolution.
 
 ```sh
-yarn add @neat-js/utils
+yarn add @neat-evolution/utils
 ```
 
 ## Rand
@@ -11,7 +11,7 @@ yarn add @neat-js/utils
 A crude port of the random number generator in Rust. Uses [seedrandom](https://www.npmjs.com/package/seedrandom). This is mostly so that the code "looks" like the original Rust code. This was helpful during debugging and it still works so it's still here :)
 
 ```ts
-import { createRNG, threadRNG } from '@neat-js/utils'
+import { createRNG, threadRNG } from '@neat-evolution/utils'
 
 // get the global random number generator
 const rng = threadRNG()
@@ -28,7 +28,7 @@ const myRng = createRNG('my seed')
 A port of [array-shuffle](https://github.com/sindresorhus/array-shuffle/blob/main/index.js) but adapted to do in-place shuffling and also to work with the random number generator.
 
 ```ts
-import { createRNG, shuffle } from '@neat-js/utils'
+import { createRNG, shuffle } from '@neat-evolution/utils'
 
 const array = [1, 2, 3]
 

@@ -1,6 +1,6 @@
-import type { Algorithm } from '@neat-js/core'
-import type { Environment } from '@neat-js/environment'
-import type { EvaluatorFactory } from '@neat-js/evaluator'
+import type { Algorithm } from '@neat-evolution/core'
+import type { Environment } from '@neat-evolution/environment'
+import type { EvaluatorFactory } from '@neat-evolution/evaluator'
 
 import { WorkerEvaluator } from './WorkerEvaluator.js'
 import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'

@@ -1,5 +1,5 @@
-export { createConfig, createLink, createState } from '@neat-js/neat'
-export { createNode } from '@neat-js/cppn'
+export { createConfig, createLink, createState } from '@neat-evolution/neat'
+export { createNode } from '@neat-evolution/cppn'
 
 export * from './substrate/createSubstrate.js'
 export * from './substrate/horizontalRows.js'

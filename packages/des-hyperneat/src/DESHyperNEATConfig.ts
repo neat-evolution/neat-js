@@ -1,4 +1,4 @@
-import { CoreConfig, type NEATConfigOptions } from '@neat-js/core'
+import { CoreConfig, type NEATConfigOptions } from '@neat-evolution/core'
 
 import type { DESHyperNEATConfigData } from './DESHyperNEATConfigData.js'
 import type { DESHyperNEATConfigFactoryOptions } from './DESHyperNEATConfigFactoryOptions.js'

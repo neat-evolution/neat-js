@@ -5,7 +5,7 @@ import type {
   LinkFactoryOptions,
   NodeFactoryOptions,
   StateData,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 import { createConfig } from './createConfig.js'
 import { createGenome } from './createGenome.js'
@@ -53,7 +53,7 @@ export const NEATAlgorithm: Algorithm<
   NEATGenome
 > = {
   name: 'NEAT',
-  pathname: '@neat-js/neat',
+  pathname: '@neat-evolution/neat',
   defaultOptions: defaultNEATGenomeOptions,
   createConfig,
   createGenome,

@@ -5,16 +5,16 @@ import type {
   NEATConfigOptions,
   NodeFactoryOptions,
   StateData,
-} from '@neat-js/core'
-import { defaultNEATConfigOptions } from '@neat-js/core'
-import type { Evaluator } from '@neat-js/evaluator'
+} from '@neat-evolution/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
+import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
   EvolutionOptions,
   PopulationOptions,
   ReproducerFactory,
   ReproducerFactoryOptions,
-} from '@neat-js/evolution'
-import { evolve, Population } from '@neat-js/evolution'
+} from '@neat-evolution/evolution'
+import { evolve, Population } from '@neat-evolution/evolution'
 
 import { NEATAlgorithm } from './NEATAlgorithm.js'
 import type { NEATConfig } from './NEATConfig.js'

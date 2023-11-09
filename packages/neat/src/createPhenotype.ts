@@ -9,8 +9,8 @@ import {
   type NodeRefTuple,
   nodeKeyToRefTuple,
   nodeTupleToKey,
-} from '@neat-js/core'
-import { PhenotypeActionType } from '@neat-js/core'
+} from '@neat-evolution/core'
+import { PhenotypeActionType } from '@neat-evolution/core'
 
 import type { NEATGenome } from './NEATGenome.js'
 

@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 
-import { Activation, defaultNEATConfigOptions } from '@neat-js/core'
+import { Activation, defaultNEATConfigOptions } from '@neat-evolution/core'
 
 import { createConfig, createGenome, createState } from '../../../src/index.js'
 

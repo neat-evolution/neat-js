@@ -1,5 +1,5 @@
-import { Activation } from '@neat-js/core'
-import { PhenotypeActionType, type Phenotype } from '@neat-js/core'
+import { Activation } from '@neat-evolution/core'
+import { PhenotypeActionType, type Phenotype } from '@neat-evolution/core'
 
 export const phenotype: Phenotype = {
   length: 9,

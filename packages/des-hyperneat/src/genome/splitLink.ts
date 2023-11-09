@@ -4,8 +4,8 @@ import {
   NodeType,
   toLinkKey,
   toNodeKey,
-} from '@neat-js/core'
-import { type CPPNGenome, type CPPNGenomeOptions } from '@neat-js/cppn'
+} from '@neat-evolution/core'
+import { type CPPNGenome, type CPPNGenomeOptions } from '@neat-evolution/cppn'
 
 export const splitLink = async (
   genome: CPPNGenome<CPPNGenomeOptions>,

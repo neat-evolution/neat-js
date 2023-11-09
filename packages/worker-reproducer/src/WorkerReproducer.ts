@@ -1,6 +1,6 @@
-import { type NEATState, type Innovation, type CoreGenome } from '@neat-js/core'
-import { Organism, type Reproducer, type Species } from '@neat-js/evolution'
-import { Worker } from '@neat-js/worker-threads'
+import { type NEATState, type Innovation, type CoreGenome } from '@neat-evolution/core'
+import { Organism, type Reproducer, type Species } from '@neat-evolution/evolution'
+import { Worker } from '@neat-evolution/worker-threads'
 import { Sema } from 'async-sema'
 
 import type { AnyPopulation, RequestMapValue } from './types.js'

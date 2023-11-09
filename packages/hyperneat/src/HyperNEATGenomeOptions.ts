@@ -3,8 +3,8 @@ import {
   defaultGenomeOptions,
   type GenomeOptions,
   type InitConfig,
-} from '@neat-js/core'
-import { defaultCPPNGenomeOptions, type CPPNGenomeOptions } from '@neat-js/cppn'
+} from '@neat-evolution/core'
+import { defaultCPPNGenomeOptions, type CPPNGenomeOptions } from '@neat-evolution/cppn'
 
 import { type Point } from './Point.js'
 

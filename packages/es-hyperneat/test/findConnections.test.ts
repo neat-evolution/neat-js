@@ -1,5 +1,5 @@
-import type { Target } from '@neat-js/core'
-import { createPhenotype } from '@neat-js/cppn'
+import type { Target } from '@neat-evolution/core'
+import { createPhenotype } from '@neat-evolution/cppn'
 import { describe, expect, test } from 'vitest'
 
 import { findConnections } from '../src/index.js'

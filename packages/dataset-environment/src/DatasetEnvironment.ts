@@ -1,8 +1,8 @@
 import {
   type Environment,
   type EnvironmentDescription,
-} from '@neat-js/environment'
-import type { Executor } from '@neat-js/executor'
+} from '@neat-evolution/environment'
+import type { Executor } from '@neat-evolution/executor'
 
 import { type Dataset } from './Dataset.js'
 import { datasetToSharedBuffer } from './datasetToSharedBuffer.js'

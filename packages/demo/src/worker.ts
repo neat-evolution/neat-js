@@ -1,16 +1,16 @@
-import type { Algorithm } from '@neat-js/core'
-import type { Environment } from '@neat-js/environment'
-import type { EvaluatorFactory } from '@neat-js/evaluator'
-import type { ReproducerFactory } from '@neat-js/evolution'
+import type { Algorithm } from '@neat-evolution/core'
+import type { Environment } from '@neat-evolution/environment'
+import type { EvaluatorFactory } from '@neat-evolution/evaluator'
+import type { ReproducerFactory } from '@neat-evolution/evolution'
 import {
   createEvaluator as createWorkerEvaluator,
   type WorkerEvaluator,
-} from '@neat-js/worker-evaluator'
+} from '@neat-evolution/worker-evaluator'
 import {
   createReproducer as createWorkerReproducer,
   type WorkerReproducer,
-} from '@neat-js/worker-reproducer'
-import { hardwareConcurrency } from '@neat-js/worker-threads'
+} from '@neat-evolution/worker-reproducer'
+import { hardwareConcurrency } from '@neat-evolution/worker-threads'
 
 import { demo } from './demo.js'
 
@@ -57,9 +57,9 @@ const createEvaluator: EvaluatorFactory<null> = (
   environment: Environment
 ) => {
   const evaluator = createWorkerEvaluator(algorithm, environment, {
-    createEnvironmentPathname: '@neat-js/dataset-environment',
+    createEnvironmentPathname: '@neat-evolution/dataset-environment',
     // FIXME: make createExecutorPathname an env variable
-    createExecutorPathname: '@neat-js/executor',
+    createExecutorPathname: '@neat-evolution/executor',
     taskCount: 100,
     threadCount: workerThreadLimit,
   })

@@ -11,18 +11,18 @@ import {
   PhenotypeActionType,
   type PhenotypeAction,
   toLinkKey,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import {
   type CPPNGenome,
   createPhenotype as createCPPNPhenotype,
   type CPPNGenomeOptions,
-} from '@neat-js/cppn'
+} from '@neat-evolution/cppn'
 import {
   exploreSubstrate,
   type ESHyperNEATGenomeOptions,
-} from '@neat-js/es-hyperneat'
-import { createSyncExecutor } from '@neat-js/executor'
-import { toPointKey, type Point, type PointKey } from '@neat-js/hyperneat'
+} from '@neat-evolution/es-hyperneat'
+import { createSyncExecutor } from '@neat-evolution/executor'
+import { toPointKey, type Point, type PointKey } from '@neat-evolution/hyperneat'
 
 import type { DESHyperNEATGenome } from './DESHyperNEATGenome.js'
 import type { DESHyperNEATLink } from './DESHyperNEATLink.js'

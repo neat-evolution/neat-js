@@ -1,14 +1,14 @@
-import { defaultNEATConfigOptions } from '@neat-js/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
-} from '@neat-js/dataset-environment'
+} from '@neat-evolution/dataset-environment'
 import {
   AsyncEvaluator,
   type FitnessData,
   type GenomeEntry,
-} from '@neat-js/evaluator'
+} from '@neat-evolution/evaluator'
 import {
   createReproducer,
   defaultEvolutionOptions,
@@ -16,8 +16,8 @@ import {
   evolve,
   Population,
   type PopulationOptions,
-} from '@neat-js/evolution'
-import { createExecutor } from '@neat-js/executor'
+} from '@neat-evolution/evolution'
+import { createExecutor } from '@neat-evolution/executor'
 import {
   NEATAlgorithm,
   defaultNEATGenomeOptions,
@@ -25,7 +25,7 @@ import {
   NEATGenome,
   type NEATConfig,
   type NEATPopulation,
-} from '@neat-js/neat'
+} from '@neat-evolution/neat'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {

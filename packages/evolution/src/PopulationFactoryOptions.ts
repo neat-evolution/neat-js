@@ -4,7 +4,7 @@ import type {
   GenomeFactoryOptions,
   GenomeOptions,
   StateData,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 import type { Species } from './Species.js'
 import type { SpeciesData } from './SpeciesData.js'

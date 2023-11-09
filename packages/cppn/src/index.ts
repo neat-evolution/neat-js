@@ -1,4 +1,4 @@
-export { createConfig, createLink, createState } from '@neat-js/neat'
+export { createConfig, createLink, createState } from '@neat-evolution/neat'
 
 export * from './cppn.js'
 export * from './CPPNAlgorithm.js'

@@ -1,4 +1,4 @@
-import { type InitConfig } from '@neat-js/core'
+import { type InitConfig } from '@neat-evolution/core'
 
 import type { DESHyperNEATGenomeOptions } from '../DESHyperNEATGenomeOptions.js'
 

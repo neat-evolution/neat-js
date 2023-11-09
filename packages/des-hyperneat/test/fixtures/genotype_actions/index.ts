@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 
-import { defaultNEATConfigOptions, PhenotypeActionType } from '@neat-js/core'
+import { defaultNEATConfigOptions, PhenotypeActionType } from '@neat-evolution/core'
 import type {
   Activation,
   Connection,
@@ -8,9 +8,9 @@ import type {
   NodeKey,
   Phenotype,
   PhenotypeAction,
-} from '@neat-js/core'
-import type { CPPNNodeData } from '@neat-js/cppn'
-import type { NEATLinkData } from '@neat-js/neat'
+} from '@neat-evolution/core'
+import type { CPPNNodeData } from '@neat-evolution/cppn'
+import type { NEATLinkData } from '@neat-evolution/neat'
 
 import { createConfig } from '../../../src/createConfig.js'
 import { createGenome } from '../../../src/createGenome.js'

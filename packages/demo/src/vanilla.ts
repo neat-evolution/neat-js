@@ -1,9 +1,9 @@
-import type { Algorithm } from '@neat-js/core'
-import type { Environment } from '@neat-js/environment'
-import { createEvaluator as createVanillaEvaluator } from '@neat-js/evaluator'
-import type { EvaluatorFactory } from '@neat-js/evaluator'
-import { createReproducer } from '@neat-js/evolution'
-import { createExecutor } from '@neat-js/executor'
+import type { Algorithm } from '@neat-evolution/core'
+import type { Environment } from '@neat-evolution/environment'
+import { createEvaluator as createVanillaEvaluator } from '@neat-evolution/evaluator'
+import type { EvaluatorFactory } from '@neat-evolution/evaluator'
+import { createReproducer } from '@neat-evolution/evolution'
+import { createExecutor } from '@neat-evolution/executor'
 
 import { demo } from './demo.js'
 

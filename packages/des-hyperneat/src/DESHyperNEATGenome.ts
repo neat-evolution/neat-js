@@ -6,9 +6,9 @@ import {
   type InitConfig,
   toLinkKey,
   nodeRefToKey,
-} from '@neat-js/core'
-import type { CPPNGenome, CPPNGenomeOptions } from '@neat-js/cppn'
-import { threadRNG } from '@neat-js/utils'
+} from '@neat-evolution/core'
+import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
+import { threadRNG } from '@neat-evolution/utils'
 
 import type { DESHyperNEATGenomeFactory } from './createGenome.js'
 import { createLinkFactory } from './createLink.js'

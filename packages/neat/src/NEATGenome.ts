@@ -8,7 +8,7 @@ import {
   nodeRefToKey,
   type ConfigFactoryOptions,
   type ConfigData,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 import { createGenome } from './createGenome.js'
 import { createLink } from './createLink.js'

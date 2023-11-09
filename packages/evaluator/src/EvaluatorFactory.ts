@@ -1,5 +1,5 @@
-import type { Algorithm } from '@neat-js/core'
-import type { Environment } from '@neat-js/environment'
+import type { Algorithm } from '@neat-evolution/core'
+import type { Environment } from '@neat-evolution/environment'
 
 import type { Evaluator } from './Evaluator.js'
 

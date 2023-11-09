@@ -1,4 +1,4 @@
-import { createSyncExecutor } from '@neat-js/executor'
+import { createSyncExecutor } from '@neat-evolution/executor'
 import { describe, expect, test } from 'vitest'
 
 import { createPhenotype } from '../src/index.js'

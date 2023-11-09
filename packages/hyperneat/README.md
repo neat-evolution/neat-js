@@ -1,9 +1,9 @@
-# @neat-js/hyperneat
+# @neat-evolution/hyperneat
 
 Implementation of the HyperNEAT algorithm.
 
 ```sh
-yarn add @neat-js/hyperneat
+yarn add @neat-evolution/hyperneat
 ```
 
 ## Example

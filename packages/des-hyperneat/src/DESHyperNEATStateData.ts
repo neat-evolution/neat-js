@@ -1,4 +1,4 @@
-import type { StateData } from '@neat-js/core'
+import type { StateData } from '@neat-evolution/core'
 
 import type { CustomStateData } from './CustomStateData.js'
 

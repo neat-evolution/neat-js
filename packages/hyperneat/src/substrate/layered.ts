@@ -1,4 +1,4 @@
-import { Connections } from '@neat-js/core'
+import { Connections } from '@neat-evolution/core'
 
 import type { HyperNEATGenomeOptions } from '../HyperNEATGenomeOptions.js'
 import { toPointKey, type Point, type PointKey } from '../Point.js'

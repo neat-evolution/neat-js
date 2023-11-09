@@ -8,10 +8,10 @@ import type {
   PhenotypeFactory,
   StateFactory,
   StateProvider,
-} from '@neat-js/core'
-import type { Environment } from '@neat-js/environment'
-import type { Executor, ExecutorFactory } from '@neat-js/executor'
-import { workerContext } from '@neat-js/worker-threads'
+} from '@neat-evolution/core'
+import type { Environment } from '@neat-evolution/environment'
+import type { Executor, ExecutorFactory } from '@neat-evolution/executor'
+import { workerContext } from '@neat-evolution/worker-threads'
 
 import {
   ActionType,

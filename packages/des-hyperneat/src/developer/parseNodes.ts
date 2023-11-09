@@ -1,4 +1,4 @@
-import { horizontalRow, type Point } from '@neat-js/hyperneat'
+import { horizontalRow, type Point } from '@neat-evolution/hyperneat'
 
 import type { IOConfig } from '../DESHyperNEATGenomeOptions.js'
 

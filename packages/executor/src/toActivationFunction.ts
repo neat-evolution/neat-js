@@ -1,4 +1,4 @@
-import { Activation } from '@neat-js/core'
+import { Activation } from '@neat-evolution/core'
 
 export type ActivationFunction = (x: number) => number
 

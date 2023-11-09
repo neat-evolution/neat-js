@@ -1,13 +1,13 @@
-import type { InitConfig, NEATConfigOptions } from '@neat-js/core'
-import { defaultNEATConfigOptions } from '@neat-js/core'
-import type { Evaluator } from '@neat-js/evaluator'
+import type { InitConfig, NEATConfigOptions } from '@neat-evolution/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
+import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
   EvolutionOptions,
   PopulationOptions,
   ReproducerFactory,
   ReproducerFactoryOptions,
-} from '@neat-js/evolution'
-import { evolve, Population } from '@neat-js/evolution'
+} from '@neat-evolution/evolution'
+import { evolve, Population } from '@neat-evolution/evolution'
 
 import type { CustomState } from './CustomState.js'
 import type { CustomStateData } from './CustomStateData.js'

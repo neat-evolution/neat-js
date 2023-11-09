@@ -7,7 +7,7 @@ import {
   InnovationLog,
   type LinkKey,
   type NodeKey,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 import { StateType } from './WorkerAction.js'
 import { WorkerCustomState } from './WorkerCustomState.js'

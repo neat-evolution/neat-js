@@ -1,5 +1,5 @@
-import type { GenomeFactoryOptions, NodeKey } from '@neat-js/core'
-import type { CPPNGenomeFactoryOptions } from '@neat-js/cppn'
+import type { GenomeFactoryOptions, NodeKey } from '@neat-evolution/core'
+import type { CPPNGenomeFactoryOptions } from '@neat-evolution/cppn'
 
 export type DESHyperNEATNodeData = [
   id: number,

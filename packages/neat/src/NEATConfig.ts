@@ -2,7 +2,7 @@ import {
   CoreConfig,
   type ConfigFactoryOptions,
   type ConfigData,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 export class NEATConfig extends CoreConfig<
   ConfigFactoryOptions,

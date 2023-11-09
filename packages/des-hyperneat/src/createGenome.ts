@@ -2,7 +2,7 @@ import type {
   GenomeFactory,
   InitConfig,
   NEATConfigOptions,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 import type { CustomState } from './CustomState.js'
 import type { CustomStateData } from './CustomStateData.js'

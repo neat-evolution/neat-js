@@ -16,9 +16,9 @@ import {
   type ConfigOptions,
   type ConfigFactoryOptions,
   type ConfigData,
-} from '@neat-js/core'
-import type { Evaluator, GenomeEntry } from '@neat-js/evaluator'
-import { threadRNG } from '@neat-js/utils'
+} from '@neat-evolution/core'
+import type { Evaluator, GenomeEntry } from '@neat-evolution/evaluator'
+import { threadRNG } from '@neat-evolution/utils'
 
 import { Organism } from './Organism.js'
 import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'

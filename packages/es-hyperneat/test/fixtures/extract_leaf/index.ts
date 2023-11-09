@@ -9,7 +9,7 @@ import {
   type Phenotype,
   PhenotypeActionType,
   type PhenotypeAction,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import {
   createGenome,
   type CPPNGenomeFactoryOptions,
@@ -20,10 +20,10 @@ import {
   type CPPNGenomeOptions,
   type CPPNNodeData,
   createPhenotype,
-} from '@neat-js/cppn'
-import { createSyncExecutor } from '@neat-js/executor'
-import { toPointKey, type Point, type PointKey } from '@neat-js/hyperneat'
-import type { NEATLinkData } from '@neat-js/neat'
+} from '@neat-evolution/cppn'
+import { createSyncExecutor } from '@neat-evolution/executor'
+import { toPointKey, type Point, type PointKey } from '@neat-evolution/hyperneat'
+import type { NEATLinkData } from '@neat-evolution/neat'
 
 import {
   QuadPoint,

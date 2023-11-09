@@ -4,15 +4,15 @@ import type {
   GenomeFactoryOptions,
   GenomeOptions,
   InitConfig,
-} from '@neat-js/core'
-import type { Environment } from '@neat-js/environment'
+} from '@neat-evolution/core'
+import type { Environment } from '@neat-evolution/environment'
 import type {
   Evaluator,
   FitnessData,
   GenomeEntries,
   GenomeEntry,
-} from '@neat-js/evaluator'
-import { Worker } from '@neat-js/worker-threads'
+} from '@neat-evolution/evaluator'
+import { Worker } from '@neat-evolution/worker-threads'
 import { Sema } from 'async-sema'
 
 import type { RequestMapValue } from './RequestMapValue.js'

@@ -2,8 +2,8 @@ import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
-} from '@neat-js/dataset-environment'
-import { createExecutor } from '@neat-js/executor'
+} from '@neat-evolution/dataset-environment'
+import { createExecutor } from '@neat-evolution/executor'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { createPhenotype } from '../src/createPhenotype.js'
@@ -11,8 +11,8 @@ import type { NEATGenome } from '../src/NEATGenome.js'
 
 import { testCases } from './fixtures/fitness/testCases.js'
 
-vi.mock('@neat-js/utils', async () => {
-  const actual: any = await vi.importActual('@neat-js/utils')
+vi.mock('@neat-evolution/utils', async () => {
+  const actual: any = await vi.importActual('@neat-evolution/utils')
   return {
     ...actual,
     shuffle: vi.fn((array) => array),

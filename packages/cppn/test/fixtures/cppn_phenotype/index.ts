@@ -1,14 +1,14 @@
 import fs from 'node:fs/promises'
 
-import { PhenotypeActionType, defaultNEATConfigOptions } from '@neat-js/core'
+import { PhenotypeActionType, defaultNEATConfigOptions } from '@neat-evolution/core'
 import type {
   Activation,
   InitConfig,
   NodeKey,
   Phenotype,
   PhenotypeAction,
-} from '@neat-js/core'
-import { createConfig, createState, type NEATLinkData } from '@neat-js/neat'
+} from '@neat-evolution/core'
+import { createConfig, createState, type NEATLinkData } from '@neat-evolution/neat'
 
 import {
   createGenome,

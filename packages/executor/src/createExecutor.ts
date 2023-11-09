@@ -1,4 +1,4 @@
-import { type Phenotype } from '@neat-js/core'
+import { type Phenotype } from '@neat-evolution/core'
 
 import { createSyncExecutor } from './createSyncExecutor.js'
 import type { Executor } from './Executor.js'

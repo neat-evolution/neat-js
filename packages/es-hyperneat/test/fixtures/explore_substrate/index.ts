@@ -9,7 +9,7 @@ import {
   type InitConfig,
   type NodeKey,
   type Phenotype,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import {
   defaultCPPNGenomeOptions,
   type CPPNNodeData,
@@ -17,10 +17,10 @@ import {
   createGenome,
   type CPPNGenome,
   type CPPNGenomeOptions,
-} from '@neat-js/cppn'
-import { createSyncExecutor, type SyncExecutor } from '@neat-js/executor'
-import { toPointKey, type Point, type PointKey } from '@neat-js/hyperneat'
-import { createConfig, createState, type NEATLinkData } from '@neat-js/neat'
+} from '@neat-evolution/cppn'
+import { createSyncExecutor, type SyncExecutor } from '@neat-evolution/executor'
+import { toPointKey, type Point, type PointKey } from '@neat-evolution/hyperneat'
+import { createConfig, createState, type NEATLinkData } from '@neat-evolution/neat'
 
 import {
   defaultESHyperNEATGenomeOptions,

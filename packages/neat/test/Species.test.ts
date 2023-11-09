@@ -1,10 +1,10 @@
-import { defaultNEATConfigOptions, type StateData } from '@neat-js/core'
+import { defaultNEATConfigOptions, type StateData } from '@neat-evolution/core'
 import {
   defaultSpeciesOptions,
   type SpeciesOptions,
   Species,
-} from '@neat-js/evolution'
-import { Organism } from '@neat-js/evolution'
+} from '@neat-evolution/evolution'
+import { Organism } from '@neat-evolution/evolution'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createConfig } from '../src/createConfig.js'

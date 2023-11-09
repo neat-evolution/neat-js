@@ -1,4 +1,4 @@
-import type { LinkFactory, LinkFactoryOptions } from '@neat-js/core'
+import type { LinkFactory, LinkFactoryOptions } from '@neat-evolution/core'
 
 import { NEATLink } from './NEATLink.js'
 

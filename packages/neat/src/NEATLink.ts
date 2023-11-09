@@ -1,5 +1,5 @@
-import { CoreLink } from '@neat-js/core'
-import type { LinkFactoryOptions } from '@neat-js/core'
+import { CoreLink } from '@neat-evolution/core'
+import type { LinkFactoryOptions } from '@neat-evolution/core'
 
 import { createLink } from './createLink.js'
 

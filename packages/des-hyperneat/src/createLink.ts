@@ -1,4 +1,4 @@
-import type { LinkFactory, NEATConfigOptions } from '@neat-js/core'
+import type { LinkFactory, NEATConfigOptions } from '@neat-evolution/core'
 
 import type { CustomState } from './CustomState.js'
 import type { CustomStateData } from './CustomStateData.js'

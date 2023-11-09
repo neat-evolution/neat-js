@@ -13,12 +13,12 @@ import {
   type PhenotypeLinkAction,
   type PhenotypeActivationAction,
   type NodeKey,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import type {
   NEATGenomeFactoryOptions,
   NEATHiddenNodeData,
   NEATLinkData,
-} from '@neat-js/neat'
+} from '@neat-evolution/neat'
 
 const knownNodes = new Set<string>()
 const linksMap = new Map<string, NEATLinkData>()

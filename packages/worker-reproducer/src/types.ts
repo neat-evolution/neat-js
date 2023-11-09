@@ -1,5 +1,5 @@
-import type { CoreGenome } from '@neat-js/core'
-import type { Population } from '@neat-js/evolution'
+import type { CoreGenome } from '@neat-evolution/core'
+import type { Population } from '@neat-evolution/evolution'
 
 import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
 

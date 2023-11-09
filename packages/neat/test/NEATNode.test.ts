@@ -1,4 +1,4 @@
-import { NodeType } from '@neat-js/core'
+import { NodeType } from '@neat-evolution/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createNode } from '../src/createNode.js'

@@ -1,4 +1,4 @@
-import { type NodeFactory } from '@neat-js/core'
+import { type NodeFactory } from '@neat-evolution/core'
 
 import { CPPNNode } from './CPPNNode.js'
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'

@@ -1,5 +1,5 @@
-import type { InitConfig } from '@neat-js/core'
-import type { Executor } from '@neat-js/executor'
+import type { InitConfig } from '@neat-evolution/core'
+import type { Executor } from '@neat-evolution/executor'
 
 export type EnvironmentDescription = InitConfig
 

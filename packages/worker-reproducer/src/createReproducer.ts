@@ -1,4 +1,4 @@
-import type { CoreGenome } from '@neat-js/core'
+import type { CoreGenome } from '@neat-evolution/core'
 
 import type { AnyPopulation } from './types.js'
 import { WorkerReproducer } from './WorkerReproducer.js'

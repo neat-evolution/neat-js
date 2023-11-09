@@ -4,8 +4,8 @@ import {
   type GenomeFactoryOptions,
   type GenomeOptions,
   type StateData,
-} from '@neat-js/core'
-import { threadRNG } from '@neat-js/utils'
+} from '@neat-evolution/core'
+import { threadRNG } from '@neat-evolution/utils'
 
 import { type Organism } from './Organism.js'
 import type { SpeciesData, SpeciesState } from './SpeciesData.js'

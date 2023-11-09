@@ -5,7 +5,7 @@ import {
   nodeTupleToKey,
   nodeRefToKey,
   type NodeRefTuple,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createConfig } from '../src/createConfig.js'

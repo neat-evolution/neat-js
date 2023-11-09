@@ -3,7 +3,7 @@ import type {
   GenomeFactoryOptions,
   GenomeOptions,
   InitConfig,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 export enum ActionType {
   INIT_EVALUATOR = 'INIT_EVALUATOR',

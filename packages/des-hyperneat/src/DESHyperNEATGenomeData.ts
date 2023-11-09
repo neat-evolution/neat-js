@@ -1,4 +1,4 @@
-import type { GenomeData } from '@neat-js/core'
+import type { GenomeData } from '@neat-evolution/core'
 
 import type { DESHyperNEATConfigData } from './DESHyperNEATConfigData.js'
 import type {
