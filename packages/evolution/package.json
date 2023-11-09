@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/evolution",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -44,10 +44,10 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@neat-evolution/core": "^0.0.1",
-    "@neat-evolution/evaluator": "^0.0.1",
-    "@neat-evolution/executor": "^0.0.1",
-    "@neat-evolution/utils": "^0.0.1",
+    "@neat-evolution/core": "^0.1.0",
+    "@neat-evolution/evaluator": "^0.1.0",
+    "@neat-evolution/executor": "^0.1.0",
+    "@neat-evolution/utils": "^0.1.0",
     "@swc/helpers": "^0.5.3"
   },
   "devDependencies": {
