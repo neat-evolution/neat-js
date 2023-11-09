@@ -33,14 +33,14 @@ jobs:
 
     # TODO: filter to only this branch
     - name: Build (all)
-      run: yarn build:ci
+      run: yarn build
 
     # TODO: run in parallel to tests
     - name: Lint (all)
-      run: yarn lint:ci
+      run: yarn lint
 
     - name: Test (all)
-      run: yarn test:ci
+      run: yarn test
         
     - name: Check packages (manypkg)
       run: yarn check:manypkg

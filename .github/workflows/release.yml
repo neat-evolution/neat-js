@@ -76,7 +76,7 @@ jobs:
         run: yarn install --immutable --refresh-lockfile
 
       - name: Build (all)
-        run: yarn build:ci
+        run: yarn build
 
       # Pass the token on the command line for publishing
       - name: Publish
