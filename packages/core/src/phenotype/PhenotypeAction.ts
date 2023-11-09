@@ -5,31 +5,30 @@ export enum PhenotypeActionType {
   Activation = 'Activation',
 }
 
-// FIXME: tuples are more efficient
-export interface PhenotypeLinkAction {
-  type: PhenotypeActionType.Link
-  from: number
-  to: number
+export type PhenotypeLinkAction = [
+  type: PhenotypeActionType.Link,
+  from: number,
+  to: number,
   weight: number
-}
-// FIXME: tuples are more efficient
-export interface PhenotypeActivationAction {
-  type: PhenotypeActionType.Activation
-  node: number
-  bias: number
+]
+
+export type PhenotypeActivationAction = [
+  type: PhenotypeActionType.Activation,
+  node: number,
+  bias: number,
   activation: Activation
-}
+]
 
 export type PhenotypeAction = PhenotypeLinkAction | PhenotypeActivationAction
 
 export function isPhenotypeLinkAction(
   action: PhenotypeAction
 ): action is PhenotypeLinkAction {
-  return action.type === PhenotypeActionType.Link
+  return action[0] === PhenotypeActionType.Link
 }
 
 export function isPhenotypeActivationAction(
   action: PhenotypeAction
 ): action is PhenotypeActivationAction {
-  return action.type === PhenotypeActionType.Activation
+  return action[0] === PhenotypeActionType.Activation
 }

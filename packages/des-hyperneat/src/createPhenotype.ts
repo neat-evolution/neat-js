@@ -22,7 +22,11 @@ import {
   type ESHyperNEATGenomeOptions,
 } from '@neat-evolution/es-hyperneat'
 import { createSyncExecutor } from '@neat-evolution/executor'
-import { toPointKey, type Point, type PointKey } from '@neat-evolution/hyperneat'
+import {
+  toPointKey,
+  type Point,
+  type PointKey,
+} from '@neat-evolution/hyperneat'
 
 import type { DESHyperNEATGenome } from './DESHyperNEATGenome.js'
 import type { DESHyperNEATLink } from './DESHyperNEATLink.js'
@@ -379,24 +383,23 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
   for (const action of assembledConnections.sortTopologically()) {
     if (isActionEdge(action)) {
       const [from, to, weight] = action
-      actions.push({
-        type: PhenotypeActionType.Link,
-        from: nodeMapping.get(from) as number,
-        to: nodeMapping.get(to) as number,
+      actions.push([
+        PhenotypeActionType.Link,
+        nodeMapping.get(from) as number,
+        nodeMapping.get(to) as number,
         weight,
-      })
+      ])
     } else {
       const [nodeKey] = action
       const index = nodeMapping.get(nodeKey) as number
-      actions.push({
-        type: PhenotypeActionType.Activation,
-        node: index,
-        bias: 0.0,
-        activation:
-          index < firstOutputId
-            ? genome.genomeOptions.hiddenActivation
-            : genome.genomeOptions.outputActivation,
-      })
+      actions.push([
+        PhenotypeActionType.Activation,
+        index,
+        0.0,
+        index < firstOutputId
+          ? genome.genomeOptions.hiddenActivation
+          : genome.genomeOptions.outputActivation,
+      ])
     }
   }
 
