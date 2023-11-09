@@ -50,18 +50,20 @@ jobs:
         env:
           NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Cache node modules
-        uses: actions/cache@v3
+      - name: Get yarn cache directory
+        id: yarn-cache-dir
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Cache TurboRepo
+        uses: actions/cache@v2
         with:
           path: |
+            .turbo
+            ${{ steps.yarn-cache-dir.outputs.dir }}
             node_modules
-            apps/*/node_modules
-            packages/*/node_modules
-            scripts/*/node_modules
-            .yarn/cache
-          key: yarn-deps-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-deps-${{ hashFiles('yarn.lock') }}
+            ${{ runner.os }}-turbo-
 
       # Set the name, email, and URL with PAT
       - name: Set git credentials
