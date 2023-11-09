@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "feat: worker-threads",
+  "packageName": "@neat-evolution/worker-threads",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

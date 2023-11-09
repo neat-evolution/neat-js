@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "feat: utils",
+  "packageName": "@neat-evolution/utils",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

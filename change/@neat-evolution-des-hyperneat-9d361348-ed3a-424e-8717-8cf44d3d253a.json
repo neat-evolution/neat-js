@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "feat: des-hyperneat algorithm",
+  "packageName": "@neat-evolution/des-hyperneat",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
