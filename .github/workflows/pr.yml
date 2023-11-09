@@ -28,6 +28,21 @@ jobs:
       env:
         NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Get yarn cache directory
+      id: yarn-cache-dir
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
+    - name: Cache TurboRepo
+      uses: actions/cache@v2
+      with:
+        path: |
+          .turbo
+          ${{ steps.yarn-cache-dir.outputs.dir }}
+          node_modules
+        key: ${{ runner.os }}-turbo-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-
+
     - name: Install dependencies (yarn)
       run: yarn install --immutable --refresh-lockfile
 
