@@ -66,7 +66,7 @@ describe('createPhenotype', () => {
       phenotype.actions.some((action) => {
         if (
           isPhenotypeLinkAction(action) &&
-          (action.from == null || action.to == null)
+          (action[1] == null || action[1] == null)
         ) {
           return true
         }

@@ -248,20 +248,10 @@ const createActions = (actions: ActionJSONData[]): PhenotypeAction[] => {
   return actions.map((action) => {
     if (isActivationAction(action)) {
       const [node, bias, activation] = action[PhenotypeActionType.Activation]
-      return {
-        type: PhenotypeActionType.Activation,
-        node,
-        bias,
-        activation,
-      }
+      return [PhenotypeActionType.Activation, node, bias, activation]
     } else {
       const [from, to, weight] = action[PhenotypeActionType.Link]
-      return {
-        type: PhenotypeActionType.Link,
-        from,
-        to,
-        weight,
-      }
+      return [PhenotypeActionType.Link, from, to, weight]
     }
   })
 }
