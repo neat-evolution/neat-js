@@ -1,4 +1,4 @@
-import { type Phenotype, PhenotypeActionType } from '@neat-js/core'
+import { type Phenotype, PhenotypeActionType } from '@neat-evolution/core'
 
 import { toActivationFunction } from './toActivationFunction.js'
 

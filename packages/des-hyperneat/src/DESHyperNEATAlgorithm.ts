@@ -1,4 +1,4 @@
-import type { Algorithm, NEATConfigOptions } from '@neat-js/core'
+import type { Algorithm, NEATConfigOptions } from '@neat-evolution/core'
 
 import { createConfig } from './createConfig.js'
 import { createGenome } from './createGenome.js'
@@ -53,7 +53,7 @@ export const DESHyperNEATAlgorithm: Algorithm<
   DESHyperNEATGenome
 > = {
   name: 'DES-HyperNEAT',
-  pathname: '@neat-js/des-hyperneat',
+  pathname: '@neat-evolution/des-hyperneat',
   defaultOptions: defaultDESHyperNEATGenomeOptions,
   createConfig,
   createGenome,

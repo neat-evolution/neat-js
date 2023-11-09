@@ -1,4 +1,4 @@
-import { CoreNode, type NodeFactoryOptions } from '@neat-js/core'
+import { CoreNode, type NodeFactoryOptions } from '@neat-evolution/core'
 
 import { createNode } from './createNode.js'
 

@@ -3,7 +3,7 @@ import {
   type State,
   type LinkKey,
   type NEATState,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 import { StateType } from './WorkerAction.js'
 import {

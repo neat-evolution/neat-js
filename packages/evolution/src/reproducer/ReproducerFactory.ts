@@ -1,4 +1,4 @@
-import type { CoreGenome } from '@neat-js/core'
+import type { CoreGenome } from '@neat-evolution/core'
 
 import type { Population } from '../Population.js'
 

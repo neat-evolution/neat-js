@@ -1,9 +1,9 @@
-# @neat-js/executor
+# @neat-evolution/executor
 
 Creates executable networks from the phenotype. Used internally for training networks. Useful for execute pre-trained networks.
 
 ```sh
-yarn add @neat-js/executor
+yarn add @neat-evolution/executor
 ```
 
 ## Example
@@ -15,9 +15,9 @@ Each flavor of the NEAT algorithm will export a `createPhenotype` that can conve
 3. Make predictions
 
 ```ts
-import { createPhenotype } from '@neat-js/neat'
+import { createPhenotype } from '@neat-evolution/neat'
 
-import { createExecutor } from '@neat-js/executor'
+import { createExecutor } from '@neat-evolution/executor'
 
 // presuming you have evolved a neat population
 const genome = population.best()

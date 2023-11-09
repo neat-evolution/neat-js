@@ -1,5 +1,5 @@
-import type { CoreGenome } from '@neat-js/core'
-import { threadRNG } from '@neat-js/utils'
+import type { CoreGenome } from '@neat-evolution/core'
+import { threadRNG } from '@neat-evolution/utils'
 
 import type { Organism } from '../Organism.js'
 import type { Population } from '../Population.js'

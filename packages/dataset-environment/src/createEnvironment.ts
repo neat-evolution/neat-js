@@ -1,4 +1,4 @@
-import type { EnvironmentFactory } from '@neat-js/environment'
+import type { EnvironmentFactory } from '@neat-evolution/environment'
 
 import { DatasetEnvironment } from './DatasetEnvironment.js'
 import { datasetFromSharedBuffer } from './datasetFromSharedBuffer.js'

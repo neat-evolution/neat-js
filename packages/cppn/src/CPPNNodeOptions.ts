@@ -1,4 +1,4 @@
-import { Activation } from '@neat-js/core'
+import { Activation } from '@neat-evolution/core'
 
 const allActivations: Activation[] = [
   Activation.None,

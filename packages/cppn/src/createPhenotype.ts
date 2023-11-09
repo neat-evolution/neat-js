@@ -8,7 +8,7 @@ import {
   type NodeKey,
   toNodeKey,
   nodeKeyToType,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 import type { CPPNGenome } from './CPPNGenome.js'
 import type { CPPNGenomeOptions } from './CPPNGenomeOptions.js'

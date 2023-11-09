@@ -5,8 +5,8 @@ import type {
   LinkFactoryOptions,
   NEATConfigOptions,
   StateData,
-} from '@neat-js/core'
-import { defaultNEATConfigOptions } from '@neat-js/core'
+} from '@neat-evolution/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   type CPPNGenome,
   type CPPNGenomeData,
@@ -14,21 +14,21 @@ import {
   type CPPNNodeData,
   type CPPNNode,
   type CPPNNodeFactoryOptions,
-} from '@neat-js/cppn'
-import type { Evaluator } from '@neat-js/evaluator'
+} from '@neat-evolution/cppn'
+import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
   EvolutionOptions,
   PopulationOptions,
   ReproducerFactory,
   ReproducerFactoryOptions,
-} from '@neat-js/evolution'
-import { evolve, Population } from '@neat-js/evolution'
+} from '@neat-evolution/evolution'
+import { evolve, Population } from '@neat-evolution/evolution'
 import type {
   NEATConfig,
   NEATLink,
   NEATLinkData,
   NEATState,
-} from '@neat-js/neat'
+} from '@neat-evolution/neat'
 
 import { ESHyperNEATAlgorithm } from './ESHyperNEATAlgorithm.js'
 import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'

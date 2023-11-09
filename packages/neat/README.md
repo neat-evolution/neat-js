@@ -1,9 +1,9 @@
-# @neat-js/neat
+# @neat-evolution/neat
 
 Implementation of the NEAT algorithm.
 
 ```sh
-yarn add @neat-js/neat
+yarn add @neat-evolution/neat
 ```
 
 ## Example
@@ -15,21 +15,21 @@ You still need a fair amount of boilerplate to set up the data environment, howe
 3. Evolve a network
 
 ```ts
-import { defaultNEATConfigOptions } from '@neat-js/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
-} from '@neat-js/dataset-environment'
-import { createEvaluator } from '@neat-js/evaluator'
+} from '@neat-evolution/dataset-environment'
+import { createEvaluator } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
   type EvolutionOptions,
-} from '@neat-js/evolution'
-import { createExecutor } from '@neat-js/executor'
+} from '@neat-evolution/evolution'
+import { createExecutor } from '@neat-evolution/executor'
 
-import { defaultNEATGenomeOptions, neat } from '@neat-js/neat'
+import { defaultNEATGenomeOptions, neat } from '@neat-evolution/neat'
 
 const datasetOptions = {
   ...defaultDatasetOptions,

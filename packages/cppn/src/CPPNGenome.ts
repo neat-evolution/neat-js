@@ -10,15 +10,15 @@ import {
   nodeRefToKey,
   type ConfigFactoryOptions,
   type ConfigData,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import {
   createLink,
   type NEATConfig,
   type NEATLink,
   type NEATLinkData,
   type NEATState,
-} from '@neat-js/neat'
-import { threadRNG } from '@neat-js/utils'
+} from '@neat-evolution/neat'
+import { threadRNG } from '@neat-evolution/utils'
 
 import type { CPPNGenomeData } from './CPPNGenomeData.js'
 import type {

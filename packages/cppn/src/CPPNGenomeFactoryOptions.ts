@@ -1,5 +1,5 @@
-import type { Activation, GenomeFactoryOptions } from '@neat-js/core'
-import type { NEATLinkData } from '@neat-js/neat'
+import type { Activation, GenomeFactoryOptions } from '@neat-evolution/core'
+import type { NEATLinkData } from '@neat-evolution/neat'
 
 export type CPPNNodeData = [id: number, bias: number, activation: Activation]
 

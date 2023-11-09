@@ -4,17 +4,17 @@ import {
   PhenotypeActionType,
   type PhenotypeAction,
   type PhenotypeFactory,
-} from '@neat-js/core'
-import { createPhenotype as createCPPNPhenotype } from '@neat-js/cppn'
-import type { CPPNGenome, CPPNGenomeOptions } from '@neat-js/cppn'
-import { createSyncExecutor } from '@neat-js/executor'
+} from '@neat-evolution/core'
+import { createPhenotype as createCPPNPhenotype } from '@neat-evolution/cppn'
+import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
+import { createSyncExecutor } from '@neat-evolution/executor'
 import {
   parseNodes,
   toPointKey,
   type PointKey,
   fromPointKey,
   type Point,
-} from '@neat-js/hyperneat'
+} from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
 import { exploreSubstrate } from './search/exploreSubstrate.js'

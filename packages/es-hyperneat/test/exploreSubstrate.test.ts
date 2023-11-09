@@ -1,5 +1,5 @@
-import { createPhenotype } from '@neat-js/cppn'
-import { type Point } from '@neat-js/hyperneat'
+import { createPhenotype } from '@neat-evolution/cppn'
+import { type Point } from '@neat-evolution/hyperneat'
 import { describe, expect, test } from 'vitest'
 
 import { exploreSubstrate } from '../src/index.js'

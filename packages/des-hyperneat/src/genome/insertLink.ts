@@ -1,5 +1,5 @@
-import { type NodeKey } from '@neat-js/core'
-import { type CPPNGenome, type CPPNGenomeOptions } from '@neat-js/cppn'
+import { type NodeKey } from '@neat-evolution/core'
+import { type CPPNGenome, type CPPNGenomeOptions } from '@neat-evolution/cppn'
 
 export const insertLink = async (
   genome: CPPNGenome<CPPNGenomeOptions>,

@@ -1,10 +1,10 @@
-import type { InitConfig } from '@neat-js/core'
+import type { InitConfig } from '@neat-evolution/core'
 import {
   type CPPNGenomeFactory,
   type CPPNGenomeFactoryOptions,
   CPPNGenome,
-} from '@neat-js/cppn'
-import type { NEATConfig, NEATState } from '@neat-js/neat'
+} from '@neat-evolution/cppn'
+import type { NEATConfig, NEATState } from '@neat-evolution/neat'
 
 import { type HyperNEATGenomeOptions } from './HyperNEATGenomeOptions.js'
 

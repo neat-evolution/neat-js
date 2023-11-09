@@ -1,9 +1,9 @@
-# @neat-js/worker-evaluator
+# @neat-evolution/worker-evaluator
 
 Evaluates Genomes in a worker. Works in the browser using Web Workers and in Node using Worker Threads. This is a drop-in replacement for `AsyncEvaluator` and is a significant performance boost in mot real-world settings.
 
 ```sh
-yarn add @neat-js/worker-evaluator
+yarn add @neat-evolution/worker-evaluator
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ If you import the package directly you should get the correct implementation for
 
 ```ts
 // Automatically choose between node and browser implementations
-import { createEvaluator } from '@neat-js/worker-evaluator'
+import { createEvaluator } from '@neat-evolution/worker-evaluator'
 ```
 
 ### Browser only
@@ -27,7 +27,7 @@ If you know you want the browser implementation (or you are having issues) you c
 
 ```ts
 // Only use the browser implementation
-import { createEvaluator } from '@neat-js/worker-evaluator/browser'
+import { createEvaluator } from '@neat-evolution/worker-evaluator/browser'
 ```
 
 ### Node only
@@ -36,7 +36,7 @@ If you know you want the Node implementation you can import it directly. This ve
 
 ```ts
 // Only use the node implementation
-import { createEvaluator } from '@neat-js/worker-evaluator/node'
+import { createEvaluator } from '@neat-evolution/worker-evaluator/node'
 ```
 
 ## Example
@@ -53,20 +53,20 @@ Everything else is the normal, required boilerplate.
 ```ts
 import os from 'node:os'
 
-import { defaultNEATConfigOptions } from '@neat-js/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
-} from '@neat-js/dataset-environment'
+} from '@neat-evolution/dataset-environment'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
   type EvolutionOptions,
-} from '@neat-js/evolution'
-import { defaultNEATGenomeOptions, neat } from '@neat-js/neat'
+} from '@neat-evolution/evolution'
+import { defaultNEATGenomeOptions, neat } from '@neat-evolution/neat'
 
-import { createEvaluator } from '@neat-js/worker-evaluator'
+import { createEvaluator } from '@neat-evolution/worker-evaluator'
 
 const datasetOptions = {
   ...defaultDatasetOptions,
@@ -87,8 +87,8 @@ const workerThreadLimit = os.cpus().length - 1
 
 // 2. Provide packages for createEnvironment and createExecutor
 const evaluatorOptions = {
-    createEnvironmentPathname: '@neat-js/dataset-environment',
-    createExecutorPathname: '@neat-js/executor',
+    createEnvironmentPathname: '@neat-evolution/dataset-environment',
+    createExecutorPathname: '@neat-evolution/executor',
     taskCount: defaultPopulationOptions.populationSize,
     threadCount: workerThreadLimit,
   }

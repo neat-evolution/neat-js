@@ -1,4 +1,4 @@
-import { CoreState } from '@neat-js/core'
+import { CoreState } from '@neat-evolution/core'
 
 import { CustomState } from './CustomState.js'
 import type { CustomStateData } from './CustomStateData.js'

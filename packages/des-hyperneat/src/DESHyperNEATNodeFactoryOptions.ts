@@ -1,6 +1,6 @@
-import type { NodeFactoryOptions } from '@neat-js/core'
-import { CPPNGenome } from '@neat-js/cppn'
-import type { CPPNGenomeFactoryOptions, CPPNGenomeOptions } from '@neat-js/cppn'
+import type { NodeFactoryOptions } from '@neat-evolution/core'
+import { CPPNGenome } from '@neat-evolution/cppn'
+import type { CPPNGenomeFactoryOptions, CPPNGenomeOptions } from '@neat-evolution/cppn'
 
 export const isCPPNGenome = (
   cppn: CPPNGenomeFactoryOptions | CPPNGenome<CPPNGenomeOptions>

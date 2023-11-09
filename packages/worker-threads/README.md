@@ -1,15 +1,15 @@
-# @neat-js/worker-threads
+# @neat-evolution/worker-threads
 
 Thin wrapper around [worker_threads](https://nodejs.org/api/worker_threads.html) to provide a cross-platform web worker-like API.
 
 ```sh
-yarn add @neat-js/worker-threads
+yarn add @neat-evolution/worker-threads
 ```
 
 ## Usage
 
 ```js
-import { Worker } from '@neat-js/worker-threads';
+import { Worker } from '@neat-evolution/worker-threads';
 
 const worker = new Worker('./worker.js');
 

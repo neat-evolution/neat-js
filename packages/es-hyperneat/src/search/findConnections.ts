@@ -1,6 +1,6 @@
-import type { Target } from '@neat-js/core'
-import type { SyncExecutor } from '@neat-js/executor'
-import { toPointKey, type PointKey } from '@neat-js/hyperneat'
+import type { Target } from '@neat-evolution/core'
+import type { SyncExecutor } from '@neat-evolution/executor'
+import { toPointKey, type PointKey } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
 

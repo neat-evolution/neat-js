@@ -3,8 +3,8 @@ import type {
   GenomeFactory,
   InitConfig,
   StateData,
-} from '@neat-js/core'
-import type { NEATConfig, NEATLinkData, NEATState } from '@neat-js/neat'
+} from '@neat-evolution/core'
+import type { NEATConfig, NEATLinkData, NEATState } from '@neat-evolution/neat'
 
 import { CPPNGenome } from './CPPNGenome.js'
 import type {

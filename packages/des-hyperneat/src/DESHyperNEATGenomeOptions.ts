@@ -1,11 +1,11 @@
-import type { GenomeOptions, InitConfig } from '@neat-js/core'
-import { defaultGenomeOptions } from '@neat-js/core'
-import { type CPPNGenomeOptions, defaultCPPNGenomeOptions } from '@neat-js/cppn'
+import type { GenomeOptions, InitConfig } from '@neat-evolution/core'
+import { defaultGenomeOptions } from '@neat-evolution/core'
+import { type CPPNGenomeOptions, defaultCPPNGenomeOptions } from '@neat-evolution/cppn'
 import {
   type ESHyperNEATGenomeOptions,
   defaultESHyperNEATGenomeOptions,
-} from '@neat-js/es-hyperneat'
-import type { Point } from '@neat-js/hyperneat'
+} from '@neat-evolution/es-hyperneat'
+import type { Point } from '@neat-evolution/hyperneat'
 
 export type IOConfig = 'line' | 'separate' | Point[][]
 

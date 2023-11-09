@@ -4,7 +4,7 @@ import type {
   ConfigFactoryOptions,
   LinkFactoryOptions,
   StateData,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import {
   type CPPNNode,
   type CPPNNodeFactoryOptions,
@@ -12,15 +12,15 @@ import {
   type CPPNGenomeData,
   type CPPNGenomeFactoryOptions,
   type CPPNNodeData,
-} from '@neat-js/cppn'
-import { createNode } from '@neat-js/cppn'
+} from '@neat-evolution/cppn'
+import { createNode } from '@neat-evolution/cppn'
 import type {
   NEATConfig,
   NEATLink,
   NEATLinkData,
   NEATState,
-} from '@neat-js/neat'
-import { createConfig, createLink, createState } from '@neat-js/neat'
+} from '@neat-evolution/neat'
+import { createConfig, createLink, createState } from '@neat-evolution/neat'
 
 import { createGenome } from './createGenome.js'
 import { createPhenotype } from './createPhenotype.js'
@@ -53,7 +53,7 @@ export const ESHyperNEATAlgorithm: Algorithm<
   CPPNGenome<ESHyperNEATGenomeOptions>
 > = {
   name: 'ES-HyperNEAT',
-  pathname: '@neat-js/es-hyperneat',
+  pathname: '@neat-evolution/es-hyperneat',
   defaultOptions: defaultESHyperNEATGenomeOptions,
   createConfig,
   createGenome,

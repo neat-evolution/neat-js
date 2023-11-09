@@ -2,17 +2,17 @@
  * @vitest-environment jsdom
  */
 import '@vitest/web-worker'
-import { defaultNEATConfigOptions } from '@neat-js/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   defaultDatasetOptions,
   loadDataset,
   DatasetEnvironment,
-} from '@neat-js/dataset-environment'
+} from '@neat-evolution/dataset-environment'
 import {
   Population,
   createReproducer,
   defaultPopulationOptions,
-} from '@neat-js/evolution'
+} from '@neat-evolution/evolution'
 import {
   type DefaultNEATGenome,
   NEATAlgorithm,
@@ -25,7 +25,7 @@ import {
   type NEATState,
   type DefaultNEATGenomeFactoryOptions,
   createConfig,
-} from '@neat-js/neat'
+} from '@neat-evolution/neat'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { WorkerEvaluator } from '../src/index.js'
@@ -54,11 +54,11 @@ type NeatPopulation = Population<
   undefined
 >
 
-const foo = import.meta.glob('@neat-js/dataset-environment', {
+const foo = import.meta.glob('@neat-evolution/dataset-environment', {
   import: 'createEnvironment',
   eager: true,
 })
-const bar = import.meta.glob('@neat-js/executor', {
+const bar = import.meta.glob('@neat-evolution/executor', {
   import: 'createExecutor',
   eager: true,
 })
@@ -66,8 +66,8 @@ const bar = import.meta.glob('@neat-js/executor', {
 describe.skip('WorkerEvaluator', () => {
   test('should initialize correctly', () => {
     const evaluator = new WorkerEvaluator(NEATAlgorithm, environment, {
-      createEnvironmentPathname: foo['@neat-js/dataset-environment'],
-      createExecutorPathname: bar['@neat-js/executor'],
+      createEnvironmentPathname: foo['@neat-evolution/dataset-environment'],
+      createExecutorPathname: bar['@neat-evolution/executor'],
       taskCount: 100,
       threadCount: 4,
     })
@@ -80,8 +80,8 @@ describe.skip('WorkerEvaluator', () => {
 
     beforeEach(() => {
       evaluator = new WorkerEvaluator(NEATAlgorithm, environment, {
-        createEnvironmentPathname: '@neat-js/dataset-environment',
-        createExecutorPathname: '@neat-js/executor',
+        createEnvironmentPathname: '@neat-evolution/dataset-environment',
+        createExecutorPathname: '@neat-evolution/executor',
         taskCount: 100,
         threadCount: 4,
       })

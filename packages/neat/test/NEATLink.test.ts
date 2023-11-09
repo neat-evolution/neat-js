@@ -4,7 +4,7 @@ import {
   type LinkData,
   toNodeKey,
   type LinkFactoryOptions,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createLink } from '../src/createLink.js'

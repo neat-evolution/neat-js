@@ -1,5 +1,5 @@
-import { NodeType, Activation, CoreNode, type NodeData } from '@neat-js/core'
-import { threadRNG } from '@neat-js/utils'
+import { NodeType, Activation, CoreNode, type NodeData } from '@neat-evolution/core'
+import { threadRNG } from '@neat-evolution/utils'
 
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
 import type { CPPNNodeOptions } from './CPPNNodeOptions.js'

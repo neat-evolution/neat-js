@@ -1,4 +1,4 @@
-import type { Genome } from '@neat-js/core'
+import type { Genome } from '@neat-evolution/core'
 
 export type GenomeEntry<
   G extends Genome<

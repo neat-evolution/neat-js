@@ -1,4 +1,4 @@
-import { defaultGenomeOptions, type GenomeOptions } from '@neat-js/core'
+import { defaultGenomeOptions, type GenomeOptions } from '@neat-evolution/core'
 
 import {
   type CPPNNodeOptions,

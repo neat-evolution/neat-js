@@ -1,11 +1,11 @@
-# @neat-js/evaluator
+# @neat-evolution/evaluator
 
 Types and helper functions for evaluating genomes in the environment. This is a critical part of the training loop and can be parallelized.
 
-If you can utilize workers (web workers or node worker threads) then you will see some significant performance improvements by using `@neat-js/worker-evaluator` instead.
+If you can utilize workers (web workers or node worker threads) then you will see some significant performance improvements by using `@neat-evolution/worker-evaluator` instead.
 
 ```sh
-yarn add @neat-js/evaluator
+yarn add @neat-evolution/evaluator
 ```
 
 ## Example
@@ -17,21 +17,21 @@ The evaluator marries the environment (the data) with the executor (the neural n
 3. Evolve a network
 
 ```ts
-import { defaultNEATConfigOptions } from '@neat-js/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
-} from '@neat-js/dataset-environment'
+} from '@neat-evolution/dataset-environment'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
   type EvolutionOptions,
-} from '@neat-js/evolution'
-import { createExecutor } from '@neat-js/executor'
-import { defaultNEATGenomeOptions, neat } from '@neat-js/neat'
+} from '@neat-evolution/evolution'
+import { createExecutor } from '@neat-evolution/executor'
+import { defaultNEATGenomeOptions, neat } from '@neat-evolution/neat'
 
-import { createEvaluator } from '@neat-js/evaluator'
+import { createEvaluator } from '@neat-evolution/evaluator'
 
 const datasetOptions = {
   ...defaultDatasetOptions,

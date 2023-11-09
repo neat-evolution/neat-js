@@ -3,7 +3,7 @@ import type {
   GenomeFactoryOptions,
   GenomeOptions,
   StateData,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 import type { PopulationFactoryOptions } from './PopulationFactoryOptions.js'
 import type { PopulationOptions } from './PopulationOptions.js'

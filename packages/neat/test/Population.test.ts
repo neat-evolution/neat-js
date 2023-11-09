@@ -3,21 +3,21 @@ import {
   type ConfigData,
   type InitConfig,
   type StateData,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import {
   defaultDatasetOptions,
   loadDataset,
   DatasetEnvironment,
-} from '@neat-js/dataset-environment'
-import { createEvaluator, type Evaluator } from '@neat-js/evaluator'
+} from '@neat-evolution/dataset-environment'
+import { createEvaluator, type Evaluator } from '@neat-evolution/evaluator'
 import {
   createReproducer,
   Population,
   defaultPopulationOptions,
   type PopulationOptions,
   type Species,
-} from '@neat-js/evolution'
-import { createExecutor } from '@neat-js/executor'
+} from '@neat-evolution/evolution'
+import { createExecutor } from '@neat-evolution/executor'
 import {
   beforeEach,
   describe,

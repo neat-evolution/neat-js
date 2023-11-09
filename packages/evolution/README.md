@@ -1,9 +1,9 @@
-# @neat-js/evolution
+# @neat-evolution/evolution
 
 All of the logic for evolving a population of organisms and organizing them into species. This is the core of the NEAT algorithm and is shared by all flavors. Typically this is wrapped up in an algorithm-specific helper function so that all of the algorithm-specific configuration is handled for you.
 
 ```sh
-yarn add @neat-js/evolution
+yarn add @neat-evolution/evolution
 ```
 
 ## Example
@@ -17,14 +17,14 @@ Managing the evolution process in this way gives you some additional abilities t
 3. Additional capabilities
 
 ```ts
-import { defaultNEATConfigOptions } from '@neat-js/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
-} from '@neat-js/dataset-environment'
-import { createEvaluator } from '@neat-js/evaluator'
-import { createExecutor } from '@neat-js/executor'
+} from '@neat-evolution/dataset-environment'
+import { createEvaluator } from '@neat-evolution/evaluator'
+import { createExecutor } from '@neat-evolution/executor'
 import {
   defaultNEATGenomeOptions,
   NEATAlgorithm,
@@ -36,7 +36,7 @@ import {
   type NEATLink,
   type NEATNode,
   type NEATState
-} from '@neat-js/neat'
+} from '@neat-evolution/neat'
 
 import {
   createReproducer,
@@ -45,7 +45,7 @@ import {
   evolve,
   Population,
   type EvolutionOptions
-} from '@neat-js/evolution'
+} from '@neat-evolution/evolution'
 
 // 1. Typical boilerplate
 const datasetOptions = {

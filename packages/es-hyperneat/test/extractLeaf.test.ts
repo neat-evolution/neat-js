@@ -1,5 +1,5 @@
-import type { Target } from '@neat-js/core'
-import type { PointKey } from '@neat-js/hyperneat'
+import type { Target } from '@neat-evolution/core'
+import type { PointKey } from '@neat-evolution/hyperneat'
 import { describe, expect, test } from 'vitest'
 
 import type { WeightFn } from '../src/index.js'

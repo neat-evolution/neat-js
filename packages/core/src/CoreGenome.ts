@@ -1,4 +1,4 @@
-import { binarySearchFirst, shuffle, threadRNG } from '@neat-js/utils'
+import { binarySearchFirst, shuffle, threadRNG } from '@neat-evolution/utils'
 
 import type { ConfigData } from './config/ConfigData.js'
 import type { ConfigFactoryOptions } from './config/ConfigFactoryOptions.js'

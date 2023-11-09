@@ -1,6 +1,6 @@
 import { unlink } from 'node:fs/promises'
 
-import { toLinkKey, type LinkKey } from '@neat-js/core'
+import { toLinkKey, type LinkKey } from '@neat-evolution/core'
 import { describe, expect, test } from 'vitest'
 
 import { createPhenotype } from '../src/index.js'

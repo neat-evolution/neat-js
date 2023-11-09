@@ -1,4 +1,4 @@
-import type { GenomeFactoryOptions, NodeKey } from '@neat-js/core'
+import type { GenomeFactoryOptions, NodeKey } from '@neat-evolution/core'
 
 export type NEATHiddenNodeData = number
 

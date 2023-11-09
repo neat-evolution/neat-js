@@ -1,6 +1,6 @@
-import type { StateData, State, LinkKey } from '@neat-js/core'
-import { CPPNAlgorithm } from '@neat-js/cppn'
-import { NEATState } from '@neat-js/neat'
+import type { StateData, State, LinkKey } from '@neat-evolution/core'
+import { CPPNAlgorithm } from '@neat-evolution/cppn'
+import { NEATState } from '@neat-evolution/neat'
 
 import type { CustomStateData } from './CustomStateData.js'
 

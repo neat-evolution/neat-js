@@ -8,11 +8,11 @@ import {
   type ConfigProvider,
   type LinkKey,
   type NodeKey,
-} from '@neat-js/core'
-import { Organism } from '@neat-js/evolution'
-import type { PopulationOptions } from '@neat-js/evolution'
-import { threadRNG } from '@neat-js/utils'
-import { workerContext } from '@neat-js/worker-threads'
+} from '@neat-evolution/core'
+import { Organism } from '@neat-evolution/evolution'
+import type { PopulationOptions } from '@neat-evolution/evolution'
+import { threadRNG } from '@neat-evolution/utils'
+import { workerContext } from '@neat-evolution/worker-threads'
 
 import type { RequestMapValue } from './types.js'
 import {

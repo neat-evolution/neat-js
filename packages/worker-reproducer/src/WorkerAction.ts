@@ -5,11 +5,11 @@ import type {
   InitConfig,
   Innovation,
   LinkKey,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import type {
   OrganismFactoryOptions,
   PopulationOptions,
-} from '@neat-js/evolution'
+} from '@neat-evolution/evolution'
 
 import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
 

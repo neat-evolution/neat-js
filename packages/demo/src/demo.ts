@@ -1,47 +1,47 @@
-import { defaultNEATConfigOptions } from '@neat-js/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   defaultCPPNGenomeOptions,
   cppn,
   CPPNAlgorithm,
   type CPPNReproducerFactory,
-} from '@neat-js/cppn'
+} from '@neat-evolution/cppn'
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
-} from '@neat-js/dataset-environment'
+} from '@neat-evolution/dataset-environment'
 import {
   defaultDESHyperNEATGenomeOptions,
   defaultTopologyConfigOptions,
   deshyperneat,
   DESHyperNEATAlgorithm,
   type DESHyperNEATReproducerFactory,
-} from '@neat-js/des-hyperneat'
+} from '@neat-evolution/des-hyperneat'
 import {
   defaultESHyperNEATGenomeOptions,
   eshyperneat,
   ESHyperNEATAlgorithm,
   type ESHyperNEATReproducerFactory,
-} from '@neat-js/es-hyperneat'
-import type { EvaluatorFactory } from '@neat-js/evaluator'
+} from '@neat-evolution/es-hyperneat'
+import type { EvaluatorFactory } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
   type EvolutionOptions,
   type ReproducerFactory,
-} from '@neat-js/evolution'
+} from '@neat-evolution/evolution'
 import {
   defaultHyperNEATGenomeOptions,
   hyperneat,
   HyperNEATAlgorithm,
   type HyperNEATReproducerFactory,
-} from '@neat-js/hyperneat'
+} from '@neat-evolution/hyperneat'
 import {
   defaultNEATGenomeOptions,
   neat,
   NEATAlgorithm,
   type NEATReproducerFactory,
-} from '@neat-js/neat'
+} from '@neat-evolution/neat'
 
 enum Methods {
   NEAT = 'NEAT',

@@ -1,11 +1,11 @@
-import { type Connection } from '@neat-js/core'
-import { type SyncExecutor } from '@neat-js/executor'
+import { type Connection } from '@neat-evolution/core'
+import { type SyncExecutor } from '@neat-evolution/executor'
 import {
   type Point,
   type PointKey,
   toPointKey,
   fromPointKey,
-} from '@neat-js/hyperneat'
+} from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
 

@@ -1,5 +1,5 @@
-import type { ConfigData, GenomeData, StateData } from '@neat-js/core'
-import type { NEATLinkData } from '@neat-js/neat'
+import type { ConfigData, GenomeData, StateData } from '@neat-evolution/core'
+import type { NEATLinkData } from '@neat-evolution/neat'
 
 import type {
   CPPNGenomeFactoryOptions,

@@ -4,14 +4,14 @@ import type {
   ConfigFactoryOptions,
   LinkFactoryOptions,
   StateData,
-} from '@neat-js/core'
-import { createConfig, createLink, createState } from '@neat-js/neat'
+} from '@neat-evolution/core'
+import { createConfig, createLink, createState } from '@neat-evolution/neat'
 import type {
   NEATConfig,
   NEATLink,
   NEATLinkData,
   NEATState,
-} from '@neat-js/neat'
+} from '@neat-evolution/neat'
 
 import { type CPPNGenome } from './CPPNGenome.js'
 import type { CPPNGenomeData } from './CPPNGenomeData.js'
@@ -53,7 +53,7 @@ export const CPPNAlgorithm: Algorithm<
   CPPNGenome<CPPNGenomeOptions>
 > = {
   name: 'CPPN',
-  pathname: '@neat-js/cppn',
+  pathname: '@neat-evolution/cppn',
   defaultOptions: defaultCPPNGenomeOptions,
   createConfig,
   createGenome,

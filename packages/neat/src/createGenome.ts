@@ -3,7 +3,7 @@ import type {
   GenomeFactory,
   InitConfig,
   StateData,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 
 import type { NEATConfig } from './NEATConfig.js'
 import { NEATGenome } from './NEATGenome.js'

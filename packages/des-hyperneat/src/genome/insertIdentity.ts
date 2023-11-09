@@ -4,8 +4,8 @@ import {
   NodeType,
   toNodeKey,
   type NodeKey,
-} from '@neat-js/core'
-import { type CPPNGenome, type CPPNGenomeOptions } from '@neat-js/cppn'
+} from '@neat-evolution/core'
+import { type CPPNGenome, type CPPNGenomeOptions } from '@neat-evolution/cppn'
 
 import { insertLink } from './insertLink.js'
 import { splitLink } from './splitLink.js'

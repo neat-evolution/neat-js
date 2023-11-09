@@ -2,7 +2,7 @@ import {
   defaultNEATConfigOptions,
   isPhenotypeLinkAction,
   type InitConfig,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {

@@ -1,6 +1,6 @@
-import type { Algorithm } from '@neat-js/core'
-import type { Environment } from '@neat-js/environment'
-import type { ExecutorFactory } from '@neat-js/executor'
+import type { Algorithm } from '@neat-evolution/core'
+import type { Environment } from '@neat-evolution/environment'
+import type { ExecutorFactory } from '@neat-evolution/executor'
 
 import { type Evaluator, type FitnessData } from './Evaluator.js'
 import type { GenomeEntries, GenomeEntry } from './GenomeEntries.js'

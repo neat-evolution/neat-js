@@ -1,4 +1,4 @@
-import type { StateFactory } from '@neat-js/core'
+import type { StateFactory } from '@neat-evolution/core'
 
 import type { CustomState } from './CustomState.js'
 import type { CustomStateData } from './CustomStateData.js'

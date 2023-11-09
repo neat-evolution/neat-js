@@ -3,13 +3,13 @@ import {
   PhenotypeActionType,
   type PhenotypeAction,
   type PhenotypeFactory,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import {
   type CPPNGenome,
   createPhenotype as createCPPNPhenotype,
   type CPPNGenomeOptions,
-} from '@neat-js/cppn'
-import { createSyncExecutor } from '@neat-js/executor'
+} from '@neat-evolution/cppn'
+import { createSyncExecutor } from '@neat-evolution/executor'
 
 import type { HyperNEATGenomeOptions } from './HyperNEATGenomeOptions.js'
 import { load } from './substrate/load.js'

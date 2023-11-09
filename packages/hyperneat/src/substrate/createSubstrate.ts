@@ -1,4 +1,4 @@
-import { isActionEdge, type Connections } from '@neat-js/core'
+import { isActionEdge, type Connections } from '@neat-evolution/core'
 
 import {
   toPointKey,

@@ -4,13 +4,13 @@ import {
   type LinkFactory,
   type NEATConfigOptions,
   type LinkFactoryOptions,
-} from '@neat-js/core'
+} from '@neat-evolution/core'
 import {
   CPPNAlgorithm,
   type CPPNGenome,
   type CPPNGenomeOptions,
-} from '@neat-js/cppn'
-import { threadRNG } from '@neat-js/utils'
+} from '@neat-evolution/cppn'
+import { threadRNG } from '@neat-evolution/utils'
 
 import type { CustomState } from './CustomState.js'
 import type { CustomStateData } from './CustomStateData.js'

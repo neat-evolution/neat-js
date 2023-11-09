@@ -1,4 +1,4 @@
-import type { StateData, LinkKey } from '@neat-js/core'
+import type { StateData, LinkKey } from '@neat-evolution/core'
 
 export interface CustomStateData {
   singleCPPNState: StateData

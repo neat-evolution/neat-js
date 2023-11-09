@@ -1,6 +1,6 @@
-import type { InitConfig } from '@neat-js/core'
-import { defaultNEATConfigOptions } from '@neat-js/core'
-import { Organism } from '@neat-js/evolution'
+import type { InitConfig } from '@neat-evolution/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
+import { Organism } from '@neat-evolution/evolution'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createConfig } from '../src/createConfig.js'
