@@ -94,7 +94,7 @@ jobs:
       # Check for changes in the yarn.lock file
       - name: Check for yarn.lock changes
         run: |
-          if [[ `git status --porcelain` ]]; then
+          if git diff --name-only | grep -q 'yarn.lock'; then
             echo "MODIFIED=true" >> $GITHUB_ENV
           fi
 
