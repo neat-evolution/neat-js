@@ -46,7 +46,6 @@ jobs:
     - name: Install dependencies (yarn)
       run: yarn install --immutable --refresh-lockfile
 
-    # TODO: filter to only this branch
     - name: Build (all)
       run: yarn build
 
