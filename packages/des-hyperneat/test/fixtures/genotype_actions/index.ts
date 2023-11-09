@@ -1,6 +1,9 @@
 import fs from 'node:fs/promises'
 
-import { defaultNEATConfigOptions, PhenotypeActionType } from '@neat-evolution/core'
+import {
+  defaultNEATConfigOptions,
+  PhenotypeActionType,
+} from '@neat-evolution/core'
 import type {
   Activation,
   Connection,

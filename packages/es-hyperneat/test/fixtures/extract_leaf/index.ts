@@ -22,7 +22,11 @@ import {
   createPhenotype,
 } from '@neat-evolution/cppn'
 import { createSyncExecutor } from '@neat-evolution/executor'
-import { toPointKey, type Point, type PointKey } from '@neat-evolution/hyperneat'
+import {
+  toPointKey,
+  type Point,
+  type PointKey,
+} from '@neat-evolution/hyperneat'
 import type { NEATLinkData } from '@neat-evolution/neat'
 
 import {

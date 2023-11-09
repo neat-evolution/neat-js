@@ -1,6 +1,9 @@
 import type { GenomeOptions, InitConfig } from '@neat-evolution/core'
 import { defaultGenomeOptions } from '@neat-evolution/core'
-import { type CPPNGenomeOptions, defaultCPPNGenomeOptions } from '@neat-evolution/cppn'
+import {
+  type CPPNGenomeOptions,
+  defaultCPPNGenomeOptions,
+} from '@neat-evolution/cppn'
 import {
   type ESHyperNEATGenomeOptions,
   defaultESHyperNEATGenomeOptions,
