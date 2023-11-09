@@ -12,6 +12,7 @@ export const workerContext = {
     message: any,
     transferList?: Array<ArrayBuffer | MessagePort>
   ) => {
+    // @ts-expect-error no interface in common
     ctx?.postMessage(message, transferList)
   },
 

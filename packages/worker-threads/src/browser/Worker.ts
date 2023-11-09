@@ -32,6 +32,7 @@ export class Worker {
   }
 
   postMessage(message: any, transferList?: Array<ArrayBuffer | MessagePort>) {
+    // @ts-expect-error no interface in common
     this.webWorker.postMessage(message, transferList)
   }
 
