@@ -51,14 +51,14 @@ jobs:
           NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get yarn cache directory
-        run: echo "YARN_CACHE_DIR=$(yarn config get cacheFolder)" >> $GITHUB_ENV
+        run: echo "YARN_CACHE_DIR_LOOKUP=$(yarn config get cacheFolder)" >> $GITHUB_ENV
 
       - name: Cache TurboRepo
         uses: actions/cache@v3
         with:
           path: |
             .turbo
-            ${{ env.YARN_CACHE_DIR }}
+            ${{ env.YARN_CACHE_DIR_LOOKUP }}
             node_modules
           key: ${{ runner.os }}-turbo-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
