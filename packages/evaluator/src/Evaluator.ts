@@ -1,4 +1,8 @@
-import type { ConfigData, GenomeOptions, InitConfig } from '@neat-evolution/core'
+import type {
+  ConfigData,
+  GenomeOptions,
+  InitConfig,
+} from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
 
 import type { GenomeEntries } from './GenomeEntries.js'

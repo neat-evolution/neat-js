@@ -19,8 +19,16 @@ import {
   type CPPNGenomeOptions,
 } from '@neat-evolution/cppn'
 import { createSyncExecutor, type SyncExecutor } from '@neat-evolution/executor'
-import { toPointKey, type Point, type PointKey } from '@neat-evolution/hyperneat'
-import { createConfig, createState, type NEATLinkData } from '@neat-evolution/neat'
+import {
+  toPointKey,
+  type Point,
+  type PointKey,
+} from '@neat-evolution/hyperneat'
+import {
+  createConfig,
+  createState,
+  type NEATLinkData,
+} from '@neat-evolution/neat'
 
 import {
   defaultESHyperNEATGenomeOptions,

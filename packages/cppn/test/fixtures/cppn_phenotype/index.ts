@@ -1,6 +1,9 @@
 import fs from 'node:fs/promises'
 
-import { PhenotypeActionType, defaultNEATConfigOptions } from '@neat-evolution/core'
+import {
+  PhenotypeActionType,
+  defaultNEATConfigOptions,
+} from '@neat-evolution/core'
 import type {
   Activation,
   InitConfig,
@@ -8,7 +11,11 @@ import type {
   Phenotype,
   PhenotypeAction,
 } from '@neat-evolution/core'
-import { createConfig, createState, type NEATLinkData } from '@neat-evolution/neat'
+import {
+  createConfig,
+  createState,
+  type NEATLinkData,
+} from '@neat-evolution/neat'
 
 import {
   createGenome,

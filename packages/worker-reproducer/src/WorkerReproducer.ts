@@ -1,5 +1,13 @@
-import { type NEATState, type Innovation, type CoreGenome } from '@neat-evolution/core'
-import { Organism, type Reproducer, type Species } from '@neat-evolution/evolution'
+import {
+  type NEATState,
+  type Innovation,
+  type CoreGenome,
+} from '@neat-evolution/core'
+import {
+  Organism,
+  type Reproducer,
+  type Species,
+} from '@neat-evolution/evolution'
 import { Worker } from '@neat-evolution/worker-threads'
 import { Sema } from 'async-sema'
 
