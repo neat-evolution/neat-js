@@ -1,32 +1,25 @@
-import type { Algorithm } from '@neat-evolution/core'
-import type { Environment } from '@neat-evolution/environment'
+import type {
+  Environment,
+  StandardEnvironment,
+} from '@neat-evolution/environment'
+import type { Executor, SyncExecutor } from '@neat-evolution/executor'
 
-import type { Evaluator } from './Evaluator.js'
+import type { Evaluator, StandardEvaluator } from './Evaluator.js'
+import type { AnyAlgorithm } from './types.js'
 
-export type EvaluatorFactory<O> = (
-  algorithm: Algorithm<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >,
-  environment: Environment,
+export type EvaluatorFactory<
+  O,
+  E extends SyncExecutor[],
+  EA extends Executor[],
+  ER
+> = (
+  algorithm: AnyAlgorithm,
+  environment: Environment<any, E, EA, ER>,
   options: O
-) => Evaluator
+) => Evaluator<E, EA, ER>
+
+export type StandardEvaluatorFactory<O> = (
+  algorithm: AnyAlgorithm,
+  environment: StandardEnvironment<any>,
+  options: O
+) => StandardEvaluator

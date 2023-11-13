@@ -1,38 +1,12 @@
-import type { Algorithm } from '@neat-evolution/core'
-import type { Environment } from '@neat-evolution/environment'
 import type { ExecutorFactory } from '@neat-evolution/executor'
 
-import { AsyncEvaluator } from './AsyncEvaluator.js'
-import type { EvaluatorFactory } from './EvaluatorFactory.js'
+import type { StandardEvaluatorFactory } from './EvaluatorFactory.js'
+import { TestEvaluator } from './TestEvaluator.js'
 
-export type AsyncEvaluatorFactoryOptions = ExecutorFactory
-
-export const createEvaluator: EvaluatorFactory<AsyncEvaluatorFactoryOptions> = (
-  algorithm: Algorithm<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >,
-  environment: Environment,
-  createExecutor: AsyncEvaluatorFactoryOptions
+export const createEvaluator: StandardEvaluatorFactory<ExecutorFactory> = (
+  algorithm,
+  environment,
+  createExecutor
 ) => {
-  return new AsyncEvaluator(algorithm, environment, createExecutor)
+  return new TestEvaluator(algorithm, environment, createExecutor)
 }
