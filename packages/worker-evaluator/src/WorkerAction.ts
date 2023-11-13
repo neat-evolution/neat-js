@@ -5,6 +5,9 @@ import type {
   InitConfig,
 } from '@neat-evolution/core'
 
+import type { ActionMessage } from './message/ActionMessage.js'
+import { createActionMessage } from './message/createActionMessage.js'
+
 export enum ActionType {
   INIT_EVALUATOR = 'INIT_EVALUATOR',
   INIT_EVALUATOR_SUCCESS = 'INIT_EVALUATOR_SUCCESS',
@@ -15,16 +18,11 @@ export enum ActionType {
   TERMINATE = 'TERMINATE',
 }
 
-export interface Action<P> {
-  type: ActionType
-  payload: P
-}
-
 export interface InitPayload {
   algorithmPathname: string
   createExecutorPathname: string
   createEnvironmentPathname: string
-  environmentData: SharedArrayBuffer | null
+  environmentData: any
 }
 
 export interface InitGenomeFactoryPayload<
@@ -36,11 +34,14 @@ export interface InitGenomeFactoryPayload<
   initConfig: InitConfig
 }
 
-export type InitAction = Action<InitPayload>
+export type InitAction = ActionMessage<InitPayload, ActionType.INIT_EVALUATOR>
 
-export type InitSuccessAction = Action<null>
+export type InitSuccessAction = ActionMessage<
+  null,
+  ActionType.INIT_EVALUATOR_SUCCESS
+>
 
-export type TerminateAction = Action<null>
+export type TerminateAction = ActionMessage<null, ActionType.TERMINATE>
 
 export interface PayloadMap {
   [ActionType.INIT_EVALUATOR]: InitPayload
@@ -52,12 +53,7 @@ export interface PayloadMap {
   [ActionType.TERMINATE]: null
 }
 
-export const createAction = <T extends ActionType>(
+export const createWorkerAction = <T extends ActionType>(
   type: T,
   payload: PayloadMap[T]
-): Action<PayloadMap[T]> => {
-  return {
-    type,
-    payload,
-  }
-}
+): ActionMessage<T, PayloadMap[T]> => createActionMessage(type, payload)

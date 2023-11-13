@@ -1,55 +1,35 @@
 import type {
-  Algorithm,
   ConfigData,
   GenomeFactoryOptions,
   GenomeOptions,
   InitConfig,
 } from '@neat-evolution/core'
-import type { Environment } from '@neat-evolution/environment'
+import type { StandardEnvironment } from '@neat-evolution/environment'
 import type {
-  Evaluator,
+  AnyAlgorithm,
   FitnessData,
   GenomeEntries,
   GenomeEntry,
+  StandardEvaluator,
 } from '@neat-evolution/evaluator'
 import { Worker } from '@neat-evolution/worker-threads'
 import { Sema } from 'async-sema'
 
+import type { ActionMessage } from './message/ActionMessage.js'
 import type { RequestMapValue } from './RequestMapValue.js'
 import {
   ActionType,
-  createAction,
-  type Action,
+  createWorkerAction,
   type InitPayload,
+  type PayloadMap,
 } from './WorkerAction.js'
 import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'
 
-export class WorkerEvaluator implements Evaluator {
-  public readonly algorithm: Algorithm<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >
+export class WorkerEvaluator implements StandardEvaluator {
+  public readonly algorithm: AnyAlgorithm
+  public readonly enableAsync = true
 
-  public readonly environment: Environment
+  public readonly environment: StandardEnvironment<any>
 
   public readonly taskCount: number
   public readonly threadCount: number
@@ -62,30 +42,8 @@ export class WorkerEvaluator implements Evaluator {
   private readonly requestMap = new Map<Worker, RequestMapValue>()
 
   constructor(
-    algorithm: Algorithm<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >,
-    environment: Environment,
+    algorithm: AnyAlgorithm,
+    environment: StandardEnvironment<any>,
     options: WorkerEvaluatorOptions
   ) {
     this.algorithm = algorithm
@@ -116,15 +74,16 @@ export class WorkerEvaluator implements Evaluator {
             name: `WorkerEvaluator-${i}`,
           }
         )
-        const messageListener = (action: Action<unknown>) => {
+        const messageListener = (action: ActionMessage<string, any>) => {
           switch (action.type) {
             case ActionType.RESPOND_EVALUATE_GENOME: {
-              const data = action as Action<number>
+              const payload =
+                action.payload as PayloadMap[ActionType.RESPOND_EVALUATE_GENOME]
               const { resolve } = this.requestMap.get(worker) ?? {}
               if (resolve == null) {
                 throw new Error('no request found')
               }
-              resolve(data.payload)
+              resolve(payload)
               break
             }
             case ActionType.INIT_EVALUATOR_SUCCESS: {
@@ -165,10 +124,10 @@ export class WorkerEvaluator implements Evaluator {
           algorithmPathname: this.algorithm.pathname,
           createExecutorPathname: this.createExecutorPathname,
           createEnvironmentPathname: this.createEnvironmentPathname,
-          environmentData: this.environment.serialize?.() ?? null,
+          environmentData: this.environment.toFactoryOptions(),
         }
 
-        worker.postMessage(createAction(ActionType.INIT_EVALUATOR, data))
+        worker.postMessage(createWorkerAction(ActionType.INIT_EVALUATOR, data))
       })
 
       initPromises.push(initPromise)
@@ -184,7 +143,7 @@ export class WorkerEvaluator implements Evaluator {
     await this.initPromise
     for (const worker of this.workers) {
       worker.postMessage(
-        createAction(ActionType.INIT_GENOME_FACTORY, {
+        createWorkerAction(ActionType.INIT_GENOME_FACTORY, {
           configData,
           genomeOptions,
           initConfig,
@@ -197,7 +156,7 @@ export class WorkerEvaluator implements Evaluator {
     const terminatePromises = new Set<Promise<void>>()
     for (const worker of this.workers) {
       // worker.unref()
-      worker.postMessage(createAction(ActionType.TERMINATE, null))
+      worker.postMessage(createWorkerAction(ActionType.TERMINATE, null))
       terminatePromises.add(worker.terminate())
     }
     for (const p of terminatePromises) {
@@ -265,7 +224,10 @@ export class WorkerEvaluator implements Evaluator {
 
       // Post data to the worker
       worker.postMessage(
-        createAction(ActionType.REQUEST_EVALUATE_GENOME, genomeFactoryOptions)
+        createWorkerAction(
+          ActionType.REQUEST_EVALUATE_GENOME,
+          genomeFactoryOptions
+        )
       )
     })
   }
