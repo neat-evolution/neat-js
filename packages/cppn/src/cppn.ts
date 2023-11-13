@@ -11,7 +11,6 @@ import type {
   EvolutionOptions,
   PopulationOptions,
   ReproducerFactory,
-  ReproducerFactoryOptions,
 } from '@neat-evolution/evolution'
 import { evolve, Population } from '@neat-evolution/evolution'
 import type {
@@ -32,7 +31,7 @@ import { type CPPNGenomeOptions } from './CPPNGenomeOptions.js'
 import type { CPPNNode } from './CPPNNode.js'
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
 
-export type CPPNPopulation<RFO extends ReproducerFactoryOptions> = Population<
+export type CPPNPopulation = Population<
   ConfigFactoryOptions,
   null,
   null,
@@ -54,20 +53,20 @@ export type CPPNPopulation<RFO extends ReproducerFactoryOptions> = Population<
   LinkFactoryOptions,
   NEATLink,
   CPPNGenome<CPPNGenomeOptions>,
-  typeof CPPNAlgorithm,
-  RFO
+  typeof CPPNAlgorithm
 >
 
-export type CPPNReproducerFactory<RFO extends ReproducerFactoryOptions> =
-  ReproducerFactory<CPPNGenome<CPPNGenomeOptions>, CPPNPopulation<RFO>, RFO>
+export type CPPNReproducerFactory = ReproducerFactory<
+  CPPNGenome<CPPNGenomeOptions>,
+  CPPNPopulation
+>
 
-export const cppn = async <RFO extends ReproducerFactoryOptions>(
-  createReproducer: CPPNReproducerFactory<RFO>,
-  evaluator: Evaluator,
+export const cppn = async (
+  createReproducer: CPPNReproducerFactory,
+  evaluator: Evaluator<any, any, any>,
   evolutionOptions: EvolutionOptions,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
-  reproducerOptions: RFO,
   genomeOptions: CPPNGenomeOptions
 ) => {
   const configProvider = CPPNAlgorithm.createConfig({
@@ -76,13 +75,12 @@ export const cppn = async <RFO extends ReproducerFactoryOptions>(
 
   const initConfig = evaluator.environment.description
 
-  const population: CPPNPopulation<RFO> = new Population(
+  const population: CPPNPopulation = new Population(
     createReproducer,
     evaluator,
     CPPNAlgorithm,
     configProvider,
     populationOptions,
-    reproducerOptions,
     genomeOptions,
     initConfig
   )
