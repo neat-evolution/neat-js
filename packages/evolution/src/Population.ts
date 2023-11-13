@@ -32,7 +32,6 @@ import {
 import type { PopulationOptions } from './PopulationOptions.js'
 import type { Reproducer } from './reproducer/Reproducer.js'
 import type { ReproducerFactory } from './reproducer/ReproducerFactory.js'
-import type { ReproducerFactoryOptions } from './reproducer/ReproducerFactoryOptions.js'
 import { Species } from './Species.js'
 
 export class Population<
@@ -106,10 +105,9 @@ export class Population<
     LFO,
     L,
     G
-  >,
-  RFO extends ReproducerFactoryOptions
+  >
 > {
-  public readonly evaluator: Evaluator
+  public readonly evaluator: Evaluator<any, any, any>
   public readonly reproducer: Reproducer<G>
   public readonly algorithm: A
   public readonly configProvider: C
@@ -154,16 +152,13 @@ export class Population<
         LFO,
         L,
         G,
-        A,
-        RFO
-      >,
-      RFO
+        A
+      >
     >,
-    evaluator: Evaluator,
+    evaluator: Evaluator<any, any, any>,
     algorithm: A,
     configProvider: C,
     populationOptions: PopulationOptions,
-    reproducerOptions: RFO,
     genomeOptions: GO,
     initConfig: InitConfig,
     populationFactoryOptions?: PopulationFactoryOptions<
@@ -253,7 +248,7 @@ export class Population<
     }
 
     // Must be last
-    this.reproducer = createReproducer(this, reproducerOptions)
+    this.reproducer = createReproducer(this)
     this.evaluatorReady = this.evaluator.initGenomeFactory(
       this.configProvider.toJSON(),
       this.genomeOptions,

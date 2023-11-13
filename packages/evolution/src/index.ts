@@ -1,7 +1,6 @@
 export * from './reproducer/createReproducer.js'
 export * from './reproducer/Reproducer.js'
 export * from './reproducer/ReproducerFactory.js'
-export * from './reproducer/ReproducerFactoryOptions.js'
 export * from './EvolutionOptions.js'
 export * from './evolve.js'
 export * from './Organism.js'

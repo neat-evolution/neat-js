@@ -9,7 +9,7 @@ import type { Reproducer } from './Reproducer.js'
 import type { ReproducerFactory } from './ReproducerFactory.js'
 
 // FIXME: is ReproducerFactory<any, any, undefined> the best way to do this?
-export const createReproducer: ReproducerFactory<any, any, undefined> = <
+export const createReproducer: ReproducerFactory<any, any> = <
   G extends CoreGenome<
     any,
     any,
@@ -55,8 +55,7 @@ export const createReproducer: ReproducerFactory<any, any, undefined> = <
     any,
     any,
     G,
-    any,
-    undefined
+    any
   >
 >(
   population: P
