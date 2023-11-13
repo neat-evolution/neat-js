@@ -18,7 +18,7 @@ export function findConnections(
 ): Array<Target<PointKey, number>> {
   const f: WeightFn = (x2: number, y2: number): number => {
     const input = reverse ? [x2, y2, x, y] : [x, y, x2, y2]
-    return cppn(input)[0] as number
+    return cppn.execute(input)[0] as number
   }
 
   const connections: Array<Target<PointKey, number>> = []
