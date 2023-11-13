@@ -5,7 +5,6 @@ import type {
   EvolutionOptions,
   PopulationOptions,
   ReproducerFactory,
-  ReproducerFactoryOptions,
 } from '@neat-evolution/evolution'
 import { evolve, Population } from '@neat-evolution/evolution'
 
@@ -33,46 +32,44 @@ import type { TopologyConfigOptions } from './TopologyConfigOptions.js'
 
 import { topologyInitConfig } from './index.js'
 
-export type DESHyperNEATPopulation<RFO extends ReproducerFactoryOptions> =
-  Population<
-    DESHyperNEATConfigFactoryOptions,
-    NEATConfigOptions,
-    NEATConfigOptions,
-    DESHyperNEATConfigData,
-    DESHyperNEATConfig,
-    CustomStateData,
-    CustomStateData,
-    CustomState,
-    CustomState,
-    DESHyperNEATStateData,
-    DESHyperNEATState,
-    DESHyperNEATNodeData,
-    DESHyperNEATLinkData,
-    DESHyperNEATGenomeFactoryOptions,
-    DESHyperNEATGenomeOptions,
-    DESHyperNEATGenomeData,
-    DESHyperNEATNodeFactoryOptions,
-    DESHyperNEATNode,
-    DESHyperNEATLinkFactoryOptions,
-    DESHyperNEATLink,
-    DESHyperNEATGenome,
-    typeof DESHyperNEATAlgorithm,
-    RFO
-  >
+export type DESHyperNEATPopulation = Population<
+  DESHyperNEATConfigFactoryOptions,
+  NEATConfigOptions,
+  NEATConfigOptions,
+  DESHyperNEATConfigData,
+  DESHyperNEATConfig,
+  CustomStateData,
+  CustomStateData,
+  CustomState,
+  CustomState,
+  DESHyperNEATStateData,
+  DESHyperNEATState,
+  DESHyperNEATNodeData,
+  DESHyperNEATLinkData,
+  DESHyperNEATGenomeFactoryOptions,
+  DESHyperNEATGenomeOptions,
+  DESHyperNEATGenomeData,
+  DESHyperNEATNodeFactoryOptions,
+  DESHyperNEATNode,
+  DESHyperNEATLinkFactoryOptions,
+  DESHyperNEATLink,
+  DESHyperNEATGenome,
+  typeof DESHyperNEATAlgorithm
+>
 
-export type DESHyperNEATReproducerFactory<
-  RFO extends ReproducerFactoryOptions
-> = ReproducerFactory<DESHyperNEATGenome, DESHyperNEATPopulation<RFO>, RFO>
+export type DESHyperNEATReproducerFactory = ReproducerFactory<
+  DESHyperNEATGenome,
+  DESHyperNEATPopulation
+>
 
-export const deshyperneat = async <RFO extends ReproducerFactoryOptions>(
-  createReproducer: DESHyperNEATReproducerFactory<RFO>,
-  evaluator: Evaluator,
+export const deshyperneat = async (
+  createReproducer: DESHyperNEATReproducerFactory,
+  evaluator: Evaluator<any, any, any>,
   evolutionOptions: EvolutionOptions,
   // FIXME: should be TopologyConfigOptions & Partial<NeatConfigOptions>
   topologyConfigOptions: TopologyConfigOptions,
   cppnConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
-  reproducerOptions: RFO,
   genomeOptions: DESHyperNEATGenomeOptions
 ) => {
   const configProvider = DESHyperNEATAlgorithm.createConfig({
@@ -92,13 +89,12 @@ export const deshyperneat = async <RFO extends ReproducerFactoryOptions>(
     genomeOptions
   )
 
-  const population: DESHyperNEATPopulation<RFO> = new Population(
+  const population: DESHyperNEATPopulation = new Population(
     createReproducer,
     evaluator,
     DESHyperNEATAlgorithm,
     configProvider,
     populationOptions,
-    reproducerOptions,
     genomeOptions,
     initConfig
   )
