@@ -1,35 +1,17 @@
-import type { Algorithm } from '@neat-evolution/core'
-import type { Environment } from '@neat-evolution/environment'
-import type { EvaluatorFactory } from '@neat-evolution/evaluator'
+import type { StandardEnvironment } from '@neat-evolution/environment'
+import type {
+  AnyAlgorithm,
+  StandardEvaluatorFactory,
+} from '@neat-evolution/evaluator'
 
 import { WorkerEvaluator } from './WorkerEvaluator.js'
 import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'
 
-export const createEvaluator: EvaluatorFactory<WorkerEvaluatorOptions> = (
-  algorithm: Algorithm<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >,
-  environment: Environment,
+export const createEvaluator: StandardEvaluatorFactory<
+  WorkerEvaluatorOptions
+> = (
+  algorithm: AnyAlgorithm,
+  environment: StandardEnvironment<any>,
   options: WorkerEvaluatorOptions
 ) => {
   return new WorkerEvaluator(algorithm, environment, options)
