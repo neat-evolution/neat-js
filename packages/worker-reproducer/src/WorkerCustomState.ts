@@ -5,6 +5,7 @@ import {
   type NEATState,
 } from '@neat-evolution/core'
 
+import type { ThreadContext } from './worker/ThreadContext.js'
 import { StateType } from './WorkerAction.js'
 import {
   WorkerState,
@@ -32,21 +33,26 @@ export class WorkerCustomState implements State<undefined> {
   protected readonly getConnectInnovationFn: GetConnectInnovationFn
   protected readonly setCPPNStateRedirectFn: SetCPPNStateRedirectFn
 
+  protected readonly context: ThreadContext
+
   constructor(
     isSingleState: boolean = false,
     getSplitInnovationFn: GetSplitInnovationFn,
     getConnectInnovationFn: GetConnectInnovationFn,
-    setCPPNStateRedirectFn: SetCPPNStateRedirectFn
+    setCPPNStateRedirectFn: SetCPPNStateRedirectFn,
+    context: ThreadContext
   ) {
     this.isSingleState = isSingleState
     this.getSplitInnovationFn = getSplitInnovationFn
     this.getConnectInnovationFn = getConnectInnovationFn
     this.setCPPNStateRedirectFn = setCPPNStateRedirectFn
+    this.context = context
 
     this.singleCPPNState = new WorkerState(
       getSplitInnovationFn,
       getConnectInnovationFn,
       setCPPNStateRedirectFn,
+      context,
       StateType.SINGLE_CPPN_STATE,
       null,
       false,
@@ -80,6 +86,7 @@ export class WorkerCustomState implements State<undefined> {
         this.getSplitInnovationFn,
         this.getConnectInnovationFn,
         this.setCPPNStateRedirectFn,
+        this.context,
         StateType.UNIQUE_CPPN_STATES,
         key,
         false,
@@ -104,7 +111,7 @@ export class WorkerCustomState implements State<undefined> {
   // cloneState -- needs wacky async behavior to communicate with main thread
   cloneState(key: LinkKey, oldKey: LinkKey): void {
     // communicate with the main thread; we don't wait for a response at all
-    this.setCPPNStateRedirectFn(key, oldKey)
+    this.setCPPNStateRedirectFn(key, oldKey, this.context)
 
     // save a reference to the old state if it exists; ensures that setState is a noop
     const oldState = this.uniqueCPPNStates.get(oldKey)

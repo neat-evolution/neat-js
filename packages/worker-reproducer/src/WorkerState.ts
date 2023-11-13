@@ -9,22 +9,29 @@ import {
   type NodeKey,
 } from '@neat-evolution/core'
 
+import type { ThreadContext } from './worker/ThreadContext.js'
 import { StateType } from './WorkerAction.js'
 import { WorkerCustomState } from './WorkerCustomState.js'
 
 export type GetSplitInnovationFn = (
   linkInnovation: number,
   stateType: StateType,
-  stateKey: string | null
+  stateKey: string | null,
+  context: ThreadContext
 ) => Promise<Innovation>
 export type GetConnectInnovationFn = (
   from: NodeKey,
   to: NodeKey,
   stateType: StateType,
-  stateKey: string | null
+  stateKey: string | null,
+  context: ThreadContext
 ) => Promise<number>
 
-export type SetCPPNStateRedirectFn = (key: LinkKey, oldKey: LinkKey) => void
+export type SetCPPNStateRedirectFn = (
+  key: LinkKey,
+  oldKey: LinkKey,
+  context: ThreadContext
+) => void
 
 export class WorkerState<
   NSD,
@@ -43,11 +50,13 @@ export class WorkerState<
 
   protected readonly getSplitInnovationFn: GetSplitInnovationFn
   protected readonly getConnectInnovationFn: GetConnectInnovationFn
+  protected readonly context: ThreadContext
 
   constructor(
     getSplitInnovationFn: GetSplitInnovationFn,
     getConnectInnovationFn: GetConnectInnovationFn,
     setCPPNStateRedirectFn: SetCPPNStateRedirectFn,
+    context: ThreadContext,
     stateType: StateType = StateType.NEAT,
     stateKey: string | null = null,
     enableCustomState: boolean = false,
@@ -55,6 +64,8 @@ export class WorkerState<
   ) {
     this.getSplitInnovationFn = getSplitInnovationFn
     this.getConnectInnovationFn = getConnectInnovationFn
+    this.context = context
+
     this.enableCustomState = enableCustomState
     this.stateType = stateType
     this.stateKey = stateKey
@@ -64,7 +75,8 @@ export class WorkerState<
         singleCPPNState === true,
         getSplitInnovationFn,
         getConnectInnovationFn,
-        setCPPNStateRedirectFn
+        setCPPNStateRedirectFn,
+        this.context
       )
     } else {
       this.custom = null
@@ -81,7 +93,8 @@ export class WorkerState<
     return await this.getSplitInnovationFn(
       linkInnovation,
       this.stateType,
-      this.stateKey
+      this.stateKey,
+      this.context
     )
   }
 
@@ -90,7 +103,8 @@ export class WorkerState<
       from,
       to,
       this.stateType,
-      this.stateKey
+      this.stateKey,
+      this.context
     )
   }
 
