@@ -7,7 +7,7 @@ import {
 } from '@neat-evolution/core'
 import { createPhenotype as createCPPNPhenotype } from '@neat-evolution/cppn'
 import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
-import { createSyncExecutor } from '@neat-evolution/executor'
+import { createExecutor } from '@neat-evolution/executor'
 import {
   parseNodes,
   toPointKey,
@@ -40,7 +40,7 @@ export const createPhenotype: PhenotypeFactory<
   )
   const depth = genome.genomeOptions.iterationLevel + 1
 
-  const cppn = createSyncExecutor(
+  const cppn = createExecutor(
     createCPPNPhenotype(genome as unknown as CPPNGenome<CPPNGenomeOptions>)
   )
 
@@ -131,7 +131,7 @@ export const createPhenotype: PhenotypeFactory<
     } else {
       const nodeIndex = nodeMapping.get(action[0]) as number
       const [x, y] = fromPointKey(action[0])
-      const [, bias] = cppn([
+      const [, bias] = cppn.execute([
         0.0,
         0.0,
         x / genome.genomeOptions.resolution,
