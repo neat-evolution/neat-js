@@ -1,17 +1,18 @@
 import {
-  type Environment,
   type EnvironmentDescription,
+  type StandardEnvironment,
 } from '@neat-evolution/environment'
-import type { Executor } from '@neat-evolution/executor'
+import type { Executor, SyncExecutor } from '@neat-evolution/executor'
 
 import { type Dataset } from './Dataset.js'
 import { datasetToSharedBuffer } from './datasetToSharedBuffer.js'
 import { crossentropy, mse } from './error.js'
 
-export class DatasetEnvironment implements Environment {
+export class DatasetEnvironment
+  implements StandardEnvironment<SharedArrayBuffer>
+{
   public readonly dataset: Dataset
   public readonly description: EnvironmentDescription
-  public readonly batchSize: number
 
   constructor(dataset: Dataset) {
     this.dataset = dataset
@@ -19,7 +20,6 @@ export class DatasetEnvironment implements Environment {
       inputs: dataset.dimensions.inputs,
       outputs: dataset.dimensions.outputs,
     }
-    this.batchSize = this.dataset.trainingInputs.length
   }
 
   private fitness(targets: number[][], predictions: number[][]): number {
@@ -33,16 +33,21 @@ export class DatasetEnvironment implements Environment {
     }
   }
 
-  async evaluate(executor: Executor): Promise<number> {
-    // do it all in one batch
-    const predictions = await executor(this.dataset.trainingInputs)
+  evaluate(executor: SyncExecutor): number {
+    const predictions = executor.executeBatch(this.dataset.trainingInputs)
 
     const fitness = this.fitness(this.dataset.trainingTargets, predictions)
     return fitness
   }
 
-  // FIXME: rename to toSharedBuffer
-  serialize(): SharedArrayBuffer {
+  async evaluateAsync(executor: Executor): Promise<number> {
+    const predictions = await executor.executeBatch(this.dataset.trainingInputs)
+
+    const fitness = this.fitness(this.dataset.trainingTargets, predictions)
+    return fitness
+  }
+
+  toFactoryOptions(): SharedArrayBuffer {
     return datasetToSharedBuffer(this.dataset)
   }
 }
