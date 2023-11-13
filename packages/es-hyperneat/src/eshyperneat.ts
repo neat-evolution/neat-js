@@ -20,7 +20,6 @@ import type {
   EvolutionOptions,
   PopulationOptions,
   ReproducerFactory,
-  ReproducerFactoryOptions,
 } from '@neat-evolution/evolution'
 import { evolve, Population } from '@neat-evolution/evolution'
 import type {
@@ -33,47 +32,42 @@ import type {
 import { ESHyperNEATAlgorithm } from './ESHyperNEATAlgorithm.js'
 import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
 
-export type ESHyperNEATPopulation<RFO extends ReproducerFactoryOptions> =
-  Population<
-    ConfigFactoryOptions,
-    null,
-    null,
-    ConfigData,
-    NEATConfig,
-    null,
-    null,
-    null,
-    null,
-    StateData,
-    NEATState,
-    CPPNNodeData,
-    NEATLinkData,
-    CPPNGenomeFactoryOptions,
-    ESHyperNEATGenomeOptions,
-    CPPNGenomeData<ESHyperNEATGenomeOptions>,
-    CPPNNodeFactoryOptions,
-    CPPNNode,
-    LinkFactoryOptions,
-    NEATLink,
-    CPPNGenome<ESHyperNEATGenomeOptions>,
-    typeof ESHyperNEATAlgorithm,
-    RFO
-  >
+export type ESHyperNEATPopulation = Population<
+  ConfigFactoryOptions,
+  null,
+  null,
+  ConfigData,
+  NEATConfig,
+  null,
+  null,
+  null,
+  null,
+  StateData,
+  NEATState,
+  CPPNNodeData,
+  NEATLinkData,
+  CPPNGenomeFactoryOptions,
+  ESHyperNEATGenomeOptions,
+  CPPNGenomeData<ESHyperNEATGenomeOptions>,
+  CPPNNodeFactoryOptions,
+  CPPNNode,
+  LinkFactoryOptions,
+  NEATLink,
+  CPPNGenome<ESHyperNEATGenomeOptions>,
+  typeof ESHyperNEATAlgorithm
+>
 
-export type ESHyperNEATReproducerFactory<RFO extends ReproducerFactoryOptions> =
-  ReproducerFactory<
-    CPPNGenome<ESHyperNEATGenomeOptions>,
-    ESHyperNEATPopulation<RFO>,
-    RFO
-  >
+export type ESHyperNEATReproducerFactory = ReproducerFactory<
+  CPPNGenome<ESHyperNEATGenomeOptions>,
+  ESHyperNEATPopulation
+>
 
-export const eshyperneat = async <RFO extends ReproducerFactoryOptions>(
-  createReproducer: ESHyperNEATReproducerFactory<RFO>,
-  evaluator: Evaluator,
+export const eshyperneat = async (
+  createReproducer: ESHyperNEATReproducerFactory,
+  evaluator: Evaluator<any, any, any>,
   evolutionOptions: EvolutionOptions,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
-  reproducerOptions: RFO,
   genomeOptions: ESHyperNEATGenomeOptions
 ) => {
   const configProvider = ESHyperNEATAlgorithm.createConfig({
@@ -89,13 +83,12 @@ export const eshyperneat = async <RFO extends ReproducerFactoryOptions>(
     outputs: 2,
   }
 
-  const population: ESHyperNEATPopulation<RFO> = new Population(
+  const population: ESHyperNEATPopulation = new Population(
     createReproducer,
     evaluator,
     ESHyperNEATAlgorithm,
     configProvider,
     populationOptions,
-    reproducerOptions,
     genomeOptions,
     cppnInitConfig
   )
