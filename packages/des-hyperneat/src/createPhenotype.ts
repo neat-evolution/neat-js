@@ -21,7 +21,7 @@ import {
   exploreSubstrate,
   type ESHyperNEATGenomeOptions,
 } from '@neat-evolution/es-hyperneat'
-import { createSyncExecutor } from '@neat-evolution/executor'
+import { createExecutor } from '@neat-evolution/executor'
 import {
   toPointKey,
   type Point,
@@ -131,7 +131,7 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
       const targetRef = nodeKeyToRef(targetKey)
 
       // Develop the link's cppn
-      const cppn = createSyncExecutor(
+      const cppn = createExecutor(
         createCPPNPhenotype(
           genome.getLinkCPPN(
             sourceKey,
@@ -247,7 +247,7 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
       const depth = genome.getDepth(nodeKey) as number
       if (depth > 0) {
         // Develop the node's cppn
-        const cppn = createSyncExecutor(
+        const cppn = createExecutor(
           createCPPNPhenotype(
             genome.getNodeCPPN(nodeKey) as CPPNGenome<CPPNGenomeOptions>
           )
