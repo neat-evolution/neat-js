@@ -1,43 +1,9 @@
-import type { Genome } from '@neat-evolution/core'
+import type { AnyGenome } from './types.js'
 
-export type GenomeEntry<
-  G extends Genome<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    G
-  >
-> = [speciesIndex: number, organismIndex: number, genome: G]
+export type GenomeEntry<G extends AnyGenome<G>> = [
+  speciesIndex: number,
+  organismIndex: number,
+  genome: G
+]
 
-export type GenomeEntries<
-  G extends Genome<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    G
-  >
-> = Iterable<GenomeEntry<G>>
+export type GenomeEntries<G extends AnyGenome<G>> = Iterable<GenomeEntry<G>>
