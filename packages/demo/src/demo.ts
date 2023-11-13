@@ -3,7 +3,6 @@ import {
   defaultCPPNGenomeOptions,
   cppn,
   CPPNAlgorithm,
-  type CPPNReproducerFactory,
 } from '@neat-evolution/cppn'
 import {
   DatasetEnvironment,
@@ -15,15 +14,13 @@ import {
   defaultTopologyConfigOptions,
   deshyperneat,
   DESHyperNEATAlgorithm,
-  type DESHyperNEATReproducerFactory,
 } from '@neat-evolution/des-hyperneat'
 import {
   defaultESHyperNEATGenomeOptions,
   eshyperneat,
   ESHyperNEATAlgorithm,
-  type ESHyperNEATReproducerFactory,
 } from '@neat-evolution/es-hyperneat'
-import type { EvaluatorFactory } from '@neat-evolution/evaluator'
+import type { StandardEvaluatorFactory } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
@@ -34,7 +31,6 @@ import {
   defaultHyperNEATGenomeOptions,
   hyperneat,
   HyperNEATAlgorithm,
-  type HyperNEATReproducerFactory,
 } from '@neat-evolution/hyperneat'
 import {
   defaultNEATGenomeOptions,
@@ -43,7 +39,7 @@ import {
   type NEATReproducerFactory,
 } from '@neat-evolution/neat'
 
-enum Methods {
+export enum Methods {
   NEAT = 'NEAT',
   CPPN = 'CPPN',
   HyperNEAT = 'HyperNEAT',
@@ -51,11 +47,11 @@ enum Methods {
   DES_HyperNEAT = 'DES-HyperNEAT',
 }
 
-const method = Methods.DES_HyperNEAT
+export const method = Methods.DES_HyperNEAT
 
 export const demo = async (
-  createReproducer: ReproducerFactory<any, any, any>,
-  createEvaluator: EvaluatorFactory<null>
+  createReproducer: ReproducerFactory<any, any>,
+  createEvaluator: StandardEvaluatorFactory<any>
 ) => {
   const datasetOptions = defaultDatasetOptions
   datasetOptions.dataset = new URL(
@@ -80,36 +76,33 @@ export const demo = async (
       case Methods.NEAT: {
         const evaluator = createEvaluator(NEATAlgorithm, environment, null)
         return await neat(
-          createReproducer as NEATReproducerFactory<undefined>,
+          createReproducer as NEATReproducerFactory,
           evaluator,
           evolutionOptions,
           defaultNEATConfigOptions,
           defaultPopulationOptions,
-          undefined,
           defaultNEATGenomeOptions
         )
       }
       case Methods.CPPN: {
         const evaluator = createEvaluator(CPPNAlgorithm, environment, null)
         return await cppn(
-          createReproducer as CPPNReproducerFactory<undefined>,
+          createReproducer,
           evaluator,
           evolutionOptions,
           defaultNEATConfigOptions,
           defaultPopulationOptions,
-          undefined,
           defaultCPPNGenomeOptions
         )
       }
       case Methods.HyperNEAT: {
         const evaluator = createEvaluator(HyperNEATAlgorithm, environment, null)
         return await hyperneat(
-          createReproducer as HyperNEATReproducerFactory<undefined>,
+          createReproducer,
           evaluator,
           evolutionOptions,
           defaultNEATConfigOptions,
           defaultPopulationOptions,
-          undefined,
           defaultHyperNEATGenomeOptions
         )
       }
@@ -120,12 +113,11 @@ export const demo = async (
           null
         )
         return await eshyperneat(
-          createReproducer as ESHyperNEATReproducerFactory<undefined>,
+          createReproducer,
           evaluator,
           evolutionOptions,
           defaultNEATConfigOptions,
           defaultPopulationOptions,
-          undefined,
           defaultESHyperNEATGenomeOptions
         )
       }
@@ -136,13 +128,12 @@ export const demo = async (
           null
         )
         return await deshyperneat(
-          createReproducer as DESHyperNEATReproducerFactory<undefined>,
+          createReproducer,
           evaluator,
           evolutionOptions,
           defaultTopologyConfigOptions,
           defaultNEATConfigOptions,
           defaultPopulationOptions,
-          undefined,
           defaultDESHyperNEATGenomeOptions
         )
       }
