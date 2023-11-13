@@ -9,7 +9,7 @@ import {
   createPhenotype as createCPPNPhenotype,
   type CPPNGenomeOptions,
 } from '@neat-evolution/cppn'
-import { createSyncExecutor } from '@neat-evolution/executor'
+import { createExecutor } from '@neat-evolution/executor'
 
 import type { HyperNEATGenomeOptions } from './HyperNEATGenomeOptions.js'
 import { load } from './substrate/load.js'
@@ -21,7 +21,7 @@ export const createPhenotype: PhenotypeFactory<
   const phenotype = createCPPNPhenotype(
     genome as unknown as CPPNGenome<CPPNGenomeOptions>
   )
-  const cppn = createSyncExecutor(phenotype)
+  const cppn = createExecutor(phenotype)
   const initConfig = genome.genomeOptions.initConfig
   if (initConfig == null) {
     throw new Error('initConfig is required')
@@ -36,13 +36,19 @@ export const createPhenotype: PhenotypeFactory<
   for (const action of substrate.actions) {
     if (isSubstrateLinkAction(action)) {
       const { from, to, x0, y0, x1, y1 } = action
-      const [weight] = cppn([x0, y0, x1, y1]) as [weight: number, bias: number]
+      const [weight] = cppn.execute([x0, y0, x1, y1]) as [
+        weight: number,
+        bias: number
+      ]
       if (Math.abs(weight) > genome.genomeOptions.weightThreshold) {
         actions.push([PhenotypeActionType.Link, from, to, weight])
       }
     } else {
       const { node, x, y } = action
-      const [, bias] = cppn([0.0, 0.0, x, y]) as [weight: number, bias: number]
+      const [, bias] = cppn.execute([0.0, 0.0, x, y]) as [
+        weight: number,
+        bias: number
+      ]
       const activation = substrate.inputs.includes(node)
         ? Activation.None
         : substrate.outputs.includes(node)
