@@ -1,11 +1,23 @@
 import type { InitConfig } from '@neat-evolution/core'
-import type { Executor } from '@neat-evolution/executor'
+import type { Executor, SyncExecutor } from '@neat-evolution/executor'
 
 export type EnvironmentDescription = InitConfig
 
-export interface Environment {
+export interface Environment<
+  EFO,
+  E extends SyncExecutor[],
+  EA extends Executor[],
+  ER
+> {
   description: EnvironmentDescription
-  batchSize: number
-  evaluate: (executor: Executor) => Promise<number>
-  serialize?: () => SharedArrayBuffer
+  evaluate: (...args: E) => ER
+  evaluateAsync: (...args: EA) => Promise<ER>
+  toFactoryOptions: () => EFO
 }
+
+export type StandardEnvironment<EFO> = Environment<
+  EFO,
+  [executor: SyncExecutor],
+  [executor: Executor],
+  number
+>
