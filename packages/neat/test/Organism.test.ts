@@ -217,7 +217,7 @@ describe('Organism class', () => {
   })
 
   describe('Organism toJSON', () => {
-    test('should correctly serialize', () => {
+    test('should correctly export JSON', () => {
       const organism = new Organism(genome, generation, {
         fitness: 100,
         adjustedFitness: 200,
