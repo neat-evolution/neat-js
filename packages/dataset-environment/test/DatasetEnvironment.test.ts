@@ -37,7 +37,7 @@ describe('DatasetEnvironment', () => {
     })
 
     test('should convert a dataset to a SharedArrayBuffer', () => {
-      const sharedBuffer = environment.serialize()
+      const sharedBuffer = environment.toFactoryOptions()
       const restoredDataset = datasetFromSharedBuffer(sharedBuffer)
       expect(restoredDataset).toEqual(dataset)
     })
