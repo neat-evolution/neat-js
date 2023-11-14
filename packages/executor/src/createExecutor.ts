@@ -56,9 +56,11 @@ export const createExecutor: SyncExecutorFactory = (
   const executeBatch = (batch: BatchInputs): BatchOutputs => {
     const outputs: BatchOutputs = new Array(batch.length)
 
+    let i = 0
     for (const inputs of batch) {
       // Collect output by batch
-      outputs.push(execute(inputs))
+      outputs[i] = execute(inputs)
+      i++
     }
     return outputs
   }
