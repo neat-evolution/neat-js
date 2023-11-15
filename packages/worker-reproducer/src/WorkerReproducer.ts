@@ -198,7 +198,7 @@ export class WorkerReproducer<
       )
       initPromises.push(initPromise)
     }
-    await Promise.allSettled(initPromises)
+    await Promise.all(initPromises)
   }
 
   async terminate() {
