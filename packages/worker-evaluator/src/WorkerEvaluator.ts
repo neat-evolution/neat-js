@@ -132,7 +132,7 @@ export class WorkerEvaluator implements StandardEvaluator {
 
       initPromises.push(initPromise)
     }
-    await Promise.allSettled(initPromises)
+    await Promise.all(initPromises)
   }
 
   async initGenomeFactory<CD extends ConfigData>(
