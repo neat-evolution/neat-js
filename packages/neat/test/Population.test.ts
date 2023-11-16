@@ -17,7 +17,11 @@ import {
   type PopulationOptions,
   type Species,
 } from '@neat-evolution/evolution'
-import { createExecutor } from '@neat-evolution/executor'
+import {
+  createExecutor,
+  type Executor,
+  type SyncExecutor,
+} from '@neat-evolution/executor'
 import {
   beforeEach,
   describe,
@@ -61,7 +65,7 @@ describe('Population class', () => {
   let populationOptions: PopulationOptions
   let genomeOptions: NEATGenomeOptions
   let environment: DatasetEnvironment
-  let evaluator: Evaluator
+  let evaluator: Evaluator<[SyncExecutor], [Executor], number>
 
   const initConfig: InitConfig = {
     inputs: 1,
@@ -77,13 +81,12 @@ describe('Population class', () => {
   })
 
   test('should correctly initialize', () => {
-    const population: NEATPopulation<undefined> = new Population(
+    const population: NEATPopulation = new Population(
       createReproducer,
       evaluator,
       NEATAlgorithm,
       configProvider,
       populationOptions,
-      undefined,
       genomeOptions,
       initConfig
     )
@@ -105,7 +108,7 @@ describe('Population class', () => {
   })
 
   describe('Population.size', () => {
-    let population: NEATPopulation<undefined>
+    let population: NEATPopulation
     beforeEach(() => {
       population = new Population(
         createReproducer,
@@ -113,7 +116,6 @@ describe('Population class', () => {
         NEATAlgorithm,
         configProvider,
         populationOptions,
-        undefined,
         genomeOptions,
         initConfig
       )
@@ -125,7 +127,7 @@ describe('Population class', () => {
   })
 
   describe('Population.species.size', () => {
-    let population: NEATPopulation<undefined>
+    let population: NEATPopulation
     beforeEach(async () => {
       population = new Population(
         createReproducer,
@@ -133,7 +135,6 @@ describe('Population class', () => {
         NEATAlgorithm,
         configProvider,
         populationOptions,
-        undefined,
         genomeOptions,
         initConfig
       )
@@ -152,7 +153,6 @@ describe('Population class', () => {
           NEATAlgorithm,
           configProvider,
           populationOptions,
-          undefined,
           genomeOptions,
           initConfig
         )
@@ -175,7 +175,7 @@ describe('Population class', () => {
   })
 
   describe('Population.evolve', () => {
-    let population: NEATPopulation<undefined>
+    let population: NEATPopulation
     beforeEach(async () => {
       population = new Population(
         createReproducer,
@@ -183,7 +183,6 @@ describe('Population class', () => {
         NEATAlgorithm,
         configProvider,
         populationOptions,
-        undefined,
         genomeOptions,
         initConfig
       )

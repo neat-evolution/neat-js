@@ -5,7 +5,7 @@ import {
   loadDataset,
 } from '@neat-evolution/dataset-environment'
 import {
-  AsyncEvaluator,
+  TestEvaluator,
   type FitnessData,
   type GenomeEntry,
 } from '@neat-evolution/evaluator'
@@ -36,10 +36,10 @@ import {
 } from './fixtures/debugOutput.js'
 
 describe('PopulationFactory', () => {
-  let evaluator: AsyncEvaluator
+  let evaluator: TestEvaluator
   let algorithm: typeof NEATAlgorithm
   let configProvider: NEATConfig
-  let population: NEATPopulation<undefined>
+  let population: NEATPopulation
   let populationOptions: PopulationOptions
   let genomeOptions: NEATGenomeOptions
 
@@ -54,7 +54,7 @@ describe('PopulationFactory', () => {
 
     const dataset = await loadDataset(datasetOptions)
     const environment = new DatasetEnvironment(dataset)
-    evaluator = new AsyncEvaluator(algorithm, environment, createExecutor)
+    evaluator = new TestEvaluator(algorithm, environment, createExecutor)
 
     configProvider = algorithm.createConfig({ neat: defaultNEATConfigOptions })
     populationOptions = { ...defaultPopulationOptions }
@@ -69,7 +69,6 @@ describe('PopulationFactory', () => {
       algorithm,
       configProvider,
       populationOptions,
-      undefined,
       genomeOptions,
       evaluator.environment.description
     )
@@ -106,13 +105,12 @@ describe('PopulationFactory', () => {
 
   test('hydrate population from factoryOptions', () => {
     const factoryOptions = population.toFactoryOptions()
-    const hydratedPopulation: NEATPopulation<undefined> = new Population(
+    const hydratedPopulation: NEATPopulation = new Population(
       createReproducer,
       evaluator,
       algorithm,
       configProvider,
       populationOptions,
-      undefined,
       genomeOptions,
       evaluator.environment.description,
       factoryOptions
@@ -127,13 +125,12 @@ describe('PopulationFactory', () => {
 
   test('hydrate population from data', () => {
     const data = population.toJSON()
-    const hydratedPopulation: NEATPopulation<undefined> = new Population(
+    const hydratedPopulation: NEATPopulation = new Population(
       createReproducer,
       evaluator,
       algorithm,
       configProvider,
       populationOptions,
-      undefined,
       genomeOptions,
       evaluator.environment.description,
       data.factoryOptions
@@ -195,13 +192,12 @@ describe('PopulationFactory', () => {
     }
 
     const factoryOptions = population.toFactoryOptions()
-    const hydratedPopulation: NEATPopulation<undefined> = new Population(
+    const hydratedPopulation: NEATPopulation = new Population(
       createReproducer,
       evaluator,
       algorithm,
       configProvider,
       populationOptions,
-      undefined,
       genomeOptions,
       evaluator.environment.description,
       factoryOptions

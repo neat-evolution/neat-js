@@ -19,9 +19,8 @@ import {
   type CPPNGenome,
   type CPPNGenomeOptions,
   type CPPNNodeData,
-  createPhenotype,
 } from '@neat-evolution/cppn'
-import { createSyncExecutor } from '@neat-evolution/executor'
+import { createExecutor } from '@neat-evolution/executor'
 import {
   toPointKey,
   type Point,
@@ -329,11 +328,11 @@ export const testCases: TestCase[] = rawTestCases.map(
     }
     const genome = createCPPNGenome(cppn_genome)
     const factoryOptions = toCPPNFactoryOptions(cppn_genome)
-    const cppn = createSyncExecutor(phenotype)
+    const cppn = createExecutor(phenotype)
 
     const f: WeightFn = (x2: number, y2: number): number => {
       const input = reverse ? [x2, y2, x, y] : [x, y, x2, y2]
-      return cppn(input)[0] as number
+      return cppn.execute(input)[0] as number
     }
     const root = createQuadPoint(leaf)
     return {

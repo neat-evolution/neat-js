@@ -18,7 +18,7 @@ import {
   type CPPNGenome,
   type CPPNGenomeOptions,
 } from '@neat-evolution/cppn'
-import { createSyncExecutor, type SyncExecutor } from '@neat-evolution/executor'
+import { createExecutor, type SyncExecutor } from '@neat-evolution/executor'
 import {
   toPointKey,
   type Point,
@@ -234,7 +234,7 @@ export const testCases: TestCase[] = rawTestCases.map(
       actions: createActions(phenotypeData.actions),
     }
 
-    const cppn = createSyncExecutor(phenotype)
+    const cppn = createExecutor(phenotype)
     return {
       filePath,
       args: [x, y, cppn, reverse, defaultESHyperNEATGenomeOptions],
