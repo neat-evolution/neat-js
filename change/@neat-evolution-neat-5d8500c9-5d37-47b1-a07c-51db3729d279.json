@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "fix(neat): remove reproducer options",
+  "packageName": "@neat-evolution/neat",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

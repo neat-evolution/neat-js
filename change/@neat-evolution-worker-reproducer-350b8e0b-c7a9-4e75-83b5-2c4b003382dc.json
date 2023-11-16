@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "feat(worker-reproducer): refactor code",
+  "packageName": "@neat-evolution/worker-reproducer",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
