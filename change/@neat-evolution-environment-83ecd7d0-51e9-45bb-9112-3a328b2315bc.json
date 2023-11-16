@@ -1,7 +1,7 @@
 {
-  "type": "patch",
+  "type": "minor",
   "comment": "feat(environment): new standard environment; improve environment generics",
   "packageName": "@neat-evolution/environment",
   "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
+  "dependentChangeType": "minor"
 }
