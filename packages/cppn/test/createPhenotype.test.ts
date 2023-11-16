@@ -1,4 +1,4 @@
-import { createSyncExecutor } from '@neat-evolution/executor'
+import { createExecutor } from '@neat-evolution/executor'
 import { describe, expect, test } from 'vitest'
 
 import { createPhenotype } from '../src/index.js'
@@ -54,11 +54,11 @@ describe('createPhenotype', () => {
     'should return the same outputs for test case #%d',
     (_index, testCase: TestCase) => {
       const { genome, phenotype } = testCase
-      const executorA = createSyncExecutor(createPhenotype(genome))
-      const executorB = createSyncExecutor(phenotype)
+      const executorA = createExecutor(createPhenotype(genome))
+      const executorB = createExecutor(phenotype)
       for (const input of inputs) {
-        const result = executorA(input) as [number, number]
-        const expected = executorB(input) as [number, number]
+        const result = executorA.execute(input) as [number, number]
+        const expected = executorB.execute(input) as [number, number]
         expect(result[0]).toBeCloseTo(expected[0], 5)
         expect(result[1]).toBeCloseTo(expected[1], 5)
       }

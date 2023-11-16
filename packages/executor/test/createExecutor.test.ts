@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest'
 
-import { createBatchExecutor } from '../src/index.js'
+import { createExecutor } from '../src/index.js'
 
 import { phenotype } from './fixtures/phenotype.js'
 
 describe('createExecutor', () => {
   test('should correctly create an executor', () => {
-    const executor = createBatchExecutor(phenotype, 1)
+    const executor = createExecutor(phenotype)
     expect(executor).toBeDefined()
   })
 
@@ -23,9 +23,9 @@ describe('createExecutor', () => {
       [4.4, 2.9, 1.4, 0.2],
       [4.9, 3.1, 1.5, 0.1],
     ]
-    const executor = createBatchExecutor(phenotype, data.length)
+    const executor = createExecutor(phenotype)
 
-    const outputs = await executor(data)
+    const outputs = await executor.executeBatch(data)
     expect(outputs).toBeDefined()
     expect(outputs).toHaveLength(data.length)
     expect(outputs[0]).toHaveLength(3)
