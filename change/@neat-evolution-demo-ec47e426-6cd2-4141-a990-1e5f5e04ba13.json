@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "fix(demo): fix demo after refactors",
-  "packageName": "@neat-evolution/demo",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

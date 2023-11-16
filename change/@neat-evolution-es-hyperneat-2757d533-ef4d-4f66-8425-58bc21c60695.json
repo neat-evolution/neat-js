@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "fix(es-hyperneat): remove reproducer options",
-  "packageName": "@neat-evolution/es-hyperneat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

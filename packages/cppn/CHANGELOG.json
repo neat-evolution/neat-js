@@ -2,6 +2,53 @@
   "name": "@neat-evolution/cppn",
   "entries": [
     {
+      "date": "Thu, 16 Nov 2023 03:32:05 GMT",
+      "version": "0.3.0",
+      "tag": "@neat-evolution/cppn_v0.3.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/cppn",
+            "commit": "26e1ab96fed9a1610091e44514fb609c07a7abee",
+            "comment": "fix(cppn): remove reproducer options"
+          }
+        ],
+        "minor": [
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/evaluator to v0.3.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/evolution to v0.3.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/executor to v0.3.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/neat to v0.3.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/dataset-environment to v0.3.0",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 09 Nov 2023 08:12:03 GMT",
       "version": "0.2.0",
       "tag": "@neat-evolution/cppn_v0.2.0",

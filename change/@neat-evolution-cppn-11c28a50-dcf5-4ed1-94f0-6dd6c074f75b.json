@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "fix(cppn): remove reproducer options",
-  "packageName": "@neat-evolution/cppn",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

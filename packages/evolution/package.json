@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/evolution",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@neat-evolution/core": "^0.2.0",
-    "@neat-evolution/evaluator": "^0.2.0",
+    "@neat-evolution/evaluator": "^0.3.0",
     "@neat-evolution/utils": "^0.2.0",
     "@swc/helpers": "^0.5.3"
   },

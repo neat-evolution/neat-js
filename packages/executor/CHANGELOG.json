@@ -2,6 +2,21 @@
   "name": "@neat-evolution/executor",
   "entries": [
     {
+      "date": "Thu, 16 Nov 2023 03:32:05 GMT",
+      "version": "0.3.0",
+      "tag": "@neat-evolution/executor_v0.3.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/executor",
+            "commit": "26e1ab96fed9a1610091e44514fb609c07a7abee",
+            "comment": "feat(executor): new executor interface"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 09 Nov 2023 08:12:03 GMT",
       "version": "0.2.0",
       "tag": "@neat-evolution/executor_v0.2.0",

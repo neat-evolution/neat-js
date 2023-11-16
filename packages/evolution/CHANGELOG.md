@@ -1,8 +1,17 @@
 # Change Log - @neat-evolution/evolution
 
-This log was last generated on Thu, 09 Nov 2023 08:12:03 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Nov 2023 03:32:05 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.3.0
+
+Thu, 16 Nov 2023 03:32:05 GMT
+
+### Minor changes
+
+- fix(evolution): remove reproducer options (github@heygrady.net)
+- Bump @neat-evolution/evaluator to v0.3.0
 
 ## 0.2.0
 
