@@ -9,7 +9,7 @@ export interface NodeFactory<
   NCO extends ConfigOptions,
   NSD,
   NS extends ExtendedState<NSD>,
-  N extends Node<NFO, NCO, NSD, NS, N>
+  N extends Node<NFO, NCO, NSD, NS, N>,
 > {
   (factoryOptions: NodeFactoryOptions, config: NCO, state: NS): N
   (factoryOptions: NodeFactoryOptions & Partial<NFO>, config: NCO, state: NS): N

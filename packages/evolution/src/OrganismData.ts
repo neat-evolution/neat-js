@@ -14,7 +14,7 @@ export interface OrganismData<
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
-  GO extends GenomeOptions
+  GO extends GenomeOptions,
 > {
   genome: GenomeData<CD, SD, HND, LD, GFO, GO>
   organismState: OrganismFactoryOptions

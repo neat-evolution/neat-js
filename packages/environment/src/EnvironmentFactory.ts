@@ -6,7 +6,7 @@ export type EnvironmentFactory<
   EFO,
   E extends SyncExecutor[],
   EA extends Executor[],
-  ER
+  ER,
 > = (options: EFO) => Environment<EFO, E, EA, ER>
 
 export type StandardEnvironmentFactory<EFO> = EnvironmentFactory<

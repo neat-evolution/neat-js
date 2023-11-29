@@ -27,7 +27,7 @@ export const evolve = async <
     any,
     any
   >,
-  O extends EvolutionOptions = EvolutionOptions
+  O extends EvolutionOptions = EvolutionOptions,
 >(
   population: P,
   options: O

@@ -84,7 +84,7 @@ interface ActivationActionJSONData {
   [PhenotypeActionType.Activation]: [
     node: number,
     bias: number,
-    activation: Activation
+    activation: Activation,
   ]
 }
 
@@ -214,7 +214,7 @@ export interface TestCase {
     depth: number,
     reverse: boolean,
     allowConnectionsToInput: boolean,
-    options: ESHyperNEATGenomeOptions
+    options: ESHyperNEATGenomeOptions,
   ]
   genome: CPPNGenome<CPPNGenomeOptions>
   factoryOptions: CPPNGenomeFactoryOptions

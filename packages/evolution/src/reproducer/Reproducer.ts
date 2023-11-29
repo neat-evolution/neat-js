@@ -20,7 +20,7 @@ export interface Reproducer<
     any,
     any,
     G
-  >
+  >,
 > {
   copyElites: (
     speciesIds: number[]

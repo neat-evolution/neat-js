@@ -9,14 +9,14 @@ export type PhenotypeLinkAction = [
   type: PhenotypeActionType.Link,
   from: number,
   to: number,
-  weight: number
+  weight: number,
 ]
 
 export type PhenotypeActivationAction = [
   type: PhenotypeActionType.Activation,
   node: number,
   bias: number,
-  activation: Activation
+  activation: Activation,
 ]
 
 export type PhenotypeAction = PhenotypeLinkAction | PhenotypeActivationAction

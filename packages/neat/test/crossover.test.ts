@@ -21,7 +21,7 @@ const formattedTestCases = testCases.map(
     b: NEATGenome,
     fitness1: number,
     fitness2: number,
-    expected: NEATGenome
+    expected: NEATGenome,
   ]
 >
 

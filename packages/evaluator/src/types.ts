@@ -42,7 +42,7 @@ export type AnyGenome<
     any,
     any,
     G
-  >
+  >,
 > = Genome<
   any,
   any,

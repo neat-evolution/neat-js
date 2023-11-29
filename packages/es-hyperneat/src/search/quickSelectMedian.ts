@@ -38,7 +38,7 @@ export const partition = (
   }
   ;[arr[right], arr[storeIndex]] = [arr[storeIndex], arr[right]] as [
     number,
-    number
+    number,
   ]
   return storeIndex
 }

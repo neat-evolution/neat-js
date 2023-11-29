@@ -10,13 +10,13 @@ const cloneArgs = (
   args: [
     f: WeightFn,
     connections: Array<Target<PointKey, number>>,
-    deltaWeight: number
+    deltaWeight: number,
   ]
 ) => {
   return [args[0], args[1].map((target) => ({ ...target })), args[2]] as [
     f: WeightFn,
     connections: Array<Target<PointKey, number>>,
-    deltaWeight: number
+    deltaWeight: number,
   ]
 }
 

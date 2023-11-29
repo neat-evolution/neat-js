@@ -105,7 +105,7 @@ export class Population<
     LFO,
     L,
     G
-  >
+  >,
 > {
   public readonly evaluator: Evaluator<any, any, any>
   public readonly reproducer: Reproducer<G>

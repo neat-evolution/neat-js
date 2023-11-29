@@ -41,7 +41,7 @@ export interface Genome<
     GO,
     GD,
     G
-  >
+  >,
 > {
   readonly config: C
   readonly state: S

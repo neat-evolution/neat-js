@@ -6,7 +6,7 @@ export type NEATLinkData = [
   from: NodeKey,
   to: NodeKey,
   weight: number,
-  innovation: number
+  innovation: number,
 ]
 
 export type NEATGenomeFactoryOptions = GenomeFactoryOptions<

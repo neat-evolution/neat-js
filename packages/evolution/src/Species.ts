@@ -39,7 +39,7 @@ export class Species<
     GO,
     any,
     G
-  >
+  >,
 > {
   public readonly speciesOptions: SpeciesOptions
 

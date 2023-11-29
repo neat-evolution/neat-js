@@ -10,7 +10,7 @@ export interface GenomeData<
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
-  GO extends GenomeOptions
+  GO extends GenomeOptions,
 > {
   config: CD
   state: SD

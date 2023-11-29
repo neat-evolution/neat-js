@@ -14,7 +14,7 @@ export interface PopulationData<
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
-  GO extends GenomeOptions
+  GO extends GenomeOptions,
 > {
   // shared state
   config: CD

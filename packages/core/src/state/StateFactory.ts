@@ -7,5 +7,5 @@ export type StateFactory<
   NS extends ExtendedState<NSD>,
   LS extends ExtendedState<LSD>,
   SD extends StateData,
-  S extends StateProvider<NSD, LSD, NS, LS, SD>
+  S extends StateProvider<NSD, LSD, NS, LS, SD>,
 > = (factoryOptions?: SD) => S

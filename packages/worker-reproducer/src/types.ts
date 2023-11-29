@@ -29,7 +29,7 @@ export type AnyPopulation<
     any,
     any,
     G
-  >
+  >,
 > = Population<
   any,
   any,

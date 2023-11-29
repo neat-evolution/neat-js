@@ -11,7 +11,7 @@ export interface Link<
   LCO extends ConfigOptions,
   LSD,
   LS extends ExtendedState<LSD>,
-  L extends Link<LFO, LCO, LSD, LS, L>
+  L extends Link<LFO, LCO, LSD, LS, L>,
 > extends LinkRef {
   // Link
   weight: number

@@ -8,5 +8,5 @@ export type ConfigFactory<
   NCO extends ConfigOptions,
   LCO extends ConfigOptions,
   CD extends ConfigData,
-  C extends ConfigProvider<NCO, LCO, CD>
+  C extends ConfigProvider<NCO, LCO, CD>,
 > = (factoryOptions: CFO) => C

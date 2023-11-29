@@ -9,7 +9,7 @@ export class CoreConfig<
   CFO extends ConfigFactoryOptions,
   NCO extends ConfigOptions,
   LCO extends ConfigOptions,
-  CD extends ConfigData
+  CD extends ConfigData,
 > implements ConfigProvider<NCO, LCO, CD>
 {
   public readonly neatConfig: NEATConfigOptions

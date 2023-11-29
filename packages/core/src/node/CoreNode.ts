@@ -13,7 +13,7 @@ export class CoreNode<
   NCO extends ConfigOptions,
   NSD,
   NS extends ExtendedState<NSD>,
-  N extends CoreNode<NFO, NCO, NSD, NS, N>
+  N extends CoreNode<NFO, NCO, NSD, NS, N>,
 > implements Node<NFO, NCO, NSD, NS, N>
 {
   // NodeRef

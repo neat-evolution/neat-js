@@ -15,7 +15,7 @@ export type PopulationDataSpecies<
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
-  GO extends GenomeOptions
+  GO extends GenomeOptions,
 > = Omit<
   SpeciesData<CD, SD, HND, LD, GFO, GO>,
   'config' | 'state' | 'genomeOptions' | 'speciesOptions'
@@ -27,10 +27,10 @@ export type PopulationDataSpeciesEntry<
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
-  GO extends GenomeOptions
+  GO extends GenomeOptions,
 > = [
   speciesKey: number,
-  speciesValue: PopulationDataSpecies<CD, SD, HND, LD, GFO, GO>
+  speciesValue: PopulationDataSpecies<CD, SD, HND, LD, GFO, GO>,
 ]
 
 export interface PopulationFactoryOptions<
@@ -39,7 +39,7 @@ export interface PopulationFactoryOptions<
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
-  GO extends GenomeOptions
+  GO extends GenomeOptions,
 > {
   state: SD
   nextId: number
@@ -71,7 +71,7 @@ export const toPopulationDataSpecies = <
     GO,
     any,
     G
-  >
+  >,
 >(
   species: Species<CD, SD, HND, LD, GFO, GO, G>
 ): PopulationDataSpecies<CD, SD, HND, LD, GFO, GO> => {

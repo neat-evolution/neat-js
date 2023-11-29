@@ -9,7 +9,7 @@ export interface LinkFactory<
   LCO extends ConfigOptions,
   LSD,
   LS extends ExtendedState<LSD>,
-  L extends Link<LFO, LCO, LSD, LS, L>
+  L extends Link<LFO, LCO, LSD, LS, L>,
 > {
   (factoryOptions: LinkFactoryOptions, config: LCO, state: LS): L
   (factoryOptions: LinkFactoryOptions & Partial<LFO>, config: LCO, state: LS): L

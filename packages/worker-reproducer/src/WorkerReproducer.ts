@@ -55,7 +55,7 @@ export class WorkerReproducer<
     any,
     any,
     G
-  >
+  >,
 > implements Reproducer<G>
 {
   public readonly population: AnyPopulation<G>

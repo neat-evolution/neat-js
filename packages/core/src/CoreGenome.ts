@@ -73,7 +73,7 @@ export class CoreGenome<
     LFO,
     L,
     G
-  >
+  >,
 > implements
     Genome<NCO, LCO, CD, C, NSD, LSD, NS, LS, SD, S, HND, LD, GFO, GO, GD, G>
 {

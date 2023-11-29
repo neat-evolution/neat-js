@@ -27,7 +27,7 @@ export interface InitPayload {
 
 export interface InitGenomeFactoryPayload<
   CD extends ConfigData,
-  GO extends GenomeOptions
+  GO extends GenomeOptions,
 > {
   configData: CD
   genomeOptions: GO
