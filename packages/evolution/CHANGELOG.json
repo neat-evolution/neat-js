@@ -2,6 +2,39 @@
   "name": "@neat-evolution/evolution",
   "entries": [
     {
+      "date": "Wed, 29 Nov 2023 17:31:33 GMT",
+      "version": "0.3.1",
+      "tag": "@neat-evolution/evolution_v0.3.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/evolution",
+            "commit": "51825d526f554fecd4a104d8f2e6f3265d30f62e",
+            "comment": "fix: format"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evolution",
+            "comment": "Bump @neat-evolution/core to v0.2.1",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evolution",
+            "comment": "Bump @neat-evolution/evaluator to v0.3.1",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evolution",
+            "comment": "Bump @neat-evolution/utils to v0.2.1",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 16 Nov 2023 03:32:05 GMT",
       "version": "0.3.0",
       "tag": "@neat-evolution/evolution_v0.3.0",

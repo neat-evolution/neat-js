@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "fix: format",
-  "packageName": "@neat-evolution/evaluator",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

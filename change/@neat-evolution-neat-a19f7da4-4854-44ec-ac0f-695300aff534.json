@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat(neat): create population",
-  "packageName": "@neat-evolution/neat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

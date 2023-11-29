@@ -2,6 +2,27 @@
   "name": "@neat-evolution/core",
   "entries": [
     {
+      "date": "Wed, 29 Nov 2023 17:31:33 GMT",
+      "version": "0.2.1",
+      "tag": "@neat-evolution/core_v0.2.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/core",
+            "commit": "51825d526f554fecd4a104d8f2e6f3265d30f62e",
+            "comment": "fix: format"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/core",
+            "comment": "Bump @neat-evolution/utils to v0.2.1",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 09 Nov 2023 08:12:03 GMT",
       "version": "0.2.0",
       "tag": "@neat-evolution/core_v0.2.0",

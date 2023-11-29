@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "feat(es-hyperneat): create population",
-  "packageName": "@neat-evolution/es-hyperneat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

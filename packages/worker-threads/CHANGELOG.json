@@ -2,6 +2,21 @@
   "name": "@neat-evolution/worker-threads",
   "entries": [
     {
+      "date": "Wed, 29 Nov 2023 17:31:33 GMT",
+      "version": "0.2.1",
+      "tag": "@neat-evolution/worker-threads_v0.2.1",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-threads",
+            "commit": "51825d526f554fecd4a104d8f2e6f3265d30f62e",
+            "comment": "fix: format"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 09 Nov 2023 08:12:03 GMT",
       "version": "0.2.0",
       "tag": "@neat-evolution/worker-threads_v0.2.0",
