@@ -89,7 +89,7 @@ jobs:
 
       # After publishing, install dependencies to update the yarn.lock file
       - name: Update yarn.lock
-        run: yarn install --no-immutable --mode=update-lockfile
+        run: yarn install --no-immutable
 
       # Check for changes in the yarn.lock file
       - name: Check for yarn.lock changes
