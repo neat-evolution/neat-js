@@ -1,66 +1,16 @@
-import type {
-  ConfigData,
-  ConfigFactoryOptions,
-  InitConfig,
-  LinkFactoryOptions,
-  NEATConfigOptions,
-  StateData,
-} from '@neat-evolution/core'
-import { defaultNEATConfigOptions } from '@neat-evolution/core'
-import {
-  type CPPNGenome,
-  type CPPNGenomeData,
-  type CPPNGenomeFactoryOptions,
-  type CPPNNodeData,
-  type CPPNNode,
-  type CPPNNodeFactoryOptions,
-} from '@neat-evolution/cppn'
+import type { NEATConfigOptions } from '@neat-evolution/core'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
   EvolutionOptions,
   PopulationOptions,
-  ReproducerFactory,
 } from '@neat-evolution/evolution'
-import { evolve, Population } from '@neat-evolution/evolution'
-import type {
-  NEATConfig,
-  NEATLink,
-  NEATLinkData,
-  NEATState,
-} from '@neat-evolution/neat'
+import { evolve } from '@neat-evolution/evolution'
 
-import { ESHyperNEATAlgorithm } from './ESHyperNEATAlgorithm.js'
+import {
+  createPopulation,
+  type ESHyperNEATReproducerFactory,
+} from './createPopulation.js'
 import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
-
-export type ESHyperNEATPopulation = Population<
-  ConfigFactoryOptions,
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  CPPNNodeData,
-  NEATLinkData,
-  CPPNGenomeFactoryOptions,
-  ESHyperNEATGenomeOptions,
-  CPPNGenomeData<ESHyperNEATGenomeOptions>,
-  CPPNNodeFactoryOptions,
-  CPPNNode,
-  LinkFactoryOptions,
-  NEATLink,
-  CPPNGenome<ESHyperNEATGenomeOptions>,
-  typeof ESHyperNEATAlgorithm
->
-
-export type ESHyperNEATReproducerFactory = ReproducerFactory<
-  CPPNGenome<ESHyperNEATGenomeOptions>,
-  ESHyperNEATPopulation
->
 
 export const eshyperneat = async (
   createReproducer: ESHyperNEATReproducerFactory,
@@ -70,27 +20,12 @@ export const eshyperneat = async (
   populationOptions: PopulationOptions,
   genomeOptions: ESHyperNEATGenomeOptions
 ) => {
-  const configProvider = ESHyperNEATAlgorithm.createConfig({
-    neat: neatConfigOptions ?? defaultNEATConfigOptions,
-  })
-
-  // capture the real initConfig for createPhenotype later
-  genomeOptions.initConfig = evaluator.environment.description
-
-  // force initConfig to be 4, 2
-  const cppnInitConfig: InitConfig = {
-    inputs: 4,
-    outputs: 2,
-  }
-
-  const population: ESHyperNEATPopulation = new Population(
+  const population = createPopulation(
     createReproducer,
     evaluator,
-    ESHyperNEATAlgorithm,
-    configProvider,
+    neatConfigOptions,
     populationOptions,
-    genomeOptions,
-    cppnInitConfig
+    genomeOptions
   )
 
   await evolve(population, evolutionOptions)
