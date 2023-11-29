@@ -27,10 +27,10 @@
     "test:ci": "turbo run --concurrency=2 test -- --passWithNoTests --run"
   },
   "dependencies": {
-    "@commitlint/cli": "^18.2.0",
-    "@commitlint/config-conventional": "^18.1.0",
-    "@commitlint/config-lerna-scopes": "^18.1.0",
-    "@manypkg/cli": "^0.21.0",
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "@commitlint/config-lerna-scopes": "^18.4.3",
+    "@manypkg/cli": "^0.21.1",
     "beachball": "^2.39.0",
     "husky": "^8.0.3",
     "pinst": "^3.0.0",
