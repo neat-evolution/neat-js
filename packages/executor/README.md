@@ -15,9 +15,9 @@ Each flavor of the NEAT algorithm will export a `createPhenotype` that can conve
 3. Make predictions
 
 ```ts
+import { createExecutor } from '@neat-evolution/executor'
 import { createPhenotype } from '@neat-evolution/neat'
 
-import { createExecutor } from '@neat-evolution/executor'
 
 // presuming you have evolved a neat population
 const genome = population.best()
