@@ -19,7 +19,7 @@ export const nodeTupleToKey = (nodeTuple: NodeRefTuple): string => {
  */
 export const numericTupleToNodeKey = ([type, id]: [
   type: number,
-  id: number
+  id: number,
 ]): NodeKey => `${nodeNumberToType(type)}[${id}]`
 
 export const toNodeKey = (type: NodeRef['type'], id: NodeRef['id']): string => {

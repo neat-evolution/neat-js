@@ -69,8 +69,8 @@ export class DESHyperNEATNode extends CoreNode<
       this.type === NodeType.Input
         ? this.options.maxInputSubstrateDepth
         : this.type === NodeType.Output
-        ? this.options.maxOutputSubstrateDepth
-        : this.options.maxHiddenSubstrateDepth
+          ? this.options.maxOutputSubstrateDepth
+          : this.options.maxHiddenSubstrateDepth
     const depth =
       factoryOptions.depth ?? Math.max(Math.min(1, maxSubstrateDepth), 0)
 

@@ -41,7 +41,7 @@ export type GenomeFactory<
     GO,
     any,
     G
-  >
+  >,
 > = (
   configProvider: C,
   stateProvider: S,

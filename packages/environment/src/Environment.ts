@@ -7,7 +7,7 @@ export interface Environment<
   EFO,
   E extends SyncExecutor[],
   EA extends Executor[],
-  ER
+  ER,
 > {
   description: EnvironmentDescription
   evaluate: (...args: E) => ER

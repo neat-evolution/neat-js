@@ -4,7 +4,7 @@ import type { CPPNGenomeFactoryOptions } from '@neat-evolution/cppn'
 export type DESHyperNEATNodeData = [
   id: number,
   cppn: CPPNGenomeFactoryOptions,
-  depth: number
+  depth: number,
 ]
 export type DESHyperNEATLinkData = [
   from: NodeKey,
@@ -12,7 +12,7 @@ export type DESHyperNEATLinkData = [
   weight: number,
   innovation: number,
   cppn: CPPNGenomeFactoryOptions,
-  depth: number
+  depth: number,
 ]
 
 export interface DESHyperNEATGenomeFactoryOptions

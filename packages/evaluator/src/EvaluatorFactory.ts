@@ -11,7 +11,7 @@ export type EvaluatorFactory<
   O,
   E extends SyncExecutor[],
   EA extends Executor[],
-  ER
+  ER,
 > = (
   algorithm: AnyAlgorithm,
   environment: Environment<any, E, EA, ER>,

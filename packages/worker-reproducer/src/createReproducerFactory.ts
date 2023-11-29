@@ -32,7 +32,7 @@ export const createReproducerFactory = <
     any,
     any,
     G
-  >
+  >,
 >(
   options: WorkerReproducerOptions,
   terminables: Set<Terminable>

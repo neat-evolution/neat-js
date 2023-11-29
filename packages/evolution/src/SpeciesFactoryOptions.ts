@@ -33,7 +33,7 @@ export interface SpeciesFactoryOptions<
     GO,
     any,
     G
-  >
+  >,
 > {
   organisms: Array<Organism<CD, SD, HND, LD, GFO, GO, G>>
   speciesState: SpeciesState

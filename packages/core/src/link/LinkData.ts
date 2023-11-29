@@ -5,7 +5,7 @@ import type { LinkFactoryOptions } from './LinkFactoryOptions.js'
 export interface LinkData<
   LFO extends LinkFactoryOptions,
   LCO extends ConfigOptions,
-  LSD
+  LSD,
 > {
   config: LCO
   state: LSD

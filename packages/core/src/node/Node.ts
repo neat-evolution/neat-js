@@ -11,7 +11,7 @@ export interface Node<
   NCO extends ConfigOptions,
   NSD,
   NS extends ExtendedState<NSD>,
-  N extends Node<NFO, NCO, NSD, NS, N>
+  N extends Node<NFO, NCO, NSD, NS, N>,
 > extends NodeRef {
   // NodeExtension
   config: NCO

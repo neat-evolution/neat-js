@@ -42,7 +42,7 @@ export enum ActionType {
 
 export interface InitReproducerPayload<
   CD extends ConfigData,
-  GO extends GenomeOptions
+  GO extends GenomeOptions,
 > {
   reproducerOptions: WorkerReproducerOptions
   populationOptions: PopulationOptions

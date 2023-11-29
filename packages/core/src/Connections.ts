@@ -8,7 +8,7 @@ export type Connection<N extends NodeKey, E extends Edge> = [
   from: N,
   to: N,
   /** weight for phenotype, null for substrate */
-  edge: E
+  edge: E,
 ]
 
 export interface Target<N extends NodeKey, E extends Edge> {

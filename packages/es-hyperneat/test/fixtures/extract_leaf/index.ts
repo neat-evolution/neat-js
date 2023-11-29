@@ -91,7 +91,7 @@ interface ActivationActionJSONData {
   [PhenotypeActionType.Activation]: [
     node: number,
     bias: number,
-    activation: Activation
+    activation: Activation,
   ]
 }
 
@@ -273,7 +273,7 @@ export interface TestCase {
   args: [
     f: WeightFn,
     connections: Array<Target<PointKey, number>>,
-    deltaWeight: number
+    deltaWeight: number,
   ]
   leaf: QuadPoint
   beforeConnections: Array<Target<PointKey, number>>

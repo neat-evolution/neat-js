@@ -33,7 +33,7 @@ export class Organism<
     GO,
     any,
     G
-  >
+  >,
 > {
   public readonly genome: G
   public readonly generation: number

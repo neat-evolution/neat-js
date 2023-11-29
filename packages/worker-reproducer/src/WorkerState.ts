@@ -38,7 +38,7 @@ export class WorkerState<
   LSD,
   NS extends ExtendedState<NSD>,
   LS extends ExtendedState<LSD>,
-  SD extends StateData
+  SD extends StateData,
 > implements StateProvider<NSD, LSD, NS, LS, SD>
 {
   public readonly stateType: StateType

@@ -11,13 +11,13 @@ import type { GenomeEntries } from './GenomeEntries.js'
 export type FitnessData = [
   speciesIndex: number,
   organismIndex: number,
-  fitness: number
+  fitness: number,
 ]
 
 export interface Evaluator<
   E extends SyncExecutor[],
   EA extends Executor[],
-  ER
+  ER,
 > {
   environment: Environment<any, E, EA, ER>
 

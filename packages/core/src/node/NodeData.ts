@@ -5,7 +5,7 @@ import type { NodeFactoryOptions } from './NodeFactoryOptions.js'
 export interface NodeData<
   NFO extends NodeFactoryOptions,
   NCO extends ConfigOptions,
-  NSD
+  NSD,
 > {
   config: NCO
   state: NSD

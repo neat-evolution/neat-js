@@ -57,8 +57,8 @@ function actionStringToNodeRef(
         type === 'I'
           ? NodeType.Input
           : type === 'H'
-          ? NodeType.Hidden
-          : NodeType.Output,
+            ? NodeType.Hidden
+            : NodeType.Output,
       id: parseInt(id, 10),
     }
   }
@@ -149,13 +149,13 @@ for (const line of lines) {
       const fromNode = from.startsWith('H')
         ? { type: NodeType.Hidden, id: Number(from.slice(1)) }
         : from.startsWith('I')
-        ? { type: NodeType.Input, id: Number(from.slice(1)) }
-        : { type: NodeType.Output, id: Number(from.slice(1)) }
+          ? { type: NodeType.Input, id: Number(from.slice(1)) }
+          : { type: NodeType.Output, id: Number(from.slice(1)) }
       const toNode = to.startsWith('H')
         ? { type: NodeType.Hidden, id: Number(to.slice(1)) }
         : to.startsWith('I')
-        ? { type: NodeType.Input, id: Number(to.slice(1)) }
-        : { type: NodeType.Output, id: Number(to.slice(1)) }
+          ? { type: NodeType.Input, id: Number(to.slice(1)) }
+          : { type: NodeType.Output, id: Number(to.slice(1)) }
 
       if (fromNode.type === NodeType.Hidden && !knownNodes.has(from)) {
         knownNodes.add(from)

@@ -25,7 +25,7 @@ export interface SpeciesState {
 export interface SpeciesDataOrganism<
   HND,
   LD,
-  GFO extends GenomeFactoryOptions<HND, LD>
+  GFO extends GenomeFactoryOptions<HND, LD>,
 > {
   genome: GFO
   organismState: OrganismFactoryOptions
@@ -37,7 +37,7 @@ export interface SpeciesData<
   HND,
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
-  GO extends GenomeOptions
+  GO extends GenomeOptions,
 > {
   config: CD | null
   state: SD | null

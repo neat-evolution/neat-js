@@ -87,7 +87,7 @@ interface ActivationActionJSONData {
   [PhenotypeActionType.Activation]: [
     node: number,
     bias: number,
-    activation: Activation
+    activation: Activation,
   ]
 }
 

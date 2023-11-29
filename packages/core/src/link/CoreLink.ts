@@ -13,7 +13,7 @@ export class CoreLink<
   LCO extends ConfigOptions,
   LSD,
   LS extends ExtendedState<LSD>,
-  L extends CoreLink<LFO, LCO, LSD, LS, L>
+  L extends CoreLink<LFO, LCO, LSD, LS, L>,
 > implements Link<LFO, LCO, LSD, LS, L>
 {
   // LinkRef

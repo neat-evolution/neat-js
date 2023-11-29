@@ -67,7 +67,7 @@ export interface Algorithm<
     LFO,
     L,
     G
-  >
+  >,
 > {
   name: string
   pathname: string

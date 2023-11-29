@@ -51,5 +51,5 @@ export type ReproducerFactory<
     any,
     G,
     any
-  >
+  >,
 > = (population: P) => Reproducer<G>
