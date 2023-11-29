@@ -87,21 +87,13 @@ jobs:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # After publishing, install dependencies to update the yarn.lock file
       - name: Update yarn.lock
-        run: yarn install --no-immutable
+        run: yarn install --no-immutable --mode update-lockfile
 
-      # Check for changes in the yarn.lock file
-      - name: Check for yarn.lock changes
+      - name: Commit and push yarn.lock changes
         run: |
           if git diff --name-only | grep -q 'yarn.lock'; then
-            echo "MODIFIED=true" >> $GITHUB_ENV
+            git add yarn.lock
+            git commit --no-verify -m "chore: update yarn.lock [skip ci]"
+            git push
           fi
-
-      # Commit and push the updated yarn.lock file, if it has changed
-      - name: Commit yarn.lock changes
-        if: env.MODIFIED == 'true'
-        run: |
-          git add yarn.lock
-          git commit -m "chore: update yarn.lock [skip ci]"
-          git push
