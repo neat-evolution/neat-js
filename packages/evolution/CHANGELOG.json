@@ -2,6 +2,21 @@
   "name": "@neat-evolution/evolution",
   "entries": [
     {
+      "date": "Wed, 29 Nov 2023 17:41:08 GMT",
+      "version": "0.3.1",
+      "tag": "@neat-evolution/evolution_v0.3.1",
+      "comments": {
+        "none": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/evolution",
+            "commit": "66fd4cf01da56fec673040a4ba655596c04e6480",
+            "comment": "chore: format imports in readme"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 29 Nov 2023 17:31:33 GMT",
       "version": "0.3.1",
       "tag": "@neat-evolution/evolution_v0.3.1",
