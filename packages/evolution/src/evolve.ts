@@ -85,8 +85,5 @@ export const evolve = async <
     }
   }
   console.log(`ended after ${Date.now() - startTime}ms`)
-  // for (const species of population.species.values()) {
-  //   species.adjustFitness()
-  // }
   return population.best()
 }
