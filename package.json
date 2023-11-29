@@ -11,7 +11,7 @@
     "build": "turbo run --concurrency=4 build",
     "demo": "yarn build && yarn workspace @neat-evolution/demo start",
     "clean": "turbo run clean",
-    "change": "beachball change --no-commit && git commit -a -m \"chore: add change files [skip ci]\"",
+    "change": "beachball change --no-commit && git commit -a -m \"chore: add change files\"",
     "check": "yarn check:beachball && yarn check:manypkg",
     "check:beachball": "beachball check",
     "check:manypkg": "manypkg check",
