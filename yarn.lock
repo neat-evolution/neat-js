@@ -796,7 +796,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -826,7 +825,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -854,7 +852,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -892,7 +889,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -925,7 +921,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -950,7 +945,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -982,7 +976,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -1008,7 +1001,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -1034,7 +1026,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -1058,7 +1049,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -1089,7 +1079,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -1118,7 +1107,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -1141,7 +1129,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@types/seedrandom": "npm:^3"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
@@ -1174,7 +1161,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@types/seedrandom": "npm:^3"
     "@vitest/coverage-v8": "npm:^0.34.6"
     "@vitest/web-worker": "npm:^0.34.5"
@@ -1207,7 +1193,6 @@ __metadata:
     "@swc/core": "npm:^1.3.99"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     async-sema: "npm:^3.1.1"
     concurrently: "npm:^8.2.2"
@@ -1234,7 +1219,6 @@ __metadata:
     "@tsconfig/strictest": "npm:^2.0.2"
     "@tsconfig/vite-react": "npm:^2.0.1"
     "@types/eslint": "npm:^8"
-    "@types/prettier": "npm:^2"
     "@vitest/coverage-v8": "npm:^0.34.6"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^8.54.0"
@@ -1735,13 +1719,6 @@ __metadata:
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
   checksum: 4df9de98150d2978afc2161482a3a8e6617883effba3223324f079de97ba7eabd7d84b90ced11c3f82b0c08d4a8383f678c9f73e9c41258f769b3fa234a2bb4f
-  languageName: node
-  linkType: hard
-
-"@types/prettier@npm:^2":
-  version: 2.7.3
-  resolution: "@types/prettier@npm:2.7.3"
-  checksum: cda84c19acc3bf327545b1ce71114a7d08efbd67b5030b9e8277b347fa57b05178045f70debe1d363ff7efdae62f237260713aafc2d7217e06fc99b048a88497
   languageName: node
   linkType: hard
 
