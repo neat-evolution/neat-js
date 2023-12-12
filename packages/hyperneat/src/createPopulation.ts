@@ -17,6 +17,7 @@ import {
 } from '@neat-evolution/cppn'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
+  PopulationFactory,
   PopulationOptions,
   ReproducerFactory,
 } from '@neat-evolution/evolution'
@@ -61,7 +62,29 @@ export type HyperNEATReproducerFactory = ReproducerFactory<
   HyperNEATPopulation
 >
 
-export const createPopulation = (
+export const createPopulation: PopulationFactory<
+  ConfigFactoryOptions,
+  null,
+  null,
+  ConfigData,
+  NEATConfig,
+  null,
+  null,
+  null,
+  null,
+  StateData,
+  NEATState,
+  CPPNNodeData,
+  NEATLinkData,
+  CPPNGenomeFactoryOptions,
+  HyperNEATGenomeOptions,
+  CPPNGenomeData<HyperNEATGenomeOptions>,
+  CPPNNodeFactoryOptions,
+  CPPNNode,
+  LinkFactoryOptions,
+  NEATLink,
+  CPPNGenome<HyperNEATGenomeOptions>
+> = (
   createReproducer: HyperNEATReproducerFactory,
   evaluator: Evaluator<any, any, any>,
   neatConfigOptions: NEATConfigOptions,

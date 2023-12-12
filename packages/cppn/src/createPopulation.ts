@@ -8,6 +8,7 @@ import type {
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
+  PopulationFactory,
   PopulationOptions,
   ReproducerFactory,
 } from '@neat-evolution/evolution'
@@ -60,7 +61,29 @@ export type CPPNReproducerFactory = ReproducerFactory<
   CPPNPopulation
 >
 
-export const createPopulation = (
+export const createPopulation: PopulationFactory<
+  ConfigFactoryOptions,
+  null,
+  null,
+  ConfigData,
+  NEATConfig,
+  null,
+  null,
+  null,
+  null,
+  StateData,
+  NEATState,
+  CPPNNodeData,
+  NEATLinkData,
+  CPPNGenomeFactoryOptions,
+  CPPNGenomeOptions,
+  CPPNGenomeData<CPPNGenomeOptions>,
+  CPPNNodeFactoryOptions,
+  CPPNNode,
+  LinkFactoryOptions,
+  NEATLink,
+  CPPNGenome<CPPNGenomeOptions>
+> = (
   createReproducer: CPPNReproducerFactory,
   evaluator: Evaluator<any, any, any>,
   neatConfigOptions: NEATConfigOptions,
