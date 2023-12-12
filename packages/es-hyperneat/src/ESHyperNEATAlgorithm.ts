@@ -13,14 +13,13 @@ import {
   type CPPNGenomeFactoryOptions,
   type CPPNNodeData,
 } from '@neat-evolution/cppn'
-import { createNode } from '@neat-evolution/cppn'
 import type {
   NEATConfig,
   NEATLink,
   NEATLinkData,
   NEATState,
 } from '@neat-evolution/neat'
-import { createConfig, createLink, createState } from '@neat-evolution/neat'
+import { createConfig, createState } from '@neat-evolution/neat'
 
 import { createGenome } from './createGenome.js'
 import { createPhenotype } from './createPhenotype.js'
@@ -57,8 +56,6 @@ export const ESHyperNEATAlgorithm: Algorithm<
   defaultOptions: defaultESHyperNEATGenomeOptions,
   createConfig,
   createGenome,
-  createLink,
-  createNode,
   createPhenotype,
   createState,
 }
