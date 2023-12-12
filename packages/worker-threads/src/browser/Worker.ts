@@ -1,4 +1,5 @@
 import type { WorkerEventTypes } from '../EventTypes.js'
+import type { MessageListenerFn } from '../MessageListenerFn.js'
 import type { WorkerOptions, WebWorkerOptions } from '../WorkerOptions.js'
 
 export class Worker {
@@ -20,14 +21,11 @@ export class Worker {
     this.webWorker = new globalThis.Worker(scriptURL, options)
   }
 
-  addEventListener(type: WorkerEventTypes, listener: (...args: any[]) => void) {
+  addEventListener(type: WorkerEventTypes, listener: MessageListenerFn) {
     this.webWorker.addEventListener(type, listener as EventListener)
   }
 
-  removeEventListener(
-    type: WorkerEventTypes,
-    listener: (...args: any[]) => void
-  ) {
+  removeEventListener(type: WorkerEventTypes, listener: MessageListenerFn) {
     this.webWorker.removeEventListener(type, listener as EventListener)
   }
 

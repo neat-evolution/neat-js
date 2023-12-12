@@ -1,6 +1,30 @@
-import type { Algorithm, Genome } from '@neat-evolution/core'
+import type { Algorithm, CoreGenome, Genome } from '@neat-evolution/core'
 
-export type AnyAlgorithm = Algorithm<
+export type AnyAlgorithm<
+  G extends CoreGenome<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    G
+  >,
+> = Algorithm<
   any,
   any,
   any,
@@ -21,7 +45,7 @@ export type AnyAlgorithm = Algorithm<
   any,
   any,
   any,
-  any
+  G
 >
 
 export type AnyGenome<

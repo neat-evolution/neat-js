@@ -29,7 +29,7 @@ const createReproducer: ReproducerFactory<any, any> = createReproducerFactory(
 )
 
 const createEvaluator: StandardEvaluatorFactory<any> = (
-  algorithm: AnyAlgorithm,
+  algorithm: AnyAlgorithm<any>,
   environment: StandardEnvironment<any>
 ) => {
   const evaluator = createWorkerEvaluator(algorithm, environment, {

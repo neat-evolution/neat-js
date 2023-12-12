@@ -8,7 +8,7 @@ import {
   type Reproducer,
   type Species,
 } from '@neat-evolution/evolution'
-import { Worker } from '@neat-evolution/worker-threads'
+import { Worker, type WorkerMessageEvent } from '@neat-evolution/worker-threads'
 import { Sema } from 'async-sema'
 
 import type { AnyPopulation, RequestMapValue } from './types.js'
@@ -59,6 +59,7 @@ export class WorkerReproducer<
 > implements Reproducer<G>
 {
   public readonly population: AnyPopulation<G>
+  public readonly algorithmPathname: string
   public readonly threadCount: number
   public readonly initPromise: Promise<void>
   public readonly options: WorkerReproducerOptions
@@ -73,6 +74,8 @@ export class WorkerReproducer<
   constructor(population: AnyPopulation<G>, options: WorkerReproducerOptions) {
     this.options = options
     this.population = population
+    this.algorithmPathname =
+      options.algorithmPathname ?? population.algorithm.pathname
     this.workers = []
     this.requestMap = new Map()
     this.threadCount = options.threadCount
@@ -92,12 +95,16 @@ export class WorkerReproducer<
           const worker = new Worker(
             new URL('./workerReproducerScript.js', import.meta.url),
             {
-              name: `WorkerReproducer-${i}`,
+              name: 'WorkerReproducer',
+              type: 'module',
             }
           )
 
           // messages sent from the reproducer script
-          const messageListener = (action: Action<ActionType>) => {
+          const messageListener = (
+            actionEvent: WorkerMessageEvent<Action<ActionType>>
+          ) => {
+            const action: Action<ActionType> = actionEvent.data
             switch (action.type) {
               case ActionType.RESPOND_ELITE_ORGANISM: {
                 this.handleRespondEliteOrganism(
@@ -190,7 +197,7 @@ export class WorkerReproducer<
             configData: this.population.configProvider.toJSON(),
             genomeOptions: this.population.genomeOptions,
             initConfig: this.population.initConfig,
-            algorithmPathname: this.population.algorithm.pathname,
+            algorithmPathname: this.algorithmPathname,
           }
 
           worker.postMessage(createAction(ActionType.INIT_REPRODUCER, data))

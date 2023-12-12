@@ -31,7 +31,9 @@ export const initThread = async (
     payload.reproducerOptions.enableCustomState,
     payload.genomeOptions.singleCPPNState
   )
-  const { createConfig, createGenome } = await import(payload.algorithmPathname)
+  const { createConfig, createGenome } = await import(
+    /* @vite-ignore */ payload.algorithmPathname
+  )
   const configProvider = createConfig(payload.configData)
   context.threadInfo = {
     reproducerOptions: payload.reproducerOptions,
