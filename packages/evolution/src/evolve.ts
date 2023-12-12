@@ -40,6 +40,7 @@ export const evolve = async <
     options.iterations > 0 ? options.iterations + 1 : Number.MAX_SAFE_INTEGER
 
   const startTime = Date.now()
+  let didTimeout = false
   for (let i = 0; i < iterations; i++) {
     if (i % 10 === 0) {
       console.log(`Iter: ${i}`)
@@ -53,6 +54,7 @@ export const evolve = async <
       Date.now() - startTime >= (options.secondsLimit + 3) * 1000
     ) {
       console.log(`seconds limit ${options.secondsLimit} reached`)
+      didTimeout = true
       break
     }
     if (i % 10 === 0) {
@@ -85,5 +87,10 @@ export const evolve = async <
     }
   }
   console.log(`ended after ${Date.now() - startTime}ms`)
+
+  if (!didTimeout) {
+    // final evaluation for fitness
+    await population.evaluate()
+  }
   return population.best()
 }
