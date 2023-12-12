@@ -7,10 +7,8 @@ import type { GenomeFactory } from './genome/GenomeFactory.js'
 import type { GenomeFactoryOptions } from './genome/GenomeFactoryOptions.js'
 import type { GenomeOptions } from './genome/GenomeOptions.js'
 import type { CoreLink } from './link/CoreLink.js'
-import type { LinkFactory } from './link/LinkFactory.js'
 import type { LinkFactoryOptions } from './link/LinkFactoryOptions.js'
 import type { CoreNode } from './node/CoreNode.js'
-import type { NodeFactory } from './node/NodeFactory.js'
 import type { NodeFactoryOptions } from './node/NodeFactoryOptions.js'
 import type { PhenotypeFactory } from './phenotype/PhenotypeFactory.js'
 import type { CoreState } from './state/CoreState.js'
@@ -90,14 +88,6 @@ export interface Algorithm<
     GO,
     G
   >
-  /**
-   * @deprecated use genome.createLink instead
-   */
-  createLink: LinkFactory<LFO, LCO, LSD, LS, L>
-  /**
-   * @deprecated use genome.createNode instead
-   */
-  createNode: NodeFactory<NFO, NCO, NSD, NS, N>
   createPhenotype: PhenotypeFactory<G>
   createState: StateFactory<NSD, LSD, NS, LS, SD, S>
 }

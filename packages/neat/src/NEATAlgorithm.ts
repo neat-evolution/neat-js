@@ -9,8 +9,6 @@ import type {
 
 import { createConfig } from './createConfig.js'
 import { createGenome } from './createGenome.js'
-import { createLink } from './createLink.js'
-import { createNode } from './createNode.js'
 import { createPhenotype } from './createPhenotype.js'
 import { createState } from './createState.js'
 import type { NEATConfig } from './NEATConfig.js'
@@ -57,8 +55,6 @@ export const NEATAlgorithm: Algorithm<
   defaultOptions: defaultNEATGenomeOptions,
   createConfig,
   createGenome,
-  createLink,
-  createNode,
   createPhenotype,
   createState,
 }

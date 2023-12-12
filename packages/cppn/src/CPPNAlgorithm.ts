@@ -5,7 +5,7 @@ import type {
   LinkFactoryOptions,
   StateData,
 } from '@neat-evolution/core'
-import { createConfig, createLink, createState } from '@neat-evolution/neat'
+import { createConfig, createState } from '@neat-evolution/neat'
 import type {
   NEATConfig,
   NEATLink,
@@ -26,7 +26,6 @@ import {
 import type { CPPNNode } from './CPPNNode.js'
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
 import { createGenome } from './createGenome.js'
-import { createNode } from './createNode.js'
 import { createPhenotype } from './createPhenotype.js'
 
 export const CPPNAlgorithm: Algorithm<
@@ -57,8 +56,6 @@ export const CPPNAlgorithm: Algorithm<
   defaultOptions: defaultCPPNGenomeOptions,
   createConfig,
   createGenome,
-  createLink,
-  createNode,
   createPhenotype,
   createState,
 }

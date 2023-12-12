@@ -2,8 +2,6 @@ import type { Algorithm, NEATConfigOptions } from '@neat-evolution/core'
 
 import { createConfig } from './createConfig.js'
 import { createGenome } from './createGenome.js'
-import { createLink } from './createLink.js'
-import { createNode } from './createNode.js'
 import { createPhenotype } from './createPhenotype.js'
 import { createState } from './createState.js'
 import type { CustomState } from './CustomState.js'
@@ -57,8 +55,6 @@ export const DESHyperNEATAlgorithm: Algorithm<
   defaultOptions: defaultDESHyperNEATGenomeOptions,
   createConfig,
   createGenome,
-  createLink,
-  createNode,
   createPhenotype,
   createState,
 }
