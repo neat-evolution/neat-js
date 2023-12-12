@@ -23,12 +23,14 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   threadContext
 ) => {
   const { createConfig, createGenome, createPhenotype, createState } =
-    await import(algorithmPathname)
-  const { createEnvironment } = await import(createEnvironmentPathname)
-
+    await import(/* @vite-ignore */ algorithmPathname)
+  const { createEnvironment } = await import(
+    /* @vite-ignore */ createEnvironmentPathname
+  )
+  const { createExecutor } = await import(
+    /* @vite-ignore */ createExecutorPathname
+  )
   const environment = createEnvironment(environmentData)
-
-  const { createExecutor } = await import(createExecutorPathname)
 
   if (workerContext == null) {
     throw new Error('Worker must be created with a parent port')

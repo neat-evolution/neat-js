@@ -1,4 +1,7 @@
 export interface WorkerEvaluatorOptions {
+  /** path to module that exports algorithm; Required on web for vite compatibility */
+  algorithmPathname?: string
+
   /** path to module that exports createEnvironment */
   createEnvironmentPathname: string
 

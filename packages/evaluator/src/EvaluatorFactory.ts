@@ -13,13 +13,13 @@ export type EvaluatorFactory<
   EA extends Executor[],
   ER,
 > = (
-  algorithm: AnyAlgorithm,
+  algorithm: AnyAlgorithm<any>,
   environment: Environment<any, E, EA, ER>,
   options: O
 ) => Evaluator<E, EA, ER>
 
 export type StandardEvaluatorFactory<O> = (
-  algorithm: AnyAlgorithm,
+  algorithm: AnyAlgorithm<any>,
   environment: StandardEnvironment<any>,
   options: O
 ) => StandardEvaluator

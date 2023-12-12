@@ -1,4 +1,7 @@
-import { workerContext } from '@neat-evolution/worker-threads'
+import {
+  workerContext,
+  type WorkerMessageEvent,
+} from '@neat-evolution/worker-threads'
 
 import { type ActionMessage } from '../message/ActionMessage.js'
 import { ActionType, type PayloadMap } from '../WorkerAction.js'
@@ -32,7 +35,8 @@ export const startWorker = <O>({
   if (workerContext !== null) {
     workerContext.addEventListener(
       'message',
-      (action: ActionMessage<string, any>) => {
+      (actionEvent: WorkerMessageEvent<ActionMessage<string, any>>) => {
+        const action: ActionMessage<string, any> = actionEvent.data
         switch (action.type) {
           case ActionType.INIT_EVALUATOR: {
             handleInitEvaluator(

@@ -12,7 +12,7 @@ import type {
   GenomeEntry,
   StandardEvaluator,
 } from '@neat-evolution/evaluator'
-import { Worker } from '@neat-evolution/worker-threads'
+import { Worker, type WorkerMessageEvent } from '@neat-evolution/worker-threads'
 import { Sema } from 'async-sema'
 
 import type { ActionMessage } from './message/ActionMessage.js'
@@ -26,15 +26,16 @@ import {
 import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'
 
 export class WorkerEvaluator implements StandardEvaluator {
-  public readonly algorithm: AnyAlgorithm
+  public readonly algorithm: AnyAlgorithm<any>
+  public readonly algorithmPathname: string
   public readonly enableAsync = true
 
   public readonly environment: StandardEnvironment<any>
 
   public readonly taskCount: number
   public readonly threadCount: number
-  public readonly createExecutorPathname: string
   public readonly createEnvironmentPathname: string
+  public readonly createExecutorPathname: string
   public readonly initPromise: Promise<void>
 
   private readonly workers: Worker[]
@@ -42,11 +43,12 @@ export class WorkerEvaluator implements StandardEvaluator {
   private readonly requestMap = new Map<Worker, RequestMapValue>()
 
   constructor(
-    algorithm: AnyAlgorithm,
+    algorithm: AnyAlgorithm<any>,
     environment: StandardEnvironment<any>,
     options: WorkerEvaluatorOptions
   ) {
     this.algorithm = algorithm
+    this.algorithmPathname = options.algorithmPathname ?? algorithm.pathname
     this.environment = environment
 
     this.taskCount = options.taskCount
@@ -71,10 +73,14 @@ export class WorkerEvaluator implements StandardEvaluator {
         const worker = new Worker(
           new URL('./workerEvaluatorScript.js', import.meta.url),
           {
-            name: `WorkerEvaluator-${i}`,
+            name: 'WorkerEvaluator',
+            type: 'module',
           }
         )
-        const messageListener = (action: ActionMessage<string, any>) => {
+        const messageListener = (
+          actionEvent: WorkerMessageEvent<ActionMessage<string, any>>
+        ) => {
+          const action: ActionMessage<string, any> = actionEvent.data
           switch (action.type) {
             case ActionType.RESPOND_EVALUATE_GENOME: {
               const payload =
@@ -121,7 +127,7 @@ export class WorkerEvaluator implements StandardEvaluator {
         worker.addEventListener('error', errorListener)
 
         const data: InitPayload = {
-          algorithmPathname: this.algorithm.pathname,
+          algorithmPathname: this.algorithmPathname,
           createExecutorPathname: this.createExecutorPathname,
           createEnvironmentPathname: this.createEnvironmentPathname,
           environmentData: this.environment.toFactoryOptions(),

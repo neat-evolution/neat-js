@@ -7,7 +7,7 @@ import type { AnyAlgorithm } from './types.js'
 
 // FIXME: write tests for correctness
 export class TestEvaluator implements StandardEvaluator {
-  public readonly algorithm: AnyAlgorithm
+  public readonly algorithm: AnyAlgorithm<any>
   public readonly enableAsync = true
 
   public readonly environment: StandardEnvironment<any>
@@ -15,7 +15,7 @@ export class TestEvaluator implements StandardEvaluator {
   public readonly createExecutor: ExecutorFactory
 
   constructor(
-    algorithm: AnyAlgorithm,
+    algorithm: AnyAlgorithm<any>,
     environment: StandardEnvironment<any>,
     createExecutor: ExecutorFactory
   ) {

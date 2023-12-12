@@ -1,5 +1,6 @@
 import { threadRNG } from '@neat-evolution/utils'
 import { workerContext } from '@neat-evolution/worker-threads'
+import type { WorkerMessageEvent } from '@neat-evolution/worker-threads'
 
 import type { RequestMapValue } from '../types.js'
 import {
@@ -52,43 +53,47 @@ export const startWorker = () => {
   }
 
   if (workerContext !== null) {
-    workerContext.addEventListener('message', (action: Action<ActionType>) => {
-      switch (action.type) {
-        case ActionType.INIT_REPRODUCER:
-          initThread(
-            action.payload as InitReproducerPayload<any, any>,
-            context
-          ).catch(handleError)
-          break
-        case ActionType.REQUEST_ELITE_ORGANISM:
-          eliteOrganism(action.payload as OrganismPayload<any>, context)
-          break
-        case ActionType.REQUEST_BREED_ORGANISM:
-          breedOrganism(action.payload as SpeciesPayload, context).catch(
-            handleError
-          )
-          break
-        case ActionType.RESPOND_POPULATION_TOURNAMENT_SELECT:
-          handleResponse(action.payload, requestMap)
-          break
-        case ActionType.RESPOND_SPECIES_TOURNAMENT_SELECT:
-          handleResponse(action.payload, requestMap)
-          break
-        case ActionType.RESPOND_SPLIT_INNOVATION:
-          handleResponse(action.payload, requestMap)
-          break
-        case ActionType.RESPOND_CONNECT_INNOVATION:
-          handleResponse(action.payload, requestMap)
-          break
-        case ActionType.RESPOND_SET_CPPN_STATE_REDIRECT:
-          handleResponse(action.payload, requestMap)
-          break
-        case ActionType.TERMINATE:
-          handleTerminate()
-          break
-        default:
-          console.error(`Unknown action type: ${action.type}`)
+    workerContext.addEventListener(
+      'message',
+      (actionEvent: WorkerMessageEvent<Action<ActionType>>) => {
+        const action: Action<ActionType> = actionEvent.data
+        switch (action.type) {
+          case ActionType.INIT_REPRODUCER:
+            initThread(
+              action.payload as InitReproducerPayload<any, any>,
+              context
+            ).catch(handleError)
+            break
+          case ActionType.REQUEST_ELITE_ORGANISM:
+            eliteOrganism(action.payload as OrganismPayload<any>, context)
+            break
+          case ActionType.REQUEST_BREED_ORGANISM:
+            breedOrganism(action.payload as SpeciesPayload, context).catch(
+              handleError
+            )
+            break
+          case ActionType.RESPOND_POPULATION_TOURNAMENT_SELECT:
+            handleResponse(action.payload, requestMap)
+            break
+          case ActionType.RESPOND_SPECIES_TOURNAMENT_SELECT:
+            handleResponse(action.payload, requestMap)
+            break
+          case ActionType.RESPOND_SPLIT_INNOVATION:
+            handleResponse(action.payload, requestMap)
+            break
+          case ActionType.RESPOND_CONNECT_INNOVATION:
+            handleResponse(action.payload, requestMap)
+            break
+          case ActionType.RESPOND_SET_CPPN_STATE_REDIRECT:
+            handleResponse(action.payload, requestMap)
+            break
+          case ActionType.TERMINATE:
+            handleTerminate()
+            break
+          default:
+            console.error(`Unknown action type: ${action.type}`)
+        }
       }
-    })
+    )
   }
 }
