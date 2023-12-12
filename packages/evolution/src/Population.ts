@@ -1,28 +1,28 @@
-import {
-  type GenomeFactoryOptions,
-  type GenomeOptions,
-  type GenomeData,
-  type Algorithm,
-  type InitConfig,
-  type CoreGenome,
-  type CoreLink,
-  type LinkFactoryOptions,
-  type CoreNode,
-  type NodeFactoryOptions,
-  type CoreState,
-  type StateData,
-  type ExtendedState,
-  type CoreConfig,
-  type ConfigOptions,
-  type ConfigFactoryOptions,
-  type ConfigData,
+import type {
+  GenomeFactoryOptions,
+  GenomeOptions,
+  GenomeData,
+  InitConfig,
+  CoreGenome,
+  CoreLink,
+  LinkFactoryOptions,
+  CoreNode,
+  NodeFactoryOptions,
+  CoreState,
+  StateData,
+  ExtendedState,
+  CoreConfig,
+  ConfigOptions,
+  ConfigFactoryOptions,
+  ConfigData,
+  Algorithm,
 } from '@neat-evolution/core'
 import type { Evaluator, GenomeEntry } from '@neat-evolution/evaluator'
 import { threadRNG } from '@neat-evolution/utils'
 
 import { Organism } from './Organism.js'
 import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
-import { type PopulationData } from './PopulationData.js'
+import type { PopulationData } from './PopulationData.js'
 import {
   toPopulationDataSpecies,
   type PopulationDataSpecies,

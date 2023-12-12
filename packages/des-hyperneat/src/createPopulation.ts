@@ -60,6 +60,7 @@ export type DESHyperNEATReproducerFactory = ReproducerFactory<
   DESHyperNEATPopulation
 >
 
+// FIXME: not a valid PopulationFactory
 export const createPopulation = (
   createReproducer: DESHyperNEATReproducerFactory,
   evaluator: Evaluator<any, any, any>,

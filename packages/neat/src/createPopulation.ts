@@ -8,11 +8,12 @@ import type {
 } from '@neat-evolution/core'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import type { Evaluator } from '@neat-evolution/evaluator'
+import { Population } from '@neat-evolution/evolution'
 import type {
   PopulationOptions,
   ReproducerFactory,
+  PopulationFactory,
 } from '@neat-evolution/evolution'
-import { Population } from '@neat-evolution/evolution'
 
 import { NEATAlgorithm } from './NEATAlgorithm.js'
 import type { NEATConfig } from './NEATConfig.js'
@@ -58,7 +59,29 @@ export type NEATReproducerFactory = ReproducerFactory<
   NEATPopulation
 >
 
-export const createPopulation = (
+export const createPopulation: PopulationFactory<
+  ConfigFactoryOptions,
+  null,
+  null,
+  ConfigData,
+  NEATConfig,
+  null,
+  null,
+  null,
+  null,
+  StateData,
+  NEATState,
+  NEATHiddenNodeData,
+  NEATLinkData,
+  NEATGenomeFactoryOptions,
+  NEATGenomeOptions,
+  NEATGenomeData,
+  NodeFactoryOptions,
+  NEATNode,
+  LinkFactoryOptions,
+  NEATLink,
+  NEATGenome
+> = (
   createReproducer: NEATReproducerFactory,
   evaluator: Evaluator<any, any, any>,
   neatConfigOptions: NEATConfigOptions,
