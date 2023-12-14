@@ -41,7 +41,7 @@ const toNodePointKey = (
   x: number,
   y: number
 ): NodePointKey => {
-  return `${type}[${id}]:${x},${y}`
+  return `${type}${id}:${x},${y}`
 }
 const keysToNodePointKey = (
   nodeKey: NodeKey,

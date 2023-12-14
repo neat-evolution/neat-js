@@ -47,7 +47,7 @@ describe('Genome fitness fixtures', () => {
     '%s',
     async (_name: string, a: NEATGenome, expected: number) => {
       const phenotype = createPhenotype(a)
-      const executor = createExecutor(phenotype, environment.batchSize)
+      const executor = createExecutor(phenotype)
       const fitness = await environment.evaluate(executor)
       expect(fitness).toBe(expected)
     }

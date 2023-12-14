@@ -505,17 +505,12 @@ export class CoreGenome<
         .neat()
         .getSplitInnovation(link.innovation)
 
-      const newNodeKey = toNodeKey(NodeType.Hidden, innovation.nodeNumber)
+      const newNodeKey = toNodeKey(NodeType.Hidden, innovation[0])
       const linkFromKey = toLinkKey(link.from, newNodeKey)
       const linkToKey = toLinkKey(newNodeKey, link.to)
 
       if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
-        await this.splitLink(
-          link.from,
-          link.to,
-          innovation.nodeNumber,
-          innovation.innovationNumber
-        )
+        await this.splitLink(link.from, link.to, innovation[0], innovation[1])
         break
       }
     }

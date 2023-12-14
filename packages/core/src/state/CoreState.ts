@@ -22,18 +22,12 @@ export class CoreState<
   public readonly innovationLog: InnovationLog
   public readonly nextInnovation: Innovation
 
-  // public readonly nodeState: NS
-  // public readonly linkState: LS
-
   constructor(factoryOptions?: SD) {
     this.innovationLog = new InnovationLog(factoryOptions?.neat.innovationLog)
-    this.nextInnovation = {
-      nodeNumber: factoryOptions?.neat.nextInnovation.nodeNumber ?? 0,
-      innovationNumber:
-        factoryOptions?.neat.nextInnovation.innovationNumber ?? 0,
-    }
-    // this.nodeState = factoryOptions?.node ?? null
-    // this.linkState = factoryOptions?.link ?? null
+    this.nextInnovation = [
+      factoryOptions?.neat.nextInnovation[0] ?? 0,
+      factoryOptions?.neat.nextInnovation[1] ?? 0,
+    ]
   }
 
   /**
@@ -51,41 +45,34 @@ export class CoreState<
         throw new Error('Invalid linkInnovation key.')
       }
 
-      const newNodeKey = toNodeKey(
-        NodeType.Hidden,
-        this.nextInnovation.nodeNumber
-      )
+      const newNodeKey = toNodeKey(NodeType.Hidden, this.nextInnovation[0])
 
       this.innovationLog.connectInnovations.set(
         toLinkKey(from, newNodeKey),
-        this.nextInnovation.innovationNumber
+        this.nextInnovation[1]
       )
 
       this.innovationLog.connectInnovations.set(
         toLinkKey(newNodeKey, to),
-        this.nextInnovation.innovationNumber + 1
+        this.nextInnovation[1] + 1
       )
 
-      this.innovationLog.reverseConnectInnovations.set(
-        this.nextInnovation.innovationNumber,
-        [from, newNodeKey]
-      )
+      this.innovationLog.reverseConnectInnovations.set(this.nextInnovation[1], [
+        from,
+        newNodeKey,
+      ])
 
       this.innovationLog.reverseConnectInnovations.set(
-        this.nextInnovation.innovationNumber + 1,
+        this.nextInnovation[1] + 1,
         [newNodeKey, to]
       )
 
-      this.innovationLog.splitInnovations.set(linkInnovation, {
+      this.innovationLog.splitInnovations.set(linkInnovation, [
         ...this.nextInnovation,
-      })
-      this.innovationLog.hiddenNodeInnovations.set(
-        this.nextInnovation.nodeNumber,
-        { ...this.nextInnovation }
-      )
+      ])
 
-      this.nextInnovation.nodeNumber += 1
-      this.nextInnovation.innovationNumber += 3
+      this.nextInnovation[0] += 1
+      this.nextInnovation[1] += 3
     }
 
     return this.innovationLog.splitInnovations.get(linkInnovation) as Innovation
@@ -101,16 +88,13 @@ export class CoreState<
     const linkKey = toLinkKey(from, to)
 
     if (!this.innovationLog.connectInnovations.has(linkKey)) {
-      this.innovationLog.connectInnovations.set(
-        linkKey,
-        this.nextInnovation.innovationNumber
-      )
-      this.innovationLog.reverseConnectInnovations.set(
-        this.nextInnovation.innovationNumber,
-        [from, to]
-      )
+      this.innovationLog.connectInnovations.set(linkKey, this.nextInnovation[1])
+      this.innovationLog.reverseConnectInnovations.set(this.nextInnovation[1], [
+        from,
+        to,
+      ])
       // Increase global innovation number
-      this.nextInnovation.innovationNumber += 1
+      this.nextInnovation[1] += 1
     }
 
     return this.innovationLog.connectInnovations.get(linkKey) as number
@@ -122,12 +106,10 @@ export class CoreState<
 
   node(): NS {
     throw new Error('Not implemented')
-    // return this.nodeState
   }
 
   link(): LS {
     throw new Error('Not implemented')
-    // return this.linkState
   }
 
   toJSON(): SD {

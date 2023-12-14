@@ -189,8 +189,8 @@ describe('NEATGenome class', () => {
 
       genome.mutationAddLink()
 
-      expect(genome.state.nextInnovation.innovationNumber).toBe(1)
-      expect(genome.state.nextInnovation.nodeNumber).toBe(0)
+      expect(genome.state.nextInnovation[0]).toBe(0)
+      expect(genome.state.nextInnovation[1]).toBe(1)
     })
 
     describe('mutationAddNode', () => {
@@ -245,8 +245,8 @@ describe('NEATGenome class', () => {
         await genome.mutationAddLink()
         await genome.mutationAddNode()
 
-        expect(genome.state.nextInnovation.innovationNumber).toBe(4)
-        expect(genome.state.nextInnovation.nodeNumber).toBe(1)
+        expect(genome.state.nextInnovation[0]).toBe(1)
+        expect(genome.state.nextInnovation[1]).toBe(4)
       })
     })
 
@@ -280,8 +280,8 @@ describe('NEATGenome class', () => {
         await genome.mutationAddNode()
         genome.mutationRemoveNode()
 
-        expect(genome.state.nextInnovation.innovationNumber).toBe(4)
-        expect(genome.state.nextInnovation.nodeNumber).toBe(1)
+        expect(genome.state.nextInnovation[0]).toBe(1)
+        expect(genome.state.nextInnovation[1]).toBe(4)
       })
     })
 
@@ -312,8 +312,8 @@ describe('NEATGenome class', () => {
         await genome.mutationAddLink()
         genome.mutationRemoveLink()
 
-        expect(genome.state.nextInnovation.innovationNumber).toBe(1)
-        expect(genome.state.nextInnovation.nodeNumber).toBe(0)
+        expect(genome.state.nextInnovation[1]).toBe(1)
+        expect(genome.state.nextInnovation[0]).toBe(0)
       })
 
       test('should remove a link from a seasoned genome', async () => {

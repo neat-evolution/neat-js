@@ -24,7 +24,7 @@ describe('NEATLink class', () => {
     })
 
     test('should return string', () => {
-      expect(link.toString()).toBe('I[0] -> O[1]')
+      expect(link.toString()).toBe('I0O1')
     })
 
     test('should return identity link', () => {
