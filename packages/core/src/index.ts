@@ -33,7 +33,6 @@ export * from './node/nodeKeyToRef.js'
 export * from './node/NodeRef.js'
 export * from './node/nodeRefToKey.js'
 export * from './node/NodeType.js'
-export * from './node/nodeTypeToNumber.js'
 export * from './node/toNodeRef.js'
 
 // src/phenotype/

@@ -86,8 +86,9 @@ export interface RequestConnectInnovationPayload {
   stateKey: string | null
 }
 
-export interface RespondSplitInnovationPayload extends Innovation {
+export interface RespondSplitInnovationPayload {
   requestId: number
+  innovation: Innovation
 }
 
 export interface EmptyPayload {

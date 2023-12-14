@@ -113,11 +113,6 @@ interface ExploreSubstrateData {
   connections: ConnectionJSONData[]
 }
 
-const jsonNodeRefToNodeKey = (jsonNodeRef: string): NodeKey => {
-  const nodeType = jsonNodeRef.slice(0, 1)
-  const nodeId = jsonNodeRef.slice(1)
-  return `${nodeType}[${nodeId}]`
-}
 const jsonNodeRefToNodeId = (jsonNodeRef: string): number => {
   const nodeId = jsonNodeRef.slice(1)
   return Number(nodeId)
@@ -134,12 +129,7 @@ const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
     outputs.push([jsonNodeRefToNodeId(id), node.bias, node.activation])
   }
   for (const link of Object.values(genome.neat.links)) {
-    links.push([
-      jsonNodeRefToNodeKey(link.from),
-      jsonNodeRefToNodeKey(link.to),
-      link.weight,
-      link.innovation,
-    ])
+    links.push([link.from, link.to, link.weight, link.innovation])
   }
   return {
     hiddenNodes,

@@ -326,7 +326,7 @@ export class WorkerReproducer<
 
     const payload = {
       requestId: action.payload.requestId,
-      ...innovation,
+      innovation,
     }
     worker.postMessage(
       createAction(ActionType.RESPOND_SPLIT_INNOVATION, payload)

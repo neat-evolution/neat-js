@@ -129,11 +129,6 @@ interface DESHyperNEATGenomeActionsData {
   }
 }
 
-const jsonNodeRefToNodeKey = (jsonNodeRef: string): NodeKey => {
-  const nodeType = jsonNodeRef.slice(0, 1)
-  const nodeId = jsonNodeRef.slice(1)
-  return `${nodeType}[${nodeId}]`
-}
 const jsonNodeRefToNodeId = (jsonNodeRef: string): number => {
   const nodeId = jsonNodeRef.slice(1)
   return Number(nodeId)
@@ -150,12 +145,7 @@ const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
     outputs.push([jsonNodeRefToNodeId(id), node.bias, node.activation])
   }
   for (const link of Object.values(genome.neat.links)) {
-    links.push([
-      jsonNodeRefToNodeKey(link.from),
-      jsonNodeRefToNodeKey(link.to),
-      link.weight,
-      link.innovation,
-    ])
+    links.push([link.from, link.to, link.weight, link.innovation])
   }
   return {
     hiddenNodes,
@@ -195,8 +185,8 @@ const toDESHyperNEATFactoryOptions = (
   }
   for (const link of Object.values(genome.neat.links)) {
     links.push([
-      jsonNodeRefToNodeKey(link.neat.from),
-      jsonNodeRefToNodeKey(link.neat.to),
+      link.neat.from,
+      link.neat.to,
       link.neat.weight,
       link.neat.innovation,
       toCPPNFactoryOptions(link.cppn),
@@ -262,7 +252,7 @@ const createConnections = (
   const result: Array<Connection<NodeKey, null>> = []
   for (const [key, connection] of Object.entries(connections)) {
     for (const { node } of connection) {
-      result.push([jsonNodeRefToNodeKey(key), jsonNodeRefToNodeKey(node), null])
+      result.push([key, node, null])
     }
   }
   return result

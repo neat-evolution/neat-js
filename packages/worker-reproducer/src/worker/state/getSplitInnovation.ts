@@ -38,5 +38,5 @@ export const getSplitInnovation = async (
       )
     }
   )
-  return data
+  return data.innovation
 }

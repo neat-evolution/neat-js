@@ -62,7 +62,7 @@ const expandTypeString = (str: string): string => {
       throw new Error(`Unknown node type: ${type}`)
   }
 
-  return `${expandedType}[${id}]`
+  return `${expandedType}${id}`
 }
 
 // Helper function to format links

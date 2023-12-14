@@ -24,14 +24,9 @@ export const splitLink = async (
   const innovation = await genome.state.getSplitInnovation(
     existingLink.innovation
   )
-  const newNodeKey = toNodeKey(NodeType.Hidden, innovation.nodeNumber)
+  const newNodeKey = toNodeKey(NodeType.Hidden, innovation[0])
 
-  await genome.splitLink(
-    from,
-    to,
-    innovation.nodeNumber,
-    innovation.innovationNumber
-  )
+  await genome.splitLink(from, to, innovation[0], innovation[1])
 
   const hiddenNode = genome.hiddenNodes.get(newNodeKey)
   if (hiddenNode == null) {

@@ -83,10 +83,7 @@ export class WorkerState<
     }
     // dummy internal structure, do not use
     this.innovationLog = new InnovationLog()
-    this.nextInnovation = {
-      nodeNumber: 0,
-      innovationNumber: 0,
-    }
+    this.nextInnovation = [0, 0]
   }
 
   async getSplitInnovation(linkInnovation: number): Promise<Innovation> {
