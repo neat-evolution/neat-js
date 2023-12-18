@@ -791,9 +791,9 @@ __metadata:
     "@heygrady/eslint-config": "npm:^1.5.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.6"
     "@neat-evolution/utils": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -801,6 +801,7 @@ __metadata:
     eslint: "npm:^8.54.0"
     lint-staged: "npm:^15.1.0"
     nodemon: "npm:^3.0.1"
+    quick-lru: "npm:^7.0.0"
     rimraf: "npm:^5.0.5"
     typescript: "npm:^5.3.2"
     vitest: "npm:^0.34.6"
@@ -820,9 +821,9 @@ __metadata:
     "@neat-evolution/executor": "npm:^0.3.1"
     "@neat-evolution/neat": "npm:^0.4.0"
     "@neat-evolution/utils": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -847,9 +848,9 @@ __metadata:
     "@neat-evolution/evolution": "npm:^0.3.1"
     "@neat-evolution/executor": "npm:^0.3.1"
     "@neat-evolution/utils": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -884,9 +885,9 @@ __metadata:
     "@neat-evolution/worker-evaluator": "npm:^0.3.1"
     "@neat-evolution/worker-reproducer": "npm:^0.3.1"
     "@neat-evolution/worker-threads": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -916,9 +917,9 @@ __metadata:
     "@neat-evolution/hyperneat": "npm:^0.4.0"
     "@neat-evolution/neat": "npm:^0.4.0"
     "@neat-evolution/utils": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -940,9 +941,9 @@ __metadata:
     "@heygrady/tsconfig-bases": "npm:^1.0.6"
     "@neat-evolution/core": "npm:^0.2.1"
     "@neat-evolution/executor": "npm:^0.3.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -971,9 +972,9 @@ __metadata:
     "@neat-evolution/hyperneat": "npm:^0.4.0"
     "@neat-evolution/neat": "npm:^0.4.0"
     "@neat-evolution/utils": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -996,9 +997,9 @@ __metadata:
     "@neat-evolution/core": "npm:^0.2.1"
     "@neat-evolution/environment": "npm:^0.3.1"
     "@neat-evolution/executor": "npm:^0.3.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -1021,9 +1022,9 @@ __metadata:
     "@neat-evolution/core": "npm:^0.2.1"
     "@neat-evolution/evaluator": "npm:^0.3.1"
     "@neat-evolution/utils": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -1044,9 +1045,9 @@ __metadata:
     "@heygrady/eslint-config": "npm:^1.5.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.6"
     "@neat-evolution/core": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -1074,9 +1075,9 @@ __metadata:
     "@neat-evolution/executor": "npm:^0.3.1"
     "@neat-evolution/neat": "npm:^0.4.0"
     "@neat-evolution/utils": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -1102,9 +1103,9 @@ __metadata:
     "@neat-evolution/evolution": "npm:^0.3.1"
     "@neat-evolution/executor": "npm:^0.3.1"
     "@neat-evolution/utils": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -1124,9 +1125,9 @@ __metadata:
   dependencies:
     "@heygrady/eslint-config": "npm:^1.5.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.6"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@types/seedrandom": "npm:^3"
@@ -1156,9 +1157,9 @@ __metadata:
     "@neat-evolution/executor": "npm:^0.3.1"
     "@neat-evolution/neat": "npm:^0.4.0"
     "@neat-evolution/worker-threads": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@types/seedrandom": "npm:^3"
@@ -1188,9 +1189,9 @@ __metadata:
     "@neat-evolution/executor": "npm:^0.3.1"
     "@neat-evolution/utils": "npm:^0.2.1"
     "@neat-evolution/worker-threads": "npm:^0.2.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@types/eslint": "npm:^8"
     "@vitest/coverage-v8": "npm:^0.34.6"
@@ -1210,9 +1211,9 @@ __metadata:
   resolution: "@neat-evolution/worker-threads@workspace:packages/worker-threads"
   dependencies:
     "@heygrady/eslint-config": "npm:^1.5.1"
-    "@rushstack/eslint-patch": "npm:^1.6.0"
+    "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.63"
-    "@swc/core": "npm:^1.3.99"
+    "@swc/core": "npm:^1.3.101"
     "@swc/helpers": "npm:^0.5.3"
     "@tsconfig/esm": "npm:^1.0.5"
     "@tsconfig/node16": "npm:^16.1.1"
@@ -1314,10 +1315,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rushstack/eslint-patch@npm:^1.5.1, @rushstack/eslint-patch@npm:^1.6.0":
+"@rushstack/eslint-patch@npm:^1.5.1":
   version: 1.6.0
   resolution: "@rushstack/eslint-patch@npm:1.6.0"
   checksum: f5a44ad19f87f23adf2e0e93e12788ef37c00b1ad4c29b9c7b343dff8bed146ebc9d50cc4bf1180b51b86a361f7dc62689f385c01d774633530e6ecea18dc698
+  languageName: node
+  linkType: hard
+
+"@rushstack/eslint-patch@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "@rushstack/eslint-patch@npm:1.6.1"
+  checksum: 4c57775785718c6665bee8daea204bf2fe59c2fec6cabf0d126f01c6c170e11605b7453a089dfd5bf3fb758832b2aa7964d6b9f29007d708a3571e8ff7bcf391
   languageName: node
   linkType: hard
 
@@ -1375,82 +1383,90 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core-darwin-arm64@npm:1.3.99":
-  version: 1.3.99
-  resolution: "@swc/core-darwin-arm64@npm:1.3.99"
+"@swc/core-darwin-arm64@npm:1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core-darwin-arm64@npm:1.3.101"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@swc/core-darwin-x64@npm:1.3.99":
-  version: 1.3.99
-  resolution: "@swc/core-darwin-x64@npm:1.3.99"
+"@swc/core-darwin-x64@npm:1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core-darwin-x64@npm:1.3.101"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm64-gnu@npm:1.3.99":
-  version: 1.3.99
-  resolution: "@swc/core-linux-arm64-gnu@npm:1.3.99"
+"@swc/core-linux-arm-gnueabihf@npm:1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core-linux-arm-gnueabihf@npm:1.3.101"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@swc/core-linux-arm64-gnu@npm:1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core-linux-arm64-gnu@npm:1.3.101"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm64-musl@npm:1.3.99":
-  version: 1.3.99
-  resolution: "@swc/core-linux-arm64-musl@npm:1.3.99"
+"@swc/core-linux-arm64-musl@npm:1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core-linux-arm64-musl@npm:1.3.101"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@swc/core-linux-x64-gnu@npm:1.3.99":
-  version: 1.3.99
-  resolution: "@swc/core-linux-x64-gnu@npm:1.3.99"
+"@swc/core-linux-x64-gnu@npm:1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core-linux-x64-gnu@npm:1.3.101"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@swc/core-linux-x64-musl@npm:1.3.99":
-  version: 1.3.99
-  resolution: "@swc/core-linux-x64-musl@npm:1.3.99"
+"@swc/core-linux-x64-musl@npm:1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core-linux-x64-musl@npm:1.3.101"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@swc/core-win32-arm64-msvc@npm:1.3.99":
-  version: 1.3.99
-  resolution: "@swc/core-win32-arm64-msvc@npm:1.3.99"
+"@swc/core-win32-arm64-msvc@npm:1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core-win32-arm64-msvc@npm:1.3.101"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@swc/core-win32-ia32-msvc@npm:1.3.99":
-  version: 1.3.99
-  resolution: "@swc/core-win32-ia32-msvc@npm:1.3.99"
+"@swc/core-win32-ia32-msvc@npm:1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core-win32-ia32-msvc@npm:1.3.101"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@swc/core-win32-x64-msvc@npm:1.3.99":
-  version: 1.3.99
-  resolution: "@swc/core-win32-x64-msvc@npm:1.3.99"
+"@swc/core-win32-x64-msvc@npm:1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core-win32-x64-msvc@npm:1.3.101"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@swc/core@npm:^1.3.99":
-  version: 1.3.99
-  resolution: "@swc/core@npm:1.3.99"
+"@swc/core@npm:^1.3.101":
+  version: 1.3.101
+  resolution: "@swc/core@npm:1.3.101"
   dependencies:
-    "@swc/core-darwin-arm64": "npm:1.3.99"
-    "@swc/core-darwin-x64": "npm:1.3.99"
-    "@swc/core-linux-arm64-gnu": "npm:1.3.99"
-    "@swc/core-linux-arm64-musl": "npm:1.3.99"
-    "@swc/core-linux-x64-gnu": "npm:1.3.99"
-    "@swc/core-linux-x64-musl": "npm:1.3.99"
-    "@swc/core-win32-arm64-msvc": "npm:1.3.99"
-    "@swc/core-win32-ia32-msvc": "npm:1.3.99"
-    "@swc/core-win32-x64-msvc": "npm:1.3.99"
+    "@swc/core-darwin-arm64": "npm:1.3.101"
+    "@swc/core-darwin-x64": "npm:1.3.101"
+    "@swc/core-linux-arm-gnueabihf": "npm:1.3.101"
+    "@swc/core-linux-arm64-gnu": "npm:1.3.101"
+    "@swc/core-linux-arm64-musl": "npm:1.3.101"
+    "@swc/core-linux-x64-gnu": "npm:1.3.101"
+    "@swc/core-linux-x64-musl": "npm:1.3.101"
+    "@swc/core-win32-arm64-msvc": "npm:1.3.101"
+    "@swc/core-win32-ia32-msvc": "npm:1.3.101"
+    "@swc/core-win32-x64-msvc": "npm:1.3.101"
     "@swc/counter": "npm:^0.1.1"
     "@swc/types": "npm:^0.1.5"
   peerDependencies:
@@ -1459,6 +1475,8 @@ __metadata:
     "@swc/core-darwin-arm64":
       optional: true
     "@swc/core-darwin-x64":
+      optional: true
+    "@swc/core-linux-arm-gnueabihf":
       optional: true
     "@swc/core-linux-arm64-gnu":
       optional: true
@@ -1477,7 +1495,7 @@ __metadata:
   peerDependenciesMeta:
     "@swc/helpers":
       optional: true
-  checksum: 76926583e7826741c3ea048e6c75f0e46049ca80189b2367ecc3346d569505af08d91bcddc4d79e944af1aa574a0a60c0dcaf0fb7902656a7948801901962c83
+  checksum: 38a49876c80a9d337823c2abeaf9c2dd89f45a3c72043c9dfffb4bc0da49958643945d7755446f97eed90dbf1e0b141786acdb2419340f1b5ae99eaa53fac4bc
   languageName: node
   linkType: hard
 
@@ -7701,6 +7719,13 @@ __metadata:
   version: 5.1.1
   resolution: "quick-lru@npm:5.1.1"
   checksum: a516faa25574be7947969883e6068dbe4aa19e8ef8e8e0fd96cddd6d36485e9106d85c0041a27153286b0770b381328f4072aa40d3b18a19f5f7d2b78b94b5ed
+  languageName: node
+  linkType: hard
+
+"quick-lru@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "quick-lru@npm:7.0.0"
+  checksum: 4ed222a906f99c7a10bc679cb92bf164eaf1a40cb5203d103af9161f0d67702c74fda0332382b28a02c5b70b556a3aa2f4a8719d855682c742e0e3ac9c5dc6ad
   languageName: node
   linkType: hard
 
