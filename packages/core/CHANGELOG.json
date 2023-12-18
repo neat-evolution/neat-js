@@ -2,6 +2,27 @@
   "name": "@neat-evolution/core",
   "entries": [
     {
+      "date": "Mon, 18 Dec 2023 17:46:28 GMT",
+      "version": "0.3.0",
+      "tag": "@neat-evolution/core_v0.3.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/core",
+            "commit": "6f487f49440aad84a60331a7f9fb48e1a4f39939",
+            "comment": "feat: remove innovation log, use hash key for node and link ids"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/core",
+            "comment": "Bump @neat-evolution/utils to v0.2.2",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 29 Nov 2023 17:31:33 GMT",
       "version": "0.2.1",
       "tag": "@neat-evolution/core_v0.2.1",

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "feat: remove innovation log, use hash key for node and link ids",
-  "packageName": "@neat-evolution/hyperneat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

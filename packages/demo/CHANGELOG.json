@@ -2,6 +2,111 @@
   "name": "@neat-evolution/demo",
   "entries": [
     {
+      "date": "Mon, 18 Dec 2023 17:46:28 GMT",
+      "version": "0.3.2",
+      "tag": "@neat-evolution/demo_v0.3.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/demo",
+            "commit": "6f487f49440aad84a60331a7f9fb48e1a4f39939",
+            "comment": "feat: remove innovation log, use hash key for node and link ids"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/core to v0.3.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/cppn to v0.4.1",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/dataset-environment to v0.3.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/des-hyperneat to v0.4.1",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/environment to v0.3.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/es-hyperneat to v0.4.1",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/evaluator to v0.3.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/evolution to v0.3.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/executor to v0.3.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/hyperneat to v0.4.1",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/neat to v0.4.1",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/worker-evaluator to v0.3.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/worker-reproducer to v0.3.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/worker-threads to v0.2.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/utils to v0.2.2",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Wed, 29 Nov 2023 17:31:33 GMT",
       "version": "0.3.1",
       "tag": "@neat-evolution/demo_v0.3.1",

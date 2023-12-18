@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/worker-threads
 
-This log was last generated on Wed, 29 Nov 2023 17:31:33 GMT and should not be manually modified.
+This log was last generated on Mon, 18 Dec 2023 17:46:28 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.2.2
+
+Mon, 18 Dec 2023 17:46:28 GMT
+
+### Patches
+
+- feat: remove innovation log, use hash key for node and link ids (github@heygrady.net)
 
 ## 0.2.1
 

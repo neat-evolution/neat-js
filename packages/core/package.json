@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/core",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -44,7 +44,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@neat-evolution/utils": "^0.2.1",
+    "@neat-evolution/utils": "^0.2.2",
     "@swc/helpers": "^0.5.3",
     "quick-lru": "^7.0.0"
   },

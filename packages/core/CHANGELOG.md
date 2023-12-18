@@ -1,8 +1,17 @@
 # Change Log - @neat-evolution/core
 
-This log was last generated on Wed, 29 Nov 2023 17:31:33 GMT and should not be manually modified.
+This log was last generated on Mon, 18 Dec 2023 17:46:28 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.3.0
+
+Mon, 18 Dec 2023 17:46:28 GMT
+
+### Minor changes
+
+- feat: remove innovation log, use hash key for node and link ids (github@heygrady.net)
+- Bump @neat-evolution/utils to v0.2.2
 
 ## 0.2.1
 
