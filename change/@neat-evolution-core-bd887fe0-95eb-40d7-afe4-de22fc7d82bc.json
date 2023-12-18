@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "feat: remove innovation log, use hash key for node and link ids",
+  "packageName": "@neat-evolution/core",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
