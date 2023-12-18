@@ -1,10 +1,4 @@
-import {
-  type NodeKey,
-  type Activation,
-  NodeType,
-  toLinkKey,
-  toNodeKey,
-} from '@neat-evolution/core'
+import { type NodeKey, type Activation, toLinkKey } from '@neat-evolution/core'
 import { type CPPNGenome, type CPPNGenomeOptions } from '@neat-evolution/cppn'
 
 export const splitLink = async (
@@ -21,12 +15,11 @@ export const splitLink = async (
   if (existingLink == null) {
     throw new Error('Cannot split non-existing link')
   }
-  const innovation = await genome.state.getSplitInnovation(
+  const newNodeKey = await genome.state.getSplitInnovation(
     existingLink.innovation
   )
-  const newNodeKey = toNodeKey(NodeType.Hidden, innovation[0])
 
-  await genome.splitLink(from, to, innovation[0], innovation[1])
+  await genome.splitLink(from, to, newNodeKey)
 
   const hiddenNode = genome.hiddenNodes.get(newNodeKey)
   if (hiddenNode == null) {

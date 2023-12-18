@@ -7,12 +7,7 @@ import {
 
 import type { ThreadContext } from './worker/ThreadContext.js'
 import { StateType } from './WorkerAction.js'
-import {
-  WorkerState,
-  type GetSplitInnovationFn,
-  type GetConnectInnovationFn,
-  type SetCPPNStateRedirectFn,
-} from './WorkerState.js'
+import { WorkerState, type SetCPPNStateRedirectFn } from './WorkerState.js'
 
 export class WorkerCustomState implements State<undefined> {
   public readonly isSingleState: boolean
@@ -29,28 +24,20 @@ export class WorkerCustomState implements State<undefined> {
     WorkerState<null, null, null, null, StateData>
   >
 
-  protected readonly getSplitInnovationFn: GetSplitInnovationFn
-  protected readonly getConnectInnovationFn: GetConnectInnovationFn
   protected readonly setCPPNStateRedirectFn: SetCPPNStateRedirectFn
 
   protected readonly context: ThreadContext
 
   constructor(
     isSingleState: boolean = false,
-    getSplitInnovationFn: GetSplitInnovationFn,
-    getConnectInnovationFn: GetConnectInnovationFn,
     setCPPNStateRedirectFn: SetCPPNStateRedirectFn,
     context: ThreadContext
   ) {
     this.isSingleState = isSingleState
-    this.getSplitInnovationFn = getSplitInnovationFn
-    this.getConnectInnovationFn = getConnectInnovationFn
     this.setCPPNStateRedirectFn = setCPPNStateRedirectFn
     this.context = context
 
     this.singleCPPNState = new WorkerState(
-      getSplitInnovationFn,
-      getConnectInnovationFn,
       setCPPNStateRedirectFn,
       context,
       StateType.SINGLE_CPPN_STATE,
@@ -83,8 +70,6 @@ export class WorkerCustomState implements State<undefined> {
     let state = this.uniqueCPPNStates.get(key)
     if (state == null) {
       state = new WorkerState(
-        this.getSplitInnovationFn,
-        this.getConnectInnovationFn,
         this.setCPPNStateRedirectFn,
         this.context,
         StateType.UNIQUE_CPPN_STATES,

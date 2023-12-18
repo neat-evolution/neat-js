@@ -1,4 +1,5 @@
 import type { ConfigOptions } from '../config/ConfigOptions.js'
+import type { InnovationKey } from '../state/hashInnovationKey.js'
 import type { ExtendedState } from '../state/StateProvider.js'
 
 import type { LinkData } from './LinkData.js'
@@ -15,7 +16,7 @@ export interface Link<
 > extends LinkRef {
   // Link
   weight: number
-  readonly innovation: number
+  readonly innovation: InnovationKey
 
   // LinkExtension
   readonly config: LCO

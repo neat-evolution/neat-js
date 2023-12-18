@@ -1,8 +1,4 @@
-import {
-  type NEATState,
-  type Innovation,
-  type CoreGenome,
-} from '@neat-evolution/core'
+import type { CoreGenome } from '@neat-evolution/core'
 import {
   Organism,
   type Reproducer,
@@ -18,7 +14,6 @@ import {
   createAction,
   type InitReproducerPayload,
   type OrganismPayload,
-  StateType,
 } from './WorkerAction.js'
 import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
 
@@ -131,20 +126,6 @@ export class WorkerReproducer<
                 this.handleRequestSpeciesTournamentSelect(
                   worker,
                   action as Action<ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT>
-                )
-                break
-              }
-              case ActionType.REQUEST_SPLIT_INNOVATION: {
-                this.handleRequestSplitInnovation(
-                  worker,
-                  action as Action<ActionType.REQUEST_SPLIT_INNOVATION>
-                )
-                break
-              }
-              case ActionType.REQUEST_CONNECT_INNOVATION: {
-                this.handleRequestConnectInnovation(
-                  worker,
-                  action as Action<ActionType.REQUEST_CONNECT_INNOVATION>
                 )
                 break
               }
@@ -290,85 +271,6 @@ export class WorkerReproducer<
     }
     worker.postMessage(
       createAction(ActionType.RESPOND_SPECIES_TOURNAMENT_SELECT, payload)
-    )
-  }
-
-  protected handleRequestSplitInnovation(
-    worker: Worker,
-    action: Action<ActionType.REQUEST_SPLIT_INNOVATION>
-  ) {
-    const { stateType, stateKey } = action.payload
-    let state: NEATState
-    if (stateType === StateType.NEAT) {
-      state = this.population.stateProvider.neat()
-    } else if (stateType === StateType.SINGLE_CPPN_STATE) {
-      if (this.population.stateProvider.custom == null) {
-        throw new Error('State provider does not support custom state')
-      }
-      const stateProvider = this.population.stateProvider
-      state = stateProvider.custom.singleCPPNState
-    } else if (stateType === StateType.UNIQUE_CPPN_STATES && stateKey != null) {
-      if (this.population.stateProvider.custom == null) {
-        throw new Error('State provider does not support custom state')
-      }
-      const stateProvider = this.population.stateProvider
-      state = stateProvider.custom.getOrCreateState(
-        stateKey,
-        this.population.genomeOptions.singleCPPNState ?? false
-      )
-    } else {
-      throw new Error('Unknown state type')
-    }
-
-    const innovation = state.getSplitInnovation(
-      action.payload.innovation
-    ) as Innovation
-
-    const payload = {
-      requestId: action.payload.requestId,
-      innovation,
-    }
-    worker.postMessage(
-      createAction(ActionType.RESPOND_SPLIT_INNOVATION, payload)
-    )
-  }
-
-  protected handleRequestConnectInnovation(
-    worker: Worker,
-    action: Action<ActionType.REQUEST_CONNECT_INNOVATION>
-  ) {
-    const { stateType, stateKey } = action.payload
-    let state: NEATState
-    if (stateType === StateType.NEAT) {
-      state = this.population.stateProvider.neat()
-    } else if (stateType === StateType.SINGLE_CPPN_STATE) {
-      if (this.population.stateProvider.custom == null) {
-        throw new Error('State provider does not support custom state')
-      }
-      const stateProvider = this.population.stateProvider
-      state = stateProvider.custom.singleCPPNState
-    } else if (stateType === StateType.UNIQUE_CPPN_STATES && stateKey != null) {
-      if (this.population.stateProvider.custom == null) {
-        throw new Error('State provider does not support custom state')
-      }
-      const stateProvider = this.population.stateProvider
-      state = stateProvider.custom.getOrCreateState(
-        stateKey,
-        this.population.genomeOptions.singleCPPNState ?? false
-      )
-    } else {
-      throw new Error('Unknown state type')
-    }
-    const innovation: number = state.getConnectInnovation(
-      action.payload.from,
-      action.payload.to
-    ) as number
-    const payload = {
-      requestId: action.payload.requestId,
-      innovation,
-    }
-    worker.postMessage(
-      createAction(ActionType.RESPOND_CONNECT_INNOVATION, payload)
     )
   }
 

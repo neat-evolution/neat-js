@@ -42,7 +42,7 @@ export * from './phenotype/PhenotypeFactory.js'
 
 // src/state/
 export * from './state/CoreState.js'
-export * from './state/InnovationLog.js'
+export * from './state/hashInnovationKey.js'
 export * from './state/StateData.js'
 export * from './state/StateFactory.js'
 export * from './state/StateProvider.js'

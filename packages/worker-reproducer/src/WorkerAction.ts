@@ -3,7 +3,6 @@ import type {
   GenomeFactoryOptions,
   GenomeOptions,
   InitConfig,
-  Innovation,
   LinkKey,
 } from '@neat-evolution/core'
 import type {
@@ -29,12 +28,6 @@ export enum ActionType {
   REQUEST_SPECIES_TOURNAMENT_SELECT = 'REQUEST_SPECIES_TOURNAMENT_SELECT',
   RESPOND_SPECIES_TOURNAMENT_SELECT = 'RESPOND_SPECIES_TOURNAMENT_SELECT',
 
-  // mutate child
-  REQUEST_SPLIT_INNOVATION = 'REQUEST_SPLIT_INNOVATION',
-  RESPOND_SPLIT_INNOVATION = 'RESPOND_SPLIT_INNOVATION',
-  REQUEST_CONNECT_INNOVATION = 'REQUEST_CONNECT_INNOVATION',
-  RESPOND_CONNECT_INNOVATION = 'RESPOND_CONNECT_INNOVATION',
-
   // custom state
   REQUEST_SET_CPPN_STATE_REDIRECT = 'REQUEST_SET_CPPN_STATE_REDIRECT',
   RESPOND_SET_CPPN_STATE_REDIRECT = 'RESPOND_SET_CPPN_STATE_REDIRECT',
@@ -52,11 +45,6 @@ export interface InitReproducerPayload<
   algorithmPathname: string
 }
 
-export interface InnovationPayload {
-  requestId: number
-  innovation: number
-}
-
 /** enables custom state */
 export enum StateType {
   /** state.neat() */
@@ -65,30 +53,6 @@ export enum StateType {
   SINGLE_CPPN_STATE,
   /** state.custom.uniqueCPPNStates.get(key) */
   UNIQUE_CPPN_STATES,
-}
-
-export interface RequestSplitInnovationPayload {
-  requestId: number
-  innovation: number
-  /** enables custom state */
-  stateType: StateType
-  /** only used for UNIQUE_CPPN_STATES; state.custom.uniqueCPPNStates.get(key) */
-  stateKey: string | null
-}
-
-export interface RequestConnectInnovationPayload {
-  requestId: number
-  from: string
-  to: string
-  /** enables custom state */
-  stateType: StateType
-  /** only used for UNIQUE_CPPN_STATES; state.custom.uniqueCPPNStates.get(key) */
-  stateKey: string | null
-}
-
-export interface RespondSplitInnovationPayload {
-  requestId: number
-  innovation: Innovation
 }
 
 export interface EmptyPayload {
@@ -124,10 +88,6 @@ export interface PayloadMap {
   [ActionType.RESPOND_POPULATION_TOURNAMENT_SELECT]: OrganismPayload<any>
   [ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT]: SpeciesPayload
   [ActionType.RESPOND_SPECIES_TOURNAMENT_SELECT]: OrganismPayload<any>
-  [ActionType.REQUEST_SPLIT_INNOVATION]: RequestSplitInnovationPayload
-  [ActionType.RESPOND_SPLIT_INNOVATION]: RespondSplitInnovationPayload
-  [ActionType.REQUEST_CONNECT_INNOVATION]: RequestConnectInnovationPayload
-  [ActionType.RESPOND_CONNECT_INNOVATION]: InnovationPayload
   [ActionType.REQUEST_SET_CPPN_STATE_REDIRECT]: CPPNStateRedirectPayload
   [ActionType.RESPOND_SET_CPPN_STATE_REDIRECT]: EmptyPayload
 }

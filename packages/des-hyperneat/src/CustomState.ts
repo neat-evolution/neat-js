@@ -10,15 +10,15 @@ export class CustomState implements State<CustomStateData> {
   public readonly cppnStateRedirects: Map<LinkKey, LinkKey>
 
   constructor(factoryOptions?: CustomStateData) {
-    this.singleCPPNState = new NEATState(factoryOptions?.singleCPPNState)
+    this.singleCPPNState = new NEATState()
     this.uniqueCPPNStates = new Map<LinkKey, NEATState>()
     this.cppnStateRedirects = new Map<LinkKey, LinkKey>(
       factoryOptions?.cppnStateRedirects
     )
 
     if (factoryOptions?.uniqueCPPNStates != null) {
-      for (const [key, value] of factoryOptions.uniqueCPPNStates) {
-        this.uniqueCPPNStates.set(key, new NEATState(value))
+      for (const [key] of factoryOptions.uniqueCPPNStates) {
+        this.uniqueCPPNStates.set(key, new NEATState())
       }
     }
   }

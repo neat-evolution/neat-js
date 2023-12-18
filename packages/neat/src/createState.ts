@@ -9,6 +9,6 @@ export const createState: StateFactory<
   null,
   StateData,
   NEATState
-> = (stateFactoryOptions?: StateData) => {
-  return new NEATState(stateFactoryOptions)
+> = () => {
+  return new NEATState()
 }

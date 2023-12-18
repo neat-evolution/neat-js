@@ -111,8 +111,8 @@ describe('NEATGenome class', () => {
         outputNode = [NodeType.Output, 0]
         hiddenNodes = [node1[1]]
         links = [
-          [nodeTupleToKey(inputNode), nodeTupleToKey(node1), 1, 1],
-          [nodeTupleToKey(node1), nodeTupleToKey(outputNode), 1, 1],
+          [nodeTupleToKey(inputNode), nodeTupleToKey(node1), 1, '1'],
+          [nodeTupleToKey(node1), nodeTupleToKey(outputNode), 1, '1'],
         ]
         data = {
           ...defaultData,
@@ -176,21 +176,7 @@ describe('NEATGenome class', () => {
       expect(newLink.to[0]).toBe('O')
       expect(newLink.weight).toBeGreaterThanOrEqual(-x)
       expect(newLink.weight).toBeLessThanOrEqual(x)
-      expect(newLink.innovation).toBe(0)
-    })
-
-    test('should correctly generate and assign innovation numbers', () => {
-      const genome = createGenome(
-        configProvider,
-        state,
-        genomeOptions,
-        initConfig
-      )
-
-      genome.mutationAddLink()
-
-      expect(genome.state.nextInnovation[0]).toBe(0)
-      expect(genome.state.nextInnovation[1]).toBe(1)
+      expect(newLink.innovation).toBe('I0:O0')
     })
 
     describe('mutationAddNode', () => {
@@ -233,21 +219,6 @@ describe('NEATGenome class', () => {
         expect(genome.hiddenNodes.size).toBe(1)
         expect(Array.from(genome.connections.nodes())).toHaveLength(3)
       })
-
-      test('should correctly generate and assign innovation numbers', async () => {
-        const genome = createGenome(
-          configProvider,
-          state,
-          genomeOptions,
-          initConfig
-        )
-
-        await genome.mutationAddLink()
-        await genome.mutationAddNode()
-
-        expect(genome.state.nextInnovation[0]).toBe(1)
-        expect(genome.state.nextInnovation[1]).toBe(4)
-      })
     })
 
     describe('mutationRemoveNode', () => {
@@ -267,22 +238,6 @@ describe('NEATGenome class', () => {
         expect(Array.from(genome.hiddenNodes.entries())).toEqual([])
         expect(Array.from(genome.connections.nodes())).toEqual([])
       })
-
-      test('should correctly generate and assign innovation numbers', async () => {
-        const genome = createGenome(
-          configProvider,
-          state,
-          genomeOptions,
-          initConfig
-        )
-
-        await genome.mutationAddLink()
-        await genome.mutationAddNode()
-        genome.mutationRemoveNode()
-
-        expect(genome.state.nextInnovation[0]).toBe(1)
-        expect(genome.state.nextInnovation[1]).toBe(4)
-      })
     })
 
     describe('mutationRemoveLink', () => {
@@ -299,21 +254,6 @@ describe('NEATGenome class', () => {
 
         genome.mutationRemoveLink()
         expect(genome.links.size).toBe(0)
-      })
-
-      test('should correctly generate and assign innovation numbers', async () => {
-        const genome = createGenome(
-          configProvider,
-          state,
-          genomeOptions,
-          initConfig
-        )
-
-        await genome.mutationAddLink()
-        genome.mutationRemoveLink()
-
-        expect(genome.state.nextInnovation[1]).toBe(1)
-        expect(genome.state.nextInnovation[0]).toBe(0)
       })
 
       test('should remove a link from a seasoned genome', async () => {

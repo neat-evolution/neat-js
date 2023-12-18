@@ -23,7 +23,7 @@ const terminables = new Set<Terminable>()
 const createReproducer: ReproducerFactory<any, any> = createReproducerFactory(
   {
     threadCount: workerThreadLimit,
-    enableCustomState: method === Methods.DES_HyperNEAT,
+    enableCustomState: (method as unknown) === Methods.DES_HyperNEAT,
   },
   terminables
 )

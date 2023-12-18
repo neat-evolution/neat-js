@@ -1,6 +1,6 @@
 import type { NodeKey } from '../node/nodeRefToKey.js'
 
-import type { Innovation, InnovationLog } from './InnovationLog.js'
+import type { InnovationKey } from './hashInnovationKey.js'
 import type { StateData } from './StateData.js'
 
 export interface State<D> {
@@ -10,12 +10,13 @@ export interface State<D> {
 export type ExtendedState<D> = State<D> | null
 
 export interface NEATState extends State<StateData> {
-  innovationLog: InnovationLog
-  nextInnovation: Innovation
   getSplitInnovation: (
-    linkInnovation: number
-  ) => Innovation | Promise<Innovation>
-  getConnectInnovation: (from: NodeKey, to: NodeKey) => number | Promise<number>
+    innovationKey: InnovationKey
+  ) => NodeKey | Promise<NodeKey>
+  getConnectInnovation: (
+    from: NodeKey,
+    to: NodeKey
+  ) => InnovationKey | Promise<InnovationKey>
 }
 
 export interface StateProvider<

@@ -78,12 +78,6 @@ export const startWorker = () => {
           case ActionType.RESPOND_SPECIES_TOURNAMENT_SELECT:
             handleResponse(action.payload, requestMap)
             break
-          case ActionType.RESPOND_SPLIT_INNOVATION:
-            handleResponse(action.payload, requestMap)
-            break
-          case ActionType.RESPOND_CONNECT_INNOVATION:
-            handleResponse(action.payload, requestMap)
-            break
           case ActionType.RESPOND_SET_CPPN_STATE_REDIRECT:
             handleResponse(action.payload, requestMap)
             break

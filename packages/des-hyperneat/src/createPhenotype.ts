@@ -11,6 +11,7 @@ import {
   PhenotypeActionType,
   type PhenotypeAction,
   toLinkKey,
+  type NodeId,
 } from '@neat-evolution/core'
 import {
   type CPPNGenome,
@@ -37,7 +38,7 @@ type NodePointKey = string
 
 const toNodePointKey = (
   type: NodeType,
-  id: number,
+  id: NodeId,
   x: number,
   y: number
 ): NodePointKey => {
@@ -156,7 +157,7 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
         )
       } else if (targetRef.type === NodeType.Output) {
         const [layersReverse, connectionsReverse] = exploreSubstrate(
-          outputNodes[targetRef.id] as Point[],
+          outputNodes[targetRef.id as unknown as number] as Point[],
           [],
           cppn,
           1,
@@ -181,7 +182,9 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
           // If there are any connections to output nodes, these will also be
           // present in the reverse search. Remove to avoid duplicates.
           const filteredLayer1: Point[] = []
-          const outputSet = outputNodesHash[targetRef.id] as Set<PointKey>
+          const outputSet = outputNodesHash[
+            targetRef.id as unknown as number
+          ] as Set<PointKey>
           if (layersForward.length > 1) {
             for (const node of layersForward[1] as Point[]) {
               if (!outputSet.has(toPointKey(node))) {
@@ -273,7 +276,7 @@ export const createPhenotype: PhenotypeFactory<DESHyperNEATGenome> = (
         } else if (nodeRef.type === NodeType.Output) {
           // Output substrates are searched in reverse, starting at the output nodes
           ;[layers, connections] = exploreSubstrate(
-            outputNodes[nodeRef.id] as Point[],
+            outputNodes[nodeRef.id as unknown as number] as Point[],
             [],
             cppn,
             depth,
