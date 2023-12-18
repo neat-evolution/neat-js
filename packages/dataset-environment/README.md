@@ -16,13 +16,14 @@ The environment works hand-in-hand with the evaluator to train networks.
 2. Set up your evaluator
 
 ```ts
+import { createEvaluator } from '@neat-evolution/evaluator'
+import { createExecutor } from '@neat-evolution/executor'
+
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
 } from '@neat-evolution/dataset-environment'
-import { createEvaluator } from '@neat-evolution/evaluator'
-import { createExecutor } from '@neat-evolution/executor'
 
 
 const datasetOptions = {
