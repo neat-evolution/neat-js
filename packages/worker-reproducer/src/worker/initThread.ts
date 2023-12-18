@@ -9,8 +9,6 @@ import {
 import { WorkerState } from '../WorkerState.js'
 
 import { setCPPNStateRedirect } from './customState/setCPPNStateRedirect.js'
-import { getConnectInnovation } from './state/getConnectInnovation.js'
-import { getSplitInnovation } from './state/getSplitInnovation.js'
 import type { ThreadContext } from './ThreadContext.js'
 
 export const initThread = async (
@@ -22,8 +20,6 @@ export const initThread = async (
   }
 
   const stateProvider = new WorkerState<any, any, any, any, any>(
-    getSplitInnovation,
-    getConnectInnovation,
     setCPPNStateRedirect,
     context,
     StateType.NEAT,

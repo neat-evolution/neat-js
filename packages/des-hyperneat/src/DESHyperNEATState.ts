@@ -14,7 +14,7 @@ export class DESHyperNEATState extends CoreState<
   public readonly custom: CustomState
 
   constructor(factoryOptions?: DESHyperNEATStateData) {
-    super(factoryOptions)
+    super()
     this.custom = new CustomState(factoryOptions?.custom)
   }
 

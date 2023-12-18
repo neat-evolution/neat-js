@@ -5,6 +5,7 @@ import type { Node } from './Node.js'
 import type { NodeData } from './NodeData.js'
 import type { NodeFactory } from './NodeFactory.js'
 import type { NodeFactoryOptions } from './NodeFactoryOptions.js'
+import type { NodeId } from './NodeRef.js'
 import { toNodeKey } from './nodeRefToKey.js'
 import type { NodeType } from './NodeType.js'
 
@@ -18,7 +19,7 @@ export class CoreNode<
 {
   // NodeRef
   public readonly type: NodeType
-  public readonly id: number
+  public readonly id: NodeId
 
   // NodeExtension
   public readonly config: NCO

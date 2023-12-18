@@ -1,4 +1,5 @@
-import type { NodeRef, NodeRefTuple } from './NodeRef.js'
+import type { NodeId, NodeRef, NodeRefTuple } from './NodeRef.js'
+import type { NodeType } from './NodeType.js'
 
 /** `${type}${id}` */
 export type NodeKey = string
@@ -11,6 +12,6 @@ export const nodeTupleToKey = (nodeTuple: NodeRefTuple): string => {
   return nodeTuple[0] + nodeTuple[1]
 }
 
-export const toNodeKey = (type: NodeRef['type'], id: NodeRef['id']): string => {
+export const toNodeKey = (type: NodeType, id: NodeId): string => {
   return type + id
 }

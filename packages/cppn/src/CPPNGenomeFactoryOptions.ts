@@ -1,7 +1,11 @@
-import type { Activation, GenomeFactoryOptions } from '@neat-evolution/core'
+import type {
+  Activation,
+  GenomeFactoryOptions,
+  NodeId,
+} from '@neat-evolution/core'
 import type { NEATLinkData } from '@neat-evolution/neat'
 
-export type CPPNNodeData = [id: number, bias: number, activation: Activation]
+export type CPPNNodeData = [id: NodeId, bias: number, activation: Activation]
 
 export interface CPPNGenomeFactoryOptions
   extends GenomeFactoryOptions<CPPNNodeData, NEATLinkData> {

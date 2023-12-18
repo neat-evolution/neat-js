@@ -18,11 +18,12 @@ import { linkRefToKey, toLinkKey, type LinkKey } from './link/linkRefToKey.js'
 import type { CoreNode } from './node/CoreNode.js'
 import type { NodeFactory } from './node/NodeFactory.js'
 import type { NodeFactoryOptions } from './node/NodeFactoryOptions.js'
-import { nodeKeyToType } from './node/nodeKeyToRef.js'
+import { nodeKeyToRef, nodeKeyToType } from './node/nodeKeyToRef.js'
 import type { NodeRef } from './node/NodeRef.js'
-import { nodeRefToKey, type NodeKey, toNodeKey } from './node/nodeRefToKey.js'
+import { nodeRefToKey, type NodeKey } from './node/nodeRefToKey.js'
 import { NodeType } from './node/NodeType.js'
 import type { CoreState } from './state/CoreState.js'
+import type { InnovationKey } from './state/hashInnovationKey.js'
 import type { StateData } from './state/StateData.js'
 import type { ExtendedState } from './state/StateProvider.js'
 
@@ -390,10 +391,7 @@ export class CoreGenome<
   async splitLink(
     from: NodeKey,
     to: NodeKey,
-    /** Innovation.nodeNumber */
-    nodeNumber: number,
-    /** Innovation.innovationNumber */
-    innovationNumber: number
+    newNodeKey: NodeKey
   ): Promise<void> {
     // Retrieve the link to be split
     const linkKey = toLinkKey(from, to)
@@ -406,12 +404,11 @@ export class CoreGenome<
     this.links.delete(linkKey)
     this.connections.delete(from, to)
 
-    const newNodeKey = toNodeKey(NodeType.Hidden, nodeNumber)
     const isSafe = !this.hiddenNodes.has(newNodeKey)
     const newNode =
       this.hiddenNodes.get(newNodeKey) ??
       this.createNode(
-        { type: NodeType.Hidden, id: nodeNumber },
+        nodeKeyToRef(newNodeKey),
         this.config.node(),
         this.state.node()
       )
@@ -419,16 +416,36 @@ export class CoreGenome<
     // Insert new hidden node
     this.hiddenNodes.set(newNodeKey, !isSafe ? newNode.clone() : newNode)
 
-    type LinkDetails = [from: NodeKey, to: NodeKey, innovationNumber: number]
+    type LinkDetails = [
+      from: NodeKey,
+      to: NodeKey,
+      innovationNumber: InnovationKey,
+    ]
     let link1Details: LinkDetails
     let link2Details: LinkDetails
 
     if (nodeKeyToType(from) === NodeType.Input) {
-      link1Details = [newNodeKey, to, innovationNumber + 1]
-      link2Details = [from, newNodeKey, innovationNumber]
+      link1Details = [
+        newNodeKey,
+        to,
+        await this.state.getConnectInnovation(newNodeKey, to),
+      ]
+      link2Details = [
+        from,
+        newNodeKey,
+        await this.state.getConnectInnovation(from, newNodeKey),
+      ]
     } else {
-      link1Details = [from, newNodeKey, innovationNumber]
-      link2Details = [newNodeKey, to, innovationNumber + 1]
+      link1Details = [
+        from,
+        newNodeKey,
+        await this.state.getConnectInnovation(from, newNodeKey),
+      ]
+      link2Details = [
+        newNodeKey,
+        to,
+        await this.state.getConnectInnovation(newNodeKey, to),
+      ]
     }
     // NOTE: only async in des-hyperneat
     const link1 = await link.identity({
@@ -501,16 +518,17 @@ export class CoreGenome<
         throw new Error('Unable to find link')
       }
 
-      const innovation = await this.state
+      const newNodeKey = await this.state
         .neat()
         .getSplitInnovation(link.innovation)
 
-      const newNodeKey = toNodeKey(NodeType.Hidden, innovation[0])
       const linkFromKey = toLinkKey(link.from, newNodeKey)
       const linkToKey = toLinkKey(newNodeKey, link.to)
-
+      if (linkFromKey.includes('NaN') || linkToKey.includes('NaN')) {
+        console.log(linkFromKey, linkToKey)
+      }
       if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
-        await this.splitLink(link.from, link.to, innovation[0], innovation[1])
+        await this.splitLink(link.from, link.to, newNodeKey)
         break
       }
     }
@@ -570,6 +588,7 @@ export class CoreGenome<
         const innovation = await this.state
           .neat()
           .getConnectInnovation(sourceKey, targetKey)
+
         const weight =
           (rng.gen() - 0.5) * 2.0 * this.config.neat().initialLinkWeightSize
 

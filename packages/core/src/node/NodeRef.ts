@@ -1,8 +1,10 @@
 import { type NodeType } from './NodeType.js'
 
+export type NodeId = number | string
+
 export interface NodeRef {
   type: NodeType
-  id: number | string
+  id: NodeId
 }
 
-export type NodeRefTuple = [type: NodeType, id: number]
+export type NodeRefTuple = [type: NodeType, id: NodeId]

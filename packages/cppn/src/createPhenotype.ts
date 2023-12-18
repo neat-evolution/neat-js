@@ -48,7 +48,15 @@ export const createPhenotype: PhenotypeFactory<
     }
   } else {
     const outputNodes = Array.from(genome.outputs.values())
-    outputNodes.sort((a, b) => a.id - b.id)
+    outputNodes.sort((a, b) => {
+      if (typeof a.id === 'number' && typeof b.id === 'number') {
+        return a.id - b.id
+      } else if (typeof a.id === 'string' && typeof b.id === 'string') {
+        return a.id.localeCompare(b.id)
+      } else {
+        return 0
+      }
+    })
     for (let i = 0; i < outputNodes.length; i++) {
       const node = outputNodes[i] as CPPNNode
       outputs[i] = i + offset

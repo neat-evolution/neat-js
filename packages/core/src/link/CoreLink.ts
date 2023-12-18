@@ -1,5 +1,6 @@
 import type { ConfigOptions } from '../config/ConfigOptions.js'
 import type { NodeKey } from '../node/nodeRefToKey.js'
+import type { InnovationKey } from '../state/hashInnovationKey.js'
 import type { ExtendedState } from '../state/StateProvider.js'
 
 import type { Link } from './Link.js'
@@ -22,7 +23,7 @@ export class CoreLink<
 
   // Link
   public weight: number
-  public readonly innovation: number
+  public readonly innovation: InnovationKey
 
   // LinkExtension
   public readonly config: LCO

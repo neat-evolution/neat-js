@@ -1,12 +1,10 @@
 import {
-  type Innovation,
-  type StateProvider,
   type StateData,
   type ExtendedState,
-  type NEATState,
-  InnovationLog,
   type LinkKey,
   type NodeKey,
+  type InnovationKey,
+  CoreState,
 } from '@neat-evolution/core'
 
 import type { ThreadContext } from './worker/ThreadContext.js'
@@ -14,18 +12,19 @@ import { StateType } from './WorkerAction.js'
 import { WorkerCustomState } from './WorkerCustomState.js'
 
 export type GetSplitInnovationFn = (
-  linkInnovation: number,
+  innovationKey: InnovationKey,
   stateType: StateType,
   stateKey: string | null,
   context: ThreadContext
-) => Promise<Innovation>
+) => Promise<NodeKey>
+
 export type GetConnectInnovationFn = (
   from: NodeKey,
   to: NodeKey,
   stateType: StateType,
   stateKey: string | null,
   context: ThreadContext
-) => Promise<number>
+) => Promise<InnovationKey>
 
 export type SetCPPNStateRedirectFn = (
   key: LinkKey,
@@ -39,22 +38,15 @@ export class WorkerState<
   NS extends ExtendedState<NSD>,
   LS extends ExtendedState<LSD>,
   SD extends StateData,
-> implements StateProvider<NSD, LSD, NS, LS, SD>
-{
+> extends CoreState<NSD, LSD, NS, LS, SD> {
   public readonly stateType: StateType
   public readonly stateKey: string | null
-  public readonly innovationLog: InnovationLog
-  public readonly nextInnovation: Innovation
   public readonly enableCustomState: boolean
   public readonly custom: WorkerCustomState | null
 
-  protected readonly getSplitInnovationFn: GetSplitInnovationFn
-  protected readonly getConnectInnovationFn: GetConnectInnovationFn
   protected readonly context: ThreadContext
 
   constructor(
-    getSplitInnovationFn: GetSplitInnovationFn,
-    getConnectInnovationFn: GetConnectInnovationFn,
     setCPPNStateRedirectFn: SetCPPNStateRedirectFn,
     context: ThreadContext,
     stateType: StateType = StateType.NEAT,
@@ -62,8 +54,7 @@ export class WorkerState<
     enableCustomState: boolean = false,
     singleCPPNState: boolean | undefined
   ) {
-    this.getSplitInnovationFn = getSplitInnovationFn
-    this.getConnectInnovationFn = getConnectInnovationFn
+    super()
     this.context = context
 
     this.enableCustomState = enableCustomState
@@ -73,56 +64,25 @@ export class WorkerState<
     if (enableCustomState) {
       this.custom = new WorkerCustomState(
         singleCPPNState === true,
-        getSplitInnovationFn,
-        getConnectInnovationFn,
         setCPPNStateRedirectFn,
         this.context
       )
     } else {
       this.custom = null
     }
-    // dummy internal structure, do not use
-    this.innovationLog = new InnovationLog()
-    this.nextInnovation = [0, 0]
   }
 
-  async getSplitInnovation(linkInnovation: number): Promise<Innovation> {
-    return await this.getSplitInnovationFn(
-      linkInnovation,
-      this.stateType,
-      this.stateKey,
-      this.context
-    )
-  }
-
-  async getConnectInnovation(from: NodeKey, to: NodeKey): Promise<number> {
-    return await this.getConnectInnovationFn(
-      from,
-      to,
-      this.stateType,
-      this.stateKey,
-      this.context
-    )
-  }
-
-  neat(): NEATState {
-    return this
-  }
-
-  node(): NS {
+  override node(): NS {
     return (this.enableCustomState ? this.custom : null) as NS
   }
 
-  link(): LS {
+  override link(): LS {
     return (this.enableCustomState ? this.custom : null) as LS
   }
 
-  toJSON(): SD {
+  override toJSON(): SD {
     return {
-      neat: {
-        innovationLog: this.innovationLog.toJSON(),
-        nextInnovation: this.nextInnovation,
-      },
+      neat: null,
     } as unknown as SD
   }
 }

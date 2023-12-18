@@ -9,7 +9,7 @@ import type { NodeType } from './NodeType.js'
 export const nodeKeyToRef = (key: NodeKey): NodeRef => {
   return {
     type: key.charAt(0) as NodeType,
-    id: +key.substring(1),
+    id: key.substring(1),
   }
 }
 
@@ -18,5 +18,5 @@ export const nodeKeyToType = (key: NodeKey): NodeType => {
 }
 
 export const nodeKeyToRefTuple = (key: NodeKey): NodeRefTuple => {
-  return [key.charAt(0) as NodeType, +key.substring(1)]
+  return [key.charAt(0) as NodeType, key.substring(1)]
 }
