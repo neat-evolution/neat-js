@@ -65,6 +65,7 @@ import {
   type EvolutionOptions,
 } from '@neat-evolution/evolution'
 import { defaultNEATGenomeOptions, neat } from '@neat-evolution/neat'
+
 import { createEvaluator } from '@neat-evolution/worker-evaluator'
 
 const datasetOptions = {

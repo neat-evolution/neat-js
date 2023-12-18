@@ -24,14 +24,6 @@ import {
   loadDataset,
 } from '@neat-evolution/dataset-environment'
 import { createEvaluator } from '@neat-evolution/evaluator'
-import {
-  createReproducer,
-  defaultEvolutionOptions,
-  defaultPopulationOptions,
-  evolve,
-  Population,
-  type EvolutionOptions
-} from '@neat-evolution/evolution'
 import { createExecutor } from '@neat-evolution/executor'
 import {
   defaultNEATGenomeOptions,
@@ -45,6 +37,15 @@ import {
   type NEATNode,
   type NEATState
 } from '@neat-evolution/neat'
+
+import {
+  createReproducer,
+  defaultEvolutionOptions,
+  defaultPopulationOptions,
+  evolve,
+  Population,
+  type EvolutionOptions
+} from '@neat-evolution/evolution'
 
 
 // 1. Typical boilerplate
