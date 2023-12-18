@@ -88,7 +88,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update yarn.lock
-        run: yarn install --no-immutable --mode update-lockfile
+        run: yarn install --no-immutable --mode=update-lockfile
 
       - name: Commit and push yarn.lock changes
         run: |
