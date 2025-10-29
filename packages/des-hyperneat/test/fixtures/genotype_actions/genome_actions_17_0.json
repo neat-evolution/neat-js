@@ -43,7 +43,7 @@
                   "neat": {
                     "node_ref": "H29"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.030251071106248563
                 }
               },
@@ -453,7 +453,7 @@
                   "neat": {
                     "node_ref": "H8"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.012048381047707715
                 }
               },
@@ -612,7 +612,7 @@
                   "neat": {
                     "node_ref": "O1"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.05690920543345941
                 },
                 "O0": {
@@ -858,7 +858,7 @@
                   "neat": {
                     "node_ref": "O1"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.07244054778542099
                 }
               },
@@ -983,7 +983,7 @@
                   "neat": {
                     "node_ref": "O0"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": -0.054494183495005816
                 },
                 "O1": {
@@ -1263,7 +1263,7 @@
                   "neat": {
                     "node_ref": "O1"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": -0.17702872696009114
                 },
                 "O0": {
@@ -1464,7 +1464,7 @@
                   "neat": {
                     "node_ref": "O0"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.1006606570813711
                 },
                 "O1": {
@@ -1632,17 +1632,8 @@
   },
   "phenotype": {
     "length": 17,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      14,
-      15,
-      16
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [14, 15, 16],
     "actions": []
   }
 }

@@ -431,7 +431,7 @@
                   "neat": {
                     "node_ref": "O0"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": -0.010634821641415965
                 },
                 "O1": {
@@ -947,14 +947,14 @@
                   "neat": {
                     "node_ref": "O0"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.02056956093999432
                 },
                 "O1": {
                   "neat": {
                     "node_ref": "O1"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.04233417987192284
                 }
               },
@@ -1975,7 +1975,7 @@
                   "neat": {
                     "node_ref": "O1"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.06999821084840693
                 }
               },
@@ -2109,7 +2109,7 @@
                   "neat": {
                     "node_ref": "H7"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.0037049728420597964
                 }
               },
@@ -2935,17 +2935,8 @@
   },
   "phenotype": {
     "length": 13,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      10,
-      11,
-      12
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [10, 11, 12],
     "actions": []
   }
 }

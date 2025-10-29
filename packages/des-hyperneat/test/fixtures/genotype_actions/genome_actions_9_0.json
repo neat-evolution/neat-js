@@ -405,7 +405,7 @@
                   "neat": {
                     "node_ref": "O1"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.1187388915475448
                 },
                 "O0": {
@@ -1059,7 +1059,7 @@
                   "neat": {
                     "node_ref": "H0"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.018886003939398568
                 }
               },
@@ -1352,17 +1352,8 @@
   },
   "phenotype": {
     "length": 9,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      6,
-      7,
-      8
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [6, 7, 8],
     "actions": []
   }
 }

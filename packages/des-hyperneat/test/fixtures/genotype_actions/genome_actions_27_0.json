@@ -43,7 +43,7 @@
                   "neat": {
                     "node_ref": "H29"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.018707668372148992
                 }
               },
@@ -453,7 +453,7 @@
                   "neat": {
                     "node_ref": "H8"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.014672542789666175
                 }
               },
@@ -607,7 +607,7 @@
                   "neat": {
                     "node_ref": "O1"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.03971287226063744
                 }
               },
@@ -846,7 +846,7 @@
                   "neat": {
                     "node_ref": "O1"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.07042513862299249
                 }
               },
@@ -1185,7 +1185,7 @@
                   "neat": {
                     "node_ref": "O1"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": -0.17082907580927456
                 },
                 "O0": {
@@ -1386,7 +1386,7 @@
                   "neat": {
                     "node_ref": "O0"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.07709936607232046
                 },
                 "O1": {
@@ -1574,7 +1574,7 @@
                   "neat": {
                     "node_ref": "O0"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": -0.054494183495005816
                 },
                 "O1": {
@@ -1783,17 +1783,8 @@
   },
   "phenotype": {
     "length": 27,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      24,
-      25,
-      26
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [24, 25, 26],
     "actions": []
   }
 }
