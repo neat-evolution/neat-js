@@ -10,6 +10,8 @@ export interface Environment<
   ER,
 > {
   description: EnvironmentDescription
+  /** Force async evaluation in the evaluator */
+  isAsync: boolean
   evaluate: (...args: E) => ER
   evaluateAsync: (...args: EA) => Promise<ER>
   toFactoryOptions: () => EFO

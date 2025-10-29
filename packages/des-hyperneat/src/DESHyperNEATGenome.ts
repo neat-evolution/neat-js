@@ -225,6 +225,15 @@ export class DESHyperNEATGenome extends CoreGenome<
     node.depth = Math.min(limit, Math.max(0, node.depth))
   }
 
+  override toJSON(): DESHyperNEATGenomeData {
+    return {
+      config: this.config.toJSON(),
+      state: this.state.toJSON(),
+      genomeOptions: this.genomeOptions,
+      factoryOptions: this.toFactoryOptions(),
+    }
+  }
+
   override toFactoryOptions(): DESHyperNEATGenomeFactoryOptions {
     const inputs: DESHyperNEATNodeData[] = []
     const hiddenNodes: DESHyperNEATNodeData[] = []

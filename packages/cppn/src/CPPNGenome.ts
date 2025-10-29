@@ -252,6 +252,15 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
     }
   }
 
+  override toJSON(): CPPNGenomeData<GO> {
+    return {
+      config: this.config.toJSON(),
+      state: this.state.toJSON(),
+      genomeOptions: this.genomeOptions,
+      factoryOptions: this.toFactoryOptions(),
+    }
+  }
+
   override toFactoryOptions(): CPPNGenomeFactoryOptions {
     const hiddenNodes: CPPNNodeData[] = []
     const outputs: CPPNNodeData[] = []

@@ -1,4 +1,8 @@
-import { type Phenotype, PhenotypeActionType } from '@neat-evolution/core'
+import {
+  Activation,
+  type Phenotype,
+  PhenotypeActionType,
+} from '@neat-evolution/core'
 
 import type {
   BatchInputs,
@@ -8,6 +12,7 @@ import type {
   SyncExecutor,
 } from './Executor.js'
 import type { SyncExecutorFactory } from './ExecutorFactory.js'
+import { softmax } from './softmax.js'
 import { toActivationFunction } from './toActivationFunction.js'
 
 export const createExecutor: SyncExecutorFactory = (
@@ -25,6 +30,7 @@ export const createExecutor: SyncExecutorFactory = (
     }
 
     // Do forward pass
+    let outputActivation: Activation | undefined
     for (const action of phenotype.actions) {
       switch (action[0]) {
         case PhenotypeActionType.Link: {
@@ -35,6 +41,12 @@ export const createExecutor: SyncExecutorFactory = (
         }
         case PhenotypeActionType.Activation: {
           const [, actionNode, actionBias, actionActivation] = action
+          if (
+            outputActivation === undefined &&
+            phenotype.outputs.includes(actionNode)
+          ) {
+            outputActivation = actionActivation
+          }
           const node = values[actionNode] as number
           const activation = toActivationFunction(actionActivation)
           values[actionNode] = activation(node + actionBias)
@@ -49,8 +61,9 @@ export const createExecutor: SyncExecutorFactory = (
       const value = values[o] as number
       output.push(Number.isFinite(value) ? value : 0)
     }
-
-    return output
+    return outputActivation === Activation.Softmax
+      ? softmax(output, true)
+      : output
   }
 
   const executeBatch = (batch: BatchInputs): BatchOutputs => {

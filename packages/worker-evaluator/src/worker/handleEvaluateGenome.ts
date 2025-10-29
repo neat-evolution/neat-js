@@ -47,8 +47,8 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn<
   // evaluate the genome
   let fitness: number
 
-  // allow for different types of executors
-  if (executor.isAsync) {
+  // allow for different types of executors and environments
+  if (executor.isAsync || environment.isAsync) {
     fitness = await environment.evaluateAsync(executor)
   } else {
     fitness = environment.evaluate(executor)

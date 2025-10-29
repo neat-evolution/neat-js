@@ -1,6 +1,5 @@
 import {
   isActionEdge,
-  Activation,
   isActionNode,
   NodeType,
   type Phenotype,
@@ -72,7 +71,7 @@ export const createPhenotype: PhenotypeFactory<NEATGenome> = (
         0,
         node[0] === NodeType.Output
           ? genome.genomeOptions.outputActivation
-          : Activation.Sigmoid,
+          : genome.genomeOptions.hiddenActivation,
       ])
     }
   }

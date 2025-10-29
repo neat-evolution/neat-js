@@ -9,10 +9,10 @@ import { datasetToSharedBuffer } from './datasetToSharedBuffer.js'
 import { crossentropy, mse } from './error.js'
 
 export class DatasetEnvironment
-  implements StandardEnvironment<SharedArrayBuffer>
-{
+  implements StandardEnvironment<SharedArrayBuffer> {
   public readonly dataset: Dataset
   public readonly description: EnvironmentDescription
+  public readonly isAsync = false
 
   constructor(dataset: Dataset) {
     this.dataset = dataset

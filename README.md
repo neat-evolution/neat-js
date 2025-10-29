@@ -46,9 +46,11 @@ These packages provide the necessary components to begin creating and evolving n
 - `@neat-evolution/worker-reproducer`: A web worker-based system for parallelized genetic operations.
 
 ### Customization Options
+
 @neat-evolution offers a variety of packages for those who wish to tailor the library to their needs. You can choose different algorithms, executors, evaluators, or even build your own environment for a custom solution.
 
 #### Implementing Custom Environments
+
 To use a custom environment, install it alongside the core packages:
 
 ```sh
@@ -56,10 +58,11 @@ npm install @your-custom-environment
 ```
 
 #### Choosing Alternative Algorithms
+
 If you prefer a different flavor of the NEAT algorithm, you can install one of the alternatives:
 
 ```sh
-npm install @neat-evolution/neat           # original algorithm
+npm install @neat-evolution/neat           # NEAT algorithm
 npm install @neat-evolution/cppn           # Compositional Pattern Producing Network
 npm install @neat-evolution/hyperneat      # HyperNEAT algorithm
 npm install @neat-evolution/es-hyperneat   # Evolvable Substrate HyperNEAT
@@ -199,35 +202,42 @@ Copy and paste this boilerplate into your project's main file and adjust the dat
 For detailed explanations of each part of the boilerplate, visit our documentation pages. If you encounter any issues or have questions, feel free to open an issue on our GitHub repository.
 
 ## Packages Overview
+
 `@neat-evolution` is a collection of modular packages designed to enable and enhance the implementation of various NEAT-based algorithms. To facilitate a better understanding of how these packages can be combined and utilized, we have categorized them according to their primary function within the NEAT framework:
 
 ### Core NEAT Algorithms
+
 - `@neat-evolution/neat`: Implements the canonical NeuroEvolution of Augmenting Topologies algorithm.
 - `@neat-evolution/hyperneat`: Extends NEAT to evolve large-scale neural networks using an indirect encoding scheme.
 - `@neat-evolution/es-hyperneat`: Evolvable Substrate HyperNEAT, focuses on evolving substrates for neural network topology.
 - `@neat-evolution/des-hyperneat`: Deep Evolvable Substrate HyperNEAT, a variant for evolving deep neural networks.
 
 ### Core Concepts and Configurations
+
 - `@neat-evolution/core`: Defines the foundational genome, link, and node concepts, critical for all NEAT-based algorithms.
 - `@neat-evolution/evolution`: Describes populations, species, organisms, and includes the evolution control function.
-Environments
+  Environments
 - `@neat-evolution/environment`: Outlines the abstract environment concept, essential for neural network execution and evaluation.
 - `@neat-evolution/dataset-environment`: Offers a predefined environment for training networks with fixed datasets.
 
 ### Execution and Evaluation
+
 - `@neat-evolution/executor`: Provides the default execution mechanism for running neural networks within an environment.
 - `@neat-evolution/evaluator`: Contains the evaluator concept for assessing network performance, with a default implementation.
 
 ### Worker-Based Parallel Processing
+
 - `@neat-evolution/worker-evaluator`: Enables parallel network evaluation using Web Workers to expedite the evolutionary process.
 - `@neat-evolution/worker-reproducer`: Allows for parallel genome reproduction in evolution through Web Workers.
 - `@neat-evolution/worker-threads`: Provides a simple cross-platform implementation of worker threads for concurrency.
 
 ### Utilities and Extensions
+
 - `@neat-evolution/utils`: Offers shared utility functions that support various NEAT operations.
 - `@neat-evolution/cppn`: Implements Compositional Pattern Producing Networks, useful for pattern generation in HyperNEAT extensions.
 
 ### Demonstrations and Reference Implementations
+
 - `@neat-evolution/demo`: Provides a replication of the original NEAT demo for reference and educational purposes.
 
 For further details on each package, including specific functionalities, API references, and usage examples, please consult the documentation provided within each package in the repository.
