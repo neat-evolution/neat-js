@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "fix: manypkg fixes",
-  "packageName": "@neat-evolution/demo",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

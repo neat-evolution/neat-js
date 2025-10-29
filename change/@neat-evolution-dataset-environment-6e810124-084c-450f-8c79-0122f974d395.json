@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "fix: upgrade yarn, misc cleanup",
-  "packageName": "@neat-evolution/dataset-environment",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}
