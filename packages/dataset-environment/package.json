@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/dataset-environment",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -44,11 +44,11 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@neat-evolution/core": "^0.3.0",
-    "@neat-evolution/environment": "^0.3.2",
-    "@neat-evolution/evolution": "^0.3.2",
-    "@neat-evolution/executor": "^0.3.2",
-    "@neat-evolution/utils": "^0.2.2",
+    "@neat-evolution/core": "^0.3.1",
+    "@neat-evolution/environment": "^0.3.3",
+    "@neat-evolution/evolution": "^0.3.3",
+    "@neat-evolution/executor": "^0.3.3",
+    "@neat-evolution/utils": "^0.2.3",
     "@swc/helpers": "^0.5.17"
   },
   "devDependencies": {
