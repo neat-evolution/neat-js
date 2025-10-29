@@ -51,7 +51,7 @@
     "@neat-evolution/executor": "^0.3.2",
     "@neat-evolution/hyperneat": "^0.4.1",
     "@neat-evolution/neat": "^0.4.1",
-    "@swc/helpers": "^0.5.15"
+    "@swc/helpers": "^0.5.17"
   },
   "devDependencies": {
     "@heygrady/eslint-config": "^1.5.1",

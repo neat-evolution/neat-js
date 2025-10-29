@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@neat-evolution/utils": "^0.2.2",
-    "@swc/helpers": "^0.5.15",
+    "@swc/helpers": "^0.5.17",
     "quick-lru": "^7.0.0"
   },
   "devDependencies": {
