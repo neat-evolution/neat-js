@@ -86,7 +86,7 @@
           "neat": {
             "node_ref": "H7"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": 0.10725701582711669
         }
       },
@@ -95,7 +95,7 @@
           "neat": {
             "node_ref": "O0"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": 0.11949601997985329
         },
         "O1": {
@@ -305,7 +305,7 @@
         "Activation": [
           5,
           0.10725701582711669,
-          "Linear"
+          "HardTanh"
         ]
       },
       {
@@ -319,7 +319,7 @@
         "Activation": [
           6,
           0.11949601997985329,
-          "Linear"
+          "HardTanh"
         ]
       }
     ]

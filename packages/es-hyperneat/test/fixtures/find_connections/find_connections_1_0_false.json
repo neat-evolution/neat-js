@@ -38,7 +38,7 @@
           "neat": {
             "node_ref": "H8"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": -0.05434227641981948
         }
       },
@@ -116,86 +116,38 @@
   },
   "phenotype": {
     "length": 7,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      5,
-      6
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [5, 6],
     "actions": [
       {
-        "Activation": [
-          0,
-          0.0,
-          "None"
-        ]
+        "Activation": [0, 0.0, "None"]
       },
       {
-        "Link": [
-          0,
-          5,
-          -1.0038742407730286
-        ]
+        "Link": [0, 5, -1.0038742407730286]
       },
       {
-        "Activation": [
-          3,
-          0.0,
-          "None"
-        ]
+        "Activation": [3, 0.0, "None"]
       },
       {
-        "Link": [
-          3,
-          6,
-          0.24256663822475544
-        ]
+        "Link": [3, 6, 0.24256663822475544]
       },
       {
-        "Activation": [
-          1,
-          0.0,
-          "None"
-        ]
+        "Activation": [1, 0.0, "None"]
       },
       {
-        "Link": [
-          1,
-          5,
-          -0.19319007066756588
-        ]
+        "Link": [1, 5, -0.19319007066756588]
       },
       {
-        "Activation": [
-          5,
-          -0.057338660538791136,
-          "Sine"
-        ]
+        "Activation": [5, -0.057338660538791136, "Sine"]
       },
       {
-        "Activation": [
-          4,
-          -0.05434227641981948,
-          "Linear"
-        ]
+        "Activation": [4, -0.05434227641981948, "HardTanh"]
       },
       {
-        "Link": [
-          4,
-          6,
-          -0.07784347005805958
-        ]
+        "Link": [4, 6, -0.07784347005805958]
       },
       {
-        "Activation": [
-          6,
-          -0.07896162484823507,
-          "OffsetGaussian"
-        ]
+        "Activation": [6, -0.07896162484823507, "OffsetGaussian"]
       }
     ]
   },

@@ -295,7 +295,7 @@
           "neat": {
             "node_ref": "H22"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": 0.06622943817741171
         },
         "H19": {
@@ -530,7 +530,7 @@
         "Activation": [
           5,
           0.06622943817741171,
-          "Linear"
+          "HardTanh"
         ]
       },
       {

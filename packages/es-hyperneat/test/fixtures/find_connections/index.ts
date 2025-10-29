@@ -2,21 +2,20 @@ import fs from 'node:fs/promises'
 
 import {
   defaultNEATConfigOptions,
-  type PhenotypeAction,
   PhenotypeActionType,
   type Activation,
   type InitConfig,
-  type NodeKey,
   type Phenotype,
+  type PhenotypeAction,
   type Target,
 } from '@neat-evolution/core'
 import {
-  defaultCPPNGenomeOptions,
-  type CPPNNodeData,
-  type CPPNGenomeFactoryOptions,
   createGenome,
+  defaultCPPNGenomeOptions,
   type CPPNGenome,
+  type CPPNGenomeFactoryOptions,
   type CPPNGenomeOptions,
+  type CPPNNodeData,
 } from '@neat-evolution/cppn'
 import { createExecutor, type SyncExecutor } from '@neat-evolution/executor'
 import {
