@@ -509,7 +509,7 @@
                   "neat": {
                     "node_ref": "H36"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.013518125128255589
                 }
               },
@@ -777,7 +777,7 @@
                   "neat": {
                     "node_ref": "O1"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": 0.057212580205561095
                 }
               },
@@ -847,7 +847,7 @@
                   "neat": {
                     "node_ref": "H9"
                   },
-                  "activation": "Linear",
+                  "activation": "HardTanh",
                   "bias": -0.03722108321891321
                 }
               },
@@ -1014,17 +1014,8 @@
   },
   "phenotype": {
     "length": 11,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      8,
-      9,
-      10
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [8, 9, 10],
     "actions": []
   }
 }
