@@ -1,3 +1,4 @@
+import QuickLRU from 'quick-lru'
 import type {
   GenomeFactoryOptions,
   GenomeOptions,
@@ -177,10 +178,10 @@ export class Population<
 
     this.species = new Map<number, Species<CD, SD, HND, LD, GFO, GO, G>>()
 
-    this.extinctSpecies = new Map<
+    this.extinctSpecies = new QuickLRU<
       number,
       Species<CD, SD, HND, LD, GFO, GO, G>
-    >()
+    >({ maxSize: 1000 })
     this.nextId = populationFactoryOptions?.nextId ?? 0
 
     this.populationOptions = populationOptions

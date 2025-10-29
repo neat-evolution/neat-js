@@ -17,5 +17,6 @@
   },
   "files.insertFinalNewline": true,
   "editor.tabSize": 2,
-  "vitest.enable": true
+  "vitest.enable": true,
+  "typescript.preferences.importModuleSpecifier": "relative"
 }
