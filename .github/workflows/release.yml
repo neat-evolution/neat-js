@@ -34,11 +34,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
-          cache: 'yarn'
+          node-version: "20"
+          cache: "yarn"
           registry-url: "https://npm.pkg.github.com"
           scope: "@neat-evolution"
-      
+
       - name: Setup .yarnrc.yml
         run: |
           yarn config set npmScopes.neat-evolution.npmRegistryServer "https://npm.pkg.github.com"
@@ -69,7 +69,7 @@ jobs:
         run: |
           git config user.name "Release Bot"
           git config user.email "github@heygrady.net"
-          git remote set-url origin "https://$BEACHBALL_GH_TOKEN@github.com/neat-evolution/neat-js"
+          git remote set-url origin "https://github-actions:${{ secrets.GITHUB_TOKEN }}@github.com/neat-evolution/neat-js"
         env:
           BEACHBALL_GH_TOKEN: ${{ secrets.BEACHBALL_GH_TOKEN }}
 
