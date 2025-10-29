@@ -52,7 +52,7 @@
           "neat": {
             "node_ref": "O1"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": 0.09796278717245918
         },
         "O0": {
@@ -119,72 +119,32 @@
   },
   "phenotype": {
     "length": 8,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      6,
-      7
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [6, 7],
     "actions": [
       {
-        "Activation": [
-          2,
-          0.0,
-          "None"
-        ]
+        "Activation": [2, 0.0, "None"]
       },
       {
-        "Link": [
-          2,
-          4,
-          -1.6022120275691991
-        ]
+        "Link": [2, 4, -1.6022120275691991]
       },
       {
-        "Activation": [
-          4,
-          0.04637049692891888,
-          "OffsetGaussian"
-        ]
+        "Activation": [4, 0.04637049692891888, "OffsetGaussian"]
       },
       {
-        "Link": [
-          4,
-          5,
-          1.111671349291276
-        ]
+        "Link": [4, 5, 1.111671349291276]
       },
       {
-        "Link": [
-          4,
-          7,
-          -0.10741167030521737
-        ]
+        "Link": [4, 7, -0.10741167030521737]
       },
       {
-        "Activation": [
-          5,
-          -0.021422130573934463,
-          "None"
-        ]
+        "Activation": [5, -0.021422130573934463, "None"]
       },
       {
-        "Link": [
-          5,
-          7,
-          1.0
-        ]
+        "Link": [5, 7, 1.0]
       },
       {
-        "Activation": [
-          7,
-          0.09796278717245918,
-          "Linear"
-        ]
+        "Activation": [7, 0.09796278717245918, "HardTanh"]
       }
     ]
   }
