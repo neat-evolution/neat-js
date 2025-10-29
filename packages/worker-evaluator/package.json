@@ -49,7 +49,7 @@
     "@neat-evolution/evaluator": "^0.3.2",
     "@neat-evolution/executor": "^0.3.2",
     "@neat-evolution/worker-threads": "^0.2.2",
-    "@swc/helpers": "^0.5.15",
+    "@swc/helpers": "^0.5.17",
     "async-sema": "^3.1.1"
   },
   "devDependencies": {

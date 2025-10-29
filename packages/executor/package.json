@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@neat-evolution/core": "^0.3.0",
-    "@swc/helpers": "^0.5.15"
+    "@swc/helpers": "^0.5.17"
   },
   "devDependencies": {
     "@heygrady/eslint-config": "^1.5.1",

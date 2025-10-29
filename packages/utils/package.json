@@ -44,7 +44,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@swc/helpers": "^0.5.15",
+    "@swc/helpers": "^0.5.17",
     "seedrandom": "^3.0.5"
   },
   "devDependencies": {
