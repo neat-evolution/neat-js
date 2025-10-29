@@ -100,7 +100,7 @@
           "neat": {
             "node_ref": "H13"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": -0.3621991181131152
         }
       },
@@ -239,7 +239,7 @@
         "Activation": [
           4,
           -0.3621991181131152,
-          "Linear"
+          "HardTanh"
         ]
       },
       {

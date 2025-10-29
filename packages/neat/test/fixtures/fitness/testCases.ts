@@ -81,7 +81,10 @@ const createTestGenome = (genomeData: TestCaseGenomeData) => {
   const genome = createGenome(
     configProvider,
     state,
-    { outputActivation: Activation.Sigmoid },
+    {
+      hiddenActivation: Activation.Sigmoid,
+      outputActivation: Activation.Sigmoid,
+    },
     { inputs: 4, outputs: 3 },
     {
       hiddenNodes: formatHiddenNodes(genomeData.hidden_nodes),

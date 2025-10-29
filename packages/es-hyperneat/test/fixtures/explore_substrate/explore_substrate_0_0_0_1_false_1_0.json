@@ -39,7 +39,7 @@
           "neat": {
             "node_ref": "O1"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": -0.013325914790969395
         },
         "O0": {
@@ -72,45 +72,23 @@
   },
   "phenotype": {
     "length": 6,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      4,
-      5
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [4, 5],
     "actions": [
       {
-        "Activation": [
-          1,
-          0.0,
-          "None"
-        ]
+        "Activation": [1, 0.0, "None"]
       },
       {
-        "Link": [
-          1,
-          4,
-          0.9120432653938695
-        ]
+        "Link": [1, 4, 0.9120432653938695]
       },
       {
-        "Activation": [
-          4,
-          -0.012462476750154002,
-          "Step"
-        ]
+        "Activation": [4, -0.012462476750154002, "Step"]
       }
     ]
   },
   "depth": 1,
   "reverse": false,
   "allow_connections_to_input": false,
-  "nodes": [
-    []
-  ],
+  "nodes": [[]],
   "connections": []
 }

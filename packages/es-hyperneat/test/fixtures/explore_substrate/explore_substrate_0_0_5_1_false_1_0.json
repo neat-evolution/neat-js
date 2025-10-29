@@ -52,7 +52,7 @@
           "neat": {
             "node_ref": "H3"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": 0.001623303411984623
         },
         "H0": {
@@ -75,14 +75,14 @@
           "neat": {
             "node_ref": "O0"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": -0.009200076018876277
         },
         "O1": {
           "neat": {
             "node_ref": "O1"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": 0.02650107838613005
         }
       },
@@ -397,7 +397,7 @@
         "Activation": [
           5,
           0.001623303411984623,
-          "Linear"
+          "HardTanh"
         ]
       },
       {
@@ -467,7 +467,7 @@
         "Activation": [
           10,
           0.02650107838613005,
-          "Linear"
+          "HardTanh"
         ]
       },
       {
@@ -488,7 +488,7 @@
         "Activation": [
           9,
           -0.009200076018876277,
-          "Linear"
+          "HardTanh"
         ]
       }
     ]

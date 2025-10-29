@@ -1,10 +1,5 @@
 {
-  "inputs": [
-    [
-      524288,
-      524288
-    ]
-  ],
+  "inputs": [[524288, 524288]],
   "outputs": [],
   "cppn_genome": {
     "neat": {
@@ -44,7 +39,7 @@
           "neat": {
             "node_ref": "O1"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": 0.006888115169346037
         },
         "O0": {
@@ -63,28 +58,13 @@
   },
   "phenotype": {
     "length": 6,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      4,
-      5
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [4, 5],
     "actions": []
   },
   "depth": 1,
   "reverse": false,
   "allow_connections_to_input": false,
-  "nodes": [
-    [
-      [
-        524288,
-        524288
-      ]
-    ]
-  ],
+  "nodes": [[[524288, 524288]]],
   "connections": []
 }

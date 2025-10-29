@@ -56,7 +56,7 @@
           "neat": {
             "node_ref": "O0"
           },
-          "activation": "Linear",
+          "activation": "HardTanh",
           "bias": -0.03571021583540716
         },
         "O1": {
@@ -331,7 +331,7 @@
         "Activation": [
           5,
           -0.03571021583540716,
-          "Linear"
+          "HardTanh"
         ]
       }
     ]
