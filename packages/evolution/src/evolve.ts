@@ -44,15 +44,7 @@ export const evolve = async <
   let didEarlyStop = false
   let bestFitness = -Infinity
   let bestIteration = -1
-  let bestOrganism: Organism<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  > | undefined = undefined
+  let bestOrganism: Organism<any, any, any, any, any, any, any> | undefined
   for (let i = 0; i < iterations; i++) {
     if (i % options.logInterval === 0) {
       console.log(`Iter: ${i}`)
@@ -79,13 +71,17 @@ export const evolve = async <
       any
     >
 
-    if (options.earlyStop && (best.fitness ?? 0) < bestFitness + options.earlyStopMinThreshold && i - bestIteration > options.earlyStopPatience) {
+    if (
+      options.earlyStop &&
+      (best.fitness ?? 0) < bestFitness + options.earlyStopMinThreshold &&
+      i - bestIteration > options.earlyStopPatience
+    ) {
       console.log(`🥵 early stop after ${i} iterations`)
       didEarlyStop = true
       break
     }
     if ((best.fitness ?? 0) > bestFitness) {
-      bestFitness = best.fitness ?? 0 as number
+      bestFitness = best.fitness ?? (0 as number)
       bestOrganism = best
       bestIteration = i
       console.log(`🌟 New best ${bestFitness} in iteration ${bestIteration}`)
@@ -98,7 +94,8 @@ export const evolve = async <
       console.log(` hiddenNodes: ${best.genome.hiddenNodes.size}`)
       console.log(` links: ${best.genome.links.size}`)
       console.log(
-        `Population(species: ${population.species.size}, extinct: ${population.extinctSpecies.size
+        `Population(species: ${population.species.size}, extinct: ${
+          population.extinctSpecies.size
         }) ${Array.from(population.species.values())
           .map((s) => s.organisms.length)
           .join(' ')}`
@@ -128,5 +125,5 @@ export const evolve = async <
   >
   console.log(`last best fitness: ${lastBest.fitness ?? 0}`)
   console.log(`🏆 best fitness: ${bestFitness}`)
-  return lastBest.fitness ?? 0 > bestFitness ? lastBest : bestOrganism
+  return (lastBest.fitness ?? bestFitness) < 0 ? lastBest : bestOrganism
 }

@@ -1,4 +1,3 @@
-import QuickLRU from 'quick-lru'
 import type {
   GenomeFactoryOptions,
   GenomeOptions,
@@ -20,6 +19,7 @@ import type {
 } from '@neat-evolution/core'
 import type { Evaluator, GenomeEntry } from '@neat-evolution/evaluator'
 import { threadRNG } from '@neat-evolution/utils'
+import QuickLRU from 'quick-lru'
 
 import { Organism } from './Organism.js'
 import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
