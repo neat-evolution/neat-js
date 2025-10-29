@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "fix: upgrade yarn, misc cleanup",
-  "packageName": "@neat-evolution/core",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}
