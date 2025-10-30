@@ -2,6 +2,21 @@
   "name": "@neat-evolution/des-hyperneat",
   "entries": [
     {
+      "date": "Thu, 30 Oct 2025 20:44:57 GMT",
+      "version": "0.4.2",
+      "tag": "@neat-evolution/des-hyperneat_v0.4.2",
+      "comments": {
+        "none": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/des-hyperneat",
+            "commit": "d072be69a51f0fe33aa18275518cbc8e968699db",
+            "comment": "docs: update readme for every package"
+          }
+        ]
+      }
+    },
+    {
       "date": "Mon, 18 Dec 2023 17:46:28 GMT",
       "version": "0.4.1",
       "tag": "@neat-evolution/des-hyperneat_v0.4.1",

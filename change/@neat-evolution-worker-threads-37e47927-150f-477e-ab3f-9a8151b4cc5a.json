@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "docs: update readme for every package",
-  "packageName": "@neat-evolution/worker-threads",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "none"
-}
