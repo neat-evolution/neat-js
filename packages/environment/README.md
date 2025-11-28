@@ -15,8 +15,8 @@ The primary purpose of the `@neat-evolution/environment` package is to:
   This ensures consistency and interoperability across different problem
   domains.
 - **Abstract Evaluation Logic:** Provide abstract methods for evaluating neural
-  networks, allowing for both synchronous (`evaluate`) and asynchronous
-  (`evaluateAsync`) execution.
+  networks, allowing for both synchronous (`evaluate`, `evaluateBatch`) and asynchronous
+  (`evaluateAsync`, `evaluateBatchAsync`) execution of single or multiple genomes.
 - **Promote Modularity:** Decouple the core NEAT algorithms from the specifics
   of the problem domain, enabling different environments to be plugged in
   without modifying the evolutionary core.
@@ -48,27 +48,24 @@ yarn add @neat-evolution/environment
 
 The `environment` package exposes the following key types:
 
-- **`Environment<EFO, E, EA, ER>`**: An interface that defines the contract for
+- **`Environment<EFO>`**: An interface that defines the contract for
   any environment. It includes:
   - `description`: An `InitConfig` object that describes the initial
     configuration of the neural network (e.g., number of inputs and outputs).
   - `isAsync`: A boolean indicating whether the environment's evaluation is
     inherently asynchronous.
-  - `evaluate`: A synchronous method for evaluating a neural network, taking an
-    array of `SyncExecutor` and returning a result `ER`.
-  - `evaluateAsync`: An asynchronous method for evaluating a neural network,
-    taking an array of `Executor` and returning a `Promise` of a result `ER`.
+  - `evaluate`: A synchronous method for evaluating a single neural network, taking a
+    `SyncExecutor` and returning a `number` (fitness score).
+  - `evaluateAsync`: An asynchronous method for evaluating a single neural network,
+    taking an `Executor` and returning a `Promise<number>` (fitness score).
+  - `evaluateBatch`: A synchronous method for evaluating multiple neural networks,
+    taking an array of `SyncExecutor`s and returning an array of `number`s (fitness scores).
+  - `evaluateBatchAsync`: An asynchronous method for evaluating multiple neural networks,
+    taking an array of `Executor`s and returning a `Promise<number[]>` (fitness scores).
   - `toFactoryOptions`: A method to serialize the environment's options.
 
-- **`StandardEnvironment<EFO>`**: A type alias for a common `Environment`
-  configuration, where evaluation typically involves a single `SyncExecutor` or
-  `Executor` and returns a `number` (e.g., a fitness score).
-
-- **`EnvironmentFactory<EFO, E, EA, ER>`**: A function type that defines how an
+- **`EnvironmentFactory<EFO>`**: A function type that defines how an
   `Environment` instance is created from a set of options (`EFO`).
-
-- **`StandardEnvironmentFactory<EFO>`**: A type alias for a factory that creates
-  `StandardEnvironment` instances.
 
 ## Usage
 
@@ -79,8 +76,8 @@ problem.
 
 ```typescript
 import {
-  StandardEnvironment,
-  StandardEnvironmentFactory,
+  Environment,
+  EnvironmentFactory,
 } from "@neat-evolution/environment";
 import { InitConfig } from "@neat-evolution/core";
 import { Executor, SyncExecutor } from "@neat-evolution/executor";
@@ -90,7 +87,7 @@ interface MyEnvironmentOptions {
   // ... options specific to MyEnvironment
 }
 
-class MyEnvironment implements StandardEnvironment<MyEnvironmentOptions> {
+class MyEnvironment implements Environment<MyEnvironmentOptions> {
   description: InitConfig = { inputs: 2, outputs: 1 };
   isAsync: boolean = false;
 
@@ -107,13 +104,26 @@ class MyEnvironment implements StandardEnvironment<MyEnvironmentOptions> {
     return output[0]; // Example fitness
   }
 
+  evaluateBatch(executors: SyncExecutor[]): number[] {
+    // Implement synchronous batch evaluation logic here
+    return executors.map((executor) => executor.execute([1, 0])[0]);
+  }
+
+  async evaluateBatchAsync(executors: Executor[]): Promise<number[]> {
+    // Implement asynchronous batch evaluation logic here
+    const results = await Promise.all(
+      executors.map((executor) => executor.execute([1, 0])),
+    );
+    return results.map((output) => output[0]);
+  }
+
   toFactoryOptions(): MyEnvironmentOptions {
     return {}; // Return options to recreate this environment
   }
 }
 
 // Example of an environment factory
-const createMyEnvironment: StandardEnvironmentFactory<MyEnvironmentOptions> = (
+const createMyEnvironment: EnvironmentFactory<MyEnvironmentOptions> = (
   options: MyEnvironmentOptions,
 ) => {
   return new MyEnvironment();
