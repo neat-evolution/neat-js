@@ -5,8 +5,8 @@ import {
   type NEATState,
 } from '@neat-evolution/core'
 
-import type { ThreadContext } from './worker/ThreadContext.js'
-import { StateType } from './WorkerAction.js'
+import { StateType } from './actions.js'
+import type { ReproducerHandlerContext } from './worker/ThreadContext.js'
 import { WorkerState, type SetCPPNStateRedirectFn } from './WorkerState.js'
 
 export class WorkerCustomState implements State<undefined> {
@@ -26,12 +26,12 @@ export class WorkerCustomState implements State<undefined> {
 
   protected readonly setCPPNStateRedirectFn: SetCPPNStateRedirectFn
 
-  protected readonly context: ThreadContext
+  protected readonly context: ReproducerHandlerContext
 
   constructor(
     isSingleState: boolean = false,
     setCPPNStateRedirectFn: SetCPPNStateRedirectFn,
-    context: ThreadContext
+    context: ReproducerHandlerContext
   ) {
     this.isSingleState = isSingleState
     this.setCPPNStateRedirectFn = setCPPNStateRedirectFn

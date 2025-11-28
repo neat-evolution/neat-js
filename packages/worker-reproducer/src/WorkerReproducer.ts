@@ -4,28 +4,26 @@ import {
   type Reproducer,
   type Species,
 } from '@neat-evolution/evolution'
-import { Worker, type WorkerMessageEvent } from '@neat-evolution/worker-threads'
-import { Sema } from 'async-sema'
-
-import type { AnyPopulation, RequestMapValue } from './types.js'
 import {
-  type Action,
-  ActionType,
-  createAction,
-  type InitReproducerPayload,
-  type OrganismPayload,
-} from './WorkerAction.js'
-import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
+  Dispatcher,
+  type DispatcherContext,
+  type WorkerAction,
+} from '@neat-evolution/worker-actions'
+import { WorkerPool } from '@neat-evolution/worker-pool'
 
-// offset to avoid confusion with worker thread ids
-let threadRequestId = 1_000
-const nextRequestId = () => {
-  const id = threadRequestId++
-  if (id === 2_000) {
-    threadRequestId = 1_000
-  }
-  return id
-}
+import {
+  ActionType,
+  initReproducer,
+  terminate as terminateAction,
+  requestEliteOrganism,
+  requestBreedOrganism,
+  type EmptyPayload,
+  type OrganismPayload,
+  type SpeciesPayload,
+  type CPPNStateRedirectPayload,
+} from './actions.js'
+import type { AnyPopulation } from './types.js'
+import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
 
 export class WorkerReproducer<
   G extends CoreGenome<
@@ -59,173 +57,73 @@ export class WorkerReproducer<
   public readonly initPromise: Promise<void>
   public readonly options: WorkerReproducerOptions
 
-  private readonly workers: Worker[]
-  private readonly semaphore: Sema
-  private readonly requestMap = new Map<
-    Worker,
-    RequestMapValue<OrganismPayload<any>>
-  >()
+  private readonly pool: WorkerPool
+  private readonly dispatcher: Dispatcher
 
   constructor(population: AnyPopulation<G>, options: WorkerReproducerOptions) {
     this.options = options
     this.population = population
     this.algorithmPathname =
       options.algorithmPathname ?? population.algorithm.pathname
-    this.workers = []
-    this.requestMap = new Map()
     this.threadCount = options.threadCount
-    this.semaphore = new Sema(options.threadCount, {
-      capacity: population.populationOptions.populationSize,
+
+    this.pool = new WorkerPool({
+      threadCount: options.threadCount,
+      taskCount: population.populationOptions.populationSize,
+      workerScriptUrl: new URL('./workerReproducerScript.js', import.meta.url),
+      workerOptions: {
+        name: 'WorkerReproducer',
+        type: 'module',
+      },
     })
+
+    this.dispatcher = new Dispatcher(this.pool, {
+      verbose: options.verbose ?? false,
+    })
+
+    // Add handlers for requests from workers
+    this.dispatcher.addActionHandler(
+      ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT,
+      this.handleRequestPopulationTournamentSelect.bind(this)
+    )
+
+    this.dispatcher.addActionHandler(
+      ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT,
+      this.handleRequestSpeciesTournamentSelect.bind(this)
+    )
+
+    this.dispatcher.addActionHandler(
+      ActionType.REQUEST_SET_CPPN_STATE_REDIRECT,
+      this.handleRequestSetCPPNStateRedirect.bind(this)
+    )
+
     this.initPromise = this.initWorkers()
   }
 
   protected async initWorkers() {
-    const initPromises: Array<Promise<void>> = []
+    await this.pool.ready()
 
-    for (let i = 0; i < this.threadCount; i++) {
-      const initPromise = new Promise<void>(
-        // eslint-disable-next-line promise/param-names
-        (resolveWorkerInit, rejectWorkerInit) => {
-          const worker = new Worker(
-            new URL('./workerReproducerScript.js', import.meta.url),
-            {
-              name: 'WorkerReproducer',
-              type: 'module',
-            }
-          )
-
-          // messages sent from the reproducer script
-          const messageListener = (
-            actionEvent: WorkerMessageEvent<Action<ActionType>>
-          ) => {
-            const action: Action<ActionType> = actionEvent.data
-            switch (action.type) {
-              case ActionType.RESPOND_ELITE_ORGANISM: {
-                this.handleRespondEliteOrganism(
-                  worker,
-                  action as Action<ActionType.RESPOND_ELITE_ORGANISM>
-                )
-                break
-              }
-              case ActionType.RESPOND_BREED_ORGANISM: {
-                this.handleRespondBreedOrganism(
-                  worker,
-                  action as Action<ActionType.RESPOND_BREED_ORGANISM>
-                )
-                break
-              }
-              case ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT: {
-                this.handleRequestPopulationTournamentSelect(
-                  worker,
-                  action as Action<ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT>
-                )
-                break
-              }
-              case ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT: {
-                this.handleRequestSpeciesTournamentSelect(
-                  worker,
-                  action as Action<ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT>
-                )
-                break
-              }
-              case ActionType.REQUEST_SET_CPPN_STATE_REDIRECT: {
-                this.handleRequestSetCPPNStateRedirect(
-                  worker,
-                  action as Action<ActionType.REQUEST_SET_CPPN_STATE_REDIRECT>
-                )
-                break
-              }
-              case ActionType.INIT_REPRODUCER_SUCCESS: {
-                this.workers.push(worker)
-                resolveWorkerInit()
-                break
-              }
-              default: {
-                const { reject: rejectRequest } =
-                  this.requestMap.get(worker) ?? {}
-                const error = new Error('Unexpected action type')
-                if (rejectRequest != null) {
-                  console.error(error)
-                  rejectRequest(error)
-                } else {
-                  console.error(error)
-                  rejectWorkerInit(error)
-                }
-                break
-              }
-            }
-          }
-
-          const errorListener = (error: Error) => {
-            const { reject: rejectRequest } = this.requestMap.get(worker) ?? {}
-            if (rejectRequest != null) {
-              console.error(error)
-              rejectRequest(error)
-            } else {
-              console.error(error)
-              rejectWorkerInit(error)
-            }
-          }
-
-          worker.addEventListener('message', messageListener)
-          worker.addEventListener('error', errorListener)
-
-          // FIXME: any, any, any
-          const data: InitReproducerPayload<any, any> = {
-            reproducerOptions: this.options,
-            populationOptions: this.population.populationOptions,
-            configData: this.population.configProvider.toJSON(),
-            genomeOptions: this.population.genomeOptions,
-            initConfig: this.population.initConfig,
-            algorithmPathname: this.algorithmPathname,
-          }
-
-          worker.postMessage(createAction(ActionType.INIT_REPRODUCER, data))
-        }
-      )
-      initPromises.push(initPromise)
-    }
-    await Promise.all(initPromises)
+    await this.dispatcher.broadcast(
+      initReproducer({
+        reproducerOptions: this.options,
+        populationOptions: this.population.populationOptions,
+        configData: this.population.configProvider.toJSON(),
+        genomeOptions: this.population.genomeOptions,
+        initConfig: this.population.initConfig,
+        algorithmPathname: this.algorithmPathname,
+      })
+    )
   }
 
   async terminate() {
-    const terminatePromises = new Set<Promise<void>>()
-    for (const worker of this.workers) {
-      // worker.unref()
-      worker.postMessage(createAction(ActionType.TERMINATE, null))
-      terminatePromises.add(worker.terminate())
-    }
-    for (const p of terminatePromises) {
-      await p
-    }
-  }
-
-  protected handleRespondEliteOrganism(
-    worker: Worker,
-    action: Action<ActionType.RESPOND_ELITE_ORGANISM>
-  ) {
-    const { resolve } = this.requestMap.get(worker) ?? {}
-    if (resolve == null) {
-      throw new Error('no request found')
-    }
-    resolve(action.payload)
-  }
-
-  protected handleRespondBreedOrganism(
-    worker: Worker,
-    action: Action<ActionType.RESPOND_BREED_ORGANISM>
-  ) {
-    const { resolve } = this.requestMap.get(worker) ?? {}
-    if (resolve == null) {
-      throw new Error('no request found')
-    }
-    resolve(action.payload)
+    await this.initPromise
+    await this.dispatcher.broadcast(terminateAction())
+    await this.pool.terminate()
   }
 
   protected handleRequestPopulationTournamentSelect(
-    worker: Worker,
-    action: Action<ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT>
+    action: WorkerAction<EmptyPayload>,
+    context: DispatcherContext
   ) {
     const organism = this.population.tournamentSelect(
       this.population.populationOptions.interspeciesTournamentSize
@@ -234,19 +132,27 @@ export class WorkerReproducer<
       throw new Error('No organism found')
     }
     // FIXME: OrganismPayload<GFO>
-    const payload: OrganismPayload<any> = {
+    const responsePayload: OrganismPayload<any> = {
       genome: organism.genome.toFactoryOptions(),
       organismState: organism.toFactoryOptions(),
-      requestId: action.payload.requestId,
     }
-    worker.postMessage(
-      createAction(ActionType.RESPOND_POPULATION_TOURNAMENT_SELECT, payload)
-    )
+    // For worker→main→worker RPC, we need to use context.dispatch with proper meta
+    if (action.meta?.requestId != null) {
+      const responseAction: WorkerAction<OrganismPayload<any>> = {
+        type: 'RESPONSE',
+        payload: responsePayload,
+        meta: {
+          requestId: action.meta.requestId,
+          isResponse: true,
+        },
+      }
+      context.dispatch(responseAction)
+    }
   }
 
   protected handleRequestSpeciesTournamentSelect(
-    worker: Worker,
-    action: Action<ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT>
+    action: WorkerAction<SpeciesPayload>,
+    context: DispatcherContext
   ) {
     const { speciesId } = action.payload
     const species = this.population.species.get(speciesId) as Species<
@@ -264,31 +170,44 @@ export class WorkerReproducer<
     if (organism == null) {
       throw new Error('No organism found')
     }
-    const payload: OrganismPayload<any> = {
+    const responsePayload: OrganismPayload<any> = {
       genome: organism.genome.toFactoryOptions(),
       organismState: organism.toFactoryOptions(),
-      requestId: action.payload.requestId,
     }
-    worker.postMessage(
-      createAction(ActionType.RESPOND_SPECIES_TOURNAMENT_SELECT, payload)
-    )
+    if (action.meta?.requestId != null) {
+      const responseAction: WorkerAction<OrganismPayload<any>> = {
+        type: 'RESPONSE',
+        payload: responsePayload,
+        meta: {
+          requestId: action.meta.requestId,
+          isResponse: true,
+        },
+      }
+      context.dispatch(responseAction)
+    }
   }
 
   protected handleRequestSetCPPNStateRedirect(
-    worker: Worker,
-    action: Action<ActionType.REQUEST_SET_CPPN_STATE_REDIRECT>
+    action: WorkerAction<CPPNStateRedirectPayload>,
+    context: DispatcherContext
   ) {
     const state = this.population.stateProvider.neat()
     if (state.custom?.cloneState == null) {
       throw new Error('State provider does not support custom state')
     }
     state.custom.cloneState(action.payload.key, action.payload.oldKey)
-    const payload = {
-      requestId: action.payload.requestId,
+    const responsePayload: EmptyPayload = {}
+    if (action.meta?.requestId != null) {
+      const responseAction: WorkerAction<EmptyPayload> = {
+        type: 'RESPONSE',
+        payload: responsePayload,
+        meta: {
+          requestId: action.meta.requestId,
+          isResponse: true,
+        },
+      }
+      context.dispatch(responseAction)
     }
-    worker.postMessage(
-      createAction(ActionType.RESPOND_SET_CPPN_STATE_REDIRECT, payload)
-    )
   }
 
   async copyElites(
@@ -335,59 +254,27 @@ export class WorkerReproducer<
     organism: Organism<any, any, any, any, any, any, G>
   ): Promise<Organism<any, any, any, any, any, any, G>> {
     await this.initPromise
-    await this.semaphore.acquire()
-    const worker = this.workers.pop()
 
-    if (worker == null) {
-      this.semaphore.release()
-      throw new Error('No worker available')
-    }
-    let elite: Organism<any, any, any, any, any, any, G>
-    try {
-      const data = await this.requestEliteOrganism(worker, organism)
-      const genome = this.population.algorithm.createGenome(
-        this.population.configProvider,
-        this.population.stateProvider,
-        this.population.genomeOptions,
-        this.population.initConfig,
-        data.genome
-      )
-      elite = new Organism(
-        genome,
-        data.organismState.generation,
-        data.organismState
-      )
-    } finally {
-      this.workers.push(worker)
-      this.semaphore.release()
-    }
-    this.population.push(elite, true)
-    return elite
-  }
-
-  protected async requestEliteOrganism(
-    worker: Worker,
-    organism: Organism<any, any, any, any, any, any, G>
-  ): Promise<OrganismPayload<any>> {
-    return await new Promise((resolve, reject) => {
-      const customResolve = (
-        value: OrganismPayload<any> | PromiseLike<OrganismPayload<any>>
-      ) => {
-        this.requestMap.delete(worker)
-        resolve(value)
-      }
-      const requestId = nextRequestId()
-      this.requestMap.set(worker, { resolve: customResolve, reject })
-      const payload: OrganismPayload<any> = {
+    const data = await this.dispatcher.request<OrganismPayload<any>>(
+      requestEliteOrganism({
         genome: organism.genome.toFactoryOptions(),
         organismState: organism.toFactoryOptions(),
-        // use negative requests to avoid confusion with worker thread ids
-        requestId: -requestId,
-      }
-      worker.postMessage(
-        createAction(ActionType.REQUEST_ELITE_ORGANISM, payload)
-      )
-    })
+      })
+    )
+    const genome = this.population.algorithm.createGenome(
+      this.population.configProvider,
+      this.population.stateProvider,
+      this.population.genomeOptions,
+      this.population.initConfig,
+      data.genome
+    )
+    const elite = new Organism(
+      genome,
+      data.organismState.generation,
+      data.organismState
+    )
+    this.population.push(elite, true)
+    return elite
   }
 
   async reproduce(
@@ -427,57 +314,25 @@ export class WorkerReproducer<
     speciesId: number
   ): Promise<Organism<any, any, any, any, any, any, G>> {
     await this.initPromise
-    await this.semaphore.acquire()
-    const worker = this.workers.pop()
 
-    if (worker == null) {
-      this.semaphore.release()
-      throw new Error('No worker available')
-    }
-
-    let organism: Organism<any, any, any, any, any, any, G>
-    try {
-      const data = await this.requestBreedOrganism(worker, speciesId)
-      const genome = this.population.algorithm.createGenome(
-        this.population.configProvider,
-        this.population.stateProvider,
-        this.population.genomeOptions,
-        this.population.initConfig,
-        data.genome
-      )
-      organism = new Organism(
-        genome,
-        data.organismState.generation,
-        data.organismState
-      )
-    } finally {
-      this.workers.push(worker)
-      this.semaphore.release()
-    }
+    const data = await this.dispatcher.request<OrganismPayload<any>>(
+      requestBreedOrganism({
+        speciesId,
+      })
+    )
+    const genome = this.population.algorithm.createGenome(
+      this.population.configProvider,
+      this.population.stateProvider,
+      this.population.genomeOptions,
+      this.population.initConfig,
+      data.genome
+    )
+    const organism = new Organism(
+      genome,
+      data.organismState.generation,
+      data.organismState
+    )
     this.population.push(organism, true)
     return organism
-  }
-
-  protected async requestBreedOrganism(
-    worker: Worker,
-    speciesId: number
-  ): Promise<OrganismPayload<any>> {
-    return await new Promise((resolve, reject) => {
-      const customResolve = (
-        value: OrganismPayload<any> | PromiseLike<OrganismPayload<any>>
-      ) => {
-        this.requestMap.delete(worker)
-        resolve(value)
-      }
-      const requestId = nextRequestId()
-      this.requestMap.set(worker, { resolve: customResolve, reject })
-      worker.postMessage(
-        createAction(ActionType.REQUEST_BREED_ORGANISM, {
-          // use negative requests to avoid confusion with worker thread ids
-          requestId: -requestId,
-          speciesId,
-        })
-      )
-    })
   }
 }

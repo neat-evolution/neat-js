@@ -7,15 +7,15 @@ import {
   CoreState,
 } from '@neat-evolution/core'
 
-import type { ThreadContext } from './worker/ThreadContext.js'
-import { StateType } from './WorkerAction.js'
+import { StateType } from './actions.js'
+import type { ReproducerHandlerContext } from './worker/ThreadContext.js'
 import { WorkerCustomState } from './WorkerCustomState.js'
 
 export type GetSplitInnovationFn = (
   innovationKey: InnovationKey,
   stateType: StateType,
   stateKey: string | null,
-  context: ThreadContext
+  context: ReproducerHandlerContext
 ) => Promise<NodeKey>
 
 export type GetConnectInnovationFn = (
@@ -23,13 +23,13 @@ export type GetConnectInnovationFn = (
   to: NodeKey,
   stateType: StateType,
   stateKey: string | null,
-  context: ThreadContext
+  context: ReproducerHandlerContext
 ) => Promise<InnovationKey>
 
 export type SetCPPNStateRedirectFn = (
   key: LinkKey,
   oldKey: LinkKey,
-  context: ThreadContext
+  context: ReproducerHandlerContext
 ) => void
 
 export class WorkerState<
@@ -44,11 +44,11 @@ export class WorkerState<
   public readonly enableCustomState: boolean
   public readonly custom: WorkerCustomState | null
 
-  protected readonly context: ThreadContext
+  protected readonly context: ReproducerHandlerContext
 
   constructor(
     setCPPNStateRedirectFn: SetCPPNStateRedirectFn,
-    context: ThreadContext,
+    context: ReproducerHandlerContext,
     stateType: StateType = StateType.NEAT,
     stateKey: string | null = null,
     enableCustomState: boolean = false,
