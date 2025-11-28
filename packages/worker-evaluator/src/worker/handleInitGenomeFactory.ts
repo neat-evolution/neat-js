@@ -1,39 +1,34 @@
-import { workerContext } from '@neat-evolution/worker-threads'
+import type { WorkerContext } from '@neat-evolution/worker-actions'
 
-import {
-  ActionType,
-  createWorkerAction,
-  type InitGenomeFactoryPayload,
-} from '../WorkerAction.js'
+import { type InitGenomeFactoryPayload } from '../actions.js'
 
 import type { ThreadContext } from './ThreadContext.js'
 
 export type HandleInitGenomeFn = (
   payload: InitGenomeFactoryPayload<any, any>,
-  threadContext: ThreadContext
+  context: ThreadContext & Partial<WorkerContext>
 ) => Promise<void>
 
 export const handleInitGenomeFactory: HandleInitGenomeFn = async (
   { configData, genomeOptions, initConfig },
-  threadContext
+  context
 ) => {
-  if (threadContext.threadInfo == null) {
-    throw new Error('threadInfo not initialized')
-  }
-  if (workerContext == null) {
-    throw new Error('Worker must be created with a parent port')
+  if (context.threadInfo == null) {
+    throw new Error('handleInitGenomeFactory threadInfo not initialized')
   }
 
-  const configProvider = threadContext.threadInfo.createConfig(configData)
-  const stateProvider = threadContext.threadInfo.createState()
+  const configProvider = context.threadInfo.createConfig(configData)
+  const stateProvider = context.threadInfo.createState()
 
-  threadContext.genomeFactoryConfig = {
+  context.genomeFactoryConfig = {
     configProvider,
     stateProvider,
     genomeOptions,
     initConfig,
   }
-  workerContext.postMessage(
-    createWorkerAction(ActionType.INIT_GENOME_FACTORY_SUCCESS, null)
-  )
+
+  if (context.dispatch == null) {
+    throw new Error('dispatch not properly added to context')
+  }
+  // FIXME: should this just be handled by returning true?
 }

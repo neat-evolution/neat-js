@@ -1,35 +1,36 @@
-import type { GenomeFactoryOptions } from '@neat-evolution/core'
 import type { Executor } from '@neat-evolution/executor'
-import { workerContext } from '@neat-evolution/worker-threads'
+import { createRNG } from '@neat-evolution/utils'
+import type { WorkerContext } from '@neat-evolution/worker-actions'
 
-import { createWorkerAction, ActionType } from '../WorkerAction.js'
+import { type EvaluateGenomePayload } from '../actions.js'
 
 import type { ThreadContext } from './ThreadContext.js'
 
-export type HandleEvaluateGenomeFn<O> = (
-  options: O,
-  threadContext: ThreadContext
-) => Promise<void>
+export type HandleEvaluateGenomeFn = (
+  options: EvaluateGenomePayload,
+  context: ThreadContext & Partial<WorkerContext>
+) => Promise<number>
 
-export const handleEvaluateGenome: HandleEvaluateGenomeFn<
-  GenomeFactoryOptions<any, any>
-> = async (genomeFactoryOptions, threadContext) => {
-  if (threadContext.threadInfo == null) {
-    throw new Error('threadInfo not initialized')
+export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
+  options,
+  context
+) => {
+  const { genomeOptions: genomeFactoryOptions, seed } = options
+  if (context.threadInfo == null) {
+    throw new Error('handleEvaluateGenome threadInfo not initialized')
   }
-  if (threadContext.genomeFactoryConfig == null) {
+  if (context.genomeFactoryConfig == null) {
     throw new Error('genomeFactoryConfig not initialized')
   }
-  if (workerContext == null) {
-    throw new Error('Worker must be created with a parent port')
-  }
+
+  const rng = seed != null ? createRNG(seed) : undefined
 
   // hydrate the genome
   const { configProvider, stateProvider, genomeOptions, initConfig } =
-    threadContext.genomeFactoryConfig
+    context.genomeFactoryConfig
 
   const { createGenome, createPhenotype, createExecutor, environment } =
-    threadContext.threadInfo
+    context.threadInfo
 
   const genome = createGenome(
     configProvider,
@@ -49,12 +50,10 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn<
 
   // allow for different types of executors and environments
   if (executor.isAsync || environment.isAsync) {
-    fitness = await environment.evaluateAsync(executor)
+    fitness = await environment.evaluateAsync(executor, rng)
   } else {
-    fitness = environment.evaluate(executor)
+    fitness = environment.evaluate(executor, rng)
   }
 
-  workerContext.postMessage(
-    createWorkerAction(ActionType.RESPOND_EVALUATE_GENOME, fitness)
-  )
+  return fitness
 }

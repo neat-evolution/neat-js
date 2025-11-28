@@ -4,7 +4,7 @@ import type {
   PhenotypeFactory,
   StateFactory,
 } from '@neat-evolution/core'
-import type { StandardEnvironment } from '@neat-evolution/environment'
+import type { Environment } from '@neat-evolution/environment'
 import type { ExecutorFactory } from '@neat-evolution/executor'
 
 export type AnyGenomeFactory = GenomeFactory<
@@ -31,5 +31,5 @@ export interface ThreadInfo {
   createGenome: AnyGenomeFactory
   createPhenotype: PhenotypeFactory<any>
   createState: StateFactory<any, any, any, any, any, any>
-  environment: StandardEnvironment<any>
+  environment: Environment<any>
 }

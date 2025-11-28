@@ -1,36 +1,39 @@
 import type {
   ConfigData,
-  GenomeFactoryOptions,
   GenomeOptions,
   InitConfig,
 } from '@neat-evolution/core'
-import type { StandardEnvironment } from '@neat-evolution/environment'
+import type { Environment } from '@neat-evolution/environment'
+import {
+  type EvaluationContext,
+  type EvaluationStrategy,
+  IndividualStrategy,
+} from '@neat-evolution/evaluation-strategy'
 import type {
   AnyAlgorithm,
+  Evaluator,
   FitnessData,
   GenomeEntries,
   GenomeEntry,
-  StandardEvaluator,
 } from '@neat-evolution/evaluator'
-import { Worker, type WorkerMessageEvent } from '@neat-evolution/worker-threads'
-import { Sema } from 'async-sema'
+import { Dispatcher } from '@neat-evolution/worker-actions'
+import { WorkerPool } from '@neat-evolution/worker-pool'
 
-import type { ActionMessage } from './message/ActionMessage.js'
-import type { RequestMapValue } from './RequestMapValue.js'
 import {
-  ActionType,
-  createWorkerAction,
-  type InitPayload,
-  type PayloadMap,
-} from './WorkerAction.js'
+  initEvaluator,
+  initGenomeFactory as initGenomeFactoryAction,
+  requestEvaluateBatch,
+  requestEvaluateGenome,
+  terminate as terminateAction,
+} from './actions.js'
 import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'
 
-export class WorkerEvaluator implements StandardEvaluator {
+export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
   public readonly algorithm: AnyAlgorithm<any>
   public readonly algorithmPathname: string
   public readonly enableAsync = true
 
-  public readonly environment: StandardEnvironment<any>
+  public readonly environment: Environment<EFO>
 
   public readonly taskCount: number
   public readonly threadCount: number
@@ -38,13 +41,23 @@ export class WorkerEvaluator implements StandardEvaluator {
   public readonly createExecutorPathname: string
   public readonly initPromise: Promise<void>
 
-  private readonly workers: Worker[]
-  private readonly semaphore: Sema
-  private readonly requestMap = new Map<Worker, RequestMapValue>()
+  private readonly pool: WorkerPool
+  private readonly dispatcher: Dispatcher
+
+  /**
+   * Evaluation context exposing worker pool functionality to evaluation strategies
+   */
+  public readonly evaluationContext: EvaluationContext<any>
+
+  /**
+   * Evaluation strategy determining how genomes are evaluated
+   * Defaults to IndividualStrategy for backward compatibility
+   */
+  private readonly strategy: EvaluationStrategy<any>
 
   constructor(
     algorithm: AnyAlgorithm<any>,
-    environment: StandardEnvironment<any>,
+    environment: Environment<EFO>,
     options: WorkerEvaluatorOptions
   ) {
     this.algorithm = algorithm
@@ -56,89 +69,53 @@ export class WorkerEvaluator implements StandardEvaluator {
     this.createExecutorPathname = options.createExecutorPathname
     this.createEnvironmentPathname = options.createEnvironmentPathname
 
-    this.semaphore = new Sema(options.threadCount, {
-      capacity: options.taskCount,
+    this.pool = new WorkerPool({
+      threadCount: options.threadCount,
+      taskCount: options.taskCount,
+      workerScriptUrl: new URL('./workerEvaluatorScript.js', import.meta.url),
+      workerOptions: {
+        name: 'WorkerEvaluator',
+        type: 'module',
+      },
+      verbose: options.verbose ?? false,
     })
 
-    this.workers = []
-    this.requestMap = new Map()
+    this.dispatcher = new Dispatcher(this.pool, {
+      verbose: options.verbose ?? false,
+    })
+
     this.initPromise = this.initWorkers()
+
+    // Create evaluation context - expose Dispatcher methods directly
+    this.evaluationContext = {
+      evaluateGenomeEntry: this.evaluateGenomeEntry.bind(this),
+      evaluateGenomeEntryBatch: this.evaluateGenomeEntryBatch.bind(this),
+      dispatch: (action) => {
+        void this.dispatcher.dispatch(action)
+      },
+      request: this.dispatcher.request.bind(this.dispatcher),
+      broadcast: this.dispatcher.broadcast.bind(this.dispatcher),
+      addActionHandler: this.dispatcher.addActionHandler.bind(this.dispatcher),
+      removeActionHandler: this.dispatcher.removeActionHandler.bind(
+        this.dispatcher
+      ),
+    }
+
+    // Initialize strategy with default if not provided
+    this.strategy = options.strategy ?? new IndividualStrategy()
   }
 
   async initWorkers() {
-    const initPromises: Array<Promise<void>> = []
+    // Wait for workers to be ready before sending init messages
+    await this.pool.ready()
 
-    for (let i = 0; i < this.threadCount; i++) {
-      const initPromise = new Promise<void>((resolve, reject) => {
-        const worker = new Worker(
-          new URL('./workerEvaluatorScript.js', import.meta.url),
-          {
-            name: 'WorkerEvaluator',
-            type: 'module',
-          }
-        )
-        const messageListener = (
-          actionEvent: WorkerMessageEvent<ActionMessage<string, any>>
-        ) => {
-          const action: ActionMessage<string, any> = actionEvent.data
-          switch (action.type) {
-            case ActionType.RESPOND_EVALUATE_GENOME: {
-              const payload =
-                action.payload as PayloadMap[ActionType.RESPOND_EVALUATE_GENOME]
-              const { resolve } = this.requestMap.get(worker) ?? {}
-              if (resolve == null) {
-                throw new Error('no request found')
-              }
-              resolve(payload)
-              break
-            }
-            case ActionType.INIT_EVALUATOR_SUCCESS: {
-              resolve()
-              this.workers.push(worker)
-              break
-            }
-            case ActionType.INIT_GENOME_FACTORY_SUCCESS: {
-              break
-            }
-            default: {
-              const { reject: rejectRequest } =
-                this.requestMap.get(worker) ?? {}
-              const error = new Error('Unexpected action type')
-              if (rejectRequest != null) {
-                rejectRequest(error)
-              } else {
-                reject(error)
-              }
-              break
-            }
-          }
-        }
-
-        const errorListener = (error: Error) => {
-          const { reject: rejectRequest } = this.requestMap.get(worker) ?? {}
-          if (rejectRequest != null) {
-            rejectRequest(error)
-          } else {
-            reject(error)
-          }
-        }
-
-        worker.addEventListener('message', messageListener)
-        worker.addEventListener('error', errorListener)
-
-        const data: InitPayload = {
-          algorithmPathname: this.algorithmPathname,
-          createExecutorPathname: this.createExecutorPathname,
-          createEnvironmentPathname: this.createEnvironmentPathname,
-          environmentData: this.environment.toFactoryOptions(),
-        }
-
-        worker.postMessage(createWorkerAction(ActionType.INIT_EVALUATOR, data))
-      })
-
-      initPromises.push(initPromise)
+    const data = {
+      algorithmPathname: this.algorithmPathname,
+      createExecutorPathname: this.createExecutorPathname,
+      createEnvironmentPathname: this.createEnvironmentPathname,
+      environmentData: this.environment.toFactoryOptions(),
     }
-    await Promise.all(initPromises)
+    await this.dispatcher.broadcast<null>(initEvaluator(data))
   }
 
   async initGenomeFactory<CD extends ConfigData>(
@@ -147,94 +124,78 @@ export class WorkerEvaluator implements StandardEvaluator {
     initConfig: InitConfig
   ) {
     await this.initPromise
-    for (const worker of this.workers) {
-      worker.postMessage(
-        createWorkerAction(ActionType.INIT_GENOME_FACTORY, {
-          configData,
-          genomeOptions,
-          initConfig,
-        })
-      )
-    }
+    await this.dispatcher.broadcast(
+      initGenomeFactoryAction({
+        configData,
+        genomeOptions,
+        initConfig,
+      })
+    )
   }
 
   async terminate() {
-    const terminatePromises = new Set<Promise<void>>()
-    for (const worker of this.workers) {
-      // worker.unref()
-      worker.postMessage(createWorkerAction(ActionType.TERMINATE, null))
-      terminatePromises.add(worker.terminate())
-    }
-    for (const p of terminatePromises) {
-      await p
-    }
+    await this.initPromise
+    await this.dispatcher.broadcast(terminateAction())
+    await this.pool.terminate()
   }
 
   async *evaluate(
     genomeEntries: GenomeEntries<any>
   ): AsyncIterable<FitnessData> {
     await this.initPromise
-    const promises: Array<Promise<FitnessData>> = []
-
-    for (const entry of genomeEntries) {
-      const p = this.evaluateGenomeEntry(entry)
-      promises.push(p)
-    }
-
-    while (promises.length > 0) {
-      const p = promises.shift()
-      if (p != null) {
-        yield await p
-      }
-    }
+    // Delegate to strategy, passing the evaluation context
+    yield* this.strategy.evaluate(this.evaluationContext, genomeEntries)
   }
 
+  /**
+   * Evaluates a single genome entry using a worker
+   * @param {GenomeEntry<any>} genomeEntry - The genome entry to evaluate
+   * @param seed
+   * @returns {Promise<FitnessData>} Fitness data for the genome
+   */
   private async evaluateGenomeEntry(
-    genomeEntry: GenomeEntry<any>
+    genomeEntry: GenomeEntry<any>,
+    seed?: string
   ): Promise<FitnessData> {
     await this.initPromise
-    await this.semaphore.acquire()
-    const worker = this.workers.pop()
-
-    if (worker == null) {
-      this.semaphore.release()
-      throw new Error('No worker available')
-    }
-
-    let fitnessData: FitnessData
-
-    try {
-      const [speciesIndex, organismIndex, genome] = genomeEntry
-      const fitness = await this.requestEvaluateGenome(
-        worker,
-        genome.toFactoryOptions()
-      )
-      fitnessData = [speciesIndex, organismIndex, fitness]
-    } finally {
-      this.semaphore.release()
-      this.workers.push(worker)
-    }
-    return fitnessData
+    const [speciesIndex, organismIndex, genome] = genomeEntry
+    const fitness = await this.dispatcher.request<number>(
+      requestEvaluateGenome({
+        genomeOptions: genome.toFactoryOptions(),
+        seed,
+      })
+    )
+    return [speciesIndex, organismIndex, fitness]
   }
 
-  private async requestEvaluateGenome(
-    worker: Worker,
-    genomeFactoryOptions: GenomeFactoryOptions<any, any>
-  ): Promise<number> {
-    return await new Promise((resolve, reject) => {
-      const customResolve = (value: number | PromiseLike<number>) => {
-        this.requestMap.delete(worker)
-        resolve(value)
-      }
-      this.requestMap.set(worker, { resolve: customResolve, reject })
+  /**
+   * Evaluates a batch of genome entries together using a single worker
+   * This is critical for tournament-style evaluation where genomes compete
+   * @param {Array<GenomeEntry<any>>} genomeEntries - Array of genome entries to evaluate together
+   * @param seed
+   * @returns {Promise<FitnessData[]>} Array of fitness data for each genome
+   */
+  private async evaluateGenomeEntryBatch(
+    genomeEntries: Array<GenomeEntry<any>>,
+    seed?: string
+  ): Promise<FitnessData[]> {
+    await this.initPromise
+    const genomeFactoryOptions = genomeEntries.map(([, , genome]) =>
+      genome.toFactoryOptions()
+    )
+    const fitnessScores = await this.dispatcher.request<number[]>(
+      requestEvaluateBatch({
+        genomeOptions: genomeFactoryOptions,
+        seed,
+      })
+    )
 
-      // Post data to the worker
-      worker.postMessage(
-        createWorkerAction(
-          ActionType.REQUEST_EVALUATE_GENOME,
-          genomeFactoryOptions
-        )
-      )
+    return genomeEntries.map(([speciesIndex, organismIndex], index) => {
+      const fitness = fitnessScores[index]
+      if (fitness === undefined) {
+        throw new Error(`Missing fitness score at index ${index}`)
+      }
+      return [speciesIndex, organismIndex, fitness]
     })
   }
 }

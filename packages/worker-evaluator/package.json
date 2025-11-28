@@ -41,13 +41,17 @@
     "format": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\" --fix",
     "lint": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\"",
     "precommit": "lint-staged",
-    "test": "vitest"
+    "test": "vitest --passWithNoTests --run"
   },
   "dependencies": {
     "@neat-evolution/core": "^0.3.1",
     "@neat-evolution/environment": "^0.3.3",
+    "@neat-evolution/evaluation-strategy": "^0.1.0",
     "@neat-evolution/evaluator": "^0.3.3",
     "@neat-evolution/executor": "^0.3.3",
+    "@neat-evolution/utils": "^0.2.3",
+    "@neat-evolution/worker-actions": "^0.2.3",
+    "@neat-evolution/worker-pool": "^0.2.3",
     "@neat-evolution/worker-threads": "^0.2.3",
     "@swc/helpers": "^0.5.17",
     "async-sema": "^3.1.1"
