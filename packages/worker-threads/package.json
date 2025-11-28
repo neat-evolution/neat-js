@@ -59,7 +59,7 @@
     "format": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\" --fix",
     "lint": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\"",
     "precommit": "lint-staged",
-    "test": "vitest"
+    "test": "vitest --passWithNoTests --run"
   },
   "dependencies": {
     "@swc/helpers": "^0.5.17"

@@ -8,6 +8,8 @@ import type {
 } from '../MessageListenerFn.js'
 import type { WorkerOptions } from '../WorkerOptions.js'
 
+export type Transferable = ArrayBuffer | MessagePort
+
 export class Worker {
   public readonly nodeWorker: NodeWorker
   protected readonly listenerMap = new WeakMap<
