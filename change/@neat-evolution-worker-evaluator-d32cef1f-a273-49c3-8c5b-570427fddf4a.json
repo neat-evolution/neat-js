@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Migrate to Dispatcher/Handler pattern",
+  "packageName": "@neat-evolution/worker-evaluator",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
