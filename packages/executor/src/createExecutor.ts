@@ -26,7 +26,7 @@ export const createExecutor: SyncExecutorFactory = (
 
     // Copy inputs into values
     for (const [i, index] of phenotype.inputs.entries()) {
-      values[i] = inputs[index] as number
+      values[i] = inputs[index] ?? 0
     }
 
     // Do forward pass
@@ -36,6 +36,9 @@ export const createExecutor: SyncExecutorFactory = (
         case PhenotypeActionType.Link: {
           const [, actionFrom, actionTo, actionWeight] = action
           const from = values[actionFrom] as number
+          if (values[actionTo] === undefined) {
+            throw new Error(`Invalid actionTo index: ${actionTo}`)
+          }
           values[actionTo] += from * actionWeight
           break
         }
