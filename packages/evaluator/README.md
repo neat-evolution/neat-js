@@ -20,6 +20,9 @@ The primary purpose of the `@neat-evolution/evaluator` package is to:
 - **Support Different Execution Models:** Allow for both synchronous and
   asynchronous execution of neural networks, accommodating various performance
   requirements (e.g., single-threaded vs. worker-based).
+- **Bridge to Evaluation Strategies:** Act as a crucial bridge between the
+  evolutionary algorithms, the problem domain, and the pluggable evaluation
+  strategies.
 
 ## How it Fits into the Ecosystem
 
@@ -59,7 +62,7 @@ yarn add @neat-evolution/evaluator
 
 The `evaluator` package exposes the following key types and functions:
 
-- **`Evaluator<E, EA, ER>` interface**:
+- **`Evaluator` interface**:
 
   The core interface for any evaluator. It includes:
 
@@ -73,12 +76,6 @@ The `evaluator` package exposes the following key types and functions:
     collection of genomes with their species and organism indices) and yields
     `FitnessData` (species index, organism index, and calculated fitness).
 
-- **`StandardEvaluator` type**:
-
-  A type alias for a common `Evaluator` configuration, where evaluation
-  typically involves a single `SyncExecutor` or `Executor` and returns a
-  `number` (the fitness score).
-
 - **`GenomeEntry<G>` and `GenomeEntries<G>`**:
 
   Types that define how genomes are passed to the evaluator, including their
@@ -91,7 +88,7 @@ The `evaluator` package exposes the following key types and functions:
 
 - **`createEvaluator(...)` function**:
 
-  A factory function that creates a `StandardEvaluator` instance. It takes an
+  A factory function that creates an `Evaluator` instance. It takes an
   `Algorithm`, an `Environment`, and an `ExecutorFactory` to construct the
   evaluator. Currently, it uses a `TestEvaluator` as its underlying
   implementation.
@@ -109,7 +106,7 @@ Evaluators are typically created by the main evolutionary process (e.g., the
 function from `@neat-evolution/evolution`.
 
 ```typescript
-import { createEvaluator, StandardEvaluator } from "@neat-evolution/evaluator";
+import { createEvaluator, Evaluator } from "@neat-evolution/evaluator";
 
 import { NEATAlgorithm } from "@neat-evolution/neat"; // Example algorithm
 
@@ -135,7 +132,7 @@ async function setupEvaluator() {
 
   // 2. Create an evaluator
 
-  const evaluator: StandardEvaluator = createEvaluator(
+  const evaluator: Evaluator = createEvaluator(
     NEATAlgorithm, // The algorithm whose genomes will be evaluated
     environment, // The environment to evaluate against
     createExecutor, // A factory to create executors for running phenotypes
