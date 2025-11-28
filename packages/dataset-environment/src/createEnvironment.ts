@@ -1,11 +1,11 @@
-import type { StandardEnvironmentFactory } from '@neat-evolution/environment'
+import type { EnvironmentFactory } from '@neat-evolution/environment'
 
 import { DatasetEnvironment } from './DatasetEnvironment.js'
 import { datasetFromSharedBuffer } from './datasetFromSharedBuffer.js'
 
-export const createEnvironment: StandardEnvironmentFactory<
-  SharedArrayBuffer | null
-> = (environmentData) => {
+export const createEnvironment: EnvironmentFactory<SharedArrayBuffer | null> = (
+  environmentData
+) => {
   if (environmentData == null) {
     throw new Error('Environment data must be provided')
   }
