@@ -2,6 +2,7 @@ import type { InitConfig, NEATConfigOptions } from '@neat-evolution/core'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
+  PopulationFactoryOptions,
   PopulationOptions,
   ReproducerFactory,
 } from '@neat-evolution/evolution'
@@ -63,12 +64,20 @@ export type DESHyperNEATReproducerFactory = ReproducerFactory<
 // FIXME: not a valid PopulationFactory
 export const createPopulation = (
   createReproducer: DESHyperNEATReproducerFactory,
-  evaluator: Evaluator<any, any, any>,
+  evaluator: Evaluator<any>,
   // FIXME: should be TopologyConfigOptions & Partial<NeatConfigOptions>
   topologyConfigOptions: TopologyConfigOptions,
   cppnConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
-  genomeOptions: DESHyperNEATGenomeOptions
+  genomeOptions: DESHyperNEATGenomeOptions,
+  populationFactoryOptions?: PopulationFactoryOptions<
+    DESHyperNEATConfigData,
+    DESHyperNEATStateData,
+    DESHyperNEATNodeData,
+    DESHyperNEATLinkData,
+    DESHyperNEATGenomeFactoryOptions,
+    DESHyperNEATGenomeOptions
+  >
 ): DESHyperNEATPopulation => {
   const configProvider = DESHyperNEATAlgorithm.createConfig({
     neat: {
@@ -94,7 +103,8 @@ export const createPopulation = (
     configProvider,
     populationOptions,
     genomeOptions,
-    initConfig
+    initConfig,
+    populationFactoryOptions
   )
 
   return population

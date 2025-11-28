@@ -10,9 +10,10 @@ import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import { Population } from '@neat-evolution/evolution'
 import type {
+  PopulationFactory,
+  PopulationFactoryOptions,
   PopulationOptions,
   ReproducerFactory,
-  PopulationFactory,
 } from '@neat-evolution/evolution'
 
 import { NEATAlgorithm } from './NEATAlgorithm.js'
@@ -83,10 +84,18 @@ export const createPopulation: PopulationFactory<
   NEATGenome
 > = (
   createReproducer: NEATReproducerFactory,
-  evaluator: Evaluator<any, any, any>,
+  evaluator: Evaluator<any>,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
-  genomeOptions: NEATGenomeOptions
+  genomeOptions: NEATGenomeOptions,
+  populationFactoryOptions?: PopulationFactoryOptions<
+    ConfigData,
+    StateData,
+    NEATHiddenNodeData,
+    NEATLinkData,
+    NEATGenomeFactoryOptions,
+    NEATGenomeOptions
+  >
 ): NEATPopulation => {
   const configProvider = NEATAlgorithm.createConfig({
     neat: neatConfigOptions ?? defaultNEATConfigOptions,
@@ -99,7 +108,8 @@ export const createPopulation: PopulationFactory<
     configProvider,
     populationOptions,
     genomeOptions,
-    initConfig
+    initConfig,
+    populationFactoryOptions
   )
 
   return population
