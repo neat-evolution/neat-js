@@ -1,13 +1,17 @@
-import { createEvaluator as createVanillaEvaluator } from '@neat-evolution/evaluator'
-import type { StandardEvaluatorFactory } from '@neat-evolution/evaluator'
+import type { Environment } from '@neat-evolution/environment'
+import {
+  createEvaluator as createVanillaEvaluator,
+  type AnyAlgorithm,
+  type EvaluatorFactory,
+} from '@neat-evolution/evaluator'
 import { createReproducer } from '@neat-evolution/evolution'
 import { createExecutor } from '@neat-evolution/executor'
 
 import { demo } from './demo.js'
 
-const createEvaluator: StandardEvaluatorFactory<any> = (
-  algorithm,
-  environment
+const createEvaluator: EvaluatorFactory<any, any> = (
+  algorithm: AnyAlgorithm<any>,
+  environment: Environment<any>
 ) => {
   return createVanillaEvaluator(algorithm, environment, createExecutor)
 }

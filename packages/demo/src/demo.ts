@@ -20,7 +20,8 @@ import {
   eshyperneat,
   ESHyperNEATAlgorithm,
 } from '@neat-evolution/es-hyperneat'
-import type { StandardEvaluatorFactory } from '@neat-evolution/evaluator'
+import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
+import type { EvaluatorFactory } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
@@ -51,7 +52,7 @@ export const method = Methods.DES_HyperNEAT
 
 export const demo = async (
   createReproducer: ReproducerFactory<any, any>,
-  createEvaluator: StandardEvaluatorFactory<any>
+  createEvaluator: EvaluatorFactory<any, any>
 ) => {
   const datasetOptions = defaultDatasetOptions
   datasetOptions.dataset = new URL(
@@ -65,16 +66,23 @@ export const demo = async (
   const dataset = await loadDataset(datasetOptions)
   const environment = new DatasetEnvironment(dataset)
 
-  const evolutionOptions: EvolutionOptions = {
+  const evolutionOptions: EvolutionOptions<any, any> = {
     ...defaultEvolutionOptions,
-    iterations: 5_000,
-    secondsLimit: 600,
+    iterations: 5,
+    secondsLimit: 20,
   }
+
+  // Create evaluation strategy for genome fitness evaluation
+  // IndividualStrategy evaluates each genome independently (default behavior)
+  // Alternative strategies can be implemented for batch, tournament, or coevolution patterns
+  const strategy = new IndividualStrategy()
 
   const evolve = async (method: Methods) => {
     switch (method) {
       case Methods.NEAT: {
-        const evaluator = createEvaluator(NEATAlgorithm, environment, null)
+        const evaluator = createEvaluator(NEATAlgorithm, environment, {
+          strategy,
+        })
         return await neat(
           createReproducer as NEATReproducerFactory,
           evaluator,
@@ -85,7 +93,9 @@ export const demo = async (
         )
       }
       case Methods.CPPN: {
-        const evaluator = createEvaluator(CPPNAlgorithm, environment, null)
+        const evaluator = createEvaluator(CPPNAlgorithm, environment, {
+          strategy,
+        })
         return await cppn(
           createReproducer,
           evaluator,
@@ -96,7 +106,9 @@ export const demo = async (
         )
       }
       case Methods.HyperNEAT: {
-        const evaluator = createEvaluator(HyperNEATAlgorithm, environment, null)
+        const evaluator = createEvaluator(HyperNEATAlgorithm, environment, {
+          strategy,
+        })
         return await hyperneat(
           createReproducer,
           evaluator,
@@ -107,11 +119,9 @@ export const demo = async (
         )
       }
       case Methods.ES_HyperNEAT: {
-        const evaluator = createEvaluator(
-          ESHyperNEATAlgorithm,
-          environment,
-          null
-        )
+        const evaluator = createEvaluator(ESHyperNEATAlgorithm, environment, {
+          strategy,
+        })
         return await eshyperneat(
           createReproducer,
           evaluator,
@@ -122,11 +132,9 @@ export const demo = async (
         )
       }
       case Methods.DES_HyperNEAT: {
-        const evaluator = createEvaluator(
-          DESHyperNEATAlgorithm,
-          environment,
-          null
-        )
+        const evaluator = createEvaluator(DESHyperNEATAlgorithm, environment, {
+          strategy,
+        })
         return await deshyperneat(
           createReproducer,
           evaluator,

@@ -38,9 +38,10 @@
     "dev:cjs": "mkdir -p dist/cjs && echo '{\"type\":\"commonjs\",\"main\":\"./index.js\"}' >> dist/cjs/package.json && swc --watch src -d dist/cjs --source-maps --copy-files -C module.type=commonjs",
     "dev:esm": "swc --watch src -d dist/esm --source-maps --copy-files -C module.type=es6",
     "dev:types": "tsc --watch --declaration --emitDeclarationOnly --project tsconfig.types.json --outDir dist/types",
+    "demo": "node ./dist/esm/worker.js",
     "start": "caffeinate -s node ./dist/esm/worker.js",
     "format": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\" --fix",
-    "lint": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\"",
+    "lint": "eslint \"**/*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}\" --fix",
     "precommit": "lint-staged",
     "test": "node ./scripts/iris.js && vitest"
   },
@@ -51,6 +52,7 @@
     "@neat-evolution/des-hyperneat": "^0.4.2",
     "@neat-evolution/environment": "^0.3.3",
     "@neat-evolution/es-hyperneat": "^0.4.2",
+    "@neat-evolution/evaluation-strategy": "^0.1.0",
     "@neat-evolution/evaluator": "^0.3.3",
     "@neat-evolution/evolution": "^0.3.3",
     "@neat-evolution/executor": "^0.3.3",
@@ -59,7 +61,8 @@
     "@neat-evolution/worker-evaluator": "^0.3.3",
     "@neat-evolution/worker-reproducer": "^0.3.3",
     "@neat-evolution/worker-threads": "^0.2.3",
-    "@swc/helpers": "^0.5.17"
+    "@swc/helpers": "^0.5.17",
+    "quick-lru": "^7.0.0"
   },
   "devDependencies": {
     "@heygrady/eslint-config": "^1.5.1",
@@ -68,6 +71,7 @@
     "@rushstack/eslint-patch": "^1.6.1",
     "@swc/cli": "^0.1.65",
     "@swc/core": "^1.11.1",
+    "@tsconfig/node22": "22.0.0",
     "@types/eslint": "^8",
     "@vitest/coverage-v8": "^0.34.6",
     "concurrently": "^8.2.2",
