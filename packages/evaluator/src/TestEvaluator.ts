@@ -1,22 +1,22 @@
-import type { StandardEnvironment } from '@neat-evolution/environment'
+import type { Environment } from '@neat-evolution/environment'
 import { isAsyncExecutor, type ExecutorFactory } from '@neat-evolution/executor'
 
-import { type FitnessData, type StandardEvaluator } from './Evaluator.js'
+import { type Evaluator, type FitnessData } from './Evaluator.js'
 import type { GenomeEntries, GenomeEntry } from './GenomeEntries.js'
 import type { AnyAlgorithm } from './types.js'
 
 // FIXME: write tests for correctness
-export class TestEvaluator implements StandardEvaluator {
+export class TestEvaluator<EFO> implements Evaluator<EFO> {
   public readonly algorithm: AnyAlgorithm<any>
   public readonly enableAsync = true
 
-  public readonly environment: StandardEnvironment<any>
+  public readonly environment: Environment<EFO>
 
   public readonly createExecutor: ExecutorFactory
 
   constructor(
     algorithm: AnyAlgorithm<any>,
-    environment: StandardEnvironment<any>,
+    environment: Environment<EFO>,
     createExecutor: ExecutorFactory
   ) {
     this.algorithm = algorithm
