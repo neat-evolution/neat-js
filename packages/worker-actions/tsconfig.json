@@ -1,0 +1,13 @@
+{
+    "extends": "@heygrady/tsconfig-bases/ts-node-esm/tsconfig.json",
+    "compilerOptions": {
+        "lib": [
+            "dom",
+            "esnext"
+        ]
+    },
+    "include": [
+        "src",
+        "test"
+    ]
+}
