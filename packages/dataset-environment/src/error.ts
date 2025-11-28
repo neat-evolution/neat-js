@@ -11,7 +11,11 @@ export const normalize = (list: Vector): Vector => {
   // Normalize the list in place if the sum is not zero
   if (sum !== 0) {
     for (let i = 0; i < list.length; i++) {
-      list[i] /= sum
+      const val = list[i]
+      if (val === undefined) {
+        throw new Error('Undefined value encountered during normalization')
+      }
+      list[i] = val / sum
     }
   }
 
