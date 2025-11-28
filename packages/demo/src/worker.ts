@@ -1,8 +1,6 @@
-import type { StandardEnvironment } from '@neat-evolution/environment'
-import type {
-  AnyAlgorithm,
-  StandardEvaluatorFactory,
-} from '@neat-evolution/evaluator'
+import type { Environment } from '@neat-evolution/environment'
+import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
+import type { AnyAlgorithm, EvaluatorFactory } from '@neat-evolution/evaluator'
 import type { ReproducerFactory } from '@neat-evolution/evolution'
 import {
   createEvaluator as createWorkerEvaluator,
@@ -28,21 +26,31 @@ const createReproducer: ReproducerFactory<any, any> = createReproducerFactory(
   terminables
 )
 
-const createEvaluator: StandardEvaluatorFactory<any> = (
+const createEvaluator: EvaluatorFactory<any, any> = (
   algorithm: AnyAlgorithm<any>,
-  environment: StandardEnvironment<any>
+  environment: Environment<any>
 ) => {
+  // Explicitly use IndividualStrategy for demonstration purposes.
+  // This overrides any strategy passed in via options, ensuring the demo
+  // always uses the IndividualStrategy.
+  const strategy = new IndividualStrategy()
+
   const evaluator = createWorkerEvaluator(algorithm, environment, {
     createEnvironmentPathname: '@neat-evolution/dataset-environment',
     createExecutorPathname: '@neat-evolution/executor',
-    taskCount: 100,
+    taskCount: 100, // should match population
     threadCount: workerThreadLimit,
+    strategy, // Pass the explicitly created strategy
+    verbose: false,
   })
-  terminables.add(evaluator as WorkerEvaluator)
+  terminables.add(evaluator as WorkerEvaluator<any>)
   return evaluator
 }
-
-await demo(createReproducer, createEvaluator)
+try {
+  await demo(createReproducer, createEvaluator)
+} catch (e) {
+  console.error(e)
+}
 
 for (const terminable of terminables) {
   await terminable.terminate()
