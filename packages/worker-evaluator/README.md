@@ -15,9 +15,9 @@ The primary purpose of the `@neat-evolution/worker-evaluator` package is to:
   evolutionary generation.
 - **Improve Performance:** Enhance the overall performance of NEAT algorithms by
   offloading heavy computation from the main thread.
-- **Implement `StandardEvaluator`:** Provide a concrete, high-performance
-  implementation of the `StandardEvaluator` interface defined in
-  `@neat-evolution/evaluator`.
+- **Implement `Evaluator`:** Provide a concrete, high-performance
+  implementation of the `Evaluator` interface defined in
+  `@neat-evolution/evaluator`, integrating pluggable evaluation strategies.
 - **Manage Worker Communication:** Handle the complex logistics of spawning
   workers, sending evaluation tasks, and receiving fitness results back from
   them.
@@ -30,6 +30,9 @@ packages in the `neat-js` monorepo as follows:
 
 - **`@neat-evolution/evaluator`**: Implements the `StandardEvaluator` interface,
   fulfilling the contract for genome evaluation.
+
+- **`@neat-evolution/worker-actions`**: Uses the `Dispatcher` and `WorkerAction`
+  primitives to manage type-safe communication with worker threads.
 
 - **`@neat-evolution/worker-threads`**: Utilizes the `Worker` abstraction from
   this package to create and manage worker threads.
@@ -68,22 +71,24 @@ and functions:
 
 - **`WorkerEvaluator` class**:
 
-  The main class that implements the `StandardEvaluator` interface. It manages a
+  The main class that implements the `Evaluator` interface. It manages a
   pool of worker threads, distributes genome evaluation tasks among them, and
-  collects the results. It uses a semaphore to control the number of concurrent
+  collects the results. It uses a `Dispatcher` from `@neat-evolution/worker-actions`
+  to handle communication and a semaphore to control the number of concurrent
   tasks.
 
 - **`WorkerEvaluatorOptions` interface**:
 
   Defines configurable parameters for the `WorkerEvaluator`, such as the number
   of worker threads (`threadCount`), the total number of tasks (`taskCount`),
-  and the pathnames to the algorithm, environment creation, and executor
-  creation modules (essential for workers to initialize their own contexts).
+  the pathnames to the algorithm, environment creation, and executor
+  creation modules (essential for workers to initialize their own contexts),
+  and an optional evaluation `strategy` for customizing evaluation orchestration.
 
 - **`createEvaluator(...)` function**:
 
   A factory function that creates a `WorkerEvaluator` instance. It takes an
-  `AnyAlgorithm`, a `StandardEnvironment`, and `WorkerEvaluatorOptions` to
+  `AnyAlgorithm`, an `Environment`, and `WorkerEvaluatorOptions` to
   configure and instantiate the multi-threaded evaluator.
 
 - **`workerEvaluatorScript.ts`**:
@@ -104,6 +109,51 @@ and functions:
   These modules contain the logic executed within the worker threads to perform
   specific tasks, such as evaluating a genome or initializing the genome
   factory.
+
+## Evaluation Strategy Pattern
+
+The `WorkerEvaluator` uses a pluggable strategy pattern to separate evaluation **orchestration** from **execution**:
+
+- **Strategy**: Determines HOW genomes are evaluated (individually, in batches, tournaments)
+- **Context**: Provides low-level operations exposed to strategies (`evaluateGenomeEntry`, `evaluateGenomeEntryBatch`)
+- **WorkerEvaluator**: Manages worker pool and provides context to strategy
+
+### Default Behavior
+
+By default, `WorkerEvaluator` uses `IndividualStrategy` which evaluates each genome independently:
+
+```typescript
+import { createEvaluator } from '@neat-evolution/worker-evaluator'
+
+// Uses IndividualStrategy by default
+const evaluator = createEvaluator(algorithm, environment, {
+  createEnvironmentPathname: '@neat-evolution/dataset-environment',
+  createExecutorPathname: '@neat-evolution/executor',
+  taskCount: 100,
+  threadCount: 4,
+})
+```
+
+### Custom Strategies
+
+Pass a custom strategy via options to change evaluation behavior:
+
+```typescript
+import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
+import { createEvaluator } from '@neat-evolution/worker-evaluator'
+
+const strategy = new IndividualStrategy()
+
+const evaluator = createEvaluator(algorithm, environment, {
+  createEnvironmentPathname: '@neat-evolution/dataset-environment',
+  createExecutorPathname: '@neat-evolution/executor',
+  taskCount: 100,
+  threadCount: 4,
+  strategy, // Explicit strategy (optional)
+})
+```
+
+See `@neat-evolution/evaluation-strategy` for creating custom strategies and `@neat-evolution/demo` for reference implementation.
 
 ## Usage
 
@@ -126,6 +176,7 @@ import {
 } from "@neat-evolution/dataset-environment";
 
 import { hardwareConcurrency } from "@neat-evolution/worker-threads";
+import { IndividualStrategy } from "@neat-evolution/evaluation-strategy"; // Import IndividualStrategy
 
 async function setupWorkerEvaluator() {
   // 1. Setup the environment
@@ -151,6 +202,8 @@ async function setupWorkerEvaluator() {
     taskCount: 100, // Total number of evaluation tasks
 
     threadCount: hardwareConcurrency - 1, // Use all but one CPU core for workers
+
+    strategy: new IndividualStrategy(), // Explicitly pass the IndividualStrategy
   };
 
   // 3. Create the worker evaluator

@@ -1,16 +1,12 @@
-import { workerContext } from '@neat-evolution/worker-threads'
+import type { WorkerContext } from '@neat-evolution/worker-actions'
 
-import {
-  ActionType,
-  createWorkerAction,
-  type InitPayload,
-} from '../WorkerAction.js'
+import { type InitPayload } from '../actions.js'
 
 import type { ThreadContext } from './ThreadContext.js'
 
 export type HandleInitEvaluatorFn = (
   payload: InitPayload,
-  threadContext: ThreadContext
+  context: ThreadContext & Partial<WorkerContext>
 ) => Promise<void>
 
 export const handleInitEvaluator: HandleInitEvaluatorFn = async (
@@ -20,7 +16,7 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     createExecutorPathname,
     environmentData,
   },
-  threadContext
+  context
 ) => {
   const { createConfig, createGenome, createPhenotype, createState } =
     await import(/* @vite-ignore */ algorithmPathname)
@@ -32,10 +28,7 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   )
   const environment = createEnvironment(environmentData)
 
-  if (workerContext == null) {
-    throw new Error('Worker must be created with a parent port')
-  }
-  threadContext.threadInfo = {
+  context.threadInfo = {
     createConfig,
     createExecutor,
     createGenome,
@@ -43,7 +36,8 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     createState,
     environment,
   }
-  workerContext.postMessage(
-    createWorkerAction(ActionType.INIT_EVALUATOR_SUCCESS, null)
-  )
+  // FIXME: should this just be handled by returning true?
+  if (context.dispatch == null) {
+    throw new Error('dispatch not properly added to context')
+  }
 }
