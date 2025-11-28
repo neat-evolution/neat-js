@@ -2,6 +2,21 @@
   "name": "@neat-evolution/evaluation-strategy",
   "entries": [
     {
+      "date": "Fri, 28 Nov 2025 21:05:12 GMT",
+      "version": "0.3.2",
+      "tag": "@neat-evolution/evaluation-strategy_v0.3.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/evaluation-strategy",
+            "commit": "a82035c1a92da6c88d4b8fd0713d5d890d57a60b",
+            "comment": "Add missing files field to package.json"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 28 Nov 2025 20:11:15 GMT",
       "version": "0.3.0",
       "tag": "@neat-evolution/evaluation-strategy_v0.3.0",

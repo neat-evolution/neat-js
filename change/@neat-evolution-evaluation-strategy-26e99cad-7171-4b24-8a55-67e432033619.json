@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Add missing files field to package.json",
-  "packageName": "@neat-evolution/evaluation-strategy",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

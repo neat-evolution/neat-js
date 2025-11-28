@@ -860,14 +860,14 @@ __metadata:
     "@neat-evolution/des-hyperneat": "npm:^0.6.0"
     "@neat-evolution/environment": "npm:^0.5.0"
     "@neat-evolution/es-hyperneat": "npm:^0.6.0"
-    "@neat-evolution/evaluation-strategy": "npm:^0.3.0"
+    "@neat-evolution/evaluation-strategy": "npm:^0.3.2"
     "@neat-evolution/evaluator": "npm:^0.5.0"
     "@neat-evolution/evolution": "npm:^0.5.0"
     "@neat-evolution/executor": "npm:^0.3.5"
     "@neat-evolution/hyperneat": "npm:^0.6.0"
     "@neat-evolution/neat": "npm:^0.6.0"
     "@neat-evolution/utils": "npm:^0.2.5"
-    "@neat-evolution/worker-evaluator": "npm:^0.5.0"
+    "@neat-evolution/worker-evaluator": "npm:^0.5.2"
     "@neat-evolution/worker-reproducer": "npm:^0.5.0"
     "@neat-evolution/worker-threads": "npm:^0.4.0"
     "@rushstack/eslint-patch": "npm:^1.6.1"
@@ -976,7 +976,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/evaluation-strategy@npm:^0.3.0, @neat-evolution/evaluation-strategy@workspace:packages/evaluation-strategy":
+"@neat-evolution/evaluation-strategy@npm:^0.3.2, @neat-evolution/evaluation-strategy@workspace:packages/evaluation-strategy":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/evaluation-strategy@workspace:packages/evaluation-strategy"
   dependencies:
@@ -1185,7 +1185,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-evaluator@npm:^0.5.0, @neat-evolution/worker-evaluator@workspace:packages/worker-evaluator":
+"@neat-evolution/worker-evaluator@npm:^0.5.2, @neat-evolution/worker-evaluator@workspace:packages/worker-evaluator":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-evaluator@workspace:packages/worker-evaluator"
   dependencies:
@@ -1194,7 +1194,7 @@ __metadata:
     "@neat-evolution/core": "npm:^0.3.3"
     "@neat-evolution/dataset-environment": "npm:^0.5.0"
     "@neat-evolution/environment": "npm:^0.5.0"
-    "@neat-evolution/evaluation-strategy": "npm:^0.3.0"
+    "@neat-evolution/evaluation-strategy": "npm:^0.3.2"
     "@neat-evolution/evaluator": "npm:^0.5.0"
     "@neat-evolution/evolution": "npm:^0.5.0"
     "@neat-evolution/executor": "npm:^0.3.5"

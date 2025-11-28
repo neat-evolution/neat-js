@@ -2,6 +2,21 @@
   "name": "@neat-evolution/worker-evaluator",
   "entries": [
     {
+      "date": "Fri, 28 Nov 2025 21:05:12 GMT",
+      "version": "0.5.2",
+      "tag": "@neat-evolution/worker-evaluator_v0.5.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/evaluation-strategy to v0.3.2",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 28 Nov 2025 20:11:15 GMT",
       "version": "0.5.0",
       "tag": "@neat-evolution/worker-evaluator_v0.5.0",

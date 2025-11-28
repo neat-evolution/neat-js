@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/worker-evaluator
 
-<!-- This log was last generated on Fri, 28 Nov 2025 20:11:15 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 28 Nov 2025 21:05:12 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.5.2
+
+Fri, 28 Nov 2025 21:05:12 GMT
+
+### Patches
+
+- Bump @neat-evolution/evaluation-strategy to v0.3.2
 
 ## 0.5.0
 

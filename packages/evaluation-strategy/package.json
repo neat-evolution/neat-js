@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/evaluation-strategy",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
