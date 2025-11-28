@@ -2,6 +2,8 @@ import type { WorkerEventTypes } from '../EventTypes.js'
 import type { MessageListenerFn } from '../MessageListenerFn.js'
 import type { WorkerOptions, WebWorkerOptions } from '../WorkerOptions.js'
 
+export type Transferable = ArrayBuffer | MessagePort
+
 export class Worker {
   public readonly webWorker: globalThis.Worker
 
@@ -29,7 +31,7 @@ export class Worker {
     this.webWorker.removeEventListener(type, listener as EventListener)
   }
 
-  postMessage(message: any, transferList?: Array<ArrayBuffer | MessagePort>) {
+  postMessage(message: any, transferList?: Transferable[]) {
     // @ts-expect-error no interface in common
     this.webWorker.postMessage(message, transferList)
   }
