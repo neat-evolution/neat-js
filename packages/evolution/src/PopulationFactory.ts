@@ -20,6 +20,7 @@ import type {
 import type { Evaluator } from '@neat-evolution/evaluator'
 
 import type { Population } from './Population.js'
+import type { PopulationFactoryOptions } from './PopulationFactoryOptions.js'
 import type { PopulationOptions } from './PopulationOptions.js'
 import type { ReproducerFactory } from './reproducer/ReproducerFactory.js'
 
@@ -121,10 +122,11 @@ export type PopulationFactory<
       >
     >
   >,
-  evaluator: Evaluator<any, any, any>,
+  evaluator: Evaluator<any>,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
-  genomeOptions: GO
+  genomeOptions: GO,
+  populationFactoryOptions?: PopulationFactoryOptions<CD, SD, HND, LD, GFO, GO>
 ) => Population<
   CFO,
   NCO,
