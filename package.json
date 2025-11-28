@@ -10,6 +10,8 @@
   "scripts": {
     "build": "turbo run --concurrency=4 build",
     "demo": "yarn build && yarn workspace @neat-evolution/demo start",
+    "claude": "yarn dlx @anthropic-ai/claude-code",
+    "gemini": "yarn dlx @google/gemini-cli",
     "clean": "turbo run clean",
     "change": "beachball change --no-commit && git commit -a -m \"chore: add change files\"",
     "check": "yarn check:beachball && yarn check:manypkg",
@@ -19,26 +21,23 @@
     "coverage:ci": "turbo run --concurrency=2 coverage -- --run",
     "format": "turbo run --concurrency=4 format",
     "lint": "turbo run --concurrency=4 lint",
-    "postinstall": "husky install",
-    "prepack": "pinst --disable",
-    "postpack": "pinst --enable",
+    "prepare": "husky",
     "release": "beachball publish",
     "test": "turbo run --concurrency=4 test -- --passWithNoTests --run",
     "test:ci": "turbo run --concurrency=2 test -- --passWithNoTests --run"
-  },
-  "dependencies": {
-    "@commitlint/cli": "^18.6.1",
-    "@commitlint/config-conventional": "^18.6.3",
-    "@commitlint/config-lerna-scopes": "^18.6.1",
-    "@manypkg/cli": "^0.21.4",
-    "beachball": "^2.51.0",
-    "husky": "^8.0.3",
-    "pinst": "^3.0.0",
-    "turbo": "^2.4.4"
   },
   "volta": {
     "node": "22.14.0",
     "npm": "11.1.0",
     "yarn": "4.6.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/config-workspace-scopes": "^20.0.0",
+    "@manypkg/cli": "^0.25.1",
+    "beachball": "^2.58.0",
+    "husky": "^9.1.7",
+    "turbo": "^2.6.1"
   }
 }
