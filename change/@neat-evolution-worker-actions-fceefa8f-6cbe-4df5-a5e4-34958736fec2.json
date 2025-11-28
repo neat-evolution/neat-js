@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Add centralized dispatcher/handler pattern",
+  "packageName": "@neat-evolution/worker-actions",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

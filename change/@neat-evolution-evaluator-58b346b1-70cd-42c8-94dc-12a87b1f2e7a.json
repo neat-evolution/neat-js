@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Simplify Evaluator interface and migrate to evaluation-strategy",
+  "packageName": "@neat-evolution/evaluator",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

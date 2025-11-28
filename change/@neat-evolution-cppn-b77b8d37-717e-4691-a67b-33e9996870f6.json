@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Pass populationFactoryOptions through algorithm packages",
+  "packageName": "@neat-evolution/cppn",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

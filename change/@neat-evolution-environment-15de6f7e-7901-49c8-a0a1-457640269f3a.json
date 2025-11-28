@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "Simplify Environment interface and add batch methods",
+  "packageName": "@neat-evolution/environment",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

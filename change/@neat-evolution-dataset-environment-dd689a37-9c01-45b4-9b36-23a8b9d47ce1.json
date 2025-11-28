@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix strict null check error in normalize",
+  "packageName": "@neat-evolution/dataset-environment",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
