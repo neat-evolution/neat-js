@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Pass populationFactoryOptions through algorithm packages",
-  "packageName": "@neat-evolution/neat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

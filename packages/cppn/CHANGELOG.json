@@ -2,6 +2,63 @@
   "name": "@neat-evolution/cppn",
   "entries": [
     {
+      "date": "Fri, 28 Nov 2025 20:11:15 GMT",
+      "version": "0.6.0",
+      "tag": "@neat-evolution/cppn_v0.6.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/cppn",
+            "commit": "cb3efb956e4d36b12231dd04ef434a6c7366254c",
+            "comment": "Pass populationFactoryOptions through algorithm packages"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/core to v0.3.3",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/evaluator to v0.5.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/evolution to v0.5.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/executor to v0.3.5",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/neat to v0.6.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/dataset-environment to v0.5.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/cppn",
+            "comment": "Bump @neat-evolution/utils to v0.2.5",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 30 Oct 2025 20:44:57 GMT",
       "version": "0.4.2",
       "tag": "@neat-evolution/cppn_v0.4.2",

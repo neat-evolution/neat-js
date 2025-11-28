@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix type mismatch between QuickLRU and Map",
-  "packageName": "@neat-evolution/evolution",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

@@ -2,6 +2,93 @@
   "name": "@neat-evolution/worker-evaluator",
   "entries": [
     {
+      "date": "Fri, 28 Nov 2025 20:11:15 GMT",
+      "version": "0.5.0",
+      "tag": "@neat-evolution/worker-evaluator_v0.5.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-evaluator",
+            "commit": "cb3efb956e4d36b12231dd04ef434a6c7366254c",
+            "comment": "Migrate to Dispatcher/Handler pattern"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/core to v0.3.3",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/environment to v0.5.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/evaluation-strategy to v0.3.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/evaluator to v0.5.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/executor to v0.3.5",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/utils to v0.2.5",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/worker-actions to v0.4.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/worker-pool to v0.4.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/worker-threads to v0.4.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/dataset-environment to v0.5.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/evolution to v0.5.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/neat to v0.6.0",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 30 Oct 2025 20:44:57 GMT",
       "version": "0.3.3",
       "tag": "@neat-evolution/worker-evaluator_v0.3.3",

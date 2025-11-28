@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/executor",
-  "version": "0.3.3",
+  "version": "0.3.5",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -44,7 +44,7 @@
     "test": "vitest --passWithNoTests --run"
   },
   "dependencies": {
-    "@neat-evolution/core": "^0.3.1",
+    "@neat-evolution/core": "^0.3.3",
     "@swc/helpers": "^0.5.17"
   },
   "devDependencies": {

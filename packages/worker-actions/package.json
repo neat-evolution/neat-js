@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/worker-actions",
-  "version": "0.2.3",
+  "version": "0.4.0",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -44,8 +44,8 @@
     "test": "vitest --passWithNoTests --run"
   },
   "dependencies": {
-    "@neat-evolution/worker-pool": "^0.2.3",
-    "@neat-evolution/worker-threads": "^0.2.3",
+    "@neat-evolution/worker-pool": "^0.4.0",
+    "@neat-evolution/worker-threads": "^0.4.0",
     "@swc/helpers": "^0.5.17",
     "p-defer": "^4.0.1"
   },

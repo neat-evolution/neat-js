@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Update for worker refactor and evaluation strategy",
-  "packageName": "@neat-evolution/demo",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

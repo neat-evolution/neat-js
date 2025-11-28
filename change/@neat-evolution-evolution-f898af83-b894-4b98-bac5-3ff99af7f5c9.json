@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Add populationFactoryOptions and abort signal support",
-  "packageName": "@neat-evolution/evolution",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

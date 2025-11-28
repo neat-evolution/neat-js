@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Upgrade dependencies and update scripts",
-  "packageName": "@neat-evolution/core",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

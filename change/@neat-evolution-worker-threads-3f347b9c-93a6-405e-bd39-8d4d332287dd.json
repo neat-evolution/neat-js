@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Update for worker-actions compatibility",
-  "packageName": "@neat-evolution/worker-threads",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

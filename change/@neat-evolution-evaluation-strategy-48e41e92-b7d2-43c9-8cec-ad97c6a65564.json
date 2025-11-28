@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Add pluggable evaluation strategy system",
-  "packageName": "@neat-evolution/evaluation-strategy",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

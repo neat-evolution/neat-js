@@ -2,6 +2,59 @@
   "name": "@neat-evolution/dataset-environment",
   "entries": [
     {
+      "date": "Fri, 28 Nov 2025 20:11:15 GMT",
+      "version": "0.5.0",
+      "tag": "@neat-evolution/dataset-environment_v0.5.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/dataset-environment",
+            "commit": "cb3efb956e4d36b12231dd04ef434a6c7366254c",
+            "comment": "Fix strict null check error in normalize"
+          }
+        ],
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/dataset-environment",
+            "commit": "cb3efb956e4d36b12231dd04ef434a6c7366254c",
+            "comment": "Implement batch evaluation methods"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/dataset-environment",
+            "comment": "Bump @neat-evolution/core to v0.3.3",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/dataset-environment",
+            "comment": "Bump @neat-evolution/environment to v0.5.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/dataset-environment",
+            "comment": "Bump @neat-evolution/evolution to v0.5.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/dataset-environment",
+            "comment": "Bump @neat-evolution/executor to v0.3.5",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/dataset-environment",
+            "comment": "Bump @neat-evolution/utils to v0.2.5",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 30 Oct 2025 20:44:57 GMT",
       "version": "0.3.3",
       "tag": "@neat-evolution/dataset-environment_v0.3.3",

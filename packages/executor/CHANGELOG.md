@@ -1,8 +1,18 @@
 # Change Log - @neat-evolution/executor
 
-This log was last generated on Mon, 18 Dec 2023 17:46:28 GMT and should not be manually modified.
+<!-- This log was last generated on Fri, 28 Nov 2025 20:11:15 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.3.5
+
+Fri, 28 Nov 2025 20:11:15 GMT
+
+### Patches
+
+- Upgrade dependencies and update scripts (github@heygrady.net)
+- Fix strict null check error in createExecutor (github@heygrady.net)
+- Bump @neat-evolution/core to v0.3.3
 
 ## 0.3.2
 

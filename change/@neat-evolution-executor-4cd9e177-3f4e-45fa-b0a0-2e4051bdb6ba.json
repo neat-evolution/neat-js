@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix strict null check error in createExecutor",
-  "packageName": "@neat-evolution/executor",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

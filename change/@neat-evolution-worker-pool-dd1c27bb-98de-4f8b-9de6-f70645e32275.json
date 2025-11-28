@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Add worker pool management",
-  "packageName": "@neat-evolution/worker-pool",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

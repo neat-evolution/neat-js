@@ -2,6 +2,21 @@
   "name": "@neat-evolution/worker-threads",
   "entries": [
     {
+      "date": "Fri, 28 Nov 2025 20:11:15 GMT",
+      "version": "0.4.0",
+      "tag": "@neat-evolution/worker-threads_v0.4.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-threads",
+            "commit": "cb3efb956e4d36b12231dd04ef434a6c7366254c",
+            "comment": "Update for worker-actions compatibility"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 30 Oct 2025 20:44:57 GMT",
       "version": "0.2.3",
       "tag": "@neat-evolution/worker-threads_v0.2.3",

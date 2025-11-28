@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Implement batch evaluation methods",
-  "packageName": "@neat-evolution/dataset-environment",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

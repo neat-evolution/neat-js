@@ -1,8 +1,19 @@
 # Change Log - @neat-evolution/evaluator
 
-This log was last generated on Mon, 18 Dec 2023 17:46:28 GMT and should not be manually modified.
+<!-- This log was last generated on Fri, 28 Nov 2025 20:11:15 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.5.0
+
+Fri, 28 Nov 2025 20:11:15 GMT
+
+### Minor changes
+
+- Simplify Evaluator interface and migrate to evaluation-strategy (github@heygrady.net)
+- Bump @neat-evolution/core to v0.3.3
+- Bump @neat-evolution/environment to v0.5.0
+- Bump @neat-evolution/executor to v0.3.5
 
 ## 0.3.2
 

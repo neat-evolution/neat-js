@@ -1,0 +1,32 @@
+{
+  "name": "@neat-evolution/worker-actions",
+  "entries": [
+    {
+      "date": "Fri, 28 Nov 2025 20:11:15 GMT",
+      "version": "0.4.0",
+      "tag": "@neat-evolution/worker-actions_v0.4.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-actions",
+            "commit": "cb3efb956e4d36b12231dd04ef434a6c7366254c",
+            "comment": "Add centralized dispatcher/handler pattern"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-actions",
+            "comment": "Bump @neat-evolution/worker-pool to v0.4.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-actions",
+            "comment": "Bump @neat-evolution/worker-threads to v0.4.0",
+            "commit": "not available"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -2,6 +2,47 @@
   "name": "@neat-evolution/evolution",
   "entries": [
     {
+      "date": "Fri, 28 Nov 2025 20:11:15 GMT",
+      "version": "0.5.0",
+      "tag": "@neat-evolution/evolution_v0.5.0",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/evolution",
+            "commit": "cb3efb956e4d36b12231dd04ef434a6c7366254c",
+            "comment": "Fix type mismatch between QuickLRU and Map"
+          }
+        ],
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/evolution",
+            "commit": "cb3efb956e4d36b12231dd04ef434a6c7366254c",
+            "comment": "Add populationFactoryOptions and abort signal support"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evolution",
+            "comment": "Bump @neat-evolution/core to v0.3.3",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evolution",
+            "comment": "Bump @neat-evolution/evaluator to v0.5.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evolution",
+            "comment": "Bump @neat-evolution/utils to v0.2.5",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 30 Oct 2025 20:44:57 GMT",
       "version": "0.3.3",
       "tag": "@neat-evolution/evolution_v0.3.3",
