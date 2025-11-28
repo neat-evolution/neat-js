@@ -8,8 +8,8 @@ import type {
 } from '@neat-evolution/core'
 import type { PopulationOptions } from '@neat-evolution/evolution'
 import type { RNG } from '@neat-evolution/utils'
+import type { WorkerContext } from '@neat-evolution/worker-actions'
 
-import type { RequestMapValue } from '../types.js'
 import type { WorkerReproducerOptions } from '../WorkerReproducerOptions.js'
 import type { WorkerState } from '../WorkerState.js'
 
@@ -45,9 +45,8 @@ export interface ThreadInfo<CD extends ConfigData, GO extends GenomeOptions> {
 }
 
 export interface ThreadContext {
-  blockingRequests: Set<Promise<any>>
-  nextRequestId: () => number
-  requestMap: Map<number, RequestMapValue<any>>
   rng: RNG
   threadInfo: ThreadInfo<any, any> | null
 }
+
+export type ReproducerHandlerContext = ThreadContext & WorkerContext

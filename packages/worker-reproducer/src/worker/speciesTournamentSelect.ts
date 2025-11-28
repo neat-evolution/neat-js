@@ -1,37 +1,27 @@
 import { Organism } from '@neat-evolution/evolution'
-import { workerContext } from '@neat-evolution/worker-threads'
 
 import {
-  ActionType,
-  createAction,
+  requestSpeciesTournamentSelect,
   type OrganismPayload,
-} from '../WorkerAction.js'
+} from '../actions.js'
 
-import type { ThreadContext } from './ThreadContext.js'
+import type { ReproducerHandlerContext } from './ThreadContext.js'
 
 export const speciesTournamentSelect = async (
   speciesId: number,
-  context: ThreadContext
+  context: ReproducerHandlerContext
 ): Promise<Organism<any, any, any, any, any, any, any>> => {
   if (context.threadInfo == null) {
-    throw new Error('threadInfo not initialized')
+    throw new Error('speciesTournamentSelect threadInfo not initialized')
   }
-  const requestId = context.nextRequestId()
-  const data = await new Promise<OrganismPayload<any>>((resolve, reject) => {
-    context.requestMap.set(requestId, {
-      resolve,
-      reject,
+
+  // Use Handler's request method instead of manual promise tracking
+  const data = await context.request<OrganismPayload<any>>(
+    requestSpeciesTournamentSelect({
+      speciesId,
     })
-    if (workerContext == null) {
-      throw new Error('Worker must be created with a parent port')
-    }
-    workerContext.postMessage(
-      createAction(ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT, {
-        requestId,
-        speciesId,
-      })
-    )
-  })
+  )
+
   const genome = context.threadInfo.algorithm.createGenome(
     context.threadInfo.configProvider,
     context.threadInfo.stateProvider,

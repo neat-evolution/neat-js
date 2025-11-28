@@ -1,39 +1,22 @@
 import type { LinkKey } from '@neat-evolution/core'
-import { workerContext } from '@neat-evolution/worker-threads'
 
 import {
-  ActionType,
-  createAction,
+  requestSetCPPNStateRedirect,
   type EmptyPayload,
-} from '../../WorkerAction.js'
-import type { ThreadContext } from '../ThreadContext.js'
+} from '../../actions.js'
+import type { ReproducerHandlerContext } from '../ThreadContext.js'
 
 export const setCPPNStateRedirect = (
   key: LinkKey,
   oldKey: LinkKey,
-  context: ThreadContext
+  context: ReproducerHandlerContext
 ): void => {
-  const requestId = context.nextRequestId()
-
-  const response = new Promise<EmptyPayload>((resolve, reject) => {
-    context.requestMap.set(requestId, {
-      resolve,
-      reject,
-    })
-    if (workerContext == null) {
-      throw new Error('Worker must be created with a parent port')
-    }
-    workerContext.postMessage(
-      createAction(ActionType.REQUEST_SET_CPPN_STATE_REDIRECT, {
-        requestId,
-        key,
-        oldKey,
-      })
-    )
-  })
-  context.blockingRequests.add(
-    response.then(() => {
-      context.blockingRequests.delete(response)
+  // Use Handler's request method instead of manual promise tracking
+  // Fire-and-forget pattern - we don't await the response
+  void context.request<EmptyPayload>(
+    requestSetCPPNStateRedirect({
+      key,
+      oldKey,
     })
   )
 }

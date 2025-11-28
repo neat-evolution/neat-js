@@ -1,22 +1,17 @@
 import type { Organism } from '@neat-evolution/evolution'
-import { workerContext } from '@neat-evolution/worker-threads'
 
-import {
-  ActionType,
-  createAction,
-  type SpeciesPayload,
-} from '../WorkerAction.js'
+import type { SpeciesPayload } from '../actions.js'
 
 import { populationTournamentSelect } from './populationTournamentSelect.js'
 import { speciesTournamentSelect } from './speciesTournamentSelect.js'
-import type { ThreadContext } from './ThreadContext.js'
+import type { ReproducerHandlerContext } from './ThreadContext.js'
 
 export const breedOrganism = async (
   payload: SpeciesPayload,
-  context: ThreadContext
+  context: ReproducerHandlerContext
 ) => {
   if (context.threadInfo == null) {
-    throw new Error('threadInfo not initialized')
+    throw new Error('breedOrganism threadInfo not initialized')
   }
   const father =
     context.rng.gen() <
@@ -44,15 +39,11 @@ export const breedOrganism = async (
 
   await child.mutate()
 
-  if (workerContext == null) {
-    throw new Error('Worker must be created with a parent port')
+  const responsePayload = {
+    genome: child.genome.toFactoryOptions(),
+    organismState: child.toFactoryOptions(),
   }
 
-  workerContext.postMessage(
-    createAction(ActionType.RESPOND_BREED_ORGANISM, {
-      requestId: payload.requestId,
-      genome: child.genome.toFactoryOptions(),
-      organismState: child.toFactoryOptions(),
-    })
-  )
+  // Return the payload directly - Handler will automatically send RPC response
+  return responsePayload
 }

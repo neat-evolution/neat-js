@@ -31,6 +31,9 @@ packages in the `neat-js` monorepo as follows:
   fulfilling the contract for creating new organisms. The `evolve` function uses
   a `Reproducer` to generate the next generation.
 
+- **`@neat-evolution/worker-actions`**: Uses the `Dispatcher` and `WorkerAction`
+  primitives to manage type-safe communication with worker threads.
+
 - **`@neat-evolution/worker-threads`**: Utilizes the `Worker` abstraction from
   this package to create and manage worker threads.
 
@@ -63,7 +66,8 @@ and functions:
 
   The main class that implements the `Reproducer` interface. It manages a pool
   of worker threads, distributes reproduction tasks (copying elites, breeding
-  organisms) among them, and collects the results. It uses a semaphore to
+  organisms) among them, and collects the results. It uses a `Dispatcher` from
+  `@neat-evolution/worker-actions` to handle communication and a semaphore to
   control the number of concurrent tasks.
 
 - **`WorkerReproducerOptions` interface and `defaultWorkerReproducerOptions`**:
@@ -188,5 +192,3 @@ setupWorkerReproducer();
 This package is licensed under the MIT License. See the [LICENSE](../../LICENSE)
 file for details.
 
-```
-```

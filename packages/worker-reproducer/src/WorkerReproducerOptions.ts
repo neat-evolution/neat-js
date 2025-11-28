@@ -6,6 +6,8 @@ export interface WorkerReproducerOptions {
   /** os.cpus() */
   threadCount: number
   enableCustomState?: boolean
+  /** Enable verbose logging */
+  verbose?: boolean
 }
 
 export const defaultWorkerReproducerOptions: WorkerReproducerOptions = {

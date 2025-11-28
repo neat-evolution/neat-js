@@ -1,20 +1,15 @@
 import { Organism } from '@neat-evolution/evolution'
-import { workerContext } from '@neat-evolution/worker-threads'
 
-import {
-  ActionType,
-  createAction,
-  type OrganismPayload,
-} from '../WorkerAction.js'
+import type { OrganismPayload } from '../actions.js'
 
-import type { ThreadContext } from './ThreadContext.js'
+import type { ReproducerHandlerContext } from './ThreadContext.js'
 
 export const eliteOrganism = (
   payload: OrganismPayload<any>,
-  context: ThreadContext
+  context: ReproducerHandlerContext
 ) => {
   if (context.threadInfo == null) {
-    throw new Error('threadInfo not initialized')
+    throw new Error('eliteOrganism threadInfo not initialized')
   }
 
   const genome = context.threadInfo.algorithm.createGenome(
@@ -31,15 +26,11 @@ export const eliteOrganism = (
   )
   const elite = organism.asElite()
 
-  if (workerContext == null) {
-    throw new Error('Worker must be created with a parent port')
+  const responsePayload = {
+    genome: elite.genome.toFactoryOptions(),
+    organismState: elite.toFactoryOptions(),
   }
 
-  workerContext.postMessage(
-    createAction(ActionType.RESPOND_ELITE_ORGANISM, {
-      requestId: payload.requestId,
-      genome: elite.genome.toFactoryOptions(),
-      organismState: elite.toFactoryOptions(),
-    })
-  )
+  // Return the payload directly - Handler will automatically send RPC response
+  return responsePayload
 }
