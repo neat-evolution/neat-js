@@ -15,8 +15,8 @@ import type { TopologyConfigOptions } from './TopologyConfigOptions.js'
 
 export const deshyperneat = async (
   createReproducer: DESHyperNEATReproducerFactory,
-  evaluator: Evaluator<any, any, any>,
-  evolutionOptions: EvolutionOptions,
+  evaluator: Evaluator<any>,
+  evolutionOptions: EvolutionOptions<any, any>,
   // FIXME: should be TopologyConfigOptions & Partial<NeatConfigOptions>
   topologyConfigOptions: TopologyConfigOptions,
   cppnConfigOptions: NEATConfigOptions,

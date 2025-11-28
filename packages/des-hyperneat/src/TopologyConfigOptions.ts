@@ -1,15 +1,6 @@
-export interface TopologyConfigOptions {
-  addNodeProbability: number
-  addLinkProbability: number
-  initialLinkWeightSize: number
-  mutateLinkWeightProbability: number
-  mutateLinkWeightSize: number
-  removeNodeProbability: number
-  removeLinkProbability: number
-  onlyHiddenNodeDistance: boolean
-  linkDistanceWeight: number
-  mutateOnlyOneLink: boolean
-}
+import type { NEATConfigOptions } from '@neat-evolution/core'
+
+export type TopologyConfigOptions = NEATConfigOptions
 
 export const defaultTopologyConfigOptions: TopologyConfigOptions = {
   addNodeProbability: 0.03,

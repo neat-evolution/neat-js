@@ -14,8 +14,8 @@ import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
 
 export const eshyperneat = async (
   createReproducer: ESHyperNEATReproducerFactory,
-  evaluator: Evaluator<any, any, any>,
-  evolutionOptions: EvolutionOptions,
+  evaluator: Evaluator<any>,
+  evolutionOptions: EvolutionOptions<any, any>,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: ESHyperNEATGenomeOptions

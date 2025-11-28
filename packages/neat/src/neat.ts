@@ -14,8 +14,8 @@ import type { NEATGenomeOptions } from './NEATGenomeOptions.js'
 
 export const neat = async (
   createReproducer: NEATReproducerFactory,
-  evaluator: Evaluator<any, any, any>,
-  evolutionOptions: EvolutionOptions,
+  evaluator: Evaluator<any>,
+  evolutionOptions: EvolutionOptions<any, any>,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: NEATGenomeOptions

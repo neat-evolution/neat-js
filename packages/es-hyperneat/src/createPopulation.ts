@@ -18,6 +18,7 @@ import {
 import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
   PopulationFactory,
+  PopulationFactoryOptions,
   PopulationOptions,
   ReproducerFactory,
 } from '@neat-evolution/evolution'
@@ -86,10 +87,18 @@ export const createPopulation: PopulationFactory<
   CPPNGenome<ESHyperNEATGenomeOptions>
 > = (
   createReproducer: ESHyperNEATReproducerFactory,
-  evaluator: Evaluator<any, any, any>,
+  evaluator: Evaluator<any>,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
-  genomeOptions: ESHyperNEATGenomeOptions
+  genomeOptions: ESHyperNEATGenomeOptions,
+  populationFactoryOptions?: PopulationFactoryOptions<
+    ConfigData,
+    StateData,
+    CPPNNodeData,
+    NEATLinkData,
+    CPPNGenomeFactoryOptions,
+    ESHyperNEATGenomeOptions
+  >
 ): ESHyperNEATPopulation => {
   const configProvider = ESHyperNEATAlgorithm.createConfig({
     neat: neatConfigOptions ?? defaultNEATConfigOptions,
@@ -111,7 +120,8 @@ export const createPopulation: PopulationFactory<
     configProvider,
     populationOptions,
     genomeOptions,
-    cppnInitConfig
+    cppnInitConfig,
+    populationFactoryOptions
   )
 
   return population

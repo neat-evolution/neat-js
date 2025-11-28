@@ -9,6 +9,7 @@ import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
   PopulationFactory,
+  PopulationFactoryOptions,
   PopulationOptions,
   ReproducerFactory,
 } from '@neat-evolution/evolution'
@@ -85,10 +86,18 @@ export const createPopulation: PopulationFactory<
   CPPNGenome<CPPNGenomeOptions>
 > = (
   createReproducer: CPPNReproducerFactory,
-  evaluator: Evaluator<any, any, any>,
+  evaluator: Evaluator<any>,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
-  genomeOptions: CPPNGenomeOptions
+  genomeOptions: CPPNGenomeOptions,
+  populationFactoryOptions?: PopulationFactoryOptions<
+    ConfigData,
+    StateData,
+    CPPNNodeData,
+    NEATLinkData,
+    CPPNGenomeFactoryOptions,
+    CPPNGenomeOptions
+  >
 ): CPPNPopulation => {
   const configProvider = CPPNAlgorithm.createConfig({
     neat: neatConfigOptions ?? defaultNEATConfigOptions,
@@ -103,7 +112,8 @@ export const createPopulation: PopulationFactory<
     configProvider,
     populationOptions,
     genomeOptions,
-    initConfig
+    initConfig,
+    populationFactoryOptions
   )
 
   return population
