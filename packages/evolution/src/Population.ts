@@ -108,7 +108,7 @@ export class Population<
     G
   >,
 > {
-  public readonly evaluator: Evaluator<any, any, any>
+  public readonly evaluator: Evaluator<any>
   public readonly reproducer: Reproducer<G>
   public readonly algorithm: A
   public readonly configProvider: C
@@ -156,7 +156,7 @@ export class Population<
         A
       >
     >,
-    evaluator: Evaluator<any, any, any>,
+    evaluator: Evaluator<any>,
     algorithm: A,
     configProvider: C,
     populationOptions: PopulationOptions,
@@ -181,7 +181,10 @@ export class Population<
     this.extinctSpecies = new QuickLRU<
       number,
       Species<CD, SD, HND, LD, GFO, GO, G>
-    >({ maxSize: 1000 })
+    >({ maxSize: 1000 }) as unknown as Map<
+      number,
+      Species<CD, SD, HND, LD, GFO, GO, G>
+    >
     this.nextId = populationFactoryOptions?.nextId ?? 0
 
     this.populationOptions = populationOptions
