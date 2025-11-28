@@ -160,12 +160,21 @@ categorized them according to their primary function within the NEAT framework:
 - **`@neat-evolution/evaluator`**: Defines the core interface for evaluators,
   which are responsible for assessing the fitness of evolved neural networks by
   running them against a specified environment.
+- **`@neat-evolution/evaluation-strategy`**: Provides pluggable strategies for
+  orchestrating genome evaluation (e.g., individual vs. batch/tournament),
+  separating the "how" of orchestration from the "where" of execution.
 
 ### Worker-Based Parallel Processing
 
 - **`@neat-evolution/worker-threads`**: Provides a cross-environment abstraction
   layer for JavaScript worker threads, offering a unified API for
   multi-threading in both Node.js and browser environments.
+- **`@neat-evolution/worker-pool`**: A generic worker pool implementation that
+  manages a collection of worker threads, handling concurrency limits and
+  resource lifecycle.
+- **`@neat-evolution/worker-actions`**: A type-safe messaging layer for
+  worker-main thread communication, providing request/response patterns and
+  structured action dispatching.
 - **`@neat-evolution/worker-evaluator`**: A multi-threaded implementation of the
   `Evaluator` interface, leveraging worker threads to parallelize genome fitness
   evaluation for improved performance.
