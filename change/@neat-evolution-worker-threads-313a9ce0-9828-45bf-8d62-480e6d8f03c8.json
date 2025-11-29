@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix browser Worker type definition",
+  "packageName": "@neat-evolution/worker-threads",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
