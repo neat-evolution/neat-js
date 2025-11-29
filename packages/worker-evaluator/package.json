@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/worker-evaluator",
-  "version": "0.5.2",
+  "version": "0.7.0",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -51,13 +51,13 @@
   "dependencies": {
     "@neat-evolution/core": "^0.3.3",
     "@neat-evolution/environment": "^0.5.0",
-    "@neat-evolution/evaluation-strategy": "^0.3.2",
+    "@neat-evolution/evaluation-strategy": "^0.3.4",
     "@neat-evolution/evaluator": "^0.5.0",
     "@neat-evolution/executor": "^0.3.5",
     "@neat-evolution/utils": "^0.2.5",
-    "@neat-evolution/worker-actions": "^0.4.0",
-    "@neat-evolution/worker-pool": "^0.4.0",
-    "@neat-evolution/worker-threads": "^0.4.0",
+    "@neat-evolution/worker-actions": "^0.4.2",
+    "@neat-evolution/worker-pool": "^0.4.2",
+    "@neat-evolution/worker-threads": "^0.4.2",
     "@swc/helpers": "^0.5.17"
   },
   "devDependencies": {

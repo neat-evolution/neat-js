@@ -860,16 +860,16 @@ __metadata:
     "@neat-evolution/des-hyperneat": "npm:^0.6.0"
     "@neat-evolution/environment": "npm:^0.5.0"
     "@neat-evolution/es-hyperneat": "npm:^0.6.0"
-    "@neat-evolution/evaluation-strategy": "npm:^0.3.2"
+    "@neat-evolution/evaluation-strategy": "npm:^0.3.4"
     "@neat-evolution/evaluator": "npm:^0.5.0"
     "@neat-evolution/evolution": "npm:^0.5.0"
     "@neat-evolution/executor": "npm:^0.3.5"
     "@neat-evolution/hyperneat": "npm:^0.6.0"
     "@neat-evolution/neat": "npm:^0.6.0"
     "@neat-evolution/utils": "npm:^0.2.5"
-    "@neat-evolution/worker-evaluator": "npm:^0.5.2"
-    "@neat-evolution/worker-reproducer": "npm:^0.5.0"
-    "@neat-evolution/worker-threads": "npm:^0.4.0"
+    "@neat-evolution/worker-evaluator": "npm:^0.7.0"
+    "@neat-evolution/worker-reproducer": "npm:^0.7.0"
+    "@neat-evolution/worker-threads": "npm:^0.4.2"
     "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.65"
     "@swc/core": "npm:^1.11.1"
@@ -976,7 +976,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/evaluation-strategy@npm:^0.3.2, @neat-evolution/evaluation-strategy@workspace:packages/evaluation-strategy":
+"@neat-evolution/evaluation-strategy@npm:^0.3.4, @neat-evolution/evaluation-strategy@workspace:packages/evaluation-strategy":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/evaluation-strategy@workspace:packages/evaluation-strategy"
   dependencies:
@@ -985,8 +985,8 @@ __metadata:
     "@neat-evolution/environment": "npm:^0.5.0"
     "@neat-evolution/evaluator": "npm:^0.5.0"
     "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/worker-actions": "npm:^0.4.0"
-    "@neat-evolution/worker-threads": "npm:^0.4.0"
+    "@neat-evolution/worker-actions": "npm:^0.4.2"
+    "@neat-evolution/worker-threads": "npm:^0.4.2"
     "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.65"
     "@swc/core": "npm:^1.11.1"
@@ -1159,14 +1159,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-actions@npm:^0.4.0, @neat-evolution/worker-actions@workspace:packages/worker-actions":
+"@neat-evolution/worker-actions@npm:^0.4.2, @neat-evolution/worker-actions@workspace:packages/worker-actions":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-actions@workspace:packages/worker-actions"
   dependencies:
     "@heygrady/eslint-config": "npm:^1.5.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.6"
-    "@neat-evolution/worker-pool": "npm:^0.4.0"
-    "@neat-evolution/worker-threads": "npm:^0.4.0"
+    "@neat-evolution/worker-pool": "npm:^0.4.2"
+    "@neat-evolution/worker-threads": "npm:^0.4.2"
     "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.65"
     "@swc/core": "npm:^1.11.1"
@@ -1185,7 +1185,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-evaluator@npm:^0.5.2, @neat-evolution/worker-evaluator@workspace:packages/worker-evaluator":
+"@neat-evolution/worker-evaluator@npm:^0.7.0, @neat-evolution/worker-evaluator@workspace:packages/worker-evaluator":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-evaluator@workspace:packages/worker-evaluator"
   dependencies:
@@ -1194,15 +1194,15 @@ __metadata:
     "@neat-evolution/core": "npm:^0.3.3"
     "@neat-evolution/dataset-environment": "npm:^0.5.0"
     "@neat-evolution/environment": "npm:^0.5.0"
-    "@neat-evolution/evaluation-strategy": "npm:^0.3.2"
+    "@neat-evolution/evaluation-strategy": "npm:^0.3.4"
     "@neat-evolution/evaluator": "npm:^0.5.0"
     "@neat-evolution/evolution": "npm:^0.5.0"
     "@neat-evolution/executor": "npm:^0.3.5"
     "@neat-evolution/neat": "npm:^0.6.0"
     "@neat-evolution/utils": "npm:^0.2.5"
-    "@neat-evolution/worker-actions": "npm:^0.4.0"
-    "@neat-evolution/worker-pool": "npm:^0.4.0"
-    "@neat-evolution/worker-threads": "npm:^0.4.0"
+    "@neat-evolution/worker-actions": "npm:^0.4.2"
+    "@neat-evolution/worker-pool": "npm:^0.4.2"
+    "@neat-evolution/worker-threads": "npm:^0.4.2"
     "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.65"
     "@swc/core": "npm:^1.11.1"
@@ -1222,13 +1222,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-pool@npm:^0.4.0, @neat-evolution/worker-pool@workspace:packages/worker-pool":
+"@neat-evolution/worker-pool@npm:^0.4.2, @neat-evolution/worker-pool@workspace:packages/worker-pool":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-pool@workspace:packages/worker-pool"
   dependencies:
     "@heygrady/eslint-config": "npm:^1.5.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.6"
-    "@neat-evolution/worker-threads": "npm:^0.4.0"
+    "@neat-evolution/worker-threads": "npm:^0.4.2"
     "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.65"
     "@swc/core": "npm:^1.11.1"
@@ -1247,7 +1247,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-reproducer@npm:^0.5.0, @neat-evolution/worker-reproducer@workspace:packages/worker-reproducer":
+"@neat-evolution/worker-reproducer@npm:^0.7.0, @neat-evolution/worker-reproducer@workspace:packages/worker-reproducer":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-reproducer@workspace:packages/worker-reproducer"
   dependencies:
@@ -1258,9 +1258,9 @@ __metadata:
     "@neat-evolution/evolution": "npm:^0.5.0"
     "@neat-evolution/executor": "npm:^0.3.5"
     "@neat-evolution/utils": "npm:^0.2.5"
-    "@neat-evolution/worker-actions": "npm:^0.4.0"
-    "@neat-evolution/worker-pool": "npm:^0.4.0"
-    "@neat-evolution/worker-threads": "npm:^0.4.0"
+    "@neat-evolution/worker-actions": "npm:^0.4.2"
+    "@neat-evolution/worker-pool": "npm:^0.4.2"
+    "@neat-evolution/worker-threads": "npm:^0.4.2"
     "@rushstack/eslint-patch": "npm:^1.6.1"
     "@swc/cli": "npm:^0.1.65"
     "@swc/core": "npm:^1.11.1"
@@ -1278,7 +1278,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-threads@npm:^0.4.0, @neat-evolution/worker-threads@workspace:packages/worker-threads":
+"@neat-evolution/worker-threads@npm:^0.4.2, @neat-evolution/worker-threads@workspace:packages/worker-threads":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-threads@workspace:packages/worker-threads"
   dependencies:

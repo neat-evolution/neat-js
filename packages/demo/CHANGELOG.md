@@ -1,8 +1,19 @@
 # Change Log - @neat-evolution/demo
 
-<!-- This log was last generated on Fri, 28 Nov 2025 21:05:12 GMT and should not be manually modified. -->
+<!-- This log was last generated on Sat, 29 Nov 2025 18:00:45 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.5.4
+
+Sat, 29 Nov 2025 18:00:45 GMT
+
+### Patches
+
+- Bump @neat-evolution/evaluation-strategy to v0.3.4
+- Bump @neat-evolution/worker-evaluator to v0.7.0
+- Bump @neat-evolution/worker-reproducer to v0.7.0
+- Bump @neat-evolution/worker-threads to v0.4.2
 
 ## 0.5.2
 

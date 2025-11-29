@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/worker-pool",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -44,7 +44,7 @@
     "test": "vitest --passWithNoTests --run"
   },
   "dependencies": {
-    "@neat-evolution/worker-threads": "^0.4.0",
+    "@neat-evolution/worker-threads": "^0.4.2",
     "@swc/helpers": "^0.5.17",
     "async-sema": "^3.1.1"
   },

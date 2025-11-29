@@ -2,6 +2,27 @@
   "name": "@neat-evolution/evaluation-strategy",
   "entries": [
     {
+      "date": "Sat, 29 Nov 2025 18:00:45 GMT",
+      "version": "0.3.4",
+      "tag": "@neat-evolution/evaluation-strategy_v0.3.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evaluation-strategy",
+            "comment": "Bump @neat-evolution/worker-actions to v0.4.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/evaluation-strategy",
+            "comment": "Bump @neat-evolution/worker-threads to v0.4.2",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 28 Nov 2025 21:05:12 GMT",
       "version": "0.3.2",
       "tag": "@neat-evolution/evaluation-strategy_v0.3.2",

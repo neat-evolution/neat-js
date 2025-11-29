@@ -2,6 +2,39 @@
   "name": "@neat-evolution/demo",
   "entries": [
     {
+      "date": "Sat, 29 Nov 2025 18:00:45 GMT",
+      "version": "0.5.4",
+      "tag": "@neat-evolution/demo_v0.5.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/evaluation-strategy to v0.3.4",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/worker-evaluator to v0.7.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/worker-reproducer to v0.7.0",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/demo",
+            "comment": "Bump @neat-evolution/worker-threads to v0.4.2",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 28 Nov 2025 21:05:12 GMT",
       "version": "0.5.2",
       "tag": "@neat-evolution/demo_v0.5.2",

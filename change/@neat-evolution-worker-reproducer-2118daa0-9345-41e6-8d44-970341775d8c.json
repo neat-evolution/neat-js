@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "Add workerScriptUrl option for Vite compatibility",
-  "packageName": "@neat-evolution/worker-reproducer",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

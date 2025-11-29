@@ -2,6 +2,45 @@
   "name": "@neat-evolution/worker-evaluator",
   "entries": [
     {
+      "date": "Sat, 29 Nov 2025 18:00:45 GMT",
+      "version": "0.7.0",
+      "tag": "@neat-evolution/worker-evaluator_v0.7.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-evaluator",
+            "commit": "dd54ddf1bc15077ad43e4a42dd77297321455307",
+            "comment": "Add workerScriptUrl option for Vite compatibility"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/evaluation-strategy to v0.3.4",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/worker-actions to v0.4.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/worker-pool to v0.4.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-evaluator",
+            "comment": "Bump @neat-evolution/worker-threads to v0.4.2",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 28 Nov 2025 21:05:12 GMT",
       "version": "0.5.2",
       "tag": "@neat-evolution/worker-evaluator_v0.5.2",

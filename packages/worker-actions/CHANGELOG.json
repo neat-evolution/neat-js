@@ -2,6 +2,27 @@
   "name": "@neat-evolution/worker-actions",
   "entries": [
     {
+      "date": "Sat, 29 Nov 2025 18:00:45 GMT",
+      "version": "0.4.2",
+      "tag": "@neat-evolution/worker-actions_v0.4.2",
+      "comments": {
+        "patch": [
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-actions",
+            "comment": "Bump @neat-evolution/worker-pool to v0.4.2",
+            "commit": "not available"
+          },
+          {
+            "author": "beachball",
+            "package": "@neat-evolution/worker-actions",
+            "comment": "Bump @neat-evolution/worker-threads to v0.4.2",
+            "commit": "not available"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 28 Nov 2025 20:11:15 GMT",
       "version": "0.4.0",
       "tag": "@neat-evolution/worker-actions_v0.4.0",

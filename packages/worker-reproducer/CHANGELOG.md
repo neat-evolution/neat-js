@@ -1,8 +1,19 @@
 # Change Log - @neat-evolution/worker-reproducer
 
-<!-- This log was last generated on Fri, 28 Nov 2025 20:11:15 GMT and should not be manually modified. -->
+<!-- This log was last generated on Sat, 29 Nov 2025 18:00:45 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.7.0
+
+Sat, 29 Nov 2025 18:00:45 GMT
+
+### Minor changes
+
+- Add workerScriptUrl option for Vite compatibility (github@heygrady.net)
+- Bump @neat-evolution/worker-actions to v0.4.2
+- Bump @neat-evolution/worker-pool to v0.4.2
+- Bump @neat-evolution/worker-threads to v0.4.2
 
 ## 0.5.0
 
