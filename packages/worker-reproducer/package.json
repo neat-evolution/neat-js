@@ -20,6 +20,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./workerReproducerScript": {
+      "types": "./dist/types/workerReproducerScript.d.ts",
+      "import": "./dist/esm/workerReproducerScript.js",
+      "require": "./dist/cjs/workerReproducerScript.js"
     }
   },
   "files": [
@@ -52,8 +57,7 @@
     "@neat-evolution/worker-actions": "^0.4.0",
     "@neat-evolution/worker-pool": "^0.4.0",
     "@neat-evolution/worker-threads": "^0.4.0",
-    "@swc/helpers": "^0.5.17",
-    "async-sema": "^3.1.1"
+    "@swc/helpers": "^0.5.17"
   },
   "devDependencies": {
     "@heygrady/eslint-config": "^1.5.1",

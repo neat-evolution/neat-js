@@ -4,8 +4,10 @@ import type { WorkerOptions, WebWorkerOptions } from '../WorkerOptions.js'
 
 export type Transferable = ArrayBuffer | MessagePort
 
+const WebWorker = self.Worker
+
 export class Worker {
-  public readonly webWorker: globalThis.Worker
+  public readonly webWorker: typeof WebWorker.prototype
 
   constructor(scriptURL: string | URL, workerOptions: WorkerOptions) {
     // filter out NodeWorkerOptions
@@ -20,7 +22,7 @@ export class Worker {
     if (type != null) {
       options.type = type
     }
-    this.webWorker = new globalThis.Worker(scriptURL, options)
+    this.webWorker = new WebWorker(scriptURL, options)
   }
 
   addEventListener(type: WorkerEventTypes, listener: MessageListenerFn) {

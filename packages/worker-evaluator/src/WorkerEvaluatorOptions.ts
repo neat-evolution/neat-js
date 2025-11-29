@@ -22,6 +22,13 @@ export interface WorkerEvaluatorOptions {
    */
   strategy?: EvaluationStrategy<any>
 
+  /**
+   * URL to the worker script. Required for Vite compatibility.
+   * In Vite, use: new URL('./path/to/workerEvaluatorScript.js', import.meta.url)
+   * directly at the call site to ensure proper bundling.
+   */
+  workerScriptUrl?: URL | string
+
   /** Enable verbose logging */
   verbose?: boolean
 }
