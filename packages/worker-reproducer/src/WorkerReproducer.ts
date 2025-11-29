@@ -67,10 +67,15 @@ export class WorkerReproducer<
       options.algorithmPathname ?? population.algorithm.pathname
     this.threadCount = options.threadCount
 
+    // Use provided workerScriptUrl or fall back to default (works in Node.js, not Vite)
+    const workerScriptUrl =
+      options.workerScriptUrl ??
+      new URL('./workerReproducerScript.js', import.meta.url)
+
     this.pool = new WorkerPool({
       threadCount: options.threadCount,
       taskCount: population.populationOptions.populationSize,
-      workerScriptUrl: new URL('./workerReproducerScript.js', import.meta.url),
+      workerScriptUrl,
       workerOptions: {
         name: 'WorkerReproducer',
         type: 'module',

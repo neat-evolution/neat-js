@@ -69,10 +69,15 @@ export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
     this.createExecutorPathname = options.createExecutorPathname
     this.createEnvironmentPathname = options.createEnvironmentPathname
 
+    // Use provided workerScriptUrl or fall back to default (works in Node.js, not Vite)
+    const workerScriptUrl =
+      options.workerScriptUrl ??
+      new URL('./workerEvaluatorScript.js', import.meta.url)
+
     this.pool = new WorkerPool({
       threadCount: options.threadCount,
       taskCount: options.taskCount,
-      workerScriptUrl: new URL('./workerEvaluatorScript.js', import.meta.url),
+      workerScriptUrl,
       workerOptions: {
         name: 'WorkerEvaluator',
         type: 'module',

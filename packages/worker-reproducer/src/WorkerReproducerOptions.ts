@@ -6,6 +6,11 @@ export interface WorkerReproducerOptions {
   /** os.cpus() */
   threadCount: number
   enableCustomState?: boolean
+  /**
+   * URL to the worker script. Required for Vite compatibility.
+   * In Vite, import with: import workerUrl from '@neat-evolution/worker-reproducer/workerReproducerScript?worker&url'
+   */
+  workerScriptUrl?: URL | string
   /** Enable verbose logging */
   verbose?: boolean
 }
