@@ -87,8 +87,9 @@ yarn add @neat-evolution/evaluation-strategy
 Pass a strategy to `WorkerEvaluator` via options:
 
 ```typescript
-import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
 import { createWorkerEvaluator } from '@neat-evolution/worker-evaluator'
+
+import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
 
 const evaluator = createWorkerEvaluator(algorithm, environment, {
   createEnvironmentPathname: '@neat-evolution/dataset-environment',
@@ -104,11 +105,12 @@ const evaluator = createWorkerEvaluator(algorithm, environment, {
 Implement the `EvaluationStrategy` interface:
 
 ```typescript
+import type { GenomeEntries, FitnessData } from '@neat-evolution/evaluator'
+
 import type {
   EvaluationStrategy,
   EvaluationContext,
 } from '@neat-evolution/evaluation-strategy'
-import type { GenomeEntries, FitnessData } from '@neat-evolution/evaluator'
 
 class BatchStrategy implements EvaluationStrategy {
   constructor(private batchSize: number = 10) {}

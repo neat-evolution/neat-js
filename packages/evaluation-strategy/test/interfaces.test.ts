@@ -1,8 +1,4 @@
-import type {
-  FitnessData,
-  GenomeEntries,
-  GenomeEntry,
-} from '@neat-evolution/evaluator'
+import type { FitnessData, GenomeEntries } from '@neat-evolution/evaluator'
 import { describe, test, expectTypeOf } from 'vitest'
 
 import type { EvaluationContext, EvaluationStrategy } from '../src/index.js'
@@ -30,8 +26,8 @@ describe('EvaluationStrategy', () => {
   test('should return AsyncIterable<FitnessData>', async () => {
     const mockStrategy: EvaluationStrategy<any> = {
       evaluate: async function* (
-        context: EvaluationContext<any>,
-        genomeEntries: GenomeEntries<any>
+        _context: EvaluationContext<any>,
+        _genomeEntries: GenomeEntries<any>
       ): AsyncIterable<FitnessData> {
         yield [0, 0, 1.0] as FitnessData
       },

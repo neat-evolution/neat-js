@@ -5,8 +5,9 @@ import type {
 } from '@neat-evolution/evaluator'
 import type { DispatcherContext } from '@neat-evolution/worker-actions'
 
-export interface EvaluationContext<G extends AnyGenome<G>>
-  extends DispatcherContext {
+export interface EvaluationContext<
+  G extends AnyGenome<G>,
+> extends DispatcherContext {
   /**
    * Evaluates a single genome, 1-to-1.
    * (e.g., for a dataset)
