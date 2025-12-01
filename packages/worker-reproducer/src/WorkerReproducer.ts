@@ -49,8 +49,7 @@ export class WorkerReproducer<
     any,
     G
   >,
-> implements Reproducer<G>
-{
+> implements Reproducer<G> {
   public readonly population: AnyPopulation<G>
   public readonly algorithmPathname: string
   public readonly threadCount: number
