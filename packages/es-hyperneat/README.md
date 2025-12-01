@@ -99,23 +99,24 @@ will then manage the evolutionary process of CPPN genomes, which are used to
 dynamically construct the substrate networks.
 
 ```typescript
-import {
-  defaultESHyperNEATGenomeOptions,
-  eshyperneat,
-  ESHyperNEATAlgorithm,
-} from "@neat-evolution/es-hyperneat";
 import { defaultNEATConfigOptions } from "@neat-evolution/core";
-import {
-  createReproducer,
-  defaultEvolutionOptions,
-  defaultPopulationOptions,
-} from "@neat-evolution/evolution";
-import { createEvaluator } from "@neat-evolution/evaluator";
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
 } from "@neat-evolution/dataset-environment";
+import { createEvaluator } from "@neat-evolution/evaluator";
+import {
+  createReproducer,
+  defaultEvolutionOptions,
+  defaultPopulationOptions,
+} from "@neat-evolution/evolution";
+
+import {
+  defaultESHyperNEATGenomeOptions,
+  eshyperneat,
+  ESHyperNEATAlgorithm,
+} from "@neat-evolution/es-hyperneat";
 
 async function runESHyperNEATExample() {
   // 1. Setup the environment

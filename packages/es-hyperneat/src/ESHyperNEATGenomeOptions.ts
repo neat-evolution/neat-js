@@ -9,8 +9,7 @@ import type { CPPNGenomeOptions } from '@neat-evolution/cppn'
 import type { IOConfig } from '@neat-evolution/hyperneat'
 
 export interface ESHyperNEATGenomeOptions
-  extends GenomeOptions,
-    CPPNGenomeOptions {
+  extends GenomeOptions, CPPNGenomeOptions {
   initConfig?: InitConfig
   inputConfig: IOConfig
   outputConfig: IOConfig
