@@ -68,19 +68,17 @@
     "@heygrady/eslint-config": "^1.5.1",
     "@heygrady/tsconfig-bases": "^1.0.6",
     "@neat-evolution/utils": "^0.2.5",
-    "@rushstack/eslint-patch": "^1.6.1",
     "@swc/cli": "^0.1.65",
     "@swc/core": "^1.11.1",
     "@tsconfig/node22": "22.0.0",
-    "@types/eslint": "^8",
-    "@vitest/coverage-v8": "^0.34.6",
+    "@vitest/coverage-v8": "^4.0.14",
     "concurrently": "^8.2.2",
-    "eslint": "^8.57.1",
+    "eslint": "^9.39.1",
     "lint-staged": "^15.4.3",
     "nodemon": "^3.1.9",
     "rimraf": "^5.0.10",
-    "typescript": "^5.3.2",
-    "vitest": "^0.34.6"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
   },
   "lint-staged": {
     "*.{md,cjs,mjs,js,jsx,cts,.ts,ts,tsx,json}": [

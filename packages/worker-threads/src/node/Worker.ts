@@ -19,6 +19,7 @@ export class Worker {
 
   constructor(scriptURL: string | URL, options: WorkerOptions) {
     // filter out WebWorkerOptions
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { credentials, type, ...nodeWorkerOptions } = options
 
     this.nodeWorker = new NodeWorker(scriptURL, {
