@@ -164,7 +164,7 @@ for (const line of lines) {
       }
       if (to.startsWith('H') && !knownNodes.has(to)) {
         knownNodes.add(to)
-        const type = NodeType.Hidden
+        const _type = NodeType.Hidden
         const id = Number(to.slice(1))
         hiddenNodes.push(id)
       }
