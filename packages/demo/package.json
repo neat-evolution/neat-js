@@ -65,7 +65,7 @@
     "quick-lru": "^7.0.0"
   },
   "devDependencies": {
-    "@heygrady/eslint-config": "^1.6.1",
+    "@heygrady/eslint-config": "^1.7.0",
     "@heygrady/tsconfig-bases": "^1.0.7",
     "@neat-evolution/utils": "workspace:^",
     "@swc/cli": "^0.7.9",
