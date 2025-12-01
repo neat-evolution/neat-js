@@ -99,24 +99,23 @@ with a specific `Algorithm`, `Evaluator`, and various options, then pass it to
 the `evolve` function.
 
 ```typescript
+
+
+import { defaultNEATConfigOptions } from "@neat-evolution/core";
+import {
+  DatasetEnvironment,
+  defaultDatasetOptions,
+  loadDataset,
+} from "@neat-evolution/dataset-environment";
+import { createEvaluator } from "@neat-evolution/evaluator";
+import { defaultNEATGenomeOptions, NEATAlgorithm } from "@neat-evolution/neat";
+
 import {
   createReproducer,
   defaultEvolutionOptions,
   defaultPopulationOptions,
   evolve,
 } from "@neat-evolution/evolution";
-
-import { defaultNEATGenomeOptions, NEATAlgorithm } from "@neat-evolution/neat";
-
-import { defaultNEATConfigOptions } from "@neat-evolution/core";
-
-import { createEvaluator } from "@neat-evolution/evaluator";
-
-import {
-  DatasetEnvironment,
-  defaultDatasetOptions,
-  loadDataset,
-} from "@neat-evolution/dataset-environment";
 
 async function runEvolutionExample() {
   // 1. Setup the environment
