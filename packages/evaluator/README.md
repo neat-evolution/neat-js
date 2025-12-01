@@ -106,17 +106,17 @@ Evaluators are typically created by the main evolutionary process (e.g., the
 function from `@neat-evolution/evolution`.
 
 ```typescript
-import { createEvaluator, Evaluator } from "@neat-evolution/evaluator";
 
-import { NEATAlgorithm } from "@neat-evolution/neat"; // Example algorithm
 
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
 } from "@neat-evolution/dataset-environment";
-
 import { createExecutor } from "@neat-evolution/executor"; // Example executor factory
+import { NEATAlgorithm } from "@neat-evolution/neat"; // Example algorithm
+
+import { createEvaluator, Evaluator } from "@neat-evolution/evaluator";
 
 async function setupEvaluator() {
   // 1. Setup the environment
