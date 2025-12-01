@@ -98,23 +98,24 @@ with the necessary factories and options. This function will then manage the
 evolutionary process and return the best-performing genome found.
 
 ```typescript
-import {
-  cppn,
-  CPPNAlgorithm,
-  defaultCPPNGenomeOptions,
-} from "@neat-evolution/cppn";
 import { defaultNEATConfigOptions } from "@neat-evolution/core";
-import {
-  createReproducer,
-  defaultEvolutionOptions,
-  defaultPopulationOptions,
-} from "@neat-evolution/evolution";
-import { createEvaluator } from "@neat-evolution/evaluator";
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
 } from "@neat-evolution/dataset-environment";
+import { createEvaluator } from "@neat-evolution/evaluator";
+import {
+  createReproducer,
+  defaultEvolutionOptions,
+  defaultPopulationOptions,
+} from "@neat-evolution/evolution";
+
+import {
+  cppn,
+  CPPNAlgorithm,
+  defaultCPPNGenomeOptions,
+} from "@neat-evolution/cppn";
 
 async function runCppyExample() {
   // 1. Setup the environment (e.g., a dataset environment)
