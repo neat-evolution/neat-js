@@ -90,9 +90,10 @@ inputs. In the context of NEAT, the `Phenotype` is derived from the best
 `Genome` found by the evolutionary process.
 
 ```typescript
+import { Activation, Phenotype } from "@neat-evolution/core"; // Assuming Phenotype is available
+
 import { createExecutor, Executor } from "@neat-evolution/executor";
 
-import { Activation, Phenotype } from "@neat-evolution/core"; // Assuming Phenotype is available
 
 // Example: Create a dummy phenotype (in a real scenario, this comes from a NEAT genome)
 
