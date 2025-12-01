@@ -84,7 +84,7 @@ export const loadDataset = async (config: DatasetOptions): Promise<Dataset> => {
       validationCount,
       testCount,
     }
-  } catch (err) {
+  } catch (_err) {
     throw new Error(`Unable to load dataset from file ${config.dataset}`)
   }
 }

@@ -147,12 +147,13 @@ To use the `dataset-environment` package, you typically start by defining your
 `DatasetEnvironment` instance to evaluate your NEAT genomes.
 
 ```typescript
+import { createExecutor } from "@neat-evolution/executor"; // Assuming an executor is available
+
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
 } from "@neat-evolution/dataset-environment";
-import { createExecutor } from "@neat-evolution/executor"; // Assuming an executor is available
 
 async function runDatasetDemo() {
   // Configure dataset options
