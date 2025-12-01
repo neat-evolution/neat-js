@@ -24,17 +24,14 @@ export class Handler {
 
     // Safety timeout: if ready() isn't called manually, send it automatically
     // This prevents workers from hanging if the developer forgets to call ready()
-    this.readyTimeoutId = setTimeout(
-      () => {
-        if (!this.isReady) {
-          console.warn(
-            '[Handler] Warning: handler.ready() was not called manually. Sending WORKER_READY signal automatically.'
-          )
-          this.ready()
-        }
-      },
-      options?.readyTimeoutMs ?? DEFAULT_READY_TIMEOUT_MS
-    )
+    this.readyTimeoutId = setTimeout(() => {
+      if (!this.isReady) {
+        console.warn(
+          '[Handler] Warning: handler.ready() was not called manually. Sending WORKER_READY signal automatically.'
+        )
+        this.ready()
+      }
+    }, options?.readyTimeoutMs ?? DEFAULT_READY_TIMEOUT_MS)
   }
 
   private isReady = false
