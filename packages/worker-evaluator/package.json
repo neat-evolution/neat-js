@@ -61,8 +61,8 @@
     "@swc/helpers": "^0.5.17"
   },
   "devDependencies": {
-    "@heygrady/eslint-config": "^1.5.1",
-    "@heygrady/tsconfig-bases": "^1.0.6",
+    "@heygrady/eslint-config": "^1.6.0",
+    "@heygrady/tsconfig-bases": "^1.0.7",
     "@neat-evolution/dataset-environment": "^0.5.0",
     "@neat-evolution/evolution": "^0.5.0",
     "@neat-evolution/neat": "^0.6.0",
