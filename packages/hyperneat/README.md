@@ -93,23 +93,24 @@ manage the evolutionary process of CPPN genomes, which in turn design the
 substrate networks.
 
 ```typescript
-import {
-  defaultHyperNEATGenomeOptions,
-  hyperneat,
-  HyperNEATAlgorithm,
-} from "@neat-evolution/hyperneat";
 import { defaultNEATConfigOptions } from "@neat-evolution/core";
-import {
-  createReproducer,
-  defaultEvolutionOptions,
-  defaultPopulationOptions,
-} from "@neat-evolution/evolution";
-import { createEvaluator } from "@neat-evolution/evaluator";
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
 } from "@neat-evolution/dataset-environment";
+import { createEvaluator } from "@neat-evolution/evaluator";
+import {
+  createReproducer,
+  defaultEvolutionOptions,
+  defaultPopulationOptions,
+} from "@neat-evolution/evolution";
+
+import {
+  defaultHyperNEATGenomeOptions,
+  hyperneat,
+  HyperNEATAlgorithm,
+} from "@neat-evolution/hyperneat";
 
 async function runHyperNEATExample() {
   // 1. Setup the environment (e.g., a dataset environment)

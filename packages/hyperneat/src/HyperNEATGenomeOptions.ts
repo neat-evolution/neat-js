@@ -14,8 +14,7 @@ import { type Point } from './Point.js'
 export type IOConfig = 'line' | Point[]
 
 export interface HyperNEATGenomeOptions
-  extends GenomeOptions,
-    CPPNGenomeOptions {
+  extends GenomeOptions, CPPNGenomeOptions {
   weightThreshold: number
   hiddenActivation: Activation
   outputActivation: Activation
