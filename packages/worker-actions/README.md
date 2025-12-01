@@ -85,6 +85,7 @@ Register handlers using the action type string (available via `.toString()` on t
 ```typescript
 // worker.ts
 import { Handler, WorkerContext } from "@neat-evolution/worker-actions";
+
 import { add } from "./actions";
 
 const handler = new Handler();
@@ -105,8 +106,10 @@ Use the `Dispatcher` to send actions created by your action creators.
 
 ```typescript
 // main.ts
-import { Dispatcher } from "@neat-evolution/worker-actions";
 import { WorkerPool } from "@neat-evolution/worker-pool";
+
+import { Dispatcher } from "@neat-evolution/worker-actions";
+
 import { add } from "./actions";
 
 async function run() {
