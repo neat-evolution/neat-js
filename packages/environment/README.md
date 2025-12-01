@@ -75,12 +75,13 @@ implement the `Environment` interface in a separate package to define a specific
 problem.
 
 ```typescript
+import { InitConfig } from "@neat-evolution/core";
+import { Executor, SyncExecutor } from "@neat-evolution/executor";
+
 import {
   Environment,
   EnvironmentFactory,
 } from "@neat-evolution/environment";
-import { InitConfig } from "@neat-evolution/core";
-import { Executor, SyncExecutor } from "@neat-evolution/executor";
 
 // Example of a custom environment implementation (conceptual)
 interface MyEnvironmentOptions {
