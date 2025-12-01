@@ -7,9 +7,9 @@ import type {
 import type { EvaluationContext } from '../EvaluationContext.js'
 import type { EvaluationStrategy } from '../EvaluationStrategy.js'
 
-export class IndividualStrategy<G extends AnyGenome<G>>
-  implements EvaluationStrategy<G>
-{
+export class IndividualStrategy<
+  G extends AnyGenome<G>,
+> implements EvaluationStrategy<G> {
   async *evaluate(
     context: EvaluationContext<G>,
     genomeEntries: GenomeEntries<G>
