@@ -139,6 +139,7 @@ dist
 !.yarn/sdks
 !.yarn/versions
 .turbo
+.claude/
 .gemini/
 CLAUDE.md
 GEMINI.md
