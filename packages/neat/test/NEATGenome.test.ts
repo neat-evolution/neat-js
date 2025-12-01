@@ -149,12 +149,12 @@ describe('NEATGenome class', () => {
   describe('mutationAddLink', () => {
     let hiddenNodes: NEATHiddenNodeData[]
     let links: NEATLinkData[]
-    let data: NEATGenomeData
+    let _data: NEATGenomeData
 
     beforeEach(() => {
       hiddenNodes = []
       links = []
-      data = {
+      _data = {
         ...defaultData,
         factoryOptions: { hiddenNodes, links },
       }

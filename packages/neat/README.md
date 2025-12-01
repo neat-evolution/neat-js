@@ -89,27 +89,25 @@ with the necessary factories and options. This function will then manage the
 evolutionary process and return the best-performing genome found.
 
 ```typescript
-import {
-  defaultNEATGenomeOptions,
-  neat,
-  NEATAlgorithm,
-} from "@neat-evolution/neat";
 
 import { defaultNEATConfigOptions } from "@neat-evolution/core";
-
+import {
+  DatasetEnvironment,
+  defaultDatasetOptions,
+  loadDataset,
+} from "@neat-evolution/dataset-environment";
+import { createEvaluator } from "@neat-evolution/evaluator"; // Assuming a standard evaluator
 import {
   createReproducer,
   defaultEvolutionOptions,
   defaultPopulationOptions,
 } from "@neat-evolution/evolution";
 
-import { createEvaluator } from "@neat-evolution/evaluator"; // Assuming a standard evaluator
-
 import {
-  DatasetEnvironment,
-  defaultDatasetOptions,
-  loadDataset,
-} from "@neat-evolution/dataset-environment";
+  defaultNEATGenomeOptions,
+  neat,
+  NEATAlgorithm,
+} from "@neat-evolution/neat";
 
 async function runNeatExample() {
   // 1. Setup the environment (e.g., a dataset environment)
