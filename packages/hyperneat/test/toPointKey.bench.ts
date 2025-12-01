@@ -23,32 +23,32 @@ const toTemplatePointKey = (point: Point): string => {
 }
 
 describe('toPointKey', () => {
-  test('toBinaryPointKey', () => {
+  bench('toBinaryPointKey', () => {
     const point: Point = [1, 2]
     const key = toBinaryPointKey(point)
     expect(key).toBe(65538)
   })
-  test('toJSONPointKey', () => {
+  bench('toJSONPointKey', () => {
     const point: Point = [1, 2]
     const key = toJSONPointKey(point)
     expect(key).toBe('[1,2]')
   })
-  test('toJoinPointKey', () => {
+  bench('toJoinPointKey', () => {
     const point: Point = [1, 2]
     const key = toJoinPointKey(point)
     expect(key).toBe('1,2')
   })
-  test('toPlusPointKey', () => {
+  bench('toPlusPointKey', () => {
     const point: Point = [1, 2]
     const key = toPlusPointKey(point)
     expect(key).toBe('1,2')
   })
-  test('toTemplatePointKey', () => {
+  bench('toTemplatePointKey', () => {
     const point: Point = [1, 2]
     const key = toTemplatePointKey(point)
     expect(key).toBe('1,2')
   })
-  test('toPointKey', () => {
+  bench('toPointKey', () => {
     const point: Point = [1, 2]
     const key = toPointKey(point)
     expect(key).toBe('1,2')

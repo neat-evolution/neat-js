@@ -53,31 +53,31 @@ const fromPointKeyManualParseInt = (key: string): Point => {
 
 const key = toPointKey([1, 2])
 describe('fromPointKey', () => {
-  test('fromPointKey', () => {
+  bench('fromPointKey', () => {
     const point = fromPointKey(key)
     expect(point).toEqual([1, 2])
   })
-  test('fromPointKeySplit', () => {
+  bench('fromPointKeySplit', () => {
     const point = fromPointKeySplit(key)
     expect(point).toEqual([1, 2])
   })
-  test('fromPointKeyRegExp', () => {
+  bench('fromPointKeyRegExp', () => {
     const point = fromPointKeyRegExp(key)
     expect(point).toEqual([1, 2])
   })
-  test('fromPointKeySubstring', () => {
+  bench('fromPointKeySubstring', () => {
     const point = fromPointKeySubstring(key)
     expect(point).toEqual([1, 2])
   })
-  test('fromPointKeyManual', () => {
+  bench('fromPointKeyManual', () => {
     const point = fromPointKeyManual(key)
     expect(point).toEqual([1, 2])
   })
-  test('fromPointKeyManualCharCode', () => {
+  bench('fromPointKeyManualCharCode', () => {
     const point = fromPointKeyManualCharCode(key)
     expect(point).toEqual([1, 2])
   })
-  test('fromPointKeyManualParseInt', () => {
+  bench('fromPointKeyManualParseInt', () => {
     const point = fromPointKeyManualParseInt(key)
     expect(point).toEqual([1, 2])
   })
