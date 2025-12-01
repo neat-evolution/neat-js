@@ -106,29 +106,27 @@ then use it to instantiate a `Reproducer` for your population. This `Reproducer`
 is then passed to the `evolve` function from `@neat-evolution/evolution`.
 
 ```typescript
-import {
-  createReproducerFactory,
-  WorkerReproducerOptions,
-} from "@neat-evolution/worker-reproducer";
 
-import { NEATAlgorithm } from "@neat-evolution/neat"; // Example algorithm
 
-import {
-  defaultPopulationOptions,
-  Population,
-} from "@neat-evolution/evolution"; // Example Population
 
 import { defaultNEATConfigOptions } from "@neat-evolution/core";
-
-import { createEvaluator } from "@neat-evolution/evaluator";
-
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
 } from "@neat-evolution/dataset-environment";
-
+import { createEvaluator } from "@neat-evolution/evaluator";
+import {
+  defaultPopulationOptions,
+  Population,
+} from "@neat-evolution/evolution"; // Example Population
+import { NEATAlgorithm } from "@neat-evolution/neat"; // Example algorithm
 import { hardwareConcurrency } from "@neat-evolution/worker-threads";
+
+import {
+  createReproducerFactory,
+  WorkerReproducerOptions,
+} from "@neat-evolution/worker-reproducer";
 
 async function setupWorkerReproducer() {
   // 1. Setup the environment
