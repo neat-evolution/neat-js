@@ -140,6 +140,7 @@ Pass a custom strategy via options to change evaluation behavior:
 
 ```typescript
 import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
+
 import { createEvaluator } from '@neat-evolution/worker-evaluator'
 
 const strategy = new IndividualStrategy()
@@ -162,21 +163,20 @@ appropriate options and then pass it to the evolutionary process. The
 `WorkerEvaluator` will then handle the parallel evaluation of genomes.
 
 ```typescript
-import {
-  createEvaluator,
-  WorkerEvaluatorOptions,
-} from "@neat-evolution/worker-evaluator";
-
-import { NEATAlgorithm } from "@neat-evolution/neat"; // Example algorithm
 
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
 } from "@neat-evolution/dataset-environment";
-
-import { hardwareConcurrency } from "@neat-evolution/worker-threads";
 import { IndividualStrategy } from "@neat-evolution/evaluation-strategy"; // Import IndividualStrategy
+import { NEATAlgorithm } from "@neat-evolution/neat"; // Example algorithm
+import { hardwareConcurrency } from "@neat-evolution/worker-threads";
+
+import {
+  createEvaluator,
+  WorkerEvaluatorOptions,
+} from "@neat-evolution/worker-evaluator";
 
 async function setupWorkerEvaluator() {
   // 1. Setup the environment
