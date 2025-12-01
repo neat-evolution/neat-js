@@ -6,27 +6,22 @@ on:
 jobs:
   build-test-lint:
     runs-on: ubuntu-latest
+    env:
+      # Yarn 4 reads auth token from this env var for npm scopes
+      YARN_NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - uses: actions/checkout@v6
+
+    - name: Enable Corepack
+      run: corepack enable
 
     - name: Set up Node.js
       uses: actions/setup-node@v6
       with:
-        node-version: '22'
+        node-version: '24'
         cache: 'yarn'
         registry-url: "https://npm.pkg.github.com"
         scope: "@neat-evolution"
-
-    - name: Setup .yarnrc.yml
-      run: |
-        yarn config set npmScopes.neat-evolution.npmRegistryServer "https://npm.pkg.github.com"
-        yarn config set npmScopes.neat-evolution.npmAlwaysAuth true
-        yarn config set npmScopes.neat-evolution.npmAuthToken $NPM_AUTH_TOKEN
-        yarn config set npmScopes.heygrady.npmRegistryServer "https://npm.pkg.github.com"
-        yarn config set npmScopes.heygrady.npmAlwaysAuth true
-        yarn config set npmScopes.heygrady.npmAuthToken $NPM_AUTH_TOKEN
-      env:
-        NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Get yarn cache directory
       run: echo "LOOKUP_YARN_CACHE_FOLDER=$(yarn config get cacheFolder)" >> $GITHUB_ENV
@@ -54,7 +49,7 @@ jobs:
 
     - name: Test (all)
       run: yarn test
-        
+
     - name: Check packages (manypkg)
       run: yarn check:manypkg
 
