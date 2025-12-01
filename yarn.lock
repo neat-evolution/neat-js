@@ -791,9 +791,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@heygrady/eslint-config@npm:^1.6.0":
-  version: 1.6.0
-  resolution: "@heygrady/eslint-config@npm:1.6.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40heygrady%2Feslint-config%2F1.6.0%2F912546bb530ca6b321568d8851e9e25a0e2eb722"
+"@heygrady/eslint-config@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "@heygrady/eslint-config@npm:1.6.1::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40heygrady%2Feslint-config%2F1.6.1%2Fb87ff362e602167bf8ba2908ff98ec37002b0341"
   dependencies:
     "@eslint/js": "npm:^9.39.1"
     "@eslint/markdown": "npm:^7.5.1"
@@ -828,7 +828,7 @@ __metadata:
     vitest: "npm:^4.0.14"
   peerDependencies:
     eslint: ^9.0.0
-  checksum: 10/7fc9ba1bc83fc482c297e895521b09776a4ebc07d9505c05ea5ae76fbf8bf15c60587ff21795a8f2ee8a99861cc484f060e6a3c32d92f6b84f1c52fc091c92d3
+  checksum: 10/07732a720cd2fd4d6a650b6795644c0c70b3bf7fb8169bba02433e6e9ffbe62787fb58fc6ea4555c9c28a059b2b9946a5c2a73358e69334cc40e998e4496b953
   languageName: node
   linkType: hard
 
@@ -1203,13 +1203,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@neat-evolution/core@npm:^0.3.3, @neat-evolution/core@workspace:packages/core":
+"@neat-evolution/core@workspace:^, @neat-evolution/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/core@workspace:packages/core"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/utils": "npm:^0.2.5"
+    "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1225,19 +1225,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/cppn@npm:^0.6.0, @neat-evolution/cppn@workspace:packages/cppn":
+"@neat-evolution/cppn@workspace:^, @neat-evolution/cppn@workspace:packages/cppn":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/cppn@workspace:packages/cppn"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/dataset-environment": "npm:^0.5.0"
-    "@neat-evolution/evaluator": "npm:^0.5.0"
-    "@neat-evolution/evolution": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/neat": "npm:^0.6.0"
-    "@neat-evolution/utils": "npm:^0.2.5"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/dataset-environment": "workspace:^"
+    "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/evolution": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/neat": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1252,17 +1252,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/dataset-environment@npm:^0.5.0, @neat-evolution/dataset-environment@workspace:packages/dataset-environment":
+"@neat-evolution/dataset-environment@workspace:^, @neat-evolution/dataset-environment@workspace:packages/dataset-environment":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/dataset-environment@workspace:packages/dataset-environment"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/environment": "npm:^0.5.0"
-    "@neat-evolution/evolution": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/utils": "npm:^0.2.5"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/environment": "workspace:^"
+    "@neat-evolution/evolution": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1281,24 +1281,24 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@neat-evolution/demo@workspace:packages/demo"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/cppn": "npm:^0.6.0"
-    "@neat-evolution/dataset-environment": "npm:^0.5.0"
-    "@neat-evolution/des-hyperneat": "npm:^0.6.0"
-    "@neat-evolution/environment": "npm:^0.5.0"
-    "@neat-evolution/es-hyperneat": "npm:^0.6.0"
-    "@neat-evolution/evaluation-strategy": "npm:^0.3.4"
-    "@neat-evolution/evaluator": "npm:^0.5.0"
-    "@neat-evolution/evolution": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/hyperneat": "npm:^0.6.0"
-    "@neat-evolution/neat": "npm:^0.6.0"
-    "@neat-evolution/utils": "npm:^0.2.5"
-    "@neat-evolution/worker-evaluator": "npm:^0.7.0"
-    "@neat-evolution/worker-reproducer": "npm:^0.7.0"
-    "@neat-evolution/worker-threads": "npm:^0.4.2"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/cppn": "workspace:^"
+    "@neat-evolution/dataset-environment": "workspace:^"
+    "@neat-evolution/des-hyperneat": "workspace:^"
+    "@neat-evolution/environment": "workspace:^"
+    "@neat-evolution/es-hyperneat": "workspace:^"
+    "@neat-evolution/evaluation-strategy": "workspace:^"
+    "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/evolution": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/hyperneat": "workspace:^"
+    "@neat-evolution/neat": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
+    "@neat-evolution/worker-evaluator": "workspace:^"
+    "@neat-evolution/worker-reproducer": "workspace:^"
+    "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1315,22 +1315,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/des-hyperneat@npm:^0.6.0, @neat-evolution/des-hyperneat@workspace:packages/des-hyperneat":
+"@neat-evolution/des-hyperneat@workspace:^, @neat-evolution/des-hyperneat@workspace:packages/des-hyperneat":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/des-hyperneat@workspace:packages/des-hyperneat"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/cppn": "npm:^0.6.0"
-    "@neat-evolution/dataset-environment": "npm:^0.5.0"
-    "@neat-evolution/es-hyperneat": "npm:^0.6.0"
-    "@neat-evolution/evaluator": "npm:^0.5.0"
-    "@neat-evolution/evolution": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/hyperneat": "npm:^0.6.0"
-    "@neat-evolution/neat": "npm:^0.6.0"
-    "@neat-evolution/utils": "npm:^0.2.5"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/cppn": "workspace:^"
+    "@neat-evolution/dataset-environment": "workspace:^"
+    "@neat-evolution/es-hyperneat": "workspace:^"
+    "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/evolution": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/hyperneat": "workspace:^"
+    "@neat-evolution/neat": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1345,15 +1345,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/environment@npm:^0.5.0, @neat-evolution/environment@workspace:packages/environment":
+"@neat-evolution/environment@workspace:^, @neat-evolution/environment@workspace:packages/environment":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/environment@workspace:packages/environment"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/utils": "npm:^0.2.5"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1368,21 +1368,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/es-hyperneat@npm:^0.6.0, @neat-evolution/es-hyperneat@workspace:packages/es-hyperneat":
+"@neat-evolution/es-hyperneat@workspace:^, @neat-evolution/es-hyperneat@workspace:packages/es-hyperneat":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/es-hyperneat@workspace:packages/es-hyperneat"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/cppn": "npm:^0.6.0"
-    "@neat-evolution/dataset-environment": "npm:^0.5.0"
-    "@neat-evolution/evaluator": "npm:^0.5.0"
-    "@neat-evolution/evolution": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/hyperneat": "npm:^0.6.0"
-    "@neat-evolution/neat": "npm:^0.6.0"
-    "@neat-evolution/utils": "npm:^0.2.5"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/cppn": "workspace:^"
+    "@neat-evolution/dataset-environment": "workspace:^"
+    "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/evolution": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/hyperneat": "workspace:^"
+    "@neat-evolution/neat": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1397,17 +1397,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/evaluation-strategy@npm:^0.3.4, @neat-evolution/evaluation-strategy@workspace:packages/evaluation-strategy":
+"@neat-evolution/evaluation-strategy@workspace:^, @neat-evolution/evaluation-strategy@workspace:packages/evaluation-strategy":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/evaluation-strategy@workspace:packages/evaluation-strategy"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/environment": "npm:^0.5.0"
-    "@neat-evolution/evaluator": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/worker-actions": "npm:^0.4.2"
-    "@neat-evolution/worker-threads": "npm:^0.4.2"
+    "@neat-evolution/environment": "workspace:^"
+    "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/worker-actions": "workspace:^"
+    "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1422,15 +1422,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/evaluator@npm:^0.5.0, @neat-evolution/evaluator@workspace:packages/evaluator":
+"@neat-evolution/evaluator@workspace:^, @neat-evolution/evaluator@workspace:packages/evaluator":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/evaluator@workspace:packages/evaluator"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/environment": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/environment": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1445,15 +1445,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/evolution@npm:^0.5.0, @neat-evolution/evolution@workspace:packages/evolution":
+"@neat-evolution/evolution@workspace:^, @neat-evolution/evolution@workspace:packages/evolution":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/evolution@workspace:packages/evolution"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/evaluator": "npm:^0.5.0"
-    "@neat-evolution/utils": "npm:^0.2.5"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1469,13 +1469,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/executor@npm:^0.3.5, @neat-evolution/executor@workspace:packages/executor":
+"@neat-evolution/executor@workspace:^, @neat-evolution/executor@workspace:packages/executor":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/executor@workspace:packages/executor"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
+    "@neat-evolution/core": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1490,20 +1490,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/hyperneat@npm:^0.6.0, @neat-evolution/hyperneat@workspace:packages/hyperneat":
+"@neat-evolution/hyperneat@workspace:^, @neat-evolution/hyperneat@workspace:packages/hyperneat":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/hyperneat@workspace:packages/hyperneat"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/cppn": "npm:^0.6.0"
-    "@neat-evolution/dataset-environment": "npm:^0.5.0"
-    "@neat-evolution/evaluator": "npm:^0.5.0"
-    "@neat-evolution/evolution": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/neat": "npm:^0.6.0"
-    "@neat-evolution/utils": "npm:^0.2.5"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/cppn": "workspace:^"
+    "@neat-evolution/dataset-environment": "workspace:^"
+    "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/evolution": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/neat": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1518,18 +1518,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/neat@npm:^0.6.0, @neat-evolution/neat@workspace:packages/neat":
+"@neat-evolution/neat@workspace:^, @neat-evolution/neat@workspace:packages/neat":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/neat@workspace:packages/neat"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/dataset-environment": "npm:^0.5.0"
-    "@neat-evolution/evaluator": "npm:^0.5.0"
-    "@neat-evolution/evolution": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/utils": "npm:^0.2.5"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/dataset-environment": "workspace:^"
+    "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/evolution": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1544,11 +1544,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/utils@npm:^0.2.5, @neat-evolution/utils@workspace:packages/utils":
+"@neat-evolution/utils@workspace:^, @neat-evolution/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/utils@workspace:packages/utils"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
@@ -1566,14 +1566,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-actions@npm:^0.4.2, @neat-evolution/worker-actions@workspace:packages/worker-actions":
+"@neat-evolution/worker-actions@workspace:^, @neat-evolution/worker-actions@workspace:packages/worker-actions":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-actions@workspace:packages/worker-actions"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/worker-pool": "npm:^0.4.2"
-    "@neat-evolution/worker-threads": "npm:^0.4.2"
+    "@neat-evolution/worker-pool": "workspace:^"
+    "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1590,24 +1590,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-evaluator@npm:^0.7.0, @neat-evolution/worker-evaluator@workspace:packages/worker-evaluator":
+"@neat-evolution/worker-evaluator@workspace:^, @neat-evolution/worker-evaluator@workspace:packages/worker-evaluator":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-evaluator@workspace:packages/worker-evaluator"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/dataset-environment": "npm:^0.5.0"
-    "@neat-evolution/environment": "npm:^0.5.0"
-    "@neat-evolution/evaluation-strategy": "npm:^0.3.4"
-    "@neat-evolution/evaluator": "npm:^0.5.0"
-    "@neat-evolution/evolution": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/neat": "npm:^0.6.0"
-    "@neat-evolution/utils": "npm:^0.2.5"
-    "@neat-evolution/worker-actions": "npm:^0.4.2"
-    "@neat-evolution/worker-pool": "npm:^0.4.2"
-    "@neat-evolution/worker-threads": "npm:^0.4.2"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/dataset-environment": "workspace:^"
+    "@neat-evolution/environment": "workspace:^"
+    "@neat-evolution/evaluation-strategy": "workspace:^"
+    "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/evolution": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/neat": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
+    "@neat-evolution/worker-actions": "workspace:^"
+    "@neat-evolution/worker-pool": "workspace:^"
+    "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1625,13 +1625,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-pool@npm:^0.4.2, @neat-evolution/worker-pool@workspace:packages/worker-pool":
+"@neat-evolution/worker-pool@workspace:^, @neat-evolution/worker-pool@workspace:packages/worker-pool":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-pool@workspace:packages/worker-pool"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/worker-threads": "npm:^0.4.2"
+    "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1648,20 +1648,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-reproducer@npm:^0.7.0, @neat-evolution/worker-reproducer@workspace:packages/worker-reproducer":
+"@neat-evolution/worker-reproducer@workspace:^, @neat-evolution/worker-reproducer@workspace:packages/worker-reproducer":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-reproducer@workspace:packages/worker-reproducer"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "npm:^0.3.3"
-    "@neat-evolution/evaluator": "npm:^0.5.0"
-    "@neat-evolution/evolution": "npm:^0.5.0"
-    "@neat-evolution/executor": "npm:^0.3.5"
-    "@neat-evolution/utils": "npm:^0.2.5"
-    "@neat-evolution/worker-actions": "npm:^0.4.2"
-    "@neat-evolution/worker-pool": "npm:^0.4.2"
-    "@neat-evolution/worker-threads": "npm:^0.4.2"
+    "@neat-evolution/core": "workspace:^"
+    "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/evolution": "workspace:^"
+    "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/utils": "workspace:^"
+    "@neat-evolution/worker-actions": "workspace:^"
+    "@neat-evolution/worker-pool": "workspace:^"
+    "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
@@ -1677,11 +1677,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-threads@npm:^0.4.2, @neat-evolution/worker-threads@workspace:packages/worker-threads":
+"@neat-evolution/worker-threads@workspace:^, @neat-evolution/worker-threads@workspace:packages/worker-threads":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-threads@workspace:packages/worker-threads"
   dependencies:
-    "@heygrady/eslint-config": "npm:^1.6.0"
+    "@heygrady/eslint-config": "npm:^1.6.1"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
