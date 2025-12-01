@@ -44,7 +44,7 @@
     "test": "vitest --passWithNoTests --run"
   },
   "dependencies": {
-    "@neat-evolution/core": "^0.3.3",
+    "@neat-evolution/core": "workspace:^",
     "@swc/helpers": "^0.5.17"
   },
   "devDependencies": {

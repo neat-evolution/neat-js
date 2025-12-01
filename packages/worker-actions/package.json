@@ -44,8 +44,8 @@
     "test": "vitest --passWithNoTests --run"
   },
   "dependencies": {
-    "@neat-evolution/worker-pool": "^0.4.2",
-    "@neat-evolution/worker-threads": "^0.4.2",
+    "@neat-evolution/worker-pool": "workspace:^",
+    "@neat-evolution/worker-threads": "workspace:^",
     "@swc/helpers": "^0.5.17",
     "p-defer": "^4.0.1"
   },
