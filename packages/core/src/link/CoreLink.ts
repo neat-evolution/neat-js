@@ -15,8 +15,7 @@ export class CoreLink<
   LSD,
   LS extends ExtendedState<LSD>,
   L extends CoreLink<LFO, LCO, LSD, LS, L>,
-> implements Link<LFO, LCO, LSD, LS, L>
-{
+> implements Link<LFO, LCO, LSD, LS, L> {
   // LinkRef
   public readonly from: NodeKey
   public readonly to: NodeKey

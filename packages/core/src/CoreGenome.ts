@@ -75,9 +75,24 @@ export class CoreGenome<
     L,
     G
   >,
-> implements
-    Genome<NCO, LCO, CD, C, NSD, LSD, NS, LS, SD, S, HND, LD, GFO, GO, GD, G>
-{
+> implements Genome<
+  NCO,
+  LCO,
+  CD,
+  C,
+  NSD,
+  LSD,
+  NS,
+  LS,
+  SD,
+  S,
+  HND,
+  LD,
+  GFO,
+  GO,
+  GD,
+  G
+> {
   public readonly config: C
   public readonly state: S
   public readonly genomeOptions: GO
