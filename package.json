@@ -2,6 +2,10 @@
   "name": "neat-evolution",
   "packageManager": "yarn@4.12.0",
   "private": true,
+  "resolutions": {
+    "@heygrady/eslint-config": "portal:/Users/heygrady/projects/blog/packages/eslint-config",
+    "@heygrady/tsconfig-bases": "portal:/Users/heygrady/projects/blog/packages/tsconfig-bases"
+  },
   "workspaces": [
     "apps/*",
     "packages/*",

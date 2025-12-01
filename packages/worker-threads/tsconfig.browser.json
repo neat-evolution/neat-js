@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@heygrady/tsconfig-bases/ts-web-esnext/tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "outDir": "./dist/types/browser",
+    "rootDir": "./src",
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"]
+  },
+  "include": [
+    "src/browser",
+    "src/browser.ts",
+    "src/EventTypes.ts",
+    "src/MessageEvent.ts",
+    "src/MessageListenerFn.ts",
+    "src/WorkerOptions.ts"
+  ]
+}

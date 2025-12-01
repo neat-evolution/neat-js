@@ -1,10 +1,12 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@heygrady/tsconfig-bases/ts-node-esm/tsconfig.json",
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
-    "noEmit": false
+    "noEmit": false,
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"]
   },
-  "extends": "./tsconfig.json",
   "include": ["src"]
 }
  
