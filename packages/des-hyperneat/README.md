@@ -104,24 +104,25 @@ function, providing it with the necessary factories and options. This function
 will then manage the evolutionary process of the complex DES-HyperNEAT genomes.
 
 ```typescript
+import { defaultNEATConfigOptions } from "@neat-evolution/core";
+import {
+  DatasetEnvironment,
+  defaultDatasetOptions,
+  loadDataset,
+} from "@neat-evolution/dataset-environment";
+import { createEvaluator } from "@neat-evolution/evaluator";
+import {
+  createReproducer,
+  defaultEvolutionOptions,
+  defaultPopulationOptions,
+} from "@neat-evolution/evolution";
+
 import {
   defaultDESHyperNEATGenomeOptions,
   defaultTopologyConfigOptions,
   deshyperneat,
   DESHyperNEATAlgorithm,
 } from "@neat-evolution/des-hyperneat";
-import { defaultNEATConfigOptions } from "@neat-evolution/core";
-import {
-  createReproducer,
-  defaultEvolutionOptions,
-  defaultPopulationOptions,
-} from "@neat-evolution/evolution";
-import { createEvaluator } from "@neat-evolution/evaluator";
-import {
-  DatasetEnvironment,
-  defaultDatasetOptions,
-  loadDataset,
-} from "@neat-evolution/dataset-environment";
 
 async function runDESHyperNEATExample() {
   // 1. Setup the environment
