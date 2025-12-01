@@ -46,8 +46,9 @@ The `worker-pool` package exposes the following key classes and interfaces:
 To use the `worker-pool`, create an instance with your desired configuration, wait for it to be ready, and then acquire/release workers as needed.
 
 ```typescript
-import { WorkerPool } from "@neat-evolution/worker-pool";
 import { hardwareConcurrency } from "@neat-evolution/worker-threads";
+
+import { WorkerPool } from "@neat-evolution/worker-pool";
 
 async function runWorkerPoolExample() {
   // 1. Configure the pool
@@ -86,6 +87,7 @@ The worker script pointed to by `workerScriptUrl` must send a `WORKER_READY` mes
 ```typescript
 // my-worker.js
 import { workerContext } from '@neat-evolution/worker-threads'
+
 import { WORKER_READY } from "@neat-evolution/worker-pool";
 
 // ... initialization logic ...
