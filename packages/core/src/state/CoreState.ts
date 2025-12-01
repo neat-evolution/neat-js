@@ -10,12 +10,12 @@ import type {
 } from './StateProvider.js'
 
 export class CoreState<
-    NSD,
-    LSD,
-    NS extends ExtendedState<NSD>,
-    LS extends ExtendedState<LSD>,
-    SD extends StateData,
-  >
+  NSD,
+  LSD,
+  NS extends ExtendedState<NSD>,
+  LS extends ExtendedState<LSD>,
+  SD extends StateData,
+>
   implements NEATState, StateProvider<NSD, LSD, NS, LS, SD>
 {
   /**

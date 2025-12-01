@@ -15,8 +15,7 @@ export class CoreNode<
   NSD,
   NS extends ExtendedState<NSD>,
   N extends CoreNode<NFO, NCO, NSD, NS, N>,
-> implements Node<NFO, NCO, NSD, NS, N>
-{
+> implements Node<NFO, NCO, NSD, NS, N> {
   // NodeRef
   public readonly type: NodeType
   public readonly id: NodeId
