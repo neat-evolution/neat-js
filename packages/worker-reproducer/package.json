@@ -65,7 +65,7 @@
     "@swc/cli": "^0.7.9",
     "@swc/core": "^1.15.3",
     "@vitest/coverage-v8": "^4.0.14",
-    "@vitest/web-worker": "^0.34.7",
+    "@vitest/web-worker": "^4.0.14",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.1",
     "lint-staged": "^16.2.7",
