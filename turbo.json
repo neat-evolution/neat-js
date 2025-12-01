@@ -1,42 +1,50 @@
 {
-  "$schema": "https://turborepo.org/schema.json",
+  "$schema": "https://turbo.build/schema.json",
+  "concurrency": "4",
   "tasks": {
     "build": {
       "inputs": [
         "src/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}",
+        "*.config.{cjs,mjs,js,ts}",
         "package.json"
       ],
-      "outputs": [
-        "dist/**"
-      ],
-      "dependsOn": [
-        "^build"
-      ]
+      "outputs": ["dist/**"],
+      "dependsOn": ["^build"],
+      "cache": true
     },
-    "clean": {},
+    "dev": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    },
     "coverage": {
       "inputs": [
         "src/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}",
         "test/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}",
         "package.json"
       ],
-      "outputs": [
-        "coverage/**"
-      ]
+      "outputs": ["coverage/**"],
+      "dependsOn": ["^test"],
+      "cache": true
     },
     "format": {
       "inputs": [
         "src/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}",
         "test/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}",
         "package.json"
-      ]
+      ],
+      "cache": true
     },
     "lint": {
       "inputs": [
         "src/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}",
         "test/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}",
         "package.json"
-      ]
+      ],
+      "cache": true
     },
     "precommit": {
       "inputs": [
@@ -44,16 +52,16 @@
         "test/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}",
         "package.json"
       ],
-      "dependsOn": [
-        "^build"
-      ]
+      "cache": false
     },
     "test": {
       "inputs": [
         "src/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}",
         "test/**/*.{cjs,mjs,js,jsx,cts,mts,ts,tsx}",
         "package.json"
-      ]
+      ],
+      "dependsOn": ["^build"],
+      "cache": true
     }
   }
 }
