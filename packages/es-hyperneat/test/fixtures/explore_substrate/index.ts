@@ -7,7 +7,6 @@ import {
   type Activation,
   type Connection,
   type InitConfig,
-  type NodeKey,
   type Phenotype,
 } from '@neat-evolution/core'
 import {

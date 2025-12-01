@@ -5,7 +5,6 @@ import {
   type Activation,
   type Target,
   type InitConfig,
-  type NodeKey,
   type Phenotype,
   PhenotypeActionType,
   type PhenotypeAction,
