@@ -1612,7 +1612,7 @@ __metadata:
     "@swc/helpers": "npm:^0.5.17"
     "@types/seedrandom": "npm:^3"
     "@vitest/coverage-v8": "npm:^4.0.14"
-    "@vitest/web-worker": "npm:^0.34.7"
+    "@vitest/web-worker": "npm:^4.0.14"
     concurrently: "npm:^9.2.1"
     eslint: "npm:^9.39.1"
     jsdom: "npm:^22.1.0"
@@ -1665,7 +1665,7 @@ __metadata:
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
     "@vitest/coverage-v8": "npm:^4.0.14"
-    "@vitest/web-worker": "npm:^0.34.7"
+    "@vitest/web-worker": "npm:^4.0.14"
     concurrently: "npm:^9.2.1"
     eslint: "npm:^9.39.1"
     lint-staged: "npm:^16.2.7"
@@ -2762,14 +2762,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/web-worker@npm:^0.34.7":
-  version: 0.34.7
-  resolution: "@vitest/web-worker@npm:0.34.7"
+"@vitest/web-worker@npm:^4.0.14":
+  version: 4.0.14
+  resolution: "@vitest/web-worker@npm:4.0.14"
   dependencies:
-    debug: "npm:^4.3.4"
+    obug: "npm:^2.1.1"
   peerDependencies:
-    vitest: ">=0.34.0"
-  checksum: 10/1b4c7341bc5b9b8fd17f0d3d5670902ff8675c2eebbbfb6d83675f15318464d78d4332b21c924956ea0968c14124fd18022fafb187a46fc2a0df7494df200f95
+    vitest: 4.0.14
+  checksum: 10/51a7093a91d93d427d1b24273444b4d57a5bf90a2c0a56ffd3bd9a34ef7ad2c27b88b570f7b53b92aedd01b24cec61516a124fce3d59251d4f205578fd055235
   languageName: node
   linkType: hard
 
