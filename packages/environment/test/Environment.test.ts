@@ -12,11 +12,11 @@ describe('StandardEnvironment', () => {
       description: EnvironmentDescription = { inputs: 2, outputs: 1 }
       isAsync = false
 
-      evaluate(executor: SyncExecutor): number {
+      evaluate(_executor: SyncExecutor): number {
         return 1.0
       }
 
-      async evaluateAsync(executor: Executor): Promise<number> {
+      async evaluateAsync(_executor: Executor): Promise<number> {
         return 1.0
       }
 
@@ -35,15 +35,15 @@ describe('StandardEnvironment', () => {
       description: EnvironmentDescription = { inputs: 2, outputs: 1 }
       isAsync = true
 
-      evaluate(executor: SyncExecutor): number {
+      evaluate(_executor: SyncExecutor): number {
         throw new Error('Use async evaluation')
       }
 
-      async evaluateAsync(executor: Executor): Promise<number> {
+      async evaluateAsync(_executor: Executor): Promise<number> {
         return 0.5
       }
 
-      evaluateBatch(executors: SyncExecutor[]): number[] {
+      evaluateBatch(_executors: SyncExecutor[]): number[] {
         throw new Error('Use async evaluation')
       }
 
@@ -106,11 +106,11 @@ describe('StandardEnvironment', () => {
       description: EnvironmentDescription = { inputs: 4, outputs: 3 }
       isAsync = false
 
-      evaluate(executor: SyncExecutor): number {
+      evaluate(_executor: SyncExecutor): number {
         return 0.95
       }
 
-      async evaluateAsync(executor: Executor): Promise<number> {
+      async evaluateAsync(_executor: Executor): Promise<number> {
         return 0.95
       }
 
@@ -135,11 +135,11 @@ describe('StandardEnvironment', () => {
       description: EnvironmentDescription = { inputs: 1, outputs: 1 }
       isAsync = false
 
-      evaluate(executor: SyncExecutor): number {
+      evaluate(_executor: SyncExecutor): number {
         return 0.5
       }
 
-      async evaluateAsync(executor: Executor): Promise<number> {
+      async evaluateAsync(_executor: Executor): Promise<number> {
         return 0.5
       }
 
