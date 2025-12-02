@@ -108,14 +108,21 @@ deterministic hashing:
 
 ```typescript
 // CoreState.ts
-getSplitInnovation(innovationKey: InnovationKey): NodeKey | Promise<NodeKey> {
-  const nodeId = hashInnovationKey(innovationKey)
-  const nodeKey = toNodeKey(NodeType.Hidden, nodeId)
-  return nodeKey
-}
+class CoreState {
+   getSplitInnovation(
+      innovationKey: InnovationKey,
+   ): NodeKey | Promise<NodeKey> {
+      const nodeId = hashInnovationKey(innovationKey);
+      const nodeKey = toNodeKey(NodeType.Hidden, nodeId);
+      return nodeKey;
+   }
 
-getConnectInnovation(from: NodeKey, to: NodeKey): InnovationKey | Promise<InnovationKey> {
-  return from + ':' + to
+   getConnectInnovation(
+      from: NodeKey,
+      to: NodeKey,
+   ): InnovationKey | Promise<InnovationKey> {
+      return from + ":" + to;
+   }
 }
 ```
 
