@@ -51,9 +51,10 @@ export function exploreSubstrate(
       const nodeKey = toPointKey(node)
       for (const target of targets) {
         const targetPoint = fromPointKey(target.node)
+        // Use Math.trunc to match Rust's `as i64` truncation toward zero
         const targetNode: Point = [
-          Math.floor(targetPoint[0] * options.resolution),
-          Math.floor(targetPoint[1] * options.resolution),
+          Math.trunc(targetPoint[0] * options.resolution),
+          Math.trunc(targetPoint[1] * options.resolution),
         ]
         const targetKey = toPointKey(targetNode)
         if (!visited.has(targetKey)) {
