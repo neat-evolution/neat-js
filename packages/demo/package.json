@@ -62,7 +62,7 @@
     "@neat-evolution/worker-reproducer": "workspace:^",
     "@neat-evolution/worker-threads": "workspace:^",
     "@swc/helpers": "^0.5.17",
-    "quick-lru": "^7.0.0"
+    "quick-lru": "^7.3.0"
   },
   "devDependencies": {
     "@heygrady/eslint-config": "^1.7.0",
@@ -70,7 +70,7 @@
     "@neat-evolution/utils": "workspace:^",
     "@swc/cli": "^0.7.9",
     "@swc/core": "^1.15.3",
-    "@tsconfig/node22": "22.0.0",
+    "@tsconfig/node22": "^22.0.5",
     "@vitest/coverage-v8": "^4.0.14",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.1",

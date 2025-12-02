@@ -46,7 +46,7 @@
   "dependencies": {
     "@neat-evolution/utils": "workspace:^",
     "@swc/helpers": "^0.5.17",
-    "quick-lru": "^7.0.0"
+    "quick-lru": "^7.3.0"
   },
   "devDependencies": {
     "@heygrady/eslint-config": "^1.7.0",
