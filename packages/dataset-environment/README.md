@@ -76,69 +76,40 @@ The `dataset-environment` package exposes several important components:
   back, enabling efficient data transfer between the main thread and worker
   threads.
 
-## How it Fits into the Ecosystem
-
-This package is a specialized environment provider within the `neat-js`
-ecosystem. It builds upon the `environment` and `core` packages and is utilized
-by the `demo` package to showcase NEAT algorithms on a real-world dataset.
-
-- **`@neat-evolution/environment`**: Implements the `StandardEnvironment`
-  interface defined in this package.
-- **`@neat-evolution/core`**: Uses `InitConfig` for defining dataset dimensions.
-- **`@neat-evolution/utils`**: Leverages `createRNG` and `shuffle` for dataset
-  preparation (e.g., shuffling data).
-- **`@neat-evolution/demo`**: Utilizes `DatasetEnvironment` to run various NEAT
-  algorithms on the Iris dataset.
-- **`@neat-evolution/worker-evaluator`**: Can use the `createEnvironment`
-  factory to reconstruct the environment in worker threads from a
-  `SharedArrayBuffer`.
-
 ## Installation
 
-To install the `@neat-evolution/dataset-environment` package, use the following
-command:
+This package is hosted on [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry). You'll need to configure your package manager to use the GitHub Packages registry for the `@neat-evolution` scope.
+
+### Yarn (v2+)
+
+Add to your `.yarnrc.yml`:
+
+```yaml
+npmScopes:
+  neat-evolution:
+    npmAlwaysAuth: true
+    npmRegistryServer: "https://npm.pkg.github.com"
+```
+
+Then install:
 
 ```sh
 yarn add @neat-evolution/dataset-environment
 ```
 
-## Key Components
+### npm
 
-The `dataset-environment` package exposes several important components:
+Create a `.npmrc` file in your project root:
 
-- **`Dataset` interface**: Defines the structure of a loaded dataset, including
-  input and target arrays for training, validation, and testing, along with
-  metadata like dimensions and whether it's a classification task.
+```
+@neat-evolution:registry=https://npm.pkg.github.com
+```
 
-- **`DatasetOptions` interface and `defaultDatasetOptions`**: `DatasetOptions`
-  defines configurable parameters for loading a dataset (e.g., file path, seed
-  for shuffling, split fractions, bias input). `defaultDatasetOptions` provides
-  a standard set of these parameters.
+Then install:
 
-- **`loadDataset(config: DatasetOptions): Promise<Dataset>`**: An asynchronous
-  function responsible for reading a dataset from a specified file path, parsing
-  its content, and splitting it into training, validation, and test sets. It
-  also handles shuffling and adding a bias input if configured.
-
-- **`DatasetEnvironment` class**: The core environment implementation. It takes
-  a `Dataset` object and provides `evaluate` and `evaluateAsync` methods to
-  calculate the fitness of a neural network based on its performance on the
-  dataset. It supports both mean squared error (MSE) for regression and
-  cross-entropy for classification.
-
-- **`createEnvironment(environmentData: SharedArrayBuffer | null): DatasetEnvironment`**:
-  A factory function used to reconstruct a `DatasetEnvironment` instance from a
-  `SharedArrayBuffer`. This is particularly useful for passing environment data
-  to worker threads without serialization overhead.
-
-- **Accuracy Functions (`oneHotAccuracy`, `roundedAccuracy`,
-  `binaryAccuracy`)**: Utility functions for calculating different types of
-  accuracy metrics, primarily used for classification tasks.
-
-- **`datasetToSharedBuffer` and `datasetFromSharedBuffer`**: Functions for
-  serializing a `Dataset` object into a `SharedArrayBuffer` and deserializing it
-  back, enabling efficient data transfer between the main thread and worker
-  threads.
+```sh
+npm install @neat-evolution/dataset-environment
+```
 
 ## Usage
 

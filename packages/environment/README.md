@@ -38,10 +38,37 @@ various NEAT algorithms to be applied to diverse problems. Other packages in the
 
 ## Installation
 
-To install the `@neat-evolution/environment` package, use the following command:
+This package is hosted on [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry). You'll need to configure your package manager to use the GitHub Packages registry for the `@neat-evolution` scope.
+
+### Yarn (v2+)
+
+Add to your `.yarnrc.yml`:
+
+```yaml
+npmScopes:
+  neat-evolution:
+    npmAlwaysAuth: true
+    npmRegistryServer: "https://npm.pkg.github.com"
+```
+
+Then install:
 
 ```sh
 yarn add @neat-evolution/environment
+```
+
+### npm
+
+Create a `.npmrc` file in your project root:
+
+```
+@neat-evolution:registry=https://npm.pkg.github.com
+```
+
+Then install:
+
+```sh
+npm install @neat-evolution/environment
 ```
 
 ## Key Components

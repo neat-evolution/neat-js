@@ -41,6 +41,29 @@ neural network training.
 implementation of NeuroEvolution of Augmenting Topologies (NEAT) algorithms. It
 allows users to easily evolve neural networks for a variety of tasks.
 
+This repo's packages are hosted on [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry). You'll need to configure your package manager to use the GitHub Packages registry for the `@neat-evolution` scope.
+
+### Configuration
+
+#### Yarn (v2+)
+
+Add to your `.yarnrc.yml`:
+
+```yaml
+npmScopes:
+  neat-evolution:
+    npmAlwaysAuth: true
+    npmRegistryServer: "https://npm.pkg.github.com"
+```
+
+#### npm
+
+Create a `.npmrc` file in your project root:
+
+```
+@neat-evolution:registry=https://npm.pkg.github.com
+```
+
 ### Quick Start
 
 To quickly set up a basic NEAT environment, install the following core packages:

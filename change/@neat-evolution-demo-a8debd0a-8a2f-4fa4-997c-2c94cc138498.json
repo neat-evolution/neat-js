@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "chore: update quick-lru to ^7.3.0",
+  "packageName": "@neat-evolution/demo",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

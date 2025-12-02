@@ -76,8 +76,37 @@ const strategy = new IndividualStrategy()
 
 ## Installation
 
+This package is hosted on [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry). You'll need to configure your package manager to use the GitHub Packages registry for the `@neat-evolution` scope.
+
+### Yarn (v2+)
+
+Add to your `.yarnrc.yml`:
+
+```yaml
+npmScopes:
+  neat-evolution:
+    npmAlwaysAuth: true
+    npmRegistryServer: "https://npm.pkg.github.com"
+```
+
+Then install:
+
 ```bash
 yarn add @neat-evolution/evaluation-strategy
+```
+
+### npm
+
+Create a `.npmrc` file in your project root:
+
+```
+@neat-evolution:registry=https://npm.pkg.github.com
+```
+
+Then install:
+
+```bash
+npm install @neat-evolution/evaluation-strategy
 ```
 
 ## Usage

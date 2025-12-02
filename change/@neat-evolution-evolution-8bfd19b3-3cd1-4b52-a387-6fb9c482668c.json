@@ -1,0 +1,7 @@
+{
+  "type": "none",
+  "comment": "docs: add GitHub Packages installation instructions",
+  "packageName": "@neat-evolution/evolution",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "none"
+}
