@@ -1,0 +1,32 @@
+{
+  "ignores": [
+    "@swc/helpers",
+    "@swc/cli",
+    "@swc/core",
+    "@vitest/coverage-v8",
+    "@vitest/web-worker",
+    "@types/*",
+    "@heygrady/tsconfig-bases",
+    "@heygrady/eslint-config",
+    "@commitlint/cli",
+    "@commitlint/config-conventional",
+    "@commitlint/config-workspace-scopes",
+    "@manypkg/cli",
+    "beachball",
+    "husky",
+    "turbo",
+    "rimraf",
+    "concurrently",
+    "nodemon",
+    "lint-staged",
+    "typescript",
+    "eslint",
+    "vitest",
+    "globals",
+    "jsdom"
+  ],
+  "ignore-patterns": [
+    "dist",
+    "coverage"
+  ]
+}
