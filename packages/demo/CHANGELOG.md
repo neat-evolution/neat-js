@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/demo
 
-<!-- This log was last generated on Sat, 29 Nov 2025 18:00:45 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 02 Dec 2025 18:45:22 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.5.6
+
+Tue, 02 Dec 2025 18:45:22 GMT
+
+### Patches
+
+- chore: update quick-lru to ^7.3.0 (github@heygrady.net)
 
 ## 0.5.4
 

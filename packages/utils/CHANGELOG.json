@@ -2,6 +2,21 @@
   "name": "@neat-evolution/utils",
   "entries": [
     {
+      "date": "Tue, 02 Dec 2025 18:45:22 GMT",
+      "version": "0.2.5",
+      "tag": "@neat-evolution/utils_v0.2.5",
+      "comments": {
+        "none": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/utils",
+            "commit": "78d9623da965a36d793e6bb4f8da414e34df0aba",
+            "comment": "docs: add GitHub Packages installation instructions"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 02 Dec 2025 02:20:20 GMT",
       "version": "0.2.5",
       "tag": "@neat-evolution/utils_v0.2.5",

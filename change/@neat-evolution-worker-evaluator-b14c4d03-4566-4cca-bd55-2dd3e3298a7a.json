@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "docs: add GitHub Packages installation instructions",
-  "packageName": "@neat-evolution/worker-evaluator",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "none"
-}

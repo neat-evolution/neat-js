@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/es-hyperneat
 
-<!-- This log was last generated on Fri, 28 Nov 2025 20:11:15 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 02 Dec 2025 18:45:22 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.6.2
+
+Tue, 02 Dec 2025 18:45:22 GMT
+
+### Patches
+
+- fix: improve explore substrate correctness, performance improvements (github@heygrady.net)
 
 ## 0.6.0
 

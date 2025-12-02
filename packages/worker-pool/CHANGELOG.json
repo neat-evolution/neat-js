@@ -2,6 +2,21 @@
   "name": "@neat-evolution/worker-pool",
   "entries": [
     {
+      "date": "Tue, 02 Dec 2025 18:45:22 GMT",
+      "version": "0.4.2",
+      "tag": "@neat-evolution/worker-pool_v0.4.2",
+      "comments": {
+        "none": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-pool",
+            "commit": "78d9623da965a36d793e6bb4f8da414e34df0aba",
+            "comment": "docs: add GitHub Packages installation instructions"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 02 Dec 2025 02:20:21 GMT",
       "version": "0.4.2",
       "tag": "@neat-evolution/worker-pool_v0.4.2",

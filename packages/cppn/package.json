@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/cppn",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",

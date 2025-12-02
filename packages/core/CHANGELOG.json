@@ -2,6 +2,29 @@
   "name": "@neat-evolution/core",
   "entries": [
     {
+      "date": "Tue, 02 Dec 2025 18:45:22 GMT",
+      "version": "0.3.5",
+      "tag": "@neat-evolution/core_v0.3.5",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/core",
+            "commit": "78d9623da965a36d793e6bb4f8da414e34df0aba",
+            "comment": "chore: update quick-lru to ^7.3.0"
+          }
+        ],
+        "none": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/core",
+            "commit": "78d9623da965a36d793e6bb4f8da414e34df0aba",
+            "comment": "docs: add GitHub Packages installation instructions"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 02 Dec 2025 02:20:20 GMT",
       "version": "0.3.3",
       "tag": "@neat-evolution/core_v0.3.3",

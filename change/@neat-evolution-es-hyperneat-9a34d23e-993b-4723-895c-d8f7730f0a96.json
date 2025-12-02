@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "fix: improve explore substrate correctness, performance improvements",
-  "packageName": "@neat-evolution/es-hyperneat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}
