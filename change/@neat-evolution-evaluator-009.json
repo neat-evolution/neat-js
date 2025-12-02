@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "internal: update tooling (ESLint flat config, Yarn 4, SWC)",
-  "packageName": "@neat-evolution/evaluator",
-  "email": "not@not.com",
-  "dependentChangeType": "none"
-}

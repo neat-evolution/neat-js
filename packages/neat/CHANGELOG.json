@@ -2,6 +2,21 @@
   "name": "@neat-evolution/neat",
   "entries": [
     {
+      "date": "Tue, 02 Dec 2025 02:20:20 GMT",
+      "version": "0.6.0",
+      "tag": "@neat-evolution/neat_v0.6.0",
+      "comments": {
+        "none": [
+          {
+            "author": "not@not.com",
+            "package": "@neat-evolution/neat",
+            "commit": "3d3c82470b61562e2c8c40e61abdf18efcea4934",
+            "comment": "internal: update tooling (ESLint flat config, Yarn 4, SWC)"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 28 Nov 2025 20:11:15 GMT",
       "version": "0.6.0",
       "tag": "@neat-evolution/neat_v0.6.0",
