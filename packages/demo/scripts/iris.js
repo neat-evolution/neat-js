@@ -26,7 +26,7 @@ async function processIrisData() {
   for (const line of lines) {
     if (!line) continue // Skip empty lines
     const parts = line.trim().split(',')
-    output += parts.slice(0, -1).join(', ') + '\n'
+    output += `${parts.slice(0, -1).join(', ')}\n`
   }
 
   output += '\n'
@@ -38,7 +38,7 @@ async function processIrisData() {
     const label = parts[parts.length - 1][8] // Get the first character of the species name
     console.log({ parts, label })
     const mapping = { o: '0, 0, 1', s: '0, 1, 0', g: '1, 0, 0' }
-    output += mapping[label] + '\n'
+    output += `${mapping[label]}\n`
   }
 
   // Ensure the 'generated' directory exists

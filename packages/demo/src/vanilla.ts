@@ -1,7 +1,7 @@
 import type { Environment } from '@neat-evolution/environment'
 import {
-  createEvaluator as createVanillaEvaluator,
   type AnyAlgorithm,
+  createEvaluator as createVanillaEvaluator,
   type EvaluatorFactory,
 } from '@neat-evolution/evaluator'
 import { createReproducer } from '@neat-evolution/evolution'

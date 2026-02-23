@@ -12,7 +12,7 @@ import {
 } from '@neat-evolution/worker-reproducer'
 import { hardwareConcurrency } from '@neat-evolution/worker-threads'
 
-import { Methods, demo, method } from './demo.js'
+import { demo, Methods, method } from './demo.js'
 
 const workerThreadLimit = hardwareConcurrency - 1
 
