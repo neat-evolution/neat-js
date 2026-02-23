@@ -1,8 +1,8 @@
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
-  defaultCPPNGenomeOptions,
-  cppn,
   CPPNAlgorithm,
+  cppn,
+  defaultCPPNGenomeOptions,
 } from '@neat-evolution/cppn'
 import {
   DatasetEnvironment,
@@ -10,15 +10,15 @@ import {
   loadDataset,
 } from '@neat-evolution/dataset-environment'
 import {
+  DESHyperNEATAlgorithm,
   defaultDESHyperNEATGenomeOptions,
   defaultTopologyConfigOptions,
   deshyperneat,
-  DESHyperNEATAlgorithm,
 } from '@neat-evolution/des-hyperneat'
 import {
   defaultESHyperNEATGenomeOptions,
-  eshyperneat,
   ESHyperNEATAlgorithm,
+  eshyperneat,
 } from '@neat-evolution/es-hyperneat'
 import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
 import type { EvaluatorFactory } from '@neat-evolution/evaluator'
@@ -30,14 +30,14 @@ import {
 } from '@neat-evolution/evolution'
 import {
   defaultHyperNEATGenomeOptions,
-  hyperneat,
   HyperNEATAlgorithm,
+  hyperneat,
 } from '@neat-evolution/hyperneat'
 import {
   defaultNEATGenomeOptions,
-  neat,
   NEATAlgorithm,
   type NEATReproducerFactory,
+  neat,
 } from '@neat-evolution/neat'
 
 export enum Methods {

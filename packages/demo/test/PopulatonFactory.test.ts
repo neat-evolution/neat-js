@@ -5,9 +5,9 @@ import {
   loadDataset,
 } from '@neat-evolution/dataset-environment'
 import {
-  TestEvaluator,
   type FitnessData,
   type GenomeEntry,
+  TestEvaluator,
 } from '@neat-evolution/evaluator'
 import {
   createReproducer,
@@ -19,11 +19,11 @@ import {
 } from '@neat-evolution/evolution'
 import { createExecutor } from '@neat-evolution/executor'
 import {
-  NEATAlgorithm,
   defaultNEATGenomeOptions,
-  type NEATGenomeOptions,
-  NEATGenome,
+  NEATAlgorithm,
   type NEATConfig,
+  NEATGenome,
+  type NEATGenomeOptions,
   type NEATPopulation,
 } from '@neat-evolution/neat'
 import { beforeEach, describe, expect, test } from 'vitest'

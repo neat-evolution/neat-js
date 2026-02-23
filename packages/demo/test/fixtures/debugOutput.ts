@@ -1,18 +1,18 @@
 import fs from 'node:fs/promises'
 
 import {
+  type Action,
+  type Activation,
+  type Connection,
+  type NodeKey,
+  type NodeRef,
   NodeType,
   nodeRefsToLinkKey,
   nodeRefToKey,
-  type NodeRef,
-  type Action,
-  type Connection,
-  type Activation,
-  PhenotypeActionType,
   type Phenotype,
-  type PhenotypeLinkAction,
+  PhenotypeActionType,
   type PhenotypeActivationAction,
-  type NodeKey,
+  type PhenotypeLinkAction,
 } from '@neat-evolution/core'
 import type {
   NEATGenomeFactoryOptions,
@@ -74,12 +74,12 @@ function actionStringToLinkRef(
   const match = input.match(regex)
 
   if (match) {
-    const [, fromString, toString] = match
-    if (fromString == null || toString == null) {
+    const [, fromString, toNodeString] = match
+    if (fromString == null || toNodeString == null) {
       return null
     }
     const fromRef = actionStringToNodeRef(`Node(node: ${fromString})`)
-    const toRef = actionStringToNodeRef(`Node(node: ${toString})`)
+    const toRef = actionStringToNodeRef(`Node(node: ${toNodeString})`)
     if (fromRef == null || toRef == null) {
       return null
     }
@@ -191,12 +191,12 @@ for (const line of lines) {
     const match = line.match(regex)
 
     if (match) {
-      const [, fromString, toString] = match
-      if (fromString == null || toString == null) {
+      const [, fromString, toNodeString] = match
+      if (fromString == null || toNodeString == null) {
         throw new Error('Invalid connection.')
       }
       const fromRef = actionStringToNodeRef(`Node(node: ${fromString})`)
-      const toRef = actionStringToNodeRef(`Node(node: ${toString})`)
+      const toRef = actionStringToNodeRef(`Node(node: ${toNodeString})`)
       if (fromRef == null || toRef == null) {
         throw new Error('Invalid connection.')
       }
