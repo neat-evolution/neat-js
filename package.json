@@ -9,12 +9,14 @@
   "workspaces": [
     "apps/*",
     "packages/*",
-    "scripts/*"
+    "scripts/*",
+    ".claude/skills/*"
   ],
   "scripts": {
     "build": "turbo run build",
     "change": "beachball change --no-commit && git commit -a -m \"chore: add change files\"",
-    "check": "turbo run check && yarn check:beachball && yarn check:manypkg",
+    "check": "yarn check:types && yarn check:manypkg && yarn check:beachball",
+    "check:types": "turbo run check",
     "check:beachball": "beachball check",
     "check:manypkg": "manypkg check",
     "clean": "turbo run clean",

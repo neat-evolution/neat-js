@@ -1,0 +1,34 @@
+{
+  "name": "@neat-evolution/neat-publish",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18.14.1"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "check-status": "node scripts/check-status.js",
+    "format": "biome check --write",
+    "generate-change-files": "node scripts/generate-change-files.js",
+    "lint": "biome lint",
+    "merge-and-release": "node scripts/merge-and-release.js",
+    "test": "vitest run --passWithNoTests",
+    "test:dev": "vitest"
+  },
+  "dependencies": {
+    "conventional-commits-parser": "^6.2.1",
+    "execa": "^9.6.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.4",
+    "@vitest/coverage-v8": "^4.0.14",
+    "rimraf": "^6.1.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
+  },
+  "volta": {
+    "extends": "../../../package.json"
+  },
+  "packageManager": "yarn@4.12.0"
+}
