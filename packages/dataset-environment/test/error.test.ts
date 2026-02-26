@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest'
 
 import {
+  crossentropy,
+  crossentropySingle,
+  type Matrix,
+  mse,
   mseSingle,
   normalize,
-  type Matrix,
   type Vector,
-  mse,
-  crossentropySingle,
-  crossentropy,
 } from '../src/index.js'
 
 describe('error', () => {

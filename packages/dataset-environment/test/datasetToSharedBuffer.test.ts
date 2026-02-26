@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { datasetFromSharedBuffer } from '../src/datasetFromSharedBuffer.js'
 import { datasetToSharedBuffer } from '../src/datasetToSharedBuffer.js'
 import {
-  defaultDatasetOptions,
   type Dataset,
+  defaultDatasetOptions,
   loadDataset,
 } from '../src/index.js'
 

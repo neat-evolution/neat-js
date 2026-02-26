@@ -1,13 +1,12 @@
 import type { Executor, SyncExecutor } from '@neat-evolution/executor'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-
+import type { Dataset, DatasetOptions } from '../src/index.js'
 import {
   DatasetEnvironment,
   datasetFromSharedBuffer,
   defaultDatasetOptions,
   loadDataset,
 } from '../src/index.js'
-import type { Dataset, DatasetOptions } from '../src/index.js'
 
 describe('DatasetEnvironment', () => {
   test('should create a DatasetEnvironment', async () => {
@@ -51,8 +50,6 @@ describe('DatasetEnvironment', () => {
 
     beforeEach(async () => {
       const mockDataset: Dataset = {
-        name: 'mock-dataset',
-        description: 'A mock dataset for testing',
         dimensions: { inputs: 1, outputs: 3 },
         isClassification: true,
         oneHotOutput: true,
@@ -62,6 +59,10 @@ describe('DatasetEnvironment', () => {
         validationTargets: [],
         testInputs: [],
         testTargets: [],
+        totalCount: 1,
+        trainingCount: 1,
+        validationCount: 0,
+        testCount: 0,
       }
       environment = new DatasetEnvironment(mockDataset)
 
