@@ -1,7 +1,7 @@
 import type { Environment } from '@neat-evolution/environment'
-import { isAsyncExecutor, type ExecutorFactory } from '@neat-evolution/executor'
+import { type ExecutorFactory, isAsyncExecutor } from '@neat-evolution/executor'
 
-import { type Evaluator, type FitnessData } from './Evaluator.js'
+import type { Evaluator, FitnessData } from './Evaluator.js'
 import type { GenomeEntries, GenomeEntry } from './GenomeEntries.js'
 import type { AnyAlgorithm } from './types.js'
 
