@@ -34,11 +34,11 @@ describe('Genome crossover fixtures', () => {
     const expectedJSON = JSON.parse(JSON.stringify(expected.toJSON()))
 
     // sort links by innovation
-    resultJSON.factoryOptions.links.sort(
-      (a: NEATLinkData, b: NEATLinkData) => String(a[3]).localeCompare(String(b[3]))
+    resultJSON.factoryOptions.links.sort((a: NEATLinkData, b: NEATLinkData) =>
+      String(a[3]).localeCompare(String(b[3]))
     )
-    expectedJSON.factoryOptions.links.sort(
-      (a: NEATLinkData, b: NEATLinkData) => String(a[3]).localeCompare(String(b[3]))
+    expectedJSON.factoryOptions.links.sort((a: NEATLinkData, b: NEATLinkData) =>
+      String(a[3]).localeCompare(String(b[3]))
     )
     expect(resultJSON).toEqual(expectedJSON)
   })
