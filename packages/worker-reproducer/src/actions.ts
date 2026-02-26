@@ -9,7 +9,7 @@ import type {
   OrganismFactoryOptions,
   PopulationOptions,
 } from '@neat-evolution/evolution'
-import { createAction } from '@neat-evolution/worker-actions'
+import { createMessage } from '@neat-evolution/worker-actions'
 
 import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
 
@@ -67,29 +67,29 @@ export interface CPPNStateRedirectPayload {
 }
 
 // Action creators for worker-reproducer
-export const initReproducer = createAction<InitReproducerPayload<any, any>>(
+export const initReproducer = createMessage<InitReproducerPayload<any, any>>(
   ActionType.INIT_REPRODUCER
 )
 
-export const terminate = createAction<null>(ActionType.TERMINATE, () => null)
+export const terminate = createMessage<null>(ActionType.TERMINATE, () => null)
 
-export const requestEliteOrganism = createAction<OrganismPayload<any>>(
+export const requestEliteOrganism = createMessage<OrganismPayload<any>>(
   ActionType.REQUEST_ELITE_ORGANISM
 )
 
-export const requestBreedOrganism = createAction<SpeciesPayload>(
+export const requestBreedOrganism = createMessage<SpeciesPayload>(
   ActionType.REQUEST_BREED_ORGANISM
 )
 
-export const requestPopulationTournamentSelect = createAction<EmptyPayload>(
+export const requestPopulationTournamentSelect = createMessage<EmptyPayload>(
   ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT
 )
 
-export const requestSpeciesTournamentSelect = createAction<SpeciesPayload>(
+export const requestSpeciesTournamentSelect = createMessage<SpeciesPayload>(
   ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT
 )
 
 export const requestSetCPPNStateRedirect =
-  createAction<CPPNStateRedirectPayload>(
+  createMessage<CPPNStateRedirectPayload>(
     ActionType.REQUEST_SET_CPPN_STATE_REDIRECT
   )

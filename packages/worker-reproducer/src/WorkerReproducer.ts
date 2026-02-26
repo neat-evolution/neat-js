@@ -7,7 +7,7 @@ import {
 import {
   Dispatcher,
   type DispatcherContext,
-  type WorkerAction,
+  type WorkerMessage,
 } from '@neat-evolution/worker-actions'
 import { WorkerPool } from '@neat-evolution/worker-pool'
 
@@ -86,17 +86,17 @@ export class WorkerReproducer<
     })
 
     // Add handlers for requests from workers
-    this.dispatcher.addActionHandler(
+    this.dispatcher.addMessageHandler(
       ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT,
       this.handleRequestPopulationTournamentSelect.bind(this)
     )
 
-    this.dispatcher.addActionHandler(
+    this.dispatcher.addMessageHandler(
       ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT,
       this.handleRequestSpeciesTournamentSelect.bind(this)
     )
 
-    this.dispatcher.addActionHandler(
+    this.dispatcher.addMessageHandler(
       ActionType.REQUEST_SET_CPPN_STATE_REDIRECT,
       this.handleRequestSetCPPNStateRedirect.bind(this)
     )
@@ -126,7 +126,7 @@ export class WorkerReproducer<
   }
 
   protected handleRequestPopulationTournamentSelect(
-    action: WorkerAction<EmptyPayload>,
+    action: WorkerMessage<EmptyPayload>,
     context: DispatcherContext
   ) {
     const organism = this.population.tournamentSelect(
@@ -140,22 +140,22 @@ export class WorkerReproducer<
       genome: organism.genome.toFactoryOptions(),
       organismState: organism.toFactoryOptions(),
     }
-    // For worker→main→worker RPC, we need to use context.dispatch with proper meta
-    if (action.meta?.requestId != null) {
-      const responseAction: WorkerAction<OrganismPayload<any>> = {
+    // For worker→main→worker RPC, we need to use context.send with proper meta
+    if (action.meta?.callId != null) {
+      const responseAction: WorkerMessage<OrganismPayload<any>> = {
         type: 'RESPONSE',
         payload: responsePayload,
         meta: {
-          requestId: action.meta.requestId,
+          callId: action.meta.callId,
           isResponse: true,
         },
       }
-      context.dispatch(responseAction)
+      context.send(responseAction)
     }
   }
 
   protected handleRequestSpeciesTournamentSelect(
-    action: WorkerAction<SpeciesPayload>,
+    action: WorkerMessage<SpeciesPayload>,
     context: DispatcherContext
   ) {
     const { speciesId } = action.payload
@@ -178,21 +178,21 @@ export class WorkerReproducer<
       genome: organism.genome.toFactoryOptions(),
       organismState: organism.toFactoryOptions(),
     }
-    if (action.meta?.requestId != null) {
-      const responseAction: WorkerAction<OrganismPayload<any>> = {
+    if (action.meta?.callId != null) {
+      const responseAction: WorkerMessage<OrganismPayload<any>> = {
         type: 'RESPONSE',
         payload: responsePayload,
         meta: {
-          requestId: action.meta.requestId,
+          callId: action.meta.callId,
           isResponse: true,
         },
       }
-      context.dispatch(responseAction)
+      context.send(responseAction)
     }
   }
 
   protected handleRequestSetCPPNStateRedirect(
-    action: WorkerAction<CPPNStateRedirectPayload>,
+    action: WorkerMessage<CPPNStateRedirectPayload>,
     context: DispatcherContext
   ) {
     const state = this.population.stateProvider.neat()
@@ -201,16 +201,16 @@ export class WorkerReproducer<
     }
     state.custom.cloneState(action.payload.key, action.payload.oldKey)
     const responsePayload: EmptyPayload = {}
-    if (action.meta?.requestId != null) {
-      const responseAction: WorkerAction<EmptyPayload> = {
+    if (action.meta?.callId != null) {
+      const responseAction: WorkerMessage<EmptyPayload> = {
         type: 'RESPONSE',
         payload: responsePayload,
         meta: {
-          requestId: action.meta.requestId,
+          callId: action.meta.callId,
           isResponse: true,
         },
       }
-      context.dispatch(responseAction)
+      context.send(responseAction)
     }
   }
 
@@ -259,7 +259,7 @@ export class WorkerReproducer<
   ): Promise<Organism<any, any, any, any, any, any, G>> {
     await this.initPromise
 
-    const data = await this.dispatcher.request<OrganismPayload<any>>(
+    const data = await this.dispatcher.call<OrganismPayload<any>>(
       requestEliteOrganism({
         genome: organism.genome.toFactoryOptions(),
         organismState: organism.toFactoryOptions(),
@@ -319,7 +319,7 @@ export class WorkerReproducer<
   ): Promise<Organism<any, any, any, any, any, any, G>> {
     await this.initPromise
 
-    const data = await this.dispatcher.request<OrganismPayload<any>>(
+    const data = await this.dispatcher.call<OrganismPayload<any>>(
       requestBreedOrganism({
         speciesId,
       })

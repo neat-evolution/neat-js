@@ -31,7 +31,7 @@ packages in the `neat-js` monorepo as follows:
   fulfilling the contract for creating new organisms. The `evolve` function uses
   a `Reproducer` to generate the next generation.
 
-- **`@neat-evolution/worker-actions`**: Uses the `Dispatcher` and `WorkerAction`
+- **`@neat-evolution/worker-actions`**: Uses the `Dispatcher` and `WorkerMessage`
   primitives to manage type-safe communication with worker threads.
 
 - **`@neat-evolution/worker-threads`**: Utilizes the `Worker` abstraction from
@@ -114,7 +114,7 @@ and functions:
   It sets up message listeners to handle initialization requests, reproduction
   tasks, and other commands from the main thread.
 
-- **`WorkerAction.ts`**:
+- **`WorkerMessage.ts`**:
 
   Defines the types of actions (messages) exchanged between the main thread and
   worker threads, enabling structured communication for tasks and results.
