@@ -1,11 +1,12 @@
+import type { CoreGenome } from './CoreGenome.js'
 import type { ConfigFactory } from './config/ConfigFactory.js'
 import type { ConfigOptions } from './config/ConfigOptions.js'
 import type { CoreConfig } from './config/CoreConfig.js'
-import type { CoreGenome } from './CoreGenome.js'
 import type { GenomeData } from './genome/GenomeData.js'
 import type { GenomeFactory } from './genome/GenomeFactory.js'
 import type { GenomeFactoryOptions } from './genome/GenomeFactoryOptions.js'
 import type { GenomeOptions } from './genome/GenomeOptions.js'
+import type { ConfigData, ConfigFactoryOptions } from './index.js'
 import type { CoreLink } from './link/CoreLink.js'
 import type { LinkFactoryOptions } from './link/LinkFactoryOptions.js'
 import type { CoreNode } from './node/CoreNode.js'
@@ -15,8 +16,6 @@ import type { CoreState } from './state/CoreState.js'
 import type { StateData } from './state/StateData.js'
 import type { StateFactory } from './state/StateFactory.js'
 import type { ExtendedState } from './state/StateProvider.js'
-
-import type { ConfigData, ConfigFactoryOptions } from './index.js'
 
 export interface Algorithm<
   // Genome

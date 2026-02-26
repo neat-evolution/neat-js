@@ -1,10 +1,9 @@
 import { binarySearchFirst, shuffle, threadRNG } from '@neat-evolution/utils'
-
+import { Connections } from './Connections.js'
 import type { ConfigData } from './config/ConfigData.js'
 import type { ConfigFactoryOptions } from './config/ConfigFactoryOptions.js'
 import type { ConfigOptions } from './config/ConfigOptions.js'
 import type { CoreConfig } from './config/CoreConfig.js'
-import { Connections } from './Connections.js'
 import type { Genome } from './genome/Genome.js'
 import type { GenomeData } from './genome/GenomeData.js'
 import type { GenomeFactory } from './genome/GenomeFactory.js'
@@ -14,14 +13,14 @@ import type { InitConfig } from './genome/InitConfig.js'
 import type { CoreLink } from './link/CoreLink.js'
 import type { LinkFactory } from './link/LinkFactory.js'
 import type { LinkFactoryOptions } from './link/LinkFactoryOptions.js'
-import { linkRefToKey, toLinkKey, type LinkKey } from './link/linkRefToKey.js'
+import { type LinkKey, linkRefToKey, toLinkKey } from './link/linkRefToKey.js'
 import type { CoreNode } from './node/CoreNode.js'
 import type { NodeFactory } from './node/NodeFactory.js'
 import type { NodeFactoryOptions } from './node/NodeFactoryOptions.js'
-import { nodeKeyToRef, nodeKeyToType } from './node/nodeKeyToRef.js'
 import type { NodeRef } from './node/NodeRef.js'
-import { nodeRefToKey, type NodeKey } from './node/nodeRefToKey.js'
 import { NodeType } from './node/NodeType.js'
+import { nodeKeyToRef, nodeKeyToType } from './node/nodeKeyToRef.js'
+import { type NodeKey, nodeRefToKey } from './node/nodeRefToKey.js'
 import type { CoreState } from './state/CoreState.js'
 import type { InnovationKey } from './state/hashInnovationKey.js'
 import type { StateData } from './state/StateData.js'
@@ -75,24 +74,9 @@ export class CoreGenome<
     L,
     G
   >,
-> implements Genome<
-  NCO,
-  LCO,
-  CD,
-  C,
-  NSD,
-  LSD,
-  NS,
-  LS,
-  SD,
-  S,
-  HND,
-  LD,
-  GFO,
-  GO,
-  GD,
-  G
-> {
+> implements
+    Genome<NCO, LCO, CD, C, NSD, LSD, NS, LS, SD, S, HND, LD, GFO, GO, GD, G>
+{
   public readonly config: C
   public readonly state: S
   public readonly genomeOptions: GO

@@ -1,5 +1,5 @@
 import type { NodeRef } from '../node/NodeRef.js'
-import { nodeRefToKey, type NodeKey } from '../node/nodeRefToKey.js'
+import { type NodeKey, nodeRefToKey } from '../node/nodeRefToKey.js'
 
 import type { LinkRef } from './LinkRef.js'
 

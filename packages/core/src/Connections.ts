@@ -1,4 +1,4 @@
-import { toLinkKey, type LinkKey } from './link/linkRefToKey.js'
+import { type LinkKey, toLinkKey } from './link/linkRefToKey.js'
 import type { NodeKey } from './node/nodeRefToKey.js'
 
 /** weight for phenotype, null for substrate */

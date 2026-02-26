@@ -6,7 +6,7 @@ import type { ExtendedState, StateProvider } from '../state/StateProvider.js'
 
 import type { GenomeData } from './GenomeData.js'
 import type { GenomeFactoryOptions } from './GenomeFactoryOptions.js'
-import { type GenomeOptions } from './GenomeOptions.js'
+import type { GenomeOptions } from './GenomeOptions.js'
 
 export interface Genome<
   NCO extends ConfigOptions,

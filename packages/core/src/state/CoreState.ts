@@ -1,5 +1,5 @@
 import { NodeType } from '../index.js'
-import { toNodeKey, type NodeKey } from '../node/nodeRefToKey.js'
+import { type NodeKey, toNodeKey } from '../node/nodeRefToKey.js'
 
 import { hashInnovationKey, type InnovationKey } from './hashInnovationKey.js'
 import type { StateData } from './StateData.js'
@@ -15,8 +15,7 @@ export class CoreState<
   NS extends ExtendedState<NSD>,
   LS extends ExtendedState<LSD>,
   SD extends StateData,
->
-  implements NEATState, StateProvider<NSD, LSD, NS, LS, SD>
+> implements NEATState, StateProvider<NSD, LSD, NS, LS, SD>
 {
   /**
    * Async during worker reproduction (wrapped in WorkerState)

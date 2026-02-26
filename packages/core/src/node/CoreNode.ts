@@ -6,8 +6,8 @@ import type { NodeData } from './NodeData.js'
 import type { NodeFactory } from './NodeFactory.js'
 import type { NodeFactoryOptions } from './NodeFactoryOptions.js'
 import type { NodeId } from './NodeRef.js'
-import { toNodeKey } from './nodeRefToKey.js'
 import type { NodeType } from './NodeType.js'
+import { toNodeKey } from './nodeRefToKey.js'
 
 export class CoreNode<
   NFO extends NodeFactoryOptions,
@@ -15,7 +15,8 @@ export class CoreNode<
   NSD,
   NS extends ExtendedState<NSD>,
   N extends CoreNode<NFO, NCO, NSD, NS, N>,
-> implements Node<NFO, NCO, NSD, NS, N> {
+> implements Node<NFO, NCO, NSD, NS, N>
+{
   // NodeRef
   public readonly type: NodeType
   public readonly id: NodeId
