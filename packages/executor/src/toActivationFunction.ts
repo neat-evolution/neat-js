@@ -42,8 +42,7 @@ export function toActivationFunction(
       return (x) =>
         0.5 *
         x *
-        (1 +
-          Math.tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))))
+        (1 + Math.tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * x ** 3)))
     case Activation.Sine:
       return (x) => Math.sin(2 * x)
     case Activation.Cos:
