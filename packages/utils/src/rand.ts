@@ -1,13 +1,56 @@
-import seedrandom from 'seedrandom'
-
 export interface RNG {
   gen: () => number
   genRange: (min: number, max: number) => number
   genBool: () => boolean
 }
 
+/**
+ * Hash a string into a 32-bit unsigned integer using cyrb53 (truncated).
+ * Based on https://stackoverflow.com/a/52171480
+ */
+const hashString = (str: string): number => {
+  let h1 = 0xdeadbeef
+  let h2 = 0x41c6ce57
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i)
+    h1 = Math.imul(h1 ^ ch, 2654435761)
+    h2 = Math.imul(h2 ^ ch, 1597334677)
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507)
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909)
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507)
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909)
+  return (h2 >>> 0)
+}
+
+/**
+ * Mulberry32 PRNG. Returns a function that produces floats in [0, 1).
+ * https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
+ */
+const mulberry32 = (seed: number): (() => number) => {
+  let s = seed | 0
+  return () => {
+    s = (s + 0x6d2b79f5) | 0
+    let t = Math.imul(s ^ (s >>> 15), 1 | s)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 0x100000000
+  }
+}
+
 export const createRNG = (seed?: string): RNG => {
-  const rng = seedrandom(seed)
+  let numericSeed: number
+  if (seed != null) {
+    numericSeed = hashString(seed)
+  } else {
+    try {
+      const bytes = new Uint32Array(1)
+      crypto.getRandomValues(bytes)
+      numericSeed = bytes[0] ?? 0
+    } catch {
+      numericSeed = (Math.random() * 0x100000000) >>> 0
+    }
+  }
+  const rng = mulberry32(numericSeed)
   return {
     gen: (): number => rng(),
     genRange: (min: number, max: number): number => {
