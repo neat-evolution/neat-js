@@ -1,9 +1,4 @@
 import fs from 'node:fs/promises'
-
-import {
-  defaultNEATConfigOptions,
-  PhenotypeActionType,
-} from '@neat-evolution/core'
 import type {
   Activation,
   Connection,
@@ -11,6 +6,10 @@ import type {
   NodeKey,
   Phenotype,
   PhenotypeAction,
+} from '@neat-evolution/core'
+import {
+  defaultNEATConfigOptions,
+  PhenotypeActionType,
 } from '@neat-evolution/core'
 import type { CPPNNodeData } from '@neat-evolution/cppn'
 import type { NEATLinkData } from '@neat-evolution/neat'
@@ -26,8 +25,8 @@ import type {
   DESHyperNEATNodeData,
 } from '../../../src/DESHyperNEATGenomeFactoryOptions.js'
 import {
-  defaultDESHyperNEATGenomeOptions,
   type DESHyperNEATGenomeOptions,
+  defaultDESHyperNEATGenomeOptions,
 } from '../../../src/DESHyperNEATGenomeOptions.js'
 import type { DESHyperNEATState } from '../../../src/DESHyperNEATState.js'
 import { topologyInitConfig } from '../../../src/topology/topologyInitConfig.js'
@@ -145,7 +144,7 @@ const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
     outputs.push([jsonNodeRefToNodeId(id), node.bias, node.activation])
   }
   for (const link of Object.values(genome.neat.links)) {
-    links.push([link.from, link.to, link.weight, link.innovation])
+    links.push([link.from, link.to, link.weight, String(link.innovation)])
   }
   return {
     hiddenNodes,
@@ -188,7 +187,7 @@ const toDESHyperNEATFactoryOptions = (
       link.neat.from,
       link.neat.to,
       link.neat.weight,
-      link.neat.innovation,
+      String(link.neat.innovation),
       toCPPNFactoryOptions(link.cppn),
       link.depth,
     ])

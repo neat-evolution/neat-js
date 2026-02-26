@@ -1,4 +1,4 @@
-import type { StateData, State, LinkKey } from '@neat-evolution/core'
+import type { LinkKey, State, StateData } from '@neat-evolution/core'
 import { CPPNAlgorithm } from '@neat-evolution/cppn'
 import { NEATState } from '@neat-evolution/neat'
 

@@ -1,5 +1,5 @@
-import { type NodeKey, type Activation, toLinkKey } from '@neat-evolution/core'
-import { type CPPNGenome, type CPPNGenomeOptions } from '@neat-evolution/cppn'
+import { type Activation, type NodeKey, toLinkKey } from '@neat-evolution/core'
+import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
 
 export const splitLink = async (
   genome: CPPNGenome<CPPNGenomeOptions>,

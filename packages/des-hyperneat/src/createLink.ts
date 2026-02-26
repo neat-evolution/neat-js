@@ -3,8 +3,8 @@ import type { LinkFactory, NEATConfigOptions } from '@neat-evolution/core'
 import type { CustomState } from './CustomState.js'
 import type { CustomStateData } from './CustomStateData.js'
 import {
-  defaultDESHyperNEATGenomeOptions,
   type DESHyperNEATGenomeOptions,
+  defaultDESHyperNEATGenomeOptions,
 } from './DESHyperNEATGenomeOptions.js'
 import { DESHyperNEATLink } from './DESHyperNEATLink.js'
 import type { DESHyperNEATLinkFactoryOptions } from './DESHyperNEATLinkFactoryOptions.js'

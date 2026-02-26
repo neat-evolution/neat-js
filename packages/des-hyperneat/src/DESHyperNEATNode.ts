@@ -1,10 +1,10 @@
 import {
   CoreNode,
-  NodeType,
   type NEATConfigOptions,
   type NodeFactory,
-  toNodeKey,
+  NodeType,
   toLinkKey,
+  toNodeKey,
 } from '@neat-evolution/core'
 import {
   CPPNAlgorithm,
@@ -17,8 +17,8 @@ import type { CustomState } from './CustomState.js'
 import type { CustomStateData } from './CustomStateData.js'
 import type { DESHyperNEATGenomeOptions } from './DESHyperNEATGenomeOptions.js'
 import {
-  isCPPNGenome,
   type DESHyperNEATNodeFactoryOptions,
+  isCPPNGenome,
 } from './DESHyperNEATNodeFactoryOptions.js'
 
 export class DESHyperNEATNode extends CoreNode<

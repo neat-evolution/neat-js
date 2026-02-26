@@ -1,10 +1,10 @@
-import { type NEATConfigOptions, type NodeFactory } from '@neat-evolution/core'
+import type { NEATConfigOptions, NodeFactory } from '@neat-evolution/core'
 
 import type { CustomState } from './CustomState.js'
 import type { CustomStateData } from './CustomStateData.js'
 import {
-  defaultDESHyperNEATGenomeOptions,
   type DESHyperNEATGenomeOptions,
+  defaultDESHyperNEATGenomeOptions,
 } from './DESHyperNEATGenomeOptions.js'
 import { DESHyperNEATNode } from './DESHyperNEATNode.js'
 import type { DESHyperNEATNodeFactoryOptions } from './DESHyperNEATNodeFactoryOptions.js'
