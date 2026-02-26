@@ -1,78 +1,90 @@
 import type { Dispatcher } from '../Dispatcher.js'
-import type { WorkerAction } from '../types.js'
+import type { WorkerMessage } from '../types.js'
 
-// --- Core Action Creators ---
+// --- Core Message Creators ---
 const identityPayloadCreator = <P>(payload: P) => payload
 
-export function createAction<P = any>(
+export function createMessage<P = any>(
   type: string,
   payloadCreator: (...args: any[]) => P = identityPayloadCreator<P>,
   metaCreator?: (...args: any[]) => any
 ) {
-  const actionCreator = (...args: any[]): WorkerAction<P> => {
+  const messageCreator = (...args: any[]): WorkerMessage<P> => {
     const payload = payloadCreator(...args)
-    const action: WorkerAction<P> = { type, payload }
+    const message: WorkerMessage<P> = { type, payload }
 
     if (metaCreator != null) {
-      action.meta = metaCreator(...args)
+      message.meta = metaCreator(...args)
     }
 
-    return action
+    return message
   }
 
-  actionCreator.toString = () => type
-  return actionCreator
+  messageCreator.toString = () => type
+  return messageCreator
 }
 
-// --- Bulk Creation Utilities (redux-actions style) ---
+/** @deprecated Use createMessage */
+export const createAction = createMessage
+
+// --- Bulk Creation Utilities ---
 
 type PayloadCreator = (...args: any[]) => any
 
-interface ActionMap {
-  [key: string]: PayloadCreator | ActionMap
+interface MessageMap {
+  [key: string]: PayloadCreator | MessageMap
 }
 
-export function createActions(actionMap: ActionMap, prefix = ''): any {
-  const actions: any = {}
+export function createMessages(messageMap: MessageMap, prefix = ''): any {
+  const messages: any = {}
 
-  for (const [key, value] of Object.entries(actionMap)) {
+  for (const [key, value] of Object.entries(messageMap)) {
     const type = prefix.length > 0 ? `${prefix}/${key}` : key
 
     if (typeof value === 'function') {
       // It's a payload creator
-      actions[key] = createAction(type, value as any)
+      messages[key] = createMessage(type, value as any)
     } else if (typeof value === 'object' && value !== null) {
       // Recursive definition
-      actions[key] = createActions(value, type)
+      messages[key] = createMessages(value, type)
     }
   }
 
-  return actions
+  return messages
 }
+
+/** @deprecated Use createMessages */
+export const createActions = createMessages
 
 // --- Binding Utilities ---
 
-export function bindActionCreators(
-  actionCreators: Record<string, PayloadCreator>,
+export function bindMessageCreators(
+  messageCreators: Record<string, PayloadCreator>,
   dispatcher: Dispatcher
 ) {
   const bound: Record<string, PayloadCreator> = {}
 
-  for (const [key, creator] of Object.entries(actionCreators)) {
+  for (const [key, creator] of Object.entries(messageCreators)) {
     bound[key] = async (...args: any[]) => {
-      const action = creator(...args)
-      // Default to request (RPC) for bound actions as it covers both use cases safely
-      return await dispatcher.request(action)
+      const message = creator(...args)
+      // Default to call (RPC) for bound messages as it covers both use cases safely
+      return await dispatcher.call(message)
     }
   }
 
   return bound
 }
 
-export function isWorkerAction(action: any): action is WorkerAction {
+/** @deprecated Use bindMessageCreators */
+export const bindActionCreators = bindMessageCreators
+
+export function isWorkerMessage(message: any): message is WorkerMessage {
   return (
-    typeof action === 'object' &&
-    action !== null &&
-    typeof action.type === 'string'
+    typeof message === 'object' &&
+    message !== null &&
+    typeof message.type === 'string'
   )
 }
+
+/** @deprecated Use isWorkerMessage */
+export const isWorkerAction = isWorkerMessage
