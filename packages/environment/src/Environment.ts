@@ -10,7 +10,9 @@ export interface Environment<EFO> {
   isAsync: boolean
   evaluate: (executor: SyncExecutor, rng?: RNG) => number
   evaluateAsync: (executor: Executor, rng?: RNG) => Promise<number>
-  evaluateBatch: (executors: SyncExecutor[], rng?: RNG) => number[]
-  evaluateBatchAsync: (executors: Executor[], rng?: RNG) => Promise<number[]>
+  evaluateBatch?: (executors: SyncExecutor[], rng?: RNG) => number[]
+  evaluateBatchAsync?: (executors: Executor[], rng?: RNG) => Promise<number[]>
   toFactoryOptions: () => EFO
 }
+
+export type StandardEnvironment<EFO> = Environment<EFO>

@@ -1,9 +1,9 @@
 import type { Executor, SyncExecutor } from '@neat-evolution/executor'
-import { describe, test, expect } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import type {
-  StandardEnvironment,
   EnvironmentDescription,
+  StandardEnvironment,
 } from '../src/index.js'
 
 describe('StandardEnvironment', () => {
@@ -25,7 +25,7 @@ describe('StandardEnvironment', () => {
       }
     }
 
-    const env = new SimpleEnvironment()
+    const env: StandardEnvironment<null> = new SimpleEnvironment()
     expect(env.evaluateBatch).toBeUndefined()
     expect(env.evaluateBatchAsync).toBeUndefined()
   })
@@ -119,7 +119,7 @@ describe('StandardEnvironment', () => {
       }
     }
 
-    const env = new DatasetEnvironment()
+    const env: StandardEnvironment<SharedArrayBuffer> = new DatasetEnvironment()
 
     // Should not have batch methods
     expect(env.evaluateBatch).toBeUndefined()
