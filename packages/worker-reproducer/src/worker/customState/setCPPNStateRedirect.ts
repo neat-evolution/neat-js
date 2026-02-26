@@ -1,8 +1,8 @@
 import type { LinkKey } from '@neat-evolution/core'
 
 import {
-  requestSetCPPNStateRedirect,
   type EmptyPayload,
+  requestSetCPPNStateRedirect,
 } from '../../actions.js'
 import type { ReproducerHandlerContext } from '../ThreadContext.js'
 

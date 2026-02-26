@@ -10,7 +10,7 @@ import {
 import { breedOrganism } from './worker/breedOrganism.js'
 import { eliteOrganism } from './worker/eliteOrganism.js'
 import { initThread } from './worker/initThread.js'
-import { type ThreadContext } from './worker/ThreadContext.js'
+import type { ThreadContext } from './worker/ThreadContext.js'
 
 const handler = new Handler()
 

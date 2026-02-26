@@ -13,14 +13,14 @@ import { WorkerPool } from '@neat-evolution/worker-pool'
 
 import {
   ActionType,
-  initReproducer,
-  terminate as terminateAction,
-  requestEliteOrganism,
-  requestBreedOrganism,
-  type EmptyPayload,
-  type OrganismPayload,
-  type SpeciesPayload,
   type CPPNStateRedirectPayload,
+  type EmptyPayload,
+  initReproducer,
+  type OrganismPayload,
+  requestBreedOrganism,
+  requestEliteOrganism,
+  type SpeciesPayload,
+  terminate as terminateAction,
 } from './actions.js'
 import type { AnyPopulation } from './types.js'
 import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
@@ -49,7 +49,8 @@ export class WorkerReproducer<
     any,
     G
   >,
-> implements Reproducer<G> {
+> implements Reproducer<G>
+{
   public readonly population: AnyPopulation<G>
   public readonly algorithmPathname: string
   public readonly threadCount: number

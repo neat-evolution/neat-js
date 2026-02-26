@@ -1,4 +1,4 @@
-import { StateType, type InitReproducerPayload } from '../actions.js'
+import { type InitReproducerPayload, StateType } from '../actions.js'
 import { WorkerState } from '../WorkerState.js'
 
 import { setCPPNStateRedirect } from './customState/setCPPNStateRedirect.js'

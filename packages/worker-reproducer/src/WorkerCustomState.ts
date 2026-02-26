@@ -1,13 +1,8 @@
-import {
-  type StateData,
-  type State,
-  type LinkKey,
-  type NEATState,
-} from '@neat-evolution/core'
+import type { LinkKey, NEATState, State, StateData } from '@neat-evolution/core'
 
 import { StateType } from './actions.js'
+import { type SetCPPNStateRedirectFn, WorkerState } from './WorkerState.js'
 import type { ReproducerHandlerContext } from './worker/ThreadContext.js'
-import { WorkerState, type SetCPPNStateRedirectFn } from './WorkerState.js'
 
 export class WorkerCustomState implements State<undefined> {
   public readonly isSingleState: boolean

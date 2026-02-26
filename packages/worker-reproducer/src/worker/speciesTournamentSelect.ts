@@ -1,8 +1,8 @@
 import { Organism } from '@neat-evolution/evolution'
 
 import {
-  requestSpeciesTournamentSelect,
   type OrganismPayload,
+  requestSpeciesTournamentSelect,
 } from '../actions.js'
 
 import type { ReproducerHandlerContext } from './ThreadContext.js'

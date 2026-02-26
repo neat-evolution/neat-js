@@ -1,15 +1,15 @@
 import {
-  type StateData,
+  CoreState,
   type ExtendedState,
+  type InnovationKey,
   type LinkKey,
   type NodeKey,
-  type InnovationKey,
-  CoreState,
+  type StateData,
 } from '@neat-evolution/core'
 
 import { StateType } from './actions.js'
-import type { ReproducerHandlerContext } from './worker/ThreadContext.js'
 import { WorkerCustomState } from './WorkerCustomState.js'
+import type { ReproducerHandlerContext } from './worker/ThreadContext.js'
 
 export type GetSplitInnovationFn = (
   innovationKey: InnovationKey,
