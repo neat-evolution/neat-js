@@ -1,3 +1,3 @@
-export interface GenomeOptions {}
+export type GenomeOptions = {}
 
 export const defaultGenomeOptions: GenomeOptions = {}

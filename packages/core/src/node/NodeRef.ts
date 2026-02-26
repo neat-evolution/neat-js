@@ -1,4 +1,4 @@
-import { type NodeType } from './NodeType.js'
+import type { NodeType } from './NodeType.js'
 
 export type NodeId = number | string
 

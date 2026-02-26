@@ -1,4 +1,4 @@
-import { type Activation } from '../Activation.js'
+import type { Activation } from '../Activation.js'
 
 export enum PhenotypeActionType {
   Link = 'Link',

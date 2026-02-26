@@ -1,6 +1,6 @@
 import type { NodeRef, NodeRefTuple } from './NodeRef.js'
-import type { NodeKey } from './nodeRefToKey.js'
 import type { NodeType } from './NodeType.js'
+import type { NodeKey } from './nodeRefToKey.js'
 
 /**
  * @param {NodeKey} key a node key in the form of `${type}${id}`
