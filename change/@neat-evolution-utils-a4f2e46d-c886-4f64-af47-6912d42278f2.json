@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "apply Biome formatting; replace seedrandom with native crypto mulberry32 PRNG",
+  "packageName": "@neat-evolution/utils",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
