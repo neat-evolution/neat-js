@@ -65,7 +65,12 @@ describe('NEATLink class', () => {
 
     test('should throw an error for mismatched from node', () => {
       link2 = createLink(
-        { from: toNodeKey(NodeType.Hidden, 3), to, weight: 0.7, innovation: '1' },
+        {
+          from: toNodeKey(NodeType.Hidden, 3),
+          to,
+          weight: 0.7,
+          innovation: '1',
+        },
         null,
         null
       )
@@ -76,7 +81,12 @@ describe('NEATLink class', () => {
 
     test('should throw an error for mismatched to node', () => {
       link2 = createLink(
-        { from, to: toNodeKey(NodeType.Hidden, 3), weight: 0.7, innovation: '1' },
+        {
+          from,
+          to: toNodeKey(NodeType.Hidden, 3),
+          weight: 0.7,
+          innovation: '1',
+        },
         null,
         null
       )
