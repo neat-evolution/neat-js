@@ -141,5 +141,6 @@ dist
 .turbo
 .claude/
 .gemini/
+.devnotes/
 CLAUDE.md
 GEMINI.md
