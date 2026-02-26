@@ -1,10 +1,10 @@
-import {
-  type Environment,
-  type EnvironmentDescription,
+import type {
+  Environment,
+  EnvironmentDescription,
 } from '@neat-evolution/environment'
 import type { Executor, SyncExecutor } from '@neat-evolution/executor'
 
-import { type Dataset } from './Dataset.js'
+import type { Dataset } from './Dataset.js'
 import { datasetToSharedBuffer } from './datasetToSharedBuffer.js'
 import { crossentropy, mse } from './error.js'
 

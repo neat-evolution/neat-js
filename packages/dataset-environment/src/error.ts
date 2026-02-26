@@ -56,7 +56,7 @@ export const mseSingle = (
 
   for (const [i, t] of target.entries()) {
     const p = normalizedPrediction[i] as number
-    error += Math.pow(t - p, 2)
+    error += (t - p) ** 2
   }
 
   return target.length > 0 ? error / target.length : 0
