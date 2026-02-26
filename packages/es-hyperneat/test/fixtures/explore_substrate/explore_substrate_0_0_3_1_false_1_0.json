@@ -186,150 +186,68 @@
   },
   "phenotype": {
     "length": 9,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      7,
-      8
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [7, 8],
     "actions": [
       {
-        "Activation": [
-          3,
-          0.0,
-          "None"
-        ]
+        "Activation": [3, 0.0, "None"]
       },
       {
-        "Link": [
-          3,
-          4,
-          -6.662574962158316
-        ]
+        "Link": [3, 4, -6.662574962158316]
       },
       {
-        "Link": [
-          3,
-          8,
-          0.06383675619852047
-        ]
+        "Link": [3, 8, 0.06383675619852047]
       },
       {
-        "Activation": [
-          1,
-          0.0,
-          "None"
-        ]
+        "Activation": [1, 0.0, "None"]
       },
       {
-        "Link": [
-          1,
-          4,
-          7.957042894189338
-        ]
+        "Link": [1, 4, 7.957042894189338]
       },
       {
-        "Link": [
-          1,
-          8,
-          0.388542109685844
-        ]
+        "Link": [1, 8, 0.388542109685844]
       },
       {
-        "Activation": [
-          8,
-          -0.03434228215237908,
-          "OffsetGaussian"
-        ]
+        "Activation": [8, -0.03434228215237908, "OffsetGaussian"]
       },
       {
-        "Activation": [
-          4,
-          0.028781130457265013,
-          "Square"
-        ]
+        "Activation": [4, 0.028781130457265013, "Square"]
       },
       {
-        "Link": [
-          4,
-          5,
-          1.0
-        ]
+        "Link": [4, 5, 1.0]
       },
       {
-        "Activation": [
-          5,
-          0.0,
-          "None"
-        ]
+        "Activation": [5, 0.0, "None"]
       },
       {
-        "Link": [
-          5,
-          7,
-          7.9924330618014015
-        ]
+        "Link": [5, 7, 7.9924330618014015]
       },
       {
-        "Activation": [
-          0,
-          0.0,
-          "None"
-        ]
+        "Activation": [0, 0.0, "None"]
       },
       {
-        "Link": [
-          0,
-          6,
-          8.202934793272707
-        ]
+        "Link": [0, 6, 8.202934793272707]
       },
       {
-        "Activation": [
-          2,
-          0.0,
-          "None"
-        ]
+        "Activation": [2, 0.0, "None"]
       },
       {
-        "Link": [
-          2,
-          6,
-          -7.5
-        ]
+        "Link": [2, 6, -7.5]
       },
       {
-        "Activation": [
-          6,
-          -0.034682640409845394,
-          "Square"
-        ]
+        "Activation": [6, -0.034682640409845394, "Square"]
       },
       {
-        "Link": [
-          6,
-          7,
-          7.100513557158118
-        ]
+        "Link": [6, 7, 7.100513557158118]
       },
       {
-        "Activation": [
-          7,
-          -0.017239528243149987,
-          "Gaussian"
-        ]
+        "Activation": [7, -0.017239528243149987, "Gaussian"]
       }
     ]
   },
   "depth": 1,
   "reverse": false,
   "allow_connections_to_input": true,
-  "nodes": [
-    []
-  ],
+  "nodes": [[]],
   "connections": []
 }

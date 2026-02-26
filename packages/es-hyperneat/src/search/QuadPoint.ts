@@ -1,5 +1,5 @@
 import type { Target } from '@neat-evolution/core'
-import { toPointKey, type PointKey } from '@neat-evolution/hyperneat'
+import { type PointKey, toPointKey } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
 

@@ -5,13 +5,13 @@ import type {
   LinkFactoryOptions,
   StateData,
 } from '@neat-evolution/core'
-import {
-  type CPPNNode,
-  type CPPNNodeFactoryOptions,
-  type CPPNGenome,
-  type CPPNGenomeData,
-  type CPPNGenomeFactoryOptions,
-  type CPPNNodeData,
+import type {
+  CPPNGenome,
+  CPPNGenomeData,
+  CPPNGenomeFactoryOptions,
+  CPPNNode,
+  CPPNNodeData,
+  CPPNNodeFactoryOptions,
 } from '@neat-evolution/cppn'
 import type {
   NEATConfig,

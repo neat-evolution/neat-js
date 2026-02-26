@@ -1,6 +1,6 @@
 import type { Target } from '@neat-evolution/core'
 import type { SyncExecutor } from '@neat-evolution/executor'
-import { toPointKey, type PointKey } from '@neat-evolution/hyperneat'
+import { type PointKey, toPointKey } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
 
@@ -28,7 +28,7 @@ export function findConnections(
 
   let leaves: QuadPoint[] = [root]
   while (leaves.length > 0) {
-    let newLeaves: QuadPoint[] = []
+    const newLeaves: QuadPoint[] = []
     for (const leaf of leaves) {
       const [mi, ma] = leaf.createChildren(f)
       minWeight = Math.min(minWeight, mi)
@@ -52,7 +52,7 @@ export function findConnections(
     (options.maxDiscoveries === 0 ||
       connections.length < options.maxDiscoveries)
   ) {
-    let newLeaves: QuadPoint[] = []
+    const newLeaves: QuadPoint[] = []
     for (const leaf of leaves) {
       for (const child of leaf.extract(f, connections, maxWeight - minWeight)) {
         newLeaves.push(child)

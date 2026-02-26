@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises'
 
 import {
-  QuadPoint,
   defaultESHyperNEATGenomeOptions,
+  QuadPoint,
 } from '../../../src/index.js'
 
 export interface QuadPointJSONData {

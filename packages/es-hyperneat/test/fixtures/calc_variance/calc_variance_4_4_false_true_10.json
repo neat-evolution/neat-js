@@ -48,19 +48,9 @@
   "delta_weight": 2.0,
   "root": false,
   "branch": true,
-  "weights": [
-    1.0,
-    -1.0,
-    -1.0,
-    1.0
-  ],
+  "weights": [1.0, -1.0, -1.0, 1.0],
   "centroid": 0.0,
   "dw": 1.0,
-  "squares": [
-    1.0,
-    1.0,
-    1.0,
-    1.0
-  ],
+  "squares": [1.0, 1.0, 1.0, 1.0],
   "variance": 1.0
 }

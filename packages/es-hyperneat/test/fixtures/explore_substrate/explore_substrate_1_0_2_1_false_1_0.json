@@ -1,10 +1,5 @@
 {
-  "inputs": [
-    [
-      524288,
-      524288
-    ]
-  ],
+  "inputs": [[524288, 524288]],
   "outputs": [],
   "cppn_genome": {
     "neat": {
@@ -150,127 +145,56 @@
   },
   "phenotype": {
     "length": 8,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      6,
-      7
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [6, 7],
     "actions": [
       {
-        "Activation": [
-          3,
-          0.0,
-          "None"
-        ]
+        "Activation": [3, 0.0, "None"]
       },
       {
-        "Link": [
-          3,
-          4,
-          -7.5
-        ]
+        "Link": [3, 4, -7.5]
       },
       {
-        "Link": [
-          3,
-          7,
-          0.5471945068039608
-        ]
+        "Link": [3, 7, 0.5471945068039608]
       },
       {
-        "Activation": [
-          7,
-          0.035360770564150865,
-          "Step"
-        ]
+        "Activation": [7, 0.035360770564150865, "Step"]
       },
       {
-        "Activation": [
-          2,
-          0.0,
-          "None"
-        ]
+        "Activation": [2, 0.0, "None"]
       },
       {
-        "Link": [
-          2,
-          5,
-          -7.794221808851581
-        ]
+        "Link": [2, 5, -7.794221808851581]
       },
       {
-        "Activation": [
-          1,
-          0.0,
-          "None"
-        ]
+        "Activation": [1, 0.0, "None"]
       },
       {
-        "Link": [
-          1,
-          4,
-          6.796699198098126
-        ]
+        "Link": [1, 4, 6.796699198098126]
       },
       {
-        "Activation": [
-          4,
-          0.025099139752104555,
-          "Square"
-        ]
+        "Activation": [4, 0.025099139752104555, "Square"]
       },
       {
-        "Link": [
-          4,
-          6,
-          7.5
-        ]
+        "Link": [4, 6, 7.5]
       },
       {
-        "Activation": [
-          6,
-          -0.05780571627224036,
-          "Gaussian"
-        ]
+        "Activation": [6, -0.05780571627224036, "Gaussian"]
       },
       {
-        "Activation": [
-          0,
-          0.0,
-          "None"
-        ]
+        "Activation": [0, 0.0, "None"]
       },
       {
-        "Link": [
-          0,
-          5,
-          7.5
-        ]
+        "Link": [0, 5, 7.5]
       },
       {
-        "Activation": [
-          5,
-          -0.03183467451746215,
-          "ReLU"
-        ]
+        "Activation": [5, -0.03183467451746215, "ReLU"]
       }
     ]
   },
   "depth": 1,
   "reverse": false,
   "allow_connections_to_input": true,
-  "nodes": [
-    [
-      [
-        524288,
-        524288
-      ]
-    ]
-  ],
+  "nodes": [[[524288, 524288]]],
   "connections": []
 }

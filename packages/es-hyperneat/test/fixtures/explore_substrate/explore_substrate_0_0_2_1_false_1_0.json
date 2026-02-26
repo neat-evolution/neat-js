@@ -97,59 +97,29 @@
   },
   "phenotype": {
     "length": 8,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      6,
-      7
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [6, 7],
     "actions": [
       {
-        "Activation": [
-          4,
-          0.04306912426350637,
-          "HardTanh"
-        ]
+        "Activation": [4, 0.04306912426350637, "HardTanh"]
       },
       {
-        "Link": [
-          4,
-          6,
-          7.029293759076758
-        ]
+        "Link": [4, 6, 7.029293759076758]
       },
       {
-        "Link": [
-          4,
-          5,
-          0.29294309210200353
-        ]
+        "Link": [4, 5, 0.29294309210200353]
       },
       {
-        "Activation": [
-          5,
-          0.13220323155334326,
-          "Tanh"
-        ]
+        "Activation": [5, 0.13220323155334326, "Tanh"]
       },
       {
-        "Activation": [
-          6,
-          -0.13116278813742294,
-          "Tanh"
-        ]
+        "Activation": [6, -0.13116278813742294, "Tanh"]
       }
     ]
   },
   "depth": 1,
   "reverse": false,
   "allow_connections_to_input": true,
-  "nodes": [
-    []
-  ],
+  "nodes": [[]],
   "connections": []
 }

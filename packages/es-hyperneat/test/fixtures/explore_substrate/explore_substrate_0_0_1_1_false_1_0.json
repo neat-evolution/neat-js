@@ -136,115 +136,53 @@
   },
   "phenotype": {
     "length": 7,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      5,
-      6
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [5, 6],
     "actions": [
       {
-        "Activation": [
-          3,
-          0.0,
-          "None"
-        ]
+        "Activation": [3, 0.0, "None"]
       },
       {
-        "Link": [
-          3,
-          5,
-          -0.40894448149599616
-        ]
+        "Link": [3, 5, -0.40894448149599616]
       },
       {
-        "Activation": [
-          0,
-          0.0,
-          "None"
-        ]
+        "Activation": [0, 0.0, "None"]
       },
       {
-        "Link": [
-          0,
-          4,
-          0.10293980816955828
-        ]
+        "Link": [0, 4, 0.10293980816955828]
       },
       {
-        "Link": [
-          0,
-          5,
-          0.5825807930356127
-        ]
+        "Link": [0, 5, 0.5825807930356127]
       },
       {
-        "Activation": [
-          4,
-          0.005668609366368827,
-          "OffsetGaussian"
-        ]
+        "Activation": [4, 0.005668609366368827, "OffsetGaussian"]
       },
       {
-        "Activation": [
-          1,
-          0.0,
-          "None"
-        ]
+        "Activation": [1, 0.0, "None"]
       },
       {
-        "Link": [
-          1,
-          6,
-          1.0779945886169242
-        ]
+        "Link": [1, 6, 1.0779945886169242]
       },
       {
-        "Activation": [
-          2,
-          0.0,
-          "None"
-        ]
+        "Activation": [2, 0.0, "None"]
       },
       {
-        "Link": [
-          2,
-          6,
-          1.3901438012563578
-        ]
+        "Link": [2, 6, 1.3901438012563578]
       },
       {
-        "Link": [
-          2,
-          5,
-          -0.4840964208107701
-        ]
+        "Link": [2, 5, -0.4840964208107701]
       },
       {
-        "Activation": [
-          5,
-          -0.02717527672126954,
-          "ReLU"
-        ]
+        "Activation": [5, -0.02717527672126954, "ReLU"]
       },
       {
-        "Activation": [
-          6,
-          -0.0704482150275281,
-          "Step"
-        ]
+        "Activation": [6, -0.0704482150275281, "Step"]
       }
     ]
   },
   "depth": 1,
   "reverse": false,
   "allow_connections_to_input": false,
-  "nodes": [
-    []
-  ],
+  "nodes": [[]],
   "connections": []
 }
