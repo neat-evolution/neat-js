@@ -1,6 +1,7 @@
 {
     "extends": "@heygrady/tsconfig-bases/ts-node-esm/tsconfig.json",
     "compilerOptions": {
+        "noPropertyAccessFromIndexSignature": false,
         "lib": [
             "dom",
             "esnext"
