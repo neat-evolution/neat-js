@@ -14,7 +14,7 @@
   "scripts": {
     "build": "turbo run build",
     "change": "beachball change --no-commit && git commit -a -m \"chore: add change files\"",
-    "check": "yarn check:beachball && yarn check:manypkg",
+    "check": "turbo run check && yarn check:beachball && yarn check:manypkg",
     "check:beachball": "beachball check",
     "check:manypkg": "manypkg check",
     "clean": "turbo run clean",
@@ -30,7 +30,7 @@
     "release": "beachball publish",
     "test": "turbo run test",
     "test:ci": "turbo run test --concurrency=2",
-    "work-session": "node ~/projects/tone-studio/scripts/work-session/bin/index.js"
+    "work-session": "node ../tone-studio/scripts/work-session/bin/index.js"
   },
   "packageManager": "yarn@4.12.0",
   "volta": {
