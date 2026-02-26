@@ -73,10 +73,7 @@ export class CallManager {
     const call = this.pendingCalls.get(callId)
     if (call != null) {
       if (this.verbose) {
-        console.log(
-          '[CallManager] resolveCall: resolving callId:',
-          callId
-        )
+        console.log('[CallManager] resolveCall: resolving callId:', callId)
       }
       this.pendingCalls.delete(callId)
       if (call.timeoutId != null) {
@@ -92,10 +89,7 @@ export class CallManager {
     const call = this.pendingCalls.get(callId)
     if (call != null) {
       if (this.verbose) {
-        console.log(
-          '[CallManager] rejectCall: rejecting callId:',
-          callId
-        )
+        console.log('[CallManager] rejectCall: rejecting callId:', callId)
       }
       this.pendingCalls.delete(callId)
       if (call.timeoutId != null) {

@@ -1,10 +1,10 @@
 import type { WorkerPool } from '@neat-evolution/worker-pool'
-import type { Worker, Transferable } from '@neat-evolution/worker-threads'
+import type { Transferable, Worker } from '@neat-evolution/worker-threads'
 
 import type {
-  WorkerMessage,
-  DispatcherHandlerFn,
   DispatcherContext,
+  DispatcherHandlerFn,
+  WorkerMessage,
 } from './types.js'
 import { isWorkerMessage } from './utils/actions.js'
 import { CallManager } from './utils/CallManager.js'
@@ -66,8 +66,10 @@ export class Dispatcher {
     message: WorkerMessage,
     options?: { timeout?: number }
   ): Promise<T> {
-    const { messageWithId, promise, callId } =
-      this.callManager.createCall<T>(message, options)
+    const { messageWithId, promise, callId } = this.callManager.createCall<T>(
+      message,
+      options
+    )
 
     // Send
     this.pool
@@ -98,8 +100,7 @@ export class Dispatcher {
     const workers = this.pool.getWorkers()
 
     const promises = workers.map(async (worker: Worker) => {
-      const { messageWithId, promise } =
-        this.callManager.createCall<T>(message)
+      const { messageWithId, promise } = this.callManager.createCall<T>(message)
       this.postMessage(worker, messageWithId)
       return await promise
     })
@@ -154,10 +155,7 @@ export class Dispatcher {
           // Targeted send (reply to specific worker)
           send: (msg: WorkerMessage) => {
             if (this.verbose) {
-              console.log(
-                '[Dispatcher] context.send called with:',
-                msg.type
-              )
+              console.log('[Dispatcher] context.send called with:', msg.type)
             }
             this.postMessage(worker, msg)
           },
