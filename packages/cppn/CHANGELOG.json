@@ -2,6 +2,21 @@
   "name": "@neat-evolution/cppn",
   "entries": [
     {
+      "date": "Thu, 26 Feb 2026 22:05:36 GMT",
+      "version": "0.6.4",
+      "tag": "@neat-evolution/cppn_v0.6.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/cppn",
+            "commit": "71f6395ce75af69290a844b7ded5b4037d92584b",
+            "comment": "apply Biome formatting and update test fixtures"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 02 Dec 2025 18:45:22 GMT",
       "version": "0.6.2",
       "tag": "@neat-evolution/cppn_v0.6.2",

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "apply Biome formatting and update test fixtures",
-  "packageName": "@neat-evolution/es-hyperneat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

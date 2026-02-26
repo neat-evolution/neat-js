@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "apply Biome formatting; apply biome formatting and fix toString variable shadowing",
-  "packageName": "@neat-evolution/demo",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

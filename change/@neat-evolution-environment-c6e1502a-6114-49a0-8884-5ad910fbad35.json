@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "make batch methods optional and apply Biome formatting",
-  "packageName": "@neat-evolution/environment",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "apply Biome formatting and fix tsconfig",
-  "packageName": "@neat-evolution/worker-threads",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

@@ -2,6 +2,21 @@
   "name": "@neat-evolution/worker-evaluator",
   "entries": [
     {
+      "date": "Thu, 26 Feb 2026 22:05:36 GMT",
+      "version": "0.7.4",
+      "tag": "@neat-evolution/worker-evaluator_v0.7.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-evaluator",
+            "commit": "71f6395ce75af69290a844b7ded5b4037d92584b",
+            "comment": "apply Biome formatting; update for CallManager-based worker-actions API"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 02 Dec 2025 18:45:22 GMT",
       "version": "0.7.2",
       "tag": "@neat-evolution/worker-evaluator_v0.7.2",

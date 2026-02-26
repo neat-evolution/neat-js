@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "apply Biome formatting; update for CallManager-based worker-actions API",
-  "packageName": "@neat-evolution/worker-reproducer",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

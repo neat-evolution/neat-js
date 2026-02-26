@@ -2,6 +2,21 @@
   "name": "@neat-evolution/worker-pool",
   "entries": [
     {
+      "date": "Thu, 26 Feb 2026 22:05:36 GMT",
+      "version": "0.4.4",
+      "tag": "@neat-evolution/worker-pool_v0.4.4",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-pool",
+            "commit": "71f6395ce75af69290a844b7ded5b4037d92584b",
+            "comment": "normalize tsconfig formatting"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 02 Dec 2025 18:45:22 GMT",
       "version": "0.4.2",
       "tag": "@neat-evolution/worker-pool_v0.4.2",

@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/executor
 
-<!-- This log was last generated on Fri, 28 Nov 2025 20:11:15 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 26 Feb 2026 22:05:36 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.3.9
+
+Thu, 26 Feb 2026 22:05:36 GMT
+
+### Patches
+
+- apply Biome formatting (github@heygrady.net)
 
 ## 0.3.5
 

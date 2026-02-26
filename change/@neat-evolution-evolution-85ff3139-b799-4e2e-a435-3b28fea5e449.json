@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "apply Biome formatting",
-  "packageName": "@neat-evolution/evolution",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

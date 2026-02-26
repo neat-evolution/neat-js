@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/core
 
-<!-- This log was last generated on Tue, 02 Dec 2025 18:45:22 GMT and should not be manually modified. -->
+<!-- This log was last generated on Thu, 26 Feb 2026 22:05:36 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.3.7
+
+Thu, 26 Feb 2026 22:05:36 GMT
+
+### Patches
+
+- apply Biome formatting (github@heygrady.net)
 
 ## 0.3.5
 
