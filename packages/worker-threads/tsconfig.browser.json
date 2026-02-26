@@ -4,6 +4,7 @@
   "compilerOptions": {
     "composite": true,
     "declaration": true,
+    "noEmit": false,
     "outDir": "./dist/types/browser",
     "rootDir": "./src",
     "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"]

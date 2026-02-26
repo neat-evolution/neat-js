@@ -1,6 +1,6 @@
 import type { WorkerEventTypes } from '../EventTypes.js'
 import type { MessageListenerFn } from '../MessageListenerFn.js'
-import type { WorkerOptions, WebWorkerOptions } from '../WorkerOptions.js'
+import type { WebWorkerOptions, WorkerOptions } from '../WorkerOptions.js'
 
 export type Transferable = ArrayBuffer | MessagePort
 
