@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(neat-publish)",
+      "Bash(yarn beachball change:*)",
+      "Bash(npm view:*)",
+      "Bash(yarn dlx depcheck:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
