@@ -1300,14 +1300,12 @@ __metadata:
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
-    "@types/seedrandom": "npm:^3"
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
     "@vitest/coverage-v8": "npm:^4.0.14"
     concurrently: "npm:^9.2.1"
     lint-staged: "npm:^16.2.7"
     nodemon: "npm:^3.1.11"
     rimraf: "npm:^6.1.2"
-    seedrandom: "npm:^3.0.5"
     typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.14"
   languageName: unknown
@@ -1324,7 +1322,6 @@ __metadata:
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
-    "@types/seedrandom": "npm:^3"
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
     "@vitest/coverage-v8": "npm:^4.0.14"
     concurrently: "npm:^9.2.1"
@@ -1358,7 +1355,6 @@ __metadata:
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
-    "@types/seedrandom": "npm:^3"
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
     "@vitest/coverage-v8": "npm:^4.0.14"
     "@vitest/web-worker": "npm:^4.0.14"
@@ -1382,7 +1378,6 @@ __metadata:
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.17"
-    "@types/seedrandom": "npm:^3"
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
     "@vitest/coverage-v8": "npm:^4.0.14"
     async-sema: "npm:^3.1.1"
@@ -1964,13 +1959,6 @@ __metadata:
   version: 7.0.3
   resolution: "@types/parse-path@npm:7.0.3"
   checksum: 10/21a12c228d38f5a75659dfd7cb127dc2001ed3f6acbd1b2e0575d1348c735594c0bab06a97fe849c151438384829f20ea5971cb045f7ecd37d53c76a9fcb9de3
-  languageName: node
-  linkType: hard
-
-"@types/seedrandom@npm:^3":
-  version: 3.0.5
-  resolution: "@types/seedrandom@npm:3.0.5"
-  checksum: 10/d63d56ebc609203cf8cbe2ab7e7934237446bc2463ade664be130dcd4a3d74915d529909de2e1b18141cfabc9e42784998b7e5ff30c016919ac5b83911a700f0
   languageName: node
   linkType: hard
 
@@ -5576,13 +5564,6 @@ __metadata:
   dependencies:
     xmlchars: "npm:^2.2.0"
   checksum: 10/97b50daf6ca3a153e89842efa18a862e446248296622b7473c169c84c823ee8a16e4a43bac2f73f11fc8cb9168c73fbb0d73340f26552bac17970e9052367aa9
-  languageName: node
-  linkType: hard
-
-"seedrandom@npm:^3.0.5":
-  version: 3.0.5
-  resolution: "seedrandom@npm:3.0.5"
-  checksum: 10/acad5e516c04289f61c2fb9848f449b95f58362b75406b79ec51e101ec885293fc57e3675d2f39f49716336559d7190f7273415d185fead8cd27b171ebf7d8fb
   languageName: node
   linkType: hard
 
