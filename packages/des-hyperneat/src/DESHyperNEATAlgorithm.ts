@@ -1,11 +1,10 @@
 import type { Algorithm, NEATConfigOptions } from '@neat-evolution/core'
-
+import type { CustomState } from './CustomState.js'
+import type { CustomStateData } from './CustomStateData.js'
 import { createConfig } from './createConfig.js'
 import { createGenome } from './createGenome.js'
 import { createPhenotype } from './createPhenotype.js'
 import { createState } from './createState.js'
-import type { CustomState } from './CustomState.js'
-import type { CustomStateData } from './CustomStateData.js'
 import type { DESHyperNEATConfig } from './DESHyperNEATConfig.js'
 import type { DESHyperNEATConfigData } from './DESHyperNEATConfigData.js'
 import type { DESHyperNEATConfigFactoryOptions } from './DESHyperNEATConfigFactoryOptions.js'
@@ -13,12 +12,12 @@ import type { DESHyperNEATGenome } from './DESHyperNEATGenome.js'
 import type { DESHyperNEATGenomeData } from './DESHyperNEATGenomeData.js'
 import type {
   DESHyperNEATGenomeFactoryOptions,
-  DESHyperNEATNodeData,
   DESHyperNEATLinkData,
+  DESHyperNEATNodeData,
 } from './DESHyperNEATGenomeFactoryOptions.js'
 import {
-  defaultDESHyperNEATGenomeOptions,
   type DESHyperNEATGenomeOptions,
+  defaultDESHyperNEATGenomeOptions,
 } from './DESHyperNEATGenomeOptions.js'
 import type { DESHyperNEATLink } from './DESHyperNEATLink.js'
 import type { DESHyperNEATLinkFactoryOptions } from './DESHyperNEATLinkFactoryOptions.js'

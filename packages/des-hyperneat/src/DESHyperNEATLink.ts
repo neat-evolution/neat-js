@@ -1,9 +1,9 @@
 import {
   CoreLink,
-  toLinkKey,
   type LinkFactory,
-  type NEATConfigOptions,
   type LinkFactoryOptions,
+  type NEATConfigOptions,
+  toLinkKey,
 } from '@neat-evolution/core'
 import {
   CPPNAlgorithm,

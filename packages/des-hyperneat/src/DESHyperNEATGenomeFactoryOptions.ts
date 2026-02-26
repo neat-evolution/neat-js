@@ -20,10 +20,8 @@ export type DESHyperNEATLinkData = [
   depth: number,
 ]
 
-export interface DESHyperNEATGenomeFactoryOptions extends GenomeFactoryOptions<
-  DESHyperNEATNodeData,
-  DESHyperNEATLinkData
-> {
+export interface DESHyperNEATGenomeFactoryOptions
+  extends GenomeFactoryOptions<DESHyperNEATNodeData, DESHyperNEATLinkData> {
   inputs: DESHyperNEATNodeData[]
   outputs: DESHyperNEATNodeData[]
 }

@@ -18,8 +18,8 @@ import type { DESHyperNEATGenome } from './DESHyperNEATGenome.js'
 import type { DESHyperNEATGenomeData } from './DESHyperNEATGenomeData.js'
 import type {
   DESHyperNEATGenomeFactoryOptions,
-  DESHyperNEATNodeData,
   DESHyperNEATLinkData,
+  DESHyperNEATNodeData,
 } from './DESHyperNEATGenomeFactoryOptions.js'
 import type { DESHyperNEATGenomeOptions } from './DESHyperNEATGenomeOptions.js'
 import type { DESHyperNEATLink } from './DESHyperNEATLink.js'
@@ -28,8 +28,8 @@ import type { DESHyperNEATNode } from './DESHyperNEATNode.js'
 import type { DESHyperNEATNodeFactoryOptions } from './DESHyperNEATNodeFactoryOptions.js'
 import type { DESHyperNEATState } from './DESHyperNEATState.js'
 import type { DESHyperNEATStateData } from './DESHyperNEATStateData.js'
-import { topologyInitConfig } from './topology/topologyInitConfig.js'
 import type { TopologyConfigOptions } from './TopologyConfigOptions.js'
+import { topologyInitConfig } from './topology/topologyInitConfig.js'
 
 export type DESHyperNEATPopulation = Population<
   DESHyperNEATConfigFactoryOptions,

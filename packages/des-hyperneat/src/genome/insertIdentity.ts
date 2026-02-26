@@ -1,11 +1,11 @@
 import {
-  type NodeRef,
   Activation,
+  type NodeKey,
+  type NodeRef,
   NodeType,
   toNodeKey,
-  type NodeKey,
 } from '@neat-evolution/core'
-import { type CPPNGenome, type CPPNGenomeOptions } from '@neat-evolution/cppn'
+import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
 
 import { insertLink } from './insertLink.js'
 import { splitLink } from './splitLink.js'

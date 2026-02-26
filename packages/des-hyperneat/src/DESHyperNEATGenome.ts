@@ -1,20 +1,19 @@
 import {
   CoreGenome,
+  type InitConfig,
   type NEATConfigOptions,
   type NodeKey,
   NodeType,
-  type InitConfig,
-  toLinkKey,
   nodeRefToKey,
+  toLinkKey,
 } from '@neat-evolution/core'
 import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
 import { threadRNG } from '@neat-evolution/utils'
-
+import type { CustomState } from './CustomState.js'
+import type { CustomStateData } from './CustomStateData.js'
 import type { DESHyperNEATGenomeFactory } from './createGenome.js'
 import { createLinkFactory } from './createLink.js'
 import { createNodeFactory } from './createNode.js'
-import type { CustomState } from './CustomState.js'
-import type { CustomStateData } from './CustomStateData.js'
 import type { DESHyperNEATConfig } from './DESHyperNEATConfig.js'
 import type { DESHyperNEATConfigData } from './DESHyperNEATConfigData.js'
 import type { DESHyperNEATConfigFactoryOptions } from './DESHyperNEATConfigFactoryOptions.js'

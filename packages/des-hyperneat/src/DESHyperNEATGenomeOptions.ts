@@ -5,16 +5,15 @@ import {
   defaultCPPNGenomeOptions,
 } from '@neat-evolution/cppn'
 import {
-  type ESHyperNEATGenomeOptions,
   defaultESHyperNEATGenomeOptions,
+  type ESHyperNEATGenomeOptions,
 } from '@neat-evolution/es-hyperneat'
 import type { Point } from '@neat-evolution/hyperneat'
 
 export type IOConfig = 'line' | 'separate' | Point[][]
 
 export interface DESHyperNEATGenomeOptions
-  extends
-    GenomeOptions,
+  extends GenomeOptions,
     CPPNGenomeOptions,
     Omit<ESHyperNEATGenomeOptions, 'inputConfig' | 'outputConfig'> {
   singleCPPNState: boolean

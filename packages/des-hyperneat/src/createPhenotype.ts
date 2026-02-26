@@ -1,32 +1,32 @@
 import {
-  NodeType,
-  type Phenotype,
-  type PhenotypeFactory,
-  type NodeKey,
-  toNodeKey,
+  type Connection,
   Connections,
   isActionEdge,
-  type Connection,
-  nodeKeyToRef,
-  PhenotypeActionType,
-  type PhenotypeAction,
-  toLinkKey,
   type NodeId,
+  type NodeKey,
+  NodeType,
+  nodeKeyToRef,
+  type Phenotype,
+  type PhenotypeAction,
+  PhenotypeActionType,
+  type PhenotypeFactory,
+  toLinkKey,
+  toNodeKey,
 } from '@neat-evolution/core'
 import {
   type CPPNGenome,
-  createPhenotype as createCPPNPhenotype,
   type CPPNGenomeOptions,
+  createPhenotype as createCPPNPhenotype,
 } from '@neat-evolution/cppn'
 import {
-  exploreSubstrate,
   type ESHyperNEATGenomeOptions,
+  exploreSubstrate,
 } from '@neat-evolution/es-hyperneat'
 import { createExecutor } from '@neat-evolution/executor'
 import {
-  toPointKey,
   type Point,
   type PointKey,
+  toPointKey,
 } from '@neat-evolution/hyperneat'
 
 import type { DESHyperNEATGenome } from './DESHyperNEATGenome.js'
