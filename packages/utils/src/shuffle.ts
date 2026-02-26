@@ -1,4 +1,4 @@
-import { type RNG } from './rand.js'
+import type { RNG } from './rand.js'
 
 /**
  * Uses the Durstenfeld algorithm which is based on the Fisher–Yates algorithm.
