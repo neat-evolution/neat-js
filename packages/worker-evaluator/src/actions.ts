@@ -4,7 +4,7 @@ import type {
   GenomeOptions,
   InitConfig,
 } from '@neat-evolution/core'
-import { createAction, type WorkerAction } from '@neat-evolution/worker-actions'
+import { createMessage, type WorkerMessage } from '@neat-evolution/worker-actions'
 
 export enum ActionType {
   INIT_EVALUATOR = 'INIT_EVALUATOR',
@@ -40,27 +40,27 @@ export interface EvaluateBatchPayload {
   seed?: string | undefined
 }
 
-export type InitAction = WorkerAction<InitPayload>
+export type InitAction = WorkerMessage<InitPayload>
 
-export type InitSuccessAction = WorkerAction<null>
+export type InitSuccessAction = WorkerMessage<null>
 
-export type TerminateAction = WorkerAction<null>
+export type TerminateAction = WorkerMessage<null>
 
 // Action creators for worker-evaluator
-export const initEvaluator = createAction<InitPayload>(
+export const initEvaluator = createMessage<InitPayload>(
   ActionType.INIT_EVALUATOR
 )
 
-export const initGenomeFactory = createAction<
+export const initGenomeFactory = createMessage<
   InitGenomeFactoryPayload<any, any>
 >(ActionType.INIT_GENOME_FACTORY)
 
-export const requestEvaluateGenome = createAction<EvaluateGenomePayload>(
+export const requestEvaluateGenome = createMessage<EvaluateGenomePayload>(
   ActionType.REQUEST_EVALUATE_GENOME
 )
 
-export const requestEvaluateBatch = createAction<EvaluateBatchPayload>(
+export const requestEvaluateBatch = createMessage<EvaluateBatchPayload>(
   ActionType.REQUEST_EVALUATE_BATCH
 )
 
-export const terminate = createAction<null>(ActionType.TERMINATE, () => null)
+export const terminate = createMessage<null>(ActionType.TERMINATE, () => null)

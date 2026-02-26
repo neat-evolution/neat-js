@@ -31,7 +31,7 @@ packages in the `neat-js` monorepo as follows:
 - **`@neat-evolution/evaluator`**: Implements the `StandardEvaluator` interface,
   fulfilling the contract for genome evaluation.
 
-- **`@neat-evolution/worker-actions`**: Uses the `Dispatcher` and `WorkerAction`
+- **`@neat-evolution/worker-actions`**: Uses the `Dispatcher` and `WorkerMessage`
   primitives to manage type-safe communication with worker threads.
 
 - **`@neat-evolution/worker-threads`**: Utilizes the `Worker` abstraction from
@@ -123,8 +123,8 @@ and functions:
   It sets up message listeners to handle initialization requests, genome
   evaluation requests, and other commands from the main thread.
 
-- **Message Handling (`message/ActionMessage.ts`,
-  `message/createActionMessage.ts`)**:
+- **Message Handling (`message/WorkerMessage.ts`,
+  `message/createWorkerMessage.ts`)**:
 
   These files define the structure of messages exchanged between the main thread
   and worker threads, enabling structured communication for tasks and results.
