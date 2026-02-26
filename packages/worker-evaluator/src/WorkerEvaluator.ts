@@ -95,13 +95,23 @@ export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
     this.evaluationContext = {
       evaluateGenomeEntry: this.evaluateGenomeEntry.bind(this),
       evaluateGenomeEntryBatch: this.evaluateGenomeEntryBatch.bind(this),
-      dispatch: (action) => {
-        void this.dispatcher.dispatch(action)
+      send: (message) => {
+        void this.dispatcher.send(message)
       },
-      request: this.dispatcher.request.bind(this.dispatcher),
+      call: this.dispatcher.call.bind(this.dispatcher),
       broadcast: this.dispatcher.broadcast.bind(this.dispatcher),
-      addActionHandler: this.dispatcher.addActionHandler.bind(this.dispatcher),
-      removeActionHandler: this.dispatcher.removeActionHandler.bind(
+      addMessageHandler: this.dispatcher.addMessageHandler.bind(this.dispatcher),
+      removeMessageHandler: this.dispatcher.removeMessageHandler.bind(
+        this.dispatcher
+      ),
+
+      // Deprecated aliases
+      dispatch: (message) => {
+        void this.dispatcher.send(message)
+      },
+      request: this.dispatcher.call.bind(this.dispatcher),
+      addActionHandler: this.dispatcher.addMessageHandler.bind(this.dispatcher),
+      removeActionHandler: this.dispatcher.removeMessageHandler.bind(
         this.dispatcher
       ),
     }
@@ -164,7 +174,7 @@ export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
   ): Promise<FitnessData> {
     await this.initPromise
     const [speciesIndex, organismIndex, genome] = genomeEntry
-    const fitness = await this.dispatcher.request<number>(
+    const fitness = await this.dispatcher.call<number>(
       requestEvaluateGenome({
         genomeOptions: genome.toFactoryOptions(),
         seed,
@@ -188,7 +198,7 @@ export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
     const genomeFactoryOptions = genomeEntries.map(([, , genome]) =>
       genome.toFactoryOptions()
     )
-    const fitnessScores = await this.dispatcher.request<number[]>(
+    const fitnessScores = await this.dispatcher.call<number[]>(
       requestEvaluateBatch({
         genomeOptions: genomeFactoryOptions,
         seed,
