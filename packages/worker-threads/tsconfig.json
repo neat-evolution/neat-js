@@ -3,13 +3,7 @@
   "extends": "@heygrady/tsconfig-bases/ts-node-esm/tsconfig.json",
   "compilerOptions": {
     "noPropertyAccessFromIndexSignature": false,
-    "noEmit": true,
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable",
-      "WebWorker"
-    ]
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"]
   },
   "references": [
     {
@@ -19,8 +13,5 @@
       "path": "./tsconfig.browser.json"
     }
   ],
-  "include": [
-    "src",
-    "test"
-  ]
+  "include": ["src", "test"]
 }

@@ -1,4 +1,4 @@
-import { type WorkerOptions as NodeWorkerOptions } from 'node:worker_threads'
+import type { WorkerOptions as NodeWorkerOptions } from 'node:worker_threads'
 
 export type RequestCredentials = 'include' | 'omit' | 'same-origin'
 

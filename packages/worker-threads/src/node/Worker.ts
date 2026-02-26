@@ -1,4 +1,4 @@
-import { Worker as NodeWorker, type MessagePort } from 'node:worker_threads'
+import { type MessagePort, Worker as NodeWorker } from 'node:worker_threads'
 
 import type { WorkerEventTypes } from '../EventTypes.js'
 import { CompatMessageEvent } from '../MessageEvent.js'

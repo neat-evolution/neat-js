@@ -1,4 +1,4 @@
-import { parentPort, type MessagePort } from 'node:worker_threads'
+import { type MessagePort, parentPort } from 'node:worker_threads'
 
 import type { ContextEventTypes } from '../EventTypes.js'
 
