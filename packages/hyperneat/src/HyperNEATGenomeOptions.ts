@@ -5,16 +5,17 @@ import {
   type InitConfig,
 } from '@neat-evolution/core'
 import {
-  defaultCPPNGenomeOptions,
   type CPPNGenomeOptions,
+  defaultCPPNGenomeOptions,
 } from '@neat-evolution/cppn'
 
-import { type Point } from './Point.js'
+import type { Point } from './Point.js'
 
 export type IOConfig = 'line' | Point[]
 
 export interface HyperNEATGenomeOptions
-  extends GenomeOptions, CPPNGenomeOptions {
+  extends GenomeOptions,
+    CPPNGenomeOptions {
   weightThreshold: number
   hiddenActivation: Activation
   outputActivation: Activation

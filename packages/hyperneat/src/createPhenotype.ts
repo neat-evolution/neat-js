@@ -1,19 +1,19 @@
 import {
   Activation,
-  PhenotypeActionType,
   type PhenotypeAction,
+  PhenotypeActionType,
   type PhenotypeFactory,
 } from '@neat-evolution/core'
 import {
   type CPPNGenome,
-  createPhenotype as createCPPNPhenotype,
   type CPPNGenomeOptions,
+  createPhenotype as createCPPNPhenotype,
 } from '@neat-evolution/cppn'
 import { createExecutor } from '@neat-evolution/executor'
 
 import type { HyperNEATGenomeOptions } from './HyperNEATGenomeOptions.js'
-import { load } from './substrate/load.js'
 import { isSubstrateLinkAction } from './SubstrateAction.js'
+import { load } from './substrate/load.js'
 
 export const createPhenotype: PhenotypeFactory<
   CPPNGenome<HyperNEATGenomeOptions>

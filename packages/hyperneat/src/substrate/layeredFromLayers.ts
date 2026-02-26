@@ -1,6 +1,6 @@
 import { Connections } from '@neat-evolution/core'
 
-import { toPointKey, type Point, type PointKey } from '../Point.js'
+import { type Point, type PointKey, toPointKey } from '../Point.js'
 import type { Substrate } from '../Substrate.js'
 
 import { createSubstrate } from './createSubstrate.js'

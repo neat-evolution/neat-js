@@ -1,15 +1,15 @@
-import { isActionEdge, type Connections } from '@neat-evolution/core'
+import { type Connections, isActionEdge } from '@neat-evolution/core'
 
 import {
-  toPointKey,
+  fromPointKey,
   type Point,
   type PointKey,
-  fromPointKey,
+  toPointKey,
 } from '../Point.js'
 import type { Substrate } from '../Substrate.js'
 import {
-  SubstrateActionType,
   type SubstrateAction,
+  SubstrateActionType,
 } from '../SubstrateAction.js'
 
 export const createSubstrate = (

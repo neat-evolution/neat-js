@@ -1,6 +1,6 @@
 import { bench, describe, expect } from 'vitest'
 
-import { toPointKey, type Point } from '../src/Point.js'
+import { type Point, toPointKey } from '../src/Point.js'
 
 const toBinaryPointKey = (point: Point): number => {
   return (point[0] << 16) | point[1]
