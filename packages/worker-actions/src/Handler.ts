@@ -2,7 +2,7 @@ import { WORKER_READY } from '@neat-evolution/worker-pool'
 import type { Transferable } from '@neat-evolution/worker-threads'
 import { workerContext } from '@neat-evolution/worker-threads'
 
-import type { WorkerMessage, WorkerHandlerFn, WorkerContext } from './types.js'
+import type { WorkerContext, WorkerHandlerFn, WorkerMessage } from './types.js'
 import { CallManager } from './utils/CallManager.js'
 
 const DEFAULT_READY_TIMEOUT_MS = 20
@@ -93,7 +93,11 @@ export class Handler {
     if (message == null || typeof message.type !== 'string') return
 
     if (this.verbose) {
-      console.log('[Handler] handleMessage received:', message.type, message.meta)
+      console.log(
+        '[Handler] handleMessage received:',
+        message.type,
+        message.meta
+      )
     }
 
     // 1. Handle RPC Responses (Call/Response)
