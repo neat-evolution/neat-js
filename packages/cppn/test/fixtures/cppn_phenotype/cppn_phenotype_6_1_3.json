@@ -70,37 +70,17 @@
   },
   "phenotype": {
     "length": 6,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      4,
-      5
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [4, 5],
     "actions": [
       {
-        "Activation": [
-          0,
-          0.0,
-          "None"
-        ]
+        "Activation": [0, 0.0, "None"]
       },
       {
-        "Link": [
-          0,
-          5,
-          -0.5800835015792912
-        ]
+        "Link": [0, 5, -0.5800835015792912]
       },
       {
-        "Activation": [
-          5,
-          -0.023823274199787,
-          "Tanh"
-        ]
+        "Activation": [5, -0.023823274199787, "Tanh"]
       }
     ]
   }

@@ -1,8 +1,8 @@
 import {
-  NodeType,
   Activation,
   CoreNode,
   type NodeData,
+  NodeType,
 } from '@neat-evolution/core'
 import { threadRNG } from '@neat-evolution/utils'
 
