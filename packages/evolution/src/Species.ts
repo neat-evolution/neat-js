@@ -1,13 +1,13 @@
-import {
-  type ConfigData,
-  type Genome,
-  type GenomeFactoryOptions,
-  type GenomeOptions,
-  type StateData,
+import type {
+  ConfigData,
+  Genome,
+  GenomeFactoryOptions,
+  GenomeOptions,
+  StateData,
 } from '@neat-evolution/core'
 import { threadRNG } from '@neat-evolution/utils'
 
-import { type Organism } from './Organism.js'
+import type { Organism } from './Organism.js'
 import type { SpeciesData, SpeciesState } from './SpeciesData.js'
 import type { SpeciesFactoryOptions } from './SpeciesFactoryOptions.js'
 import type { SpeciesOptions } from './SpeciesOptions.js'

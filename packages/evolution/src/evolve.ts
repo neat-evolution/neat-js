@@ -1,6 +1,6 @@
-import { type EvolutionOptions } from './EvolutionOptions.js'
+import type { EvolutionOptions } from './EvolutionOptions.js'
 import type { Organism } from './Organism.js'
-import { type Population } from './Population.js'
+import type { Population } from './Population.js'
 
 export const evolve = async <
   P extends Population<

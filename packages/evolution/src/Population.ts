@@ -1,21 +1,21 @@
 import type {
-  GenomeFactoryOptions,
-  GenomeOptions,
-  GenomeData,
-  InitConfig,
+  Algorithm,
+  ConfigData,
+  ConfigFactoryOptions,
+  ConfigOptions,
+  CoreConfig,
   CoreGenome,
   CoreLink,
-  LinkFactoryOptions,
   CoreNode,
-  NodeFactoryOptions,
   CoreState,
-  StateData,
   ExtendedState,
-  CoreConfig,
-  ConfigOptions,
-  ConfigFactoryOptions,
-  ConfigData,
-  Algorithm,
+  GenomeData,
+  GenomeFactoryOptions,
+  GenomeOptions,
+  InitConfig,
+  LinkFactoryOptions,
+  NodeFactoryOptions,
+  StateData,
 } from '@neat-evolution/core'
 import type { Evaluator, GenomeEntry } from '@neat-evolution/evaluator'
 import { threadRNG } from '@neat-evolution/utils'
@@ -25,10 +25,10 @@ import { Organism } from './Organism.js'
 import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
 import type { PopulationData } from './PopulationData.js'
 import {
-  toPopulationDataSpecies,
   type PopulationDataSpecies,
   type PopulationDataSpeciesEntry,
   type PopulationFactoryOptions,
+  toPopulationDataSpecies,
 } from './PopulationFactoryOptions.js'
 import type { PopulationOptions } from './PopulationOptions.js'
 import type { Reproducer } from './reproducer/Reproducer.js'
