@@ -20,7 +20,7 @@ const hashString = (str: string): number => {
   h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909)
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507)
   h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909)
-  return (h2 >>> 0)
+  return h2 >>> 0
 }
 
 /**
