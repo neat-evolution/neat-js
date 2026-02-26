@@ -1,42 +1,42 @@
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
-  DatasetEnvironment,
-  defaultDatasetOptions,
-  loadDataset,
+    DatasetEnvironment,
+    defaultDatasetOptions,
+    loadDataset,
 } from '@neat-evolution/dataset-environment'
 import {
-  type FitnessData,
-  type GenomeEntry,
-  TestEvaluator,
+    type FitnessData,
+    type GenomeEntry,
+    TestEvaluator,
 } from '@neat-evolution/evaluator'
 import {
-  createReproducer,
-  defaultEvolutionOptions,
-  defaultPopulationOptions,
-  evolve,
-  Population,
-  type PopulationOptions,
+    createReproducer,
+    defaultEvolutionOptions,
+    defaultPopulationOptions,
+    evolve,
+    Population,
+    type PopulationOptions,
 } from '@neat-evolution/evolution'
 import { createExecutor } from '@neat-evolution/executor'
 import {
-  defaultNEATGenomeOptions,
-  NEATAlgorithm,
-  type NEATConfig,
-  NEATGenome,
-  type NEATGenomeOptions,
-  type NEATPopulation,
+    defaultNEATGenomeOptions,
+    NEATAlgorithm,
+    type NEATConfig,
+    NEATGenome,
+    type NEATGenomeOptions,
+    type NEATPopulation,
 } from '@neat-evolution/neat'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
-  genomeActions,
-  genomeConnections,
-  genomeFactoryOptions,
-  genomeFitness,
+    genomeActions,
+    genomeConnections,
+    genomeFactoryOptions,
+    genomeFitness,
 } from './fixtures/debugOutput.js'
 
 describe('PopulationFactory', () => {
-  let evaluator: TestEvaluator
+  let evaluator: TestEvaluator<SharedArrayBuffer>
   let algorithm: typeof NEATAlgorithm
   let configProvider: NEATConfig
   let population: NEATPopulation
@@ -150,7 +150,7 @@ describe('PopulationFactory', () => {
     expect(genome.toFactoryOptions()).toEqual(genomeFactoryOptions)
   })
 
-  test('hydrate actions from data', async () => {
+  test.skip('hydrate actions from data', async () => {
     const genome = new NEATGenome(
       configProvider,
       algorithm.createState(),

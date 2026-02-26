@@ -164,7 +164,6 @@ for (const line of lines) {
       }
       if (to.startsWith('H') && !knownNodes.has(to)) {
         knownNodes.add(to)
-        const _type = NodeType.Hidden
         const id = Number(to.slice(1))
         hiddenNodes.push(id)
       }
@@ -173,7 +172,7 @@ for (const line of lines) {
         nodeRefToKey(fromNode),
         nodeRefToKey(toNode),
         parseFloat(weight),
-        parseInt(innovation, 10),
+        innovation,
       ]
       links.push(genomeDataLink)
       linksMap.set(linkKey, genomeDataLink)
@@ -250,12 +249,12 @@ for (const line of lines) {
         if (node == null || bias == null || activation == null) {
           throw new Error('Invalid action.')
         }
-        const action: PhenotypeActivationAction = {
-          type: PhenotypeActionType.Activation,
-          node: parseInt(node, 10),
-          bias: parseFloat(bias),
-          activation: activation as Activation,
-        }
+        const action: PhenotypeActivationAction = [
+          PhenotypeActionType.Activation,
+          parseInt(node, 10),
+          parseFloat(bias),
+          activation as Activation,
+        ]
         genomePhenotype.actions.push(action)
       }
     } else if (line.startsWith('L')) {
@@ -267,12 +266,12 @@ for (const line of lines) {
         if (from == null || to == null || weight == null) {
           throw new Error('Invalid action.')
         }
-        const action: PhenotypeLinkAction = {
-          type: PhenotypeActionType.Link,
-          from: parseInt(from, 10),
-          to: parseInt(to, 10),
-          weight: parseFloat(weight),
-        }
+        const action: PhenotypeLinkAction = [
+          PhenotypeActionType.Link,
+          parseInt(from, 10),
+          parseInt(to, 10),
+          parseFloat(weight),
+        ]
         genomePhenotype.actions.push(action)
       }
     }
