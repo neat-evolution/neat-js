@@ -68,12 +68,12 @@ const expandTypeString = (str: string): string => {
 // Helper function to format links
 const formatLinks = (
   links: TestCaseLinkData[]
-): Array<[from: string, to: string, weight: number, innovation: number]> => {
+): Array<[from: string, to: string, weight: number, innovation: string]> => {
   return links.map((link) => {
     let { from, to, weight, innovation } = link
     from = expandTypeString(from)
     to = expandTypeString(to)
-    return [from, to, weight, innovation]
+    return [from, to, weight, String(innovation)]
   })
 }
 

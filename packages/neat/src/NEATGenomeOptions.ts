@@ -1,7 +1,7 @@
 import {
+  Activation,
   defaultGenomeOptions,
   type GenomeOptions,
-  Activation,
 } from '@neat-evolution/core'
 
 export interface NEATGenomeOptions extends GenomeOptions {

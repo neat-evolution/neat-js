@@ -1,51 +1,47 @@
 import {
-  defaultNEATConfigOptions,
   type ConfigData,
+  defaultNEATConfigOptions,
   type InitConfig,
   type StateData,
 } from '@neat-evolution/core'
 import {
+  DatasetEnvironment,
   defaultDatasetOptions,
   loadDataset,
-  DatasetEnvironment,
 } from '@neat-evolution/dataset-environment'
 import { createEvaluator, type Evaluator } from '@neat-evolution/evaluator'
 import {
   createReproducer,
-  Population,
   defaultPopulationOptions,
+  Population,
   type PopulationOptions,
   type Species,
 } from '@neat-evolution/evolution'
+import { createExecutor } from '@neat-evolution/executor'
 import {
-  createExecutor,
-  type Executor,
-  type SyncExecutor,
-} from '@neat-evolution/executor'
-import {
+  afterEach,
   beforeEach,
   describe,
   expect,
+  type MockInstance,
   test,
   vi,
-  type SpyInstance,
-  afterEach,
 } from 'vitest'
 
 import {
   createConfig,
-  defaultNEATGenomeOptions,
-  type NEATGenome,
-  type NEATGenomeOptions,
-  createState,
   createGenome,
   createPhenotype,
-  type NEATConfig,
-  type NEATPopulation,
+  createState,
+  defaultNEATGenomeOptions,
   NEATAlgorithm,
+  type NEATConfig,
+  type NEATGenome,
+  type NEATGenomeFactoryOptions,
+  type NEATGenomeOptions,
   type NEATHiddenNodeData,
   type NEATLinkData,
-  type NEATGenomeFactoryOptions,
+  type NEATPopulation,
 } from '../src/index.js'
 
 const createEnvironment = async () => {
@@ -65,7 +61,7 @@ describe('Population class', () => {
   let populationOptions: PopulationOptions
   let genomeOptions: NEATGenomeOptions
   let environment: DatasetEnvironment
-  let evaluator: Evaluator<[SyncExecutor], [Executor], number>
+  let evaluator: Evaluator<SharedArrayBuffer>
 
   const initConfig: InitConfig = {
     inputs: 1,
@@ -195,7 +191,7 @@ describe('Population class', () => {
     })
 
     describe('Population.evolve species calls', () => {
-      let speciesSpies: Array<Record<string, SpyInstance>> = []
+      let speciesSpies: Array<Record<string, MockInstance>> = []
 
       beforeEach(() => {
         // Create spies for each species' methods
@@ -237,12 +233,12 @@ describe('Population class', () => {
       test('should call methods in the correct order', async () => {
         await population.evolve()
         for (const spyObj of speciesSpies) {
-          const orderedSpies: SpyInstance[] = [
-            spyObj['adjustFitness'] as SpyInstance,
-            spyObj['calculateOffsprings'] as SpyInstance,
-            spyObj['retainBest'] as SpyInstance,
-            spyObj['age'] as SpyInstance,
-            spyObj['removeOld'] as SpyInstance,
+          const orderedSpies: MockInstance[] = [
+            spyObj['adjustFitness'] as MockInstance,
+            spyObj['calculateOffsprings'] as MockInstance,
+            spyObj['retainBest'] as MockInstance,
+            spyObj['age'] as MockInstance,
+            spyObj['removeOld'] as MockInstance,
           ]
           for (const [i, spy] of orderedSpies.entries()) {
             const nextSpy = orderedSpies[i + 1]

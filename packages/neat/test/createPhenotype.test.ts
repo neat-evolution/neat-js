@@ -1,18 +1,18 @@
 import {
   defaultNEATConfigOptions,
-  isPhenotypeLinkAction,
   type InitConfig,
+  isPhenotypeLinkAction,
 } from '@neat-evolution/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
-  type NEATGenome,
   createConfig,
   createGenome,
   createPhenotype,
-  type NEATGenomeOptions,
-  defaultNEATGenomeOptions,
   createState,
+  defaultNEATGenomeOptions,
+  type NEATGenome,
+  type NEATGenomeOptions,
   type NEATState,
 } from '../src/index.js'
 

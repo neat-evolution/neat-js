@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { createConfig } from '../src/createConfig.js'
 import { createGenome } from '../src/createGenome.js'
 import { createState } from '../src/createState.js'
-import { type NEATGenome } from '../src/NEATGenome.js'
+import type { NEATGenome } from '../src/NEATGenome.js'
 import {
   defaultNEATGenomeOptions,
   type NEATGenomeOptions,

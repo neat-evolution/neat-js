@@ -26,28 +26,20 @@ const formattedTestCases = testCases.map(
 >
 
 describe('Genome crossover fixtures', () => {
-  test.each(formattedTestCases)(
-    '%s',
-    (
-      _name: string,
-      a: NEATGenome,
-      b: NEATGenome,
-      fitness1: number,
-      fitness2: number,
-      expected: NEATGenome
-    ) => {
-      const result = a.crossover(b, fitness1, fitness2)
-      const resultJSON = JSON.parse(JSON.stringify(result.toJSON()))
-      const expectedJSON = JSON.parse(JSON.stringify(expected.toJSON()))
+  test.each(
+    formattedTestCases
+  )('%s', (_name: string, a: NEATGenome, b: NEATGenome, fitness1: number, fitness2: number, expected: NEATGenome) => {
+    const result = a.crossover(b, fitness1, fitness2)
+    const resultJSON = JSON.parse(JSON.stringify(result.toJSON()))
+    const expectedJSON = JSON.parse(JSON.stringify(expected.toJSON()))
 
-      // sort links by innovation
-      resultJSON.factoryOptions.links.sort(
-        (a: NEATLinkData, b: NEATLinkData) => a[3] - b[3]
-      )
-      expectedJSON.factoryOptions.links.sort(
-        (a: NEATLinkData, b: NEATLinkData) => a[3] - b[3]
-      )
-      expect(resultJSON).toEqual(expectedJSON)
-    }
-  )
+    // sort links by innovation
+    resultJSON.factoryOptions.links.sort(
+      (a: NEATLinkData, b: NEATLinkData) => String(a[3]).localeCompare(String(b[3]))
+    )
+    expectedJSON.factoryOptions.links.sort(
+      (a: NEATLinkData, b: NEATLinkData) => String(a[3]).localeCompare(String(b[3]))
+    )
+    expect(resultJSON).toEqual(expectedJSON)
+  })
 })

@@ -1,10 +1,10 @@
 import type { NEATConfigOptions } from '@neat-evolution/core'
 import type { Evaluator } from '@neat-evolution/evaluator'
-import { evolve } from '@neat-evolution/evolution'
 import type {
   EvolutionOptions,
   PopulationOptions,
 } from '@neat-evolution/evolution'
+import { evolve } from '@neat-evolution/evolution'
 
 import {
   createPopulation,

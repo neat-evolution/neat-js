@@ -69,12 +69,12 @@ const expandTypeString = (str: string): string => {
 // Helper function to format links
 const formatLinks = (
   links: TestCaseLinkData[]
-): Array<[from: string, to: string, weight: number, innovation: number]> => {
+): Array<[from: string, to: string, weight: number, innovation: string]> => {
   return links.map((link) => {
     let { from, to, weight, innovation } = link
     from = expandTypeString(from)
     to = expandTypeString(to)
-    return [from, to, weight, innovation]
+    return [from, to, weight, String(innovation)]
   })
 }
 
@@ -82,7 +82,7 @@ const createTestGenome = (genomeData: TestCaseGenomeData) => {
   const genome = createGenome(
     configProvider,
     state,
-    { outputActivation: Activation.Sigmoid },
+    { hiddenActivation: Activation.Sigmoid, outputActivation: Activation.Sigmoid },
     { inputs: 4, outputs: 3 },
     {
       hiddenNodes: formatHiddenNodes(genomeData.hidden_nodes),

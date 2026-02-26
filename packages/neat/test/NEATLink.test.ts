@@ -1,9 +1,9 @@
 import {
-  NodeType,
-  type NodeKey,
   type LinkData,
-  toNodeKey,
   type LinkFactoryOptions,
+  type NodeKey,
+  NodeType,
+  toNodeKey,
 } from '@neat-evolution/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
@@ -19,7 +19,7 @@ describe('NEATLink class', () => {
     beforeEach(() => {
       from = toNodeKey(NodeType.Input, 0)
       to = toNodeKey(NodeType.Output, 1)
-      const factoryOptions = { from, to, weight: 0.5, innovation: 1 }
+      const factoryOptions = { from, to, weight: 0.5, innovation: '1' }
       link = createLink(factoryOptions, null, null)
     })
 
@@ -28,14 +28,14 @@ describe('NEATLink class', () => {
     })
 
     test('should return identity link', () => {
-      const factoryOptions = { from, to, weight: 0.5, innovation: 1 }
+      const factoryOptions = { from, to, weight: 0.5, innovation: '1' }
       const expected = createLink(factoryOptions, null, null)
       const result = link.identity(factoryOptions)
       expect(result).toEqual(expected)
     })
 
     test('should return cloneWith link', () => {
-      const factoryOptions = { from, to, weight: 0.5, innovation: 1 }
+      const factoryOptions = { from, to, weight: 0.5, innovation: '1' }
       const expected = createLink(factoryOptions, null, null)
       const result = link.cloneWith(factoryOptions)
       expect(result).toEqual(expected)
@@ -51,8 +51,8 @@ describe('NEATLink class', () => {
     beforeEach(() => {
       from = toNodeKey(NodeType.Input, 0)
       to = toNodeKey(NodeType.Output, 1)
-      link1 = createLink({ from, to, weight: 0.5, innovation: 1 }, null, null)
-      link2 = createLink({ from, to, weight: 0.7, innovation: 1 }, null, null)
+      link1 = createLink({ from, to, weight: 0.5, innovation: '1' }, null, null)
+      link2 = createLink({ from, to, weight: 0.7, innovation: '1' }, null, null)
     })
 
     test('should successfully perform crossover with identical links', () => {
@@ -60,12 +60,12 @@ describe('NEATLink class', () => {
       expect(resultLink.weight).toBeCloseTo(0.6)
       expect(resultLink.from).toEqual(from)
       expect(resultLink.to).toEqual(to)
-      expect(resultLink.innovation).toBe(1)
+      expect(resultLink.innovation).toBe('1')
     })
 
     test('should throw an error for mismatched from node', () => {
       link2 = createLink(
-        { from: toNodeKey(NodeType.Hidden, 3), to, weight: 0.7, innovation: 1 },
+        { from: toNodeKey(NodeType.Hidden, 3), to, weight: 0.7, innovation: '1' },
         null,
         null
       )
@@ -76,7 +76,7 @@ describe('NEATLink class', () => {
 
     test('should throw an error for mismatched to node', () => {
       link2 = createLink(
-        { from, to: toNodeKey(NodeType.Hidden, 3), weight: 0.7, innovation: 1 },
+        { from, to: toNodeKey(NodeType.Hidden, 3), weight: 0.7, innovation: '1' },
         null,
         null
       )
@@ -86,7 +86,7 @@ describe('NEATLink class', () => {
     })
 
     test('should throw an error for mismatched innovation numbers', () => {
-      link2 = createLink({ from, to, weight: 0.7, innovation: 2 }, null, null)
+      link2 = createLink({ from, to, weight: 0.7, innovation: '2' }, null, null)
       expect(() => {
         link1.crossover(link2, 10, 5)
       }).toThrowError('Mismatch in crossover')
@@ -108,13 +108,13 @@ describe('NEATLink class', () => {
     beforeEach(() => {
       from = toNodeKey(NodeType.Input, 0)
       to = toNodeKey(NodeType.Output, 1)
-      link1 = createLink({ from, to, weight: 0.5, innovation: 1 }, null, null)
-      link2 = createLink({ from, to, weight: 0.7, innovation: 1 }, null, null)
+      link1 = createLink({ from, to, weight: 0.5, innovation: '1' }, null, null)
+      link2 = createLink({ from, to, weight: 0.7, innovation: '1' }, null, null)
     })
 
     test('should return zero distance for identical weights', () => {
       const link2 = createLink(
-        { from, to, weight: 0.5, innovation: 1 },
+        { from, to, weight: 0.5, innovation: '1' },
         null,
         null
       )
@@ -124,7 +124,7 @@ describe('NEATLink class', () => {
 
     test('should return small positive distance for slightly different weights', () => {
       const link2 = createLink(
-        { from, to, weight: 0.6, innovation: 1 },
+        { from, to, weight: 0.6, innovation: '1' },
         null,
         null
       )
@@ -157,7 +157,7 @@ describe('NEATLink class', () => {
     })
 
     test('should return a JSON representation of the link', () => {
-      link = createLink({ from, to, weight: 0.5, innovation: 1 }, null, null)
+      link = createLink({ from, to, weight: 0.5, innovation: '1' }, null, null)
       expect(link.toJSON()).toEqual({
         factoryOptions: {
           from: link.from,
@@ -172,7 +172,7 @@ describe('NEATLink class', () => {
 
     test('should create a link from JSON data', () => {
       const data: LinkData<LinkFactoryOptions, null, null> = {
-        factoryOptions: { from, to, weight: 0.5, innovation: 1 },
+        factoryOptions: { from, to, weight: 0.5, innovation: '1' },
         config: null,
         state: null,
       }
