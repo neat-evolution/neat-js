@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "normalize tsconfig formatting",
+  "packageName": "@neat-evolution/worker-pool",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

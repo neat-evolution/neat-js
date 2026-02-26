@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "apply Biome formatting; replace RequestManager with CallManager",
+  "packageName": "@neat-evolution/worker-actions",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
