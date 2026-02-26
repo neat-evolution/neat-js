@@ -1,6 +1,6 @@
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
-import { type InitGenomeFactoryPayload } from '../actions.js'
+import type { InitGenomeFactoryPayload } from '../actions.js'
 
 import type { ThreadContext } from './ThreadContext.js'
 

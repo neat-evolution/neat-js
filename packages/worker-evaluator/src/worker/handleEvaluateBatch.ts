@@ -2,7 +2,7 @@ import type { Executor, SyncExecutor } from '@neat-evolution/executor'
 import { createRNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
-import { type EvaluateBatchPayload } from '../actions.js'
+import type { EvaluateBatchPayload } from '../actions.js'
 
 import type { ThreadContext } from './ThreadContext.js'
 
@@ -50,8 +50,14 @@ export const handleEvaluateBatch: HandleEvaluateBatchFn = async (
   // Call batch method
   let fitnessScores: number[]
   if (isAsync) {
+    if (environment.evaluateBatchAsync == null) {
+      throw new Error('evaluateBatchAsync not implemented on environment')
+    }
     fitnessScores = await environment.evaluateBatchAsync(executors, rng)
   } else {
+    if (environment.evaluateBatch == null) {
+      throw new Error('evaluateBatch not implemented on environment')
+    }
     fitnessScores = environment.evaluateBatch(executors as SyncExecutor[], rng)
   }
 

@@ -4,7 +4,10 @@ import type {
   GenomeOptions,
   InitConfig,
 } from '@neat-evolution/core'
-import { createMessage, type WorkerMessage } from '@neat-evolution/worker-actions'
+import {
+  createMessage,
+  type WorkerMessage,
+} from '@neat-evolution/worker-actions'
 
 export enum ActionType {
   INIT_EVALUATOR = 'INIT_EVALUATOR',

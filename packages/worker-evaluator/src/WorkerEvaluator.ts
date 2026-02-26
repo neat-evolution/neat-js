@@ -100,7 +100,9 @@ export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
       },
       call: this.dispatcher.call.bind(this.dispatcher),
       broadcast: this.dispatcher.broadcast.bind(this.dispatcher),
-      addMessageHandler: this.dispatcher.addMessageHandler.bind(this.dispatcher),
+      addMessageHandler: this.dispatcher.addMessageHandler.bind(
+        this.dispatcher
+      ),
       removeMessageHandler: this.dispatcher.removeMessageHandler.bind(
         this.dispatcher
       ),
