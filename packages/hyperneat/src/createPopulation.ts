@@ -7,13 +7,13 @@ import type {
   StateData,
 } from '@neat-evolution/core'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
-import {
-  type CPPNGenome,
-  type CPPNGenomeData,
-  type CPPNGenomeFactoryOptions,
-  type CPPNNodeData,
-  type CPPNNode,
-  type CPPNNodeFactoryOptions,
+import type {
+  CPPNGenome,
+  CPPNGenomeData,
+  CPPNGenomeFactoryOptions,
+  CPPNNode,
+  CPPNNodeData,
+  CPPNNodeFactoryOptions,
 } from '@neat-evolution/cppn'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import type {

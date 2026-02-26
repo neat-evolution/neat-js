@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { toPointKey, type Point } from '../src/Point.js'
+import { type Point, toPointKey } from '../src/Point.js'
 
 describe('toPointKey', () => {
   test('toPointKey 1, 2', () => {

@@ -1,6 +1,6 @@
 import { bench, describe, expect } from 'vitest'
 
-import { toPointKey, fromPointKey, type Point } from '../src/Point.js'
+import { fromPointKey, type Point, toPointKey } from '../src/Point.js'
 
 const fromPointKeySplit = (key: string): Point => {
   const [x, y] = key.split(',') as [string, string]

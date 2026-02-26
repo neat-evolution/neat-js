@@ -1,4 +1,4 @@
-import { type SubstrateAction } from './SubstrateAction.js'
+import type { SubstrateAction } from './SubstrateAction.js'
 
 export interface Substrate {
   length: number
