@@ -2,21 +2,21 @@ import { WORKER_READY } from '@neat-evolution/worker-pool'
 import type { Transferable } from '@neat-evolution/worker-threads'
 import { workerContext } from '@neat-evolution/worker-threads'
 
-import type { WorkerAction, WorkerHandlerFn, WorkerContext } from './types.js'
-import { RequestManager } from './utils/RequestManager.js'
+import type { WorkerMessage, WorkerHandlerFn, WorkerContext } from './types.js'
+import { CallManager } from './utils/CallManager.js'
 
 const DEFAULT_READY_TIMEOUT_MS = 20
 export class Handler {
   private readonly handlers = new Map<string, WorkerHandlerFn>()
   private readonly scope = workerContext
-  private readonly requestManager: RequestManager
+  private readonly callManager: CallManager
 
   private readonly verbose: boolean
   private readyTimeoutId: any
 
   constructor(options?: { verbose?: boolean; readyTimeoutMs?: number }) {
     this.verbose = options?.verbose ?? false
-    this.requestManager = new RequestManager({ verbose: this.verbose })
+    this.callManager = new CallManager({ verbose: this.verbose })
 
     this.scope.addEventListener('message', (event: any) => {
       void this.handleMessage(event.data)
@@ -50,96 +50,116 @@ export class Handler {
     this.handlers.set(type, handler)
   }
 
-  public async request<T>(
-    action: WorkerAction,
+  public async call<T>(
+    message: WorkerMessage,
     options?: { timeout?: number }
   ): Promise<T> {
-    const { actionWithId, promise } = this.requestManager.createRequest<T>(
-      action,
+    const { messageWithId, promise } = this.callManager.createCall<T>(
+      message,
       options
     )
 
-    this.postMessage(actionWithId, actionWithId.meta?.transferList)
+    this.postMessage(messageWithId, messageWithId.meta?.transferList)
 
     if (this.verbose) {
       console.log(
-        '[Handler] request: waiting for response to requestId:',
-        actionWithId.meta?.requestId
+        '[Handler] call: waiting for response to callId:',
+        messageWithId.meta?.callId
       )
     }
     const result = await promise
     if (this.verbose) {
       console.log(
-        '[Handler] request: received response for requestId:',
-        actionWithId.meta?.requestId,
+        '[Handler] call: received response for callId:',
+        messageWithId.meta?.callId,
         result
       )
     }
     return result
   }
 
-  private async handleMessage(eventOrAction: any) {
-    // Handle CompatMessageEvent format: {data: action, type: 'message'}
-    const action = eventOrAction?.data ?? eventOrAction
+  /** @deprecated Use call */
+  public async request<T>(
+    message: WorkerMessage,
+    options?: { timeout?: number }
+  ): Promise<T> {
+    return await this.call<T>(message, options)
+  }
 
-    if (action == null || typeof action.type !== 'string') return
+  private async handleMessage(incoming: any) {
+    // Handle CompatMessageEvent format: {data: message, type: 'message'}
+    const message = incoming?.data ?? incoming
+
+    if (message == null || typeof message.type !== 'string') return
 
     if (this.verbose) {
-      console.log('[Handler] handleMessage received:', action.type, action.meta)
+      console.log('[Handler] handleMessage received:', message.type, message.meta)
     }
 
-    // 1. Handle RPC Responses (Request/Response)
-    if (this.requestManager.handleResponse(action)) {
+    // 1. Handle RPC Responses (Call/Response)
+    if (this.callManager.handleResponse(message)) {
       return
     }
 
-    // 2. Handle regular actions with handlers
-    const handler = this.handlers.get(action.type)
+    // 2. Handle regular messages with handlers
+    const handler = this.handlers.get(message.type)
     if (handler == null) return
 
     try {
       const transferList: Transferable[] = []
 
       const context: WorkerContext = {
-        action,
-        dispatch: (act: WorkerAction) => {
-          this.postMessage(act, act.meta?.transferList)
+        message,
+        send: (msg: WorkerMessage) => {
+          this.postMessage(msg, msg.meta?.transferList)
         },
         transfer: (items: Transferable[]) => transferList.push(...items),
-        request: async <T = any>(
-          act: WorkerAction,
+        call: async <T = any>(
+          msg: WorkerMessage,
           options?: { timeout?: number }
         ) => {
-          return await this.request<T>(act, options)
+          return await this.call<T>(msg, options)
+        },
+
+        // Deprecated aliases
+        action: message,
+        dispatch: (msg: WorkerMessage) => {
+          this.postMessage(msg, msg.meta?.transferList)
+        },
+        request: async <T = any>(
+          msg: WorkerMessage,
+          options?: { timeout?: number }
+        ) => {
+          return await this.call<T>(msg, options)
         },
       }
 
       // Execute Handler
-      const result = await handler(action.payload, context)
+      const result = await handler(message.payload, context)
 
-      // If this was a Request, send the Response
-      if (action.meta?.requestId != null) {
-        this.reply(action.meta.requestId, result, transferList)
+      // If this was a Call, send the Response
+      if (message.meta?.callId != null) {
+        this.reply(message.meta.callId, result, transferList)
       }
     } catch (error) {
-      if (action.meta?.requestId != null) {
-        this.replyError(action.meta.requestId, error)
+      if (message.meta?.callId != null) {
+        this.replyError(message.meta.callId, error)
       } else {
-        console.error(`[Worker] Error handling ${action.type}: `, error)
+        console.error(`[Worker] Error handling ${message.type}: `, error)
       }
     }
   }
 
   private reply(
-    requestId: string,
+    callId: string,
     payload: any,
     transferList: Transferable[] = []
   ) {
-    const response: WorkerAction = {
+    const response: WorkerMessage = {
       type: 'RESPONSE',
       payload,
       meta: {
-        requestId,
+        callId,
         isResponse: true,
         transferList,
       },
@@ -147,13 +167,13 @@ export class Handler {
     this.postMessage(response, transferList)
   }
 
-  private replyError(requestId: string, error: any) {
-    const response: WorkerAction = {
+  private replyError(callId: string, error: any) {
+    const response: WorkerMessage = {
       type: 'RESPONSE_ERROR',
       payload: error instanceof Error ? error.message : error,
       error: true,
       meta: {
-        requestId,
+        callId,
         isResponse: true,
         transferList: [],
       },
