@@ -1,19 +1,19 @@
 import type { FitnessData, GenomeEntry } from '@neat-evolution/evaluator'
-import { describe, test, expect, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import type { EvaluationContext } from '../../src/EvaluationContext.js'
 import { IndividualStrategy } from '../../src/strategies/IndividualStrategy.js'
 
 describe('IndividualStrategy', () => {
   test('should call evaluateGenomeEntry for each genome', async () => {
-    const context: EvaluationContext<any> = {
+    const context = {
       evaluateGenomeEntry: vi.fn(
         async (entry: GenomeEntry<any>): Promise<FitnessData> => {
           return [entry[0], entry[1], 1.0]
         }
       ),
       evaluateGenomeEntryBatch: vi.fn(),
-    }
+    } as unknown as EvaluationContext<any>
 
     const strategy = new IndividualStrategy()
     const genomeEntries: Array<GenomeEntry<any>> = [

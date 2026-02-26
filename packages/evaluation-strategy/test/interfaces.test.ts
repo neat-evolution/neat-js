@@ -1,5 +1,5 @@
 import type { FitnessData, GenomeEntries } from '@neat-evolution/evaluator'
-import { describe, test, expectTypeOf } from 'vitest'
+import { describe, expectTypeOf, test } from 'vitest'
 
 import type { EvaluationContext, EvaluationStrategy } from '../src/index.js'
 
