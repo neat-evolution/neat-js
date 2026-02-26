@@ -1,10 +1,14 @@
-import { defaultNEATConfigOptions, type StateData } from '@neat-evolution/core'
+import {
+  type ConfigData,
+  defaultNEATConfigOptions,
+  type StateData,
+} from '@neat-evolution/core'
 import {
   defaultSpeciesOptions,
-  type SpeciesOptions,
+  Organism,
   Species,
+  type SpeciesOptions,
 } from '@neat-evolution/evolution'
-import { Organism } from '@neat-evolution/evolution'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createConfig } from '../src/createConfig.js'
@@ -59,8 +63,7 @@ describe('Species class', () => {
     test('should correctly initialize', () => {
       const options: SpeciesOptions = defaultSpeciesOptions
       const species = new Species<
-        null,
-        null,
+        ConfigData,
         StateData,
         NEATHiddenNodeData,
         NEATLinkData,
@@ -75,8 +78,7 @@ describe('Species class', () => {
   describe('Species push', () => {
     test('should add organism to species', async () => {
       const species = new Species<
-        null,
-        null,
+        ConfigData,
         StateData,
         NEATHiddenNodeData,
         NEATLinkData,
@@ -86,8 +88,7 @@ describe('Species class', () => {
       >(defaultSpeciesOptions)
       const genome = await createSeasonedGenome()
       const organism = new Organism<
-        null,
-        null,
+        ConfigData,
         StateData,
         NEATHiddenNodeData,
         NEATLinkData,
@@ -107,8 +108,7 @@ describe('Species class', () => {
         speciationThreshold: 1,
       }
       const species = new Species<
-        null,
-        null,
+        ConfigData,
         StateData,
         NEATHiddenNodeData,
         NEATLinkData,
@@ -119,8 +119,7 @@ describe('Species class', () => {
       const genome1 = await createSeasonedGenome()
       const genome2 = await createSeasonedGenome()
       const organism1 = new Organism<
-        null,
-        null,
+        ConfigData,
         StateData,
         NEATHiddenNodeData,
         NEATLinkData,
@@ -129,8 +128,7 @@ describe('Species class', () => {
         NEATGenome
       >(genome1)
       const organism2 = new Organism<
-        null,
-        null,
+        ConfigData,
         StateData,
         NEATHiddenNodeData,
         NEATLinkData,
@@ -149,8 +147,7 @@ describe('Species class', () => {
         speciationThreshold: 0,
       }
       const species = new Species<
-        null,
-        null,
+        ConfigData,
         StateData,
         NEATHiddenNodeData,
         NEATLinkData,
@@ -161,8 +158,7 @@ describe('Species class', () => {
       const genome1 = await createSeasonedGenome()
       const genome2 = await createSeasonedGenome()
       const organism1 = new Organism<
-        null,
-        null,
+        ConfigData,
         StateData,
         NEATHiddenNodeData,
         NEATLinkData,
@@ -171,8 +167,7 @@ describe('Species class', () => {
         NEATGenome
       >(genome1)
       const organism2 = new Organism<
-        null,
-        null,
+        ConfigData,
         StateData,
         NEATHiddenNodeData,
         NEATLinkData,

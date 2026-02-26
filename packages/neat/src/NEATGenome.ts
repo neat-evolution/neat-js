@@ -1,13 +1,13 @@
 import {
+  type ConfigData,
+  type ConfigFactoryOptions,
   CoreGenome,
-  NodeType,
   type InitConfig,
   type LinkFactoryOptions,
   type NodeFactoryOptions,
-  type StateData,
+  NodeType,
   nodeRefToKey,
-  type ConfigFactoryOptions,
-  type ConfigData,
+  type StateData,
 } from '@neat-evolution/core'
 
 import { createGenome } from './createGenome.js'

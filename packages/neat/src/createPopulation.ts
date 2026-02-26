@@ -8,13 +8,13 @@ import type {
 } from '@neat-evolution/core'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import type { Evaluator } from '@neat-evolution/evaluator'
-import { Population } from '@neat-evolution/evolution'
 import type {
   PopulationFactory,
   PopulationFactoryOptions,
   PopulationOptions,
   ReproducerFactory,
 } from '@neat-evolution/evolution'
+import { Population } from '@neat-evolution/evolution'
 
 import { NEATAlgorithm } from './NEATAlgorithm.js'
 import type { NEATConfig } from './NEATConfig.js'

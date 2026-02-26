@@ -1,15 +1,15 @@
 import {
   isActionEdge,
   isActionNode,
-  NodeType,
-  type Phenotype,
-  type PhenotypeAction,
-  type PhenotypeFactory,
   type NodeRefTuple,
+  NodeType,
   nodeKeyToRefTuple,
   nodeTupleToKey,
+  type Phenotype,
+  type PhenotypeAction,
+  PhenotypeActionType,
+  type PhenotypeFactory,
 } from '@neat-evolution/core'
-import { PhenotypeActionType } from '@neat-evolution/core'
 
 import type { NEATGenome } from './NEATGenome.js'
 

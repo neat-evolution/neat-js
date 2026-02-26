@@ -1,7 +1,7 @@
 import {
-  CoreConfig,
-  type ConfigFactoryOptions,
   type ConfigData,
+  type ConfigFactoryOptions,
+  CoreConfig,
 } from '@neat-evolution/core'
 
 export class NEATConfig extends CoreConfig<

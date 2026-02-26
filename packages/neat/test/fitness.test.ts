@@ -43,13 +43,12 @@ describe('Genome fitness fixtures', () => {
     environment = new DatasetEnvironment(dataset)
   })
 
-  test.each(formattedTestCases)(
-    '%s',
-    async (_name: string, a: NEATGenome, expected: number) => {
-      const phenotype = createPhenotype(a)
-      const executor = createExecutor(phenotype)
-      const fitness = await environment.evaluate(executor)
-      expect(fitness).toBe(expected)
-    }
-  )
+  test.each(
+    formattedTestCases
+  )('%s', async (_name: string, a: NEATGenome, expected: number) => {
+    const phenotype = createPhenotype(a)
+    const executor = createExecutor(phenotype)
+    const fitness = await environment.evaluate(executor)
+    expect(fitness).toBe(expected)
+  })
 })

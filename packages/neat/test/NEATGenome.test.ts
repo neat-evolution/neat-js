@@ -1,10 +1,10 @@
 import {
   defaultNEATConfigOptions,
-  NodeType,
   type InitConfig,
-  nodeTupleToKey,
-  nodeRefToKey,
   type NodeRefTuple,
+  NodeType,
+  nodeRefToKey,
+  nodeTupleToKey,
 } from '@neat-evolution/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
@@ -147,18 +147,6 @@ describe('NEATGenome class', () => {
   })
 
   describe('mutationAddLink', () => {
-    let hiddenNodes: NEATHiddenNodeData[]
-    let links: NEATLinkData[]
-    let _data: NEATGenomeData
-
-    beforeEach(() => {
-      hiddenNodes = []
-      links = []
-      _data = {
-        ...defaultData,
-        factoryOptions: { hiddenNodes, links },
-      }
-    })
     test('should add a new link with fresh genome', async () => {
       const genome = createGenome(
         configProvider,
