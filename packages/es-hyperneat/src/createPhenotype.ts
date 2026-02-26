@@ -1,19 +1,19 @@
 import {
   Connections,
   isActionEdge,
-  PhenotypeActionType,
   type PhenotypeAction,
+  PhenotypeActionType,
   type PhenotypeFactory,
 } from '@neat-evolution/core'
-import { createPhenotype as createCPPNPhenotype } from '@neat-evolution/cppn'
 import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
+import { createPhenotype as createCPPNPhenotype } from '@neat-evolution/cppn'
 import { createExecutor } from '@neat-evolution/executor'
 import {
-  parseNodes,
-  toPointKey,
-  type PointKey,
   fromPointKey,
   type Point,
+  type PointKey,
+  parseNodes,
+  toPointKey,
 } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'

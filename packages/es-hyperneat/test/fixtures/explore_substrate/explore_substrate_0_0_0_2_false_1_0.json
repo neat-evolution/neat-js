@@ -118,101 +118,47 @@
   },
   "phenotype": {
     "length": 6,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      4,
-      5
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [4, 5],
     "actions": [
       {
-        "Activation": [
-          3,
-          0.0,
-          "None"
-        ]
+        "Activation": [3, 0.0, "None"]
       },
       {
-        "Link": [
-          3,
-          5,
-          1.2604617175112294
-        ]
+        "Link": [3, 5, 1.2604617175112294]
       },
       {
-        "Activation": [
-          2,
-          0.0,
-          "None"
-        ]
+        "Activation": [2, 0.0, "None"]
       },
       {
-        "Link": [
-          2,
-          4,
-          2.0171864390666885
-        ]
+        "Link": [2, 4, 2.0171864390666885]
       },
       {
-        "Activation": [
-          0,
-          0.0,
-          "None"
-        ]
+        "Activation": [0, 0.0, "None"]
       },
       {
-        "Link": [
-          0,
-          4,
-          -0.8004587548418008
-        ]
+        "Link": [0, 4, -0.8004587548418008]
       },
       {
-        "Activation": [
-          1,
-          0.0,
-          "None"
-        ]
+        "Activation": [1, 0.0, "None"]
       },
       {
-        "Link": [
-          1,
-          5,
-          0.22171711669423955
-        ]
+        "Link": [1, 5, 0.22171711669423955]
       },
       {
-        "Link": [
-          1,
-          4,
-          0.3958147503888523
-        ]
+        "Link": [1, 4, 0.3958147503888523]
       },
       {
-        "Activation": [
-          4,
-          -0.04500579857117875,
-          "Tanh"
-        ]
+        "Activation": [4, -0.04500579857117875, "Tanh"]
       },
       {
-        "Activation": [
-          5,
-          0.1812191648645033,
-          "Gaussian"
-        ]
+        "Activation": [5, 0.1812191648645033, "Gaussian"]
       }
     ]
   },
   "depth": 2,
   "reverse": false,
   "allow_connections_to_input": false,
-  "nodes": [
-    []
-  ],
+  "nodes": [[]],
   "connections": []
 }

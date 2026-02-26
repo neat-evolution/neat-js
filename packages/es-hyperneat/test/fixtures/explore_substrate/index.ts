@@ -1,27 +1,27 @@
 import fs from 'node:fs/promises'
 
 import {
-  defaultNEATConfigOptions,
-  type PhenotypeAction,
-  PhenotypeActionType,
   type Activation,
   type Connection,
+  defaultNEATConfigOptions,
   type InitConfig,
   type Phenotype,
+  type PhenotypeAction,
+  PhenotypeActionType,
 } from '@neat-evolution/core'
 import {
-  defaultCPPNGenomeOptions,
-  type CPPNNodeData,
-  type CPPNGenomeFactoryOptions,
-  createGenome,
   type CPPNGenome,
+  type CPPNGenomeFactoryOptions,
   type CPPNGenomeOptions,
+  type CPPNNodeData,
+  createGenome,
+  defaultCPPNGenomeOptions,
 } from '@neat-evolution/cppn'
 import { createExecutor, type SyncExecutor } from '@neat-evolution/executor'
 import {
-  toPointKey,
   type Point,
   type PointKey,
+  toPointKey,
 } from '@neat-evolution/hyperneat'
 import {
   createConfig,
@@ -128,7 +128,7 @@ const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
     outputs.push([jsonNodeRefToNodeId(id), node.bias, node.activation])
   }
   for (const link of Object.values(genome.neat.links)) {
-    links.push([link.from, link.to, link.weight, link.innovation])
+    links.push([link.from, link.to, link.weight, String(link.innovation)])
   }
   return {
     hiddenNodes,

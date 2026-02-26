@@ -1,12 +1,12 @@
 import type { InitConfig } from '@neat-evolution/core'
 import {
+  CPPNGenome,
   type CPPNGenomeFactory,
   type CPPNGenomeFactoryOptions,
-  CPPNGenome,
 } from '@neat-evolution/cppn'
 import type { NEATConfig, NEATState } from '@neat-evolution/neat'
 
-import { type ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
+import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
 
 export const createGenome: CPPNGenomeFactory<ESHyperNEATGenomeOptions> = (
   configProvider: NEATConfig,
