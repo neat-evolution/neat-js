@@ -1,9 +1,9 @@
-import { describe, test, expect } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import type {
   EvaluationContext,
-  GenomeEntry,
   FitnessData,
+  GenomeEntry,
 } from '../src/index.js'
 
 describe('EvaluationContext', () => {
