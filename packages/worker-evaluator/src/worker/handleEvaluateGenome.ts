@@ -2,7 +2,7 @@ import type { Executor } from '@neat-evolution/executor'
 import { createRNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
-import { type EvaluateGenomePayload } from '../actions.js'
+import type { EvaluateGenomePayload } from '../actions.js'
 
 import type { ThreadContext } from './ThreadContext.js'
 

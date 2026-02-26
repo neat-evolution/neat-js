@@ -11,7 +11,7 @@ import { handleEvaluateBatch } from './worker/handleEvaluateBatch.js'
 import { handleEvaluateGenome } from './worker/handleEvaluateGenome.js'
 import { handleInitEvaluator } from './worker/handleInitEvaluator.js'
 import { handleInitGenomeFactory } from './worker/handleInitGenomeFactory.js'
-import { type ThreadContext } from './worker/ThreadContext.js'
+import type { ThreadContext } from './worker/ThreadContext.js'
 
 const handler = new Handler()
 const threadContext: ThreadContext & Partial<WorkerContext> = {}

@@ -1,6 +1,6 @@
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
-import { type InitPayload } from '../actions.js'
+import type { InitPayload } from '../actions.js'
 
 import type { ThreadContext } from './ThreadContext.js'
 
