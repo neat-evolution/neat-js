@@ -5,23 +5,23 @@ import type {
   LinkFactoryOptions,
   StateData,
 } from '@neat-evolution/core'
-import { createConfig, createState } from '@neat-evolution/neat'
 import type {
   NEATConfig,
   NEATLink,
   NEATLinkData,
   NEATState,
 } from '@neat-evolution/neat'
+import { createConfig, createState } from '@neat-evolution/neat'
 
-import { type CPPNGenome } from './CPPNGenome.js'
+import type { CPPNGenome } from './CPPNGenome.js'
 import type { CPPNGenomeData } from './CPPNGenomeData.js'
 import type {
   CPPNGenomeFactoryOptions,
   CPPNNodeData,
 } from './CPPNGenomeFactoryOptions.js'
 import {
-  defaultCPPNGenomeOptions,
   type CPPNGenomeOptions,
+  defaultCPPNGenomeOptions,
 } from './CPPNGenomeOptions.js'
 import type { CPPNNode } from './CPPNNode.js'
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'

@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 
 import { createPhenotype } from '../src/index.js'
 
-import { testCases, type TestCase } from './fixtures/cppn_phenotype/index.js'
+import { type TestCase, testCases } from './fixtures/cppn_phenotype/index.js'
 
 const inputs = [
   [983040, -458752, 983040, -327680],
@@ -41,39 +41,36 @@ const inputs = [
 ]
 
 describe('createPhenotype', () => {
-  test.each([...testCases.entries()])(
-    'should export the same factoryOptions for test case #%d',
-    (_index, testCase: TestCase) => {
-      const { genome, factoryOptions } = testCase
-      const result = genome.toFactoryOptions()
-      expect(result).toEqual(factoryOptions)
-    }
-  )
+  test.each([
+    ...testCases.entries(),
+  ])('should export the same factoryOptions for test case #%d', (_index, testCase: TestCase) => {
+    const { genome, factoryOptions } = testCase
+    const result = genome.toFactoryOptions()
+    expect(result).toEqual(factoryOptions)
+  })
 
-  test.each([...testCases.entries()])(
-    'should return the same outputs for test case #%d',
-    (_index, testCase: TestCase) => {
-      const { genome, phenotype } = testCase
-      const executorA = createExecutor(createPhenotype(genome))
-      const executorB = createExecutor(phenotype)
-      for (const input of inputs) {
-        const result = executorA.execute(input) as [number, number]
-        const expected = executorB.execute(input) as [number, number]
-        expect(result[0]).toBeCloseTo(expected[0], 5)
-        expect(result[1]).toBeCloseTo(expected[1], 5)
-      }
+  test.each([
+    ...testCases.entries(),
+  ])('should return the same outputs for test case #%d', (_index, testCase: TestCase) => {
+    const { genome, phenotype } = testCase
+    const executorA = createExecutor(createPhenotype(genome))
+    const executorB = createExecutor(phenotype)
+    for (const input of inputs) {
+      const result = executorA.execute(input) as [number, number]
+      const expected = executorB.execute(input) as [number, number]
+      expect(result[0]).toBeCloseTo(expected[0], 5)
+      expect(result[1]).toBeCloseTo(expected[1], 5)
     }
-  )
+  })
 
-  test.each([...testCases.entries()])(
-    'should create a phenotype for test case #%d',
-    (_index, testCase: TestCase) => {
-      const { genome, phenotype } = testCase
-      const result = createPhenotype(genome)
-      expect(result.length).toEqual(phenotype.length)
-      expect(result.inputs).toEqual(phenotype.inputs)
-      expect(result.outputs).toEqual(phenotype.outputs)
-      expect(result.actions.length).toEqual(phenotype.actions.length)
-    }
-  )
+  test.each([
+    ...testCases.entries(),
+  ])('should create a phenotype for test case #%d', (_index, testCase: TestCase) => {
+    const { genome, phenotype } = testCase
+    const result = createPhenotype(genome)
+    expect(result.length).toEqual(phenotype.length)
+    expect(result.inputs).toEqual(phenotype.inputs)
+    expect(result.outputs).toEqual(phenotype.outputs)
+    expect(result.actions.length).toEqual(phenotype.actions.length)
+  })
 })

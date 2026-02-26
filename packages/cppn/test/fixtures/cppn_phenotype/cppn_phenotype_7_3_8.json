@@ -102,72 +102,32 @@
   },
   "phenotype": {
     "length": 7,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      5,
-      6
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [5, 6],
     "actions": [
       {
-        "Activation": [
-          1,
-          0.0,
-          "None"
-        ]
+        "Activation": [1, 0.0, "None"]
       },
       {
-        "Link": [
-          1,
-          6,
-          -0.4473277284050875
-        ]
+        "Link": [1, 6, -0.4473277284050875]
       },
       {
-        "Activation": [
-          6,
-          -0.026299589993500808,
-          "Gaussian"
-        ]
+        "Activation": [6, -0.026299589993500808, "Gaussian"]
       },
       {
-        "Activation": [
-          3,
-          0.0,
-          "None"
-        ]
+        "Activation": [3, 0.0, "None"]
       },
       {
-        "Link": [
-          3,
-          4,
-          -0.09479895076489808
-        ]
+        "Link": [3, 4, -0.09479895076489808]
       },
       {
-        "Activation": [
-          4,
-          0.0,
-          "Step"
-        ]
+        "Activation": [4, 0.0, "Step"]
       },
       {
-        "Link": [
-          4,
-          5,
-          1.0051710614731109
-        ]
+        "Link": [4, 5, 1.0051710614731109]
       },
       {
-        "Activation": [
-          5,
-          0.04851521661738606,
-          "OffsetGaussian"
-        ]
+        "Activation": [5, 0.04851521661738606, "OffsetGaussian"]
       }
     ]
   }

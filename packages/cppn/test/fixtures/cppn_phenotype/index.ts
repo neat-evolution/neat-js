@@ -1,14 +1,13 @@
 import fs from 'node:fs/promises'
-
-import {
-  PhenotypeActionType,
-  defaultNEATConfigOptions,
-} from '@neat-evolution/core'
 import type {
   Activation,
   InitConfig,
   Phenotype,
   PhenotypeAction,
+} from '@neat-evolution/core'
+import {
+  defaultNEATConfigOptions,
+  PhenotypeActionType,
 } from '@neat-evolution/core'
 import {
   createConfig,
@@ -17,12 +16,12 @@ import {
 } from '@neat-evolution/neat'
 
 import {
-  createGenome,
   type CPPNGenome,
   type CPPNGenomeFactoryOptions,
   type CPPNGenomeOptions,
-  defaultCPPNGenomeOptions,
   type CPPNNodeData,
+  createGenome,
+  defaultCPPNGenomeOptions,
 } from '../../../src/index.js'
 
 async function readJSONFile(
@@ -110,7 +109,7 @@ const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
     outputs.push([jsonNodeRefToNodeId(id), node.bias, node.activation])
   }
   for (const link of Object.values(genome.neat.links)) {
-    links.push([link.from, link.to, link.weight, link.innovation])
+    links.push([link.from, link.to, link.weight, String(link.innovation)])
   }
   return {
     hiddenNodes,

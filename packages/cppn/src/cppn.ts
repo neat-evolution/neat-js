@@ -8,8 +8,8 @@ import { evolve } from '@neat-evolution/evolution'
 
 import type { CPPNGenomeOptions } from './CPPNGenomeOptions.js'
 import {
-  createPopulation,
   type CPPNReproducerFactory,
+  createPopulation,
 } from './createPopulation.js'
 
 export const cppn = async (

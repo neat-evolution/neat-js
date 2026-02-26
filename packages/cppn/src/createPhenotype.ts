@@ -1,13 +1,13 @@
 import {
-  isActionNode,
-  NodeType,
-  type PhenotypeAction,
-  type PhenotypeFactory,
   isActionEdge,
-  PhenotypeActionType,
+  isActionNode,
   type NodeKey,
-  toNodeKey,
+  NodeType,
   nodeKeyToType,
+  type PhenotypeAction,
+  PhenotypeActionType,
+  type PhenotypeFactory,
+  toNodeKey,
 } from '@neat-evolution/core'
 
 import type { CPPNGenome } from './CPPNGenome.js'

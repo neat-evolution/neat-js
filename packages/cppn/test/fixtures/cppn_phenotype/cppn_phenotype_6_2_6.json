@@ -82,58 +82,26 @@
   },
   "phenotype": {
     "length": 6,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      4,
-      5
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [4, 5],
     "actions": [
       {
-        "Activation": [
-          0,
-          0.0,
-          "None"
-        ]
+        "Activation": [0, 0.0, "None"]
       },
       {
-        "Link": [
-          0,
-          5,
-          -0.22109381939783967
-        ]
+        "Link": [0, 5, -0.22109381939783967]
       },
       {
-        "Activation": [
-          5,
-          0.0,
-          "Tanh"
-        ]
+        "Activation": [5, 0.0, "Tanh"]
       },
       {
-        "Activation": [
-          3,
-          0.0,
-          "None"
-        ]
+        "Activation": [3, 0.0, "None"]
       },
       {
-        "Link": [
-          3,
-          4,
-          -0.5971712439187029
-        ]
+        "Link": [3, 4, -0.5971712439187029]
       },
       {
-        "Activation": [
-          4,
-          0.017351466338308984,
-          "Sine"
-        ]
+        "Activation": [4, 0.017351466338308984, "Sine"]
       }
     ]
   }

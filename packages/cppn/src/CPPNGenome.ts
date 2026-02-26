@@ -1,15 +1,15 @@
 import {
-  NodeType,
   type Activation,
-  CoreGenome,
-  type NodeKey,
-  nodeKeyToType,
-  type InitConfig,
-  type StateData,
-  type LinkFactoryOptions,
-  nodeRefToKey,
-  type ConfigFactoryOptions,
   type ConfigData,
+  type ConfigFactoryOptions,
+  CoreGenome,
+  type InitConfig,
+  type LinkFactoryOptions,
+  type NodeKey,
+  NodeType,
+  nodeKeyToType,
+  nodeRefToKey,
+  type StateData,
 } from '@neat-evolution/core'
 import {
   createLink,
@@ -28,7 +28,7 @@ import type {
 import type { CPPNGenomeOptions } from './CPPNGenomeOptions.js'
 import type { CPPNNode } from './CPPNNode.js'
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
-import { type CPPNGenomeFactory } from './createGenome.js'
+import type { CPPNGenomeFactory } from './createGenome.js'
 import { createNodeFactory } from './createNode.js'
 
 export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<

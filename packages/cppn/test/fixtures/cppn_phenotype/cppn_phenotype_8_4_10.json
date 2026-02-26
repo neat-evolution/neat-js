@@ -121,86 +121,38 @@
   },
   "phenotype": {
     "length": 8,
-    "inputs": [
-      0,
-      1,
-      2,
-      3
-    ],
-    "outputs": [
-      6,
-      7
-    ],
+    "inputs": [0, 1, 2, 3],
+    "outputs": [6, 7],
     "actions": [
       {
-        "Activation": [
-          3,
-          0.0,
-          "None"
-        ]
+        "Activation": [3, 0.0, "None"]
       },
       {
-        "Link": [
-          3,
-          4,
-          -7.5
-        ]
+        "Link": [3, 4, -7.5]
       },
       {
-        "Activation": [
-          4,
-          -0.004036467874668876,
-          "HardTanh"
-        ]
+        "Activation": [4, -0.004036467874668876, "HardTanh"]
       },
       {
-        "Link": [
-          4,
-          6,
-          7.323519910646851
-        ]
+        "Link": [4, 6, 7.323519910646851]
       },
       {
-        "Activation": [
-          6,
-          -0.01229921454238181,
-          "Gaussian"
-        ]
+        "Activation": [6, -0.01229921454238181, "Gaussian"]
       },
       {
-        "Activation": [
-          2,
-          0.0,
-          "None"
-        ]
+        "Activation": [2, 0.0, "None"]
       },
       {
-        "Link": [
-          2,
-          5,
-          -7.206413832643629
-        ]
+        "Link": [2, 5, -7.206413832643629]
       },
       {
-        "Activation": [
-          0,
-          0.0,
-          "None"
-        ]
+        "Activation": [0, 0.0, "None"]
       },
       {
-        "Link": [
-          0,
-          5,
-          8.010945541376927
-        ]
+        "Link": [0, 5, 8.010945541376927]
       },
       {
-        "Activation": [
-          5,
-          0.017443557711990007,
-          "Square"
-        ]
+        "Activation": [5, 0.017443557711990007, "Square"]
       }
     ]
   }
