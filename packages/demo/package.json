@@ -44,10 +44,10 @@
     "format": "biome check --write",
     "lint": "biome lint",
     "precommit": "lint-staged",
-    "test": "vitest --run",
-    "bench": "vitest bench --run",
-    "profile": "node --prof ./scripts/profile.js && node --prof-process --preprocess -j isolate-*.log > profile.json && rm isolate-*.log && node ./scripts/analyze-profile.js",
-    "profile:worker": "node --prof ./dist/esm/worker.js && node --prof-process --preprocess -j isolate-*.log > profile-worker.json && rm isolate-*.log && node ./scripts/analyze-profile.js profile-worker.json",
+    "test": "node ./scripts/iris.js && vitest --run",
+    "bench": "node ./scripts/iris.js && vitest bench --run",
+    "profile": "node ./scripts/iris.js && node --prof ./scripts/profile.js && node --prof-process --preprocess -j isolate-*.log > profile.json && rm isolate-*.log && node ./scripts/analyze-profile.js",
+    "profile:worker": "node ./scripts/iris.js && node --prof ./dist/esm/worker.js && node --prof-process --preprocess -j isolate-*.log > profile-worker.json && rm isolate-*.log && node ./scripts/analyze-profile.js profile-worker.json",
     "check": "tsgo --noEmit"
   },
   "dependencies": {
