@@ -2,16 +2,13 @@ import type {
   ConfigData,
   GenomeOptions,
   InitConfig,
+  FitnessData,
+  GenomeEntries,
+  GenomeEntry,
 } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
 
-import type { GenomeEntries, GenomeEntry } from './GenomeEntries.js'
-
-export type FitnessData = [
-  speciesIndex: number,
-  organismIndex: number,
-  fitness: number,
-]
+export type { FitnessData }
 
 export interface EvaluationContext {
   evaluateSingle: (entry: GenomeEntry<any>) => Promise<FitnessData>

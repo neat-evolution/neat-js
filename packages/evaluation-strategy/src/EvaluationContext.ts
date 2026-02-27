@@ -2,7 +2,7 @@ import type {
   AnyGenome,
   FitnessData,
   GenomeEntry,
-} from '@neat-evolution/evaluator'
+} from '@neat-evolution/core'
 import type { DispatcherContext } from '@neat-evolution/worker-actions'
 
 export interface EvaluationContext<G extends AnyGenome<G>>

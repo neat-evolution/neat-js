@@ -35,8 +35,8 @@
     "check": "tsgo --noEmit"
   },
   "dependencies": {
+    "@neat-evolution/core": "workspace:^",
     "@neat-evolution/environment": "workspace:^",
-    "@neat-evolution/evaluator": "workspace:^",
     "@neat-evolution/executor": "workspace:^",
     "@neat-evolution/worker-actions": "workspace:^",
     "@neat-evolution/worker-threads": "workspace:^",

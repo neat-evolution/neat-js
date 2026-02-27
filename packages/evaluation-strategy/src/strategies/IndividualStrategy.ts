@@ -2,7 +2,7 @@ import type {
   AnyGenome,
   FitnessData,
   GenomeEntries,
-} from '@neat-evolution/evaluator'
+} from '@neat-evolution/core'
 
 import type { EvaluationContext } from '../EvaluationContext.js'
 import type { EvaluationStrategy } from '../EvaluationStrategy.js'
