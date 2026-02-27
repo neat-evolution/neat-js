@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "optimize NEATGenome initialization and serialization",
+  "packageName": "@neat-evolution/neat",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

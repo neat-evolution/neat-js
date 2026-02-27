@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "refactor Evaluator API for better performance and type safety",
+  "packageName": "@neat-evolution/evaluator",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

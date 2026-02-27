@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "optimize phenotype execution using Float64Array and cached activation functions",
+  "packageName": "@neat-evolution/executor",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "optimize QuadPoint with object pooling and refactor findConnections for performance",
+  "packageName": "@neat-evolution/es-hyperneat",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

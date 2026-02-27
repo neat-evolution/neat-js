@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "optimize CoreGenome distance and crossover logic; implement static object pooling for Connections and incremental cache updates",
+  "packageName": "@neat-evolution/core",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
