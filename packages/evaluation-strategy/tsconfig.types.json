@@ -3,7 +3,8 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "noEmit": false,
-    "rootDir": "src"
+    "rootDir": "src",
+    "outDir": "dist/types"
   },
   "extends": "./tsconfig.json",
   "include": ["src"]

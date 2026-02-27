@@ -2,6 +2,7 @@ import type { Environment } from '@neat-evolution/environment'
 import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
 import type { AnyAlgorithm, EvaluatorFactory } from '@neat-evolution/evaluator'
 import type { ReproducerFactory } from '@neat-evolution/evolution'
+import { createExecutor } from '@neat-evolution/executor'
 import {
   createEvaluator as createWorkerEvaluator,
   type WorkerEvaluator,
@@ -47,7 +48,7 @@ const createEvaluator: EvaluatorFactory<any, any> = (
   return evaluator
 }
 try {
-  await demo(createReproducer, createEvaluator)
+  await demo(createReproducer, createEvaluator, createExecutor)
 } catch (e) {
   console.error(e)
 }

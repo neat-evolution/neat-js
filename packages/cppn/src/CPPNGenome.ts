@@ -8,8 +8,8 @@ import {
   type NodeKey,
   NodeType,
   nodeKeyToType,
-  nodeRefToKey,
   type StateData,
+  toNodeKey,
 } from '@neat-evolution/core'
 import {
   createLink,
@@ -75,55 +75,71 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
     )
   }
 
+  protected override hydrate(factoryOptions: CPPNGenomeFactoryOptions): void {
+    const hiddenNodesData = factoryOptions.hiddenNodes
+    for (let i = 0; i < hiddenNodesData.length; i++) {
+      const [id, bias, activation] = hiddenNodesData[i]!
+      const node = this.createNode(
+        { type: NodeType.Hidden, id, bias, activation },
+        this.config.node(),
+        this.state.node()
+      )
+      this.hiddenNodes.set(toNodeKey(NodeType.Hidden, id), node)
+    }
+
+    const outputNodesData = factoryOptions.outputs
+    for (let i = 0; i < outputNodesData.length; i++) {
+      const [id, bias, activation] = outputNodesData[i]!
+      const node = this.createNode(
+        { type: NodeType.Output, id, bias, activation },
+        this.config.node(),
+        this.state.node()
+      )
+      this.outputs.set(toNodeKey(NodeType.Output, id), node)
+    }
+
+    const linksData = factoryOptions.links
+    for (let i = 0; i < linksData.length; i++) {
+      const [fromKey, toKey, weight, innovation] = linksData[i]!
+      const linkFactoryOptions: LinkFactoryOptions = {
+        from: fromKey,
+        to: toKey,
+        weight,
+        innovation,
+      }
+      const link = this.createLink(
+        linkFactoryOptions,
+        this.config.link(),
+        this.state.link()
+      )
+      this.insertLink(link, true)
+    }
+  }
+
   protected override init(factoryOptions?: CPPNGenomeFactoryOptions): void {
-    for (let i = 0; i < this.initConfig.inputs; i++) {
+    // Only create inputs if we are not resetting (or if reset just cleared them)
+    // Actually, init() is called from constructor, so we always create inputs once.
+    const inputsCount = this.initConfig.inputs
+    for (let i = 0; i < inputsCount; i++) {
       const node = this.createNode(
         { type: NodeType.Input, id: i },
         this.config.node(),
         this.state.node()
       )
-      this.inputs.set(nodeRefToKey(node), node)
+      this.inputs.set(toNodeKey(NodeType.Input, i), node)
     }
 
     if (factoryOptions != null) {
-      for (const [id, bias, activation] of factoryOptions.hiddenNodes) {
-        const node = this.createNode(
-          { type: NodeType.Hidden, id, bias, activation },
-          this.config.node(),
-          this.state.node()
-        )
-        this.hiddenNodes.set(nodeRefToKey(node), node)
-      }
-      for (const [id, bias, activation] of factoryOptions.outputs) {
-        const node = this.createNode(
-          { type: NodeType.Output, id, bias, activation },
-          this.config.node(),
-          this.state.node()
-        )
-        this.outputs.set(nodeRefToKey(node), node)
-      }
-      for (const [fromKey, toKey, weight, innovation] of factoryOptions.links) {
-        const linkFactoryOptions: LinkFactoryOptions = {
-          from: fromKey,
-          to: toKey,
-          weight,
-          innovation,
-        }
-        const link = this.createLink(
-          linkFactoryOptions,
-          this.config.link(),
-          this.state.link()
-        )
-        this.insertLink(link, true)
-      }
+      this.hydrate(factoryOptions)
     } else {
-      for (let i = 0; i < this.initConfig.outputs; i++) {
+      const outputsCount = this.initConfig.outputs
+      for (let i = 0; i < outputsCount; i++) {
         const node = this.createNode(
           { type: NodeType.Output, id: i },
           this.config.node(),
           this.state.node()
         )
-        this.outputs.set(nodeRefToKey(node), node)
+        this.outputs.set(toNodeKey(NodeType.Output, i), node)
       }
     }
   }
@@ -262,18 +278,21 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
   }
 
   override toFactoryOptions(): CPPNGenomeFactoryOptions {
-    const hiddenNodes: CPPNNodeData[] = []
-    const outputs: CPPNNodeData[] = []
-    const links: NEATLinkData[] = []
+    const hiddenNodes: CPPNNodeData[] = new Array(this.hiddenNodes.size)
+    const outputs: CPPNNodeData[] = new Array(this.outputs.size)
+    const links: NEATLinkData[] = new Array(this.links.size)
 
+    let i = 0
     for (const node of this.hiddenNodes.values()) {
-      hiddenNodes.push([node.id, node.bias, node.activation])
+      hiddenNodes[i++] = [node.id, node.bias, node.activation]
     }
+    i = 0
     for (const node of this.outputs.values()) {
-      outputs.push([node.id, node.bias, node.activation])
+      outputs[i++] = [node.id, node.bias, node.activation]
     }
+    i = 0
     for (const link of this.links.values()) {
-      links.push([link.from, link.to, link.weight, link.innovation])
+      links[i++] = [link.from, link.to, link.weight, link.innovation]
     }
 
     return {

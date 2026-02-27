@@ -43,6 +43,10 @@ export const isActionNode = <N extends NodeKey, E extends Edge>(
 }
 
 export class Connections<N extends NodeKey, E extends Edge> {
+  // Static pools for hot paths
+  private static visitedPool = new Set<string>()
+  private static queuePool: any[] = []
+
   private readonly connectionMap: Map<N, ConnectionInfo<N, E>>
 
   private readonly nodeKeyCache = new Set<NodeKey>()
@@ -69,6 +73,12 @@ export class Connections<N extends NodeKey, E extends Edge> {
     for (const [source, target] of this.connections()) {
       this.linkKeyCache.add(toLinkKey(source, target))
     }
+  }
+
+  clear() {
+    this.connectionMap.clear()
+    this.nodeKeyCache.clear()
+    this.linkKeyCache.clear()
   }
 
   add(from: N, to: N, edge: E, isSafe?: boolean): void {
@@ -177,6 +187,18 @@ export class Connections<N extends NodeKey, E extends Edge> {
     return this.nodeKeyCache.has(node)
   }
 
+  hasInbound(node: N): boolean {
+    for (const info of this.connectionMap.values()) {
+      const targets = info.targets
+      for (let i = 0; i < targets.length; i++) {
+        if (targets[i]!.node === node) {
+          return true
+        }
+      }
+    }
+    return false
+  }
+
   delete(from: N, to: N): E {
     const info = this.connectionMap.get(from)
     if (info == null) {
@@ -188,17 +210,14 @@ export class Connections<N extends NodeKey, E extends Edge> {
       throw new Error('cannot remove non-existent connection')
     }
 
+    let removedEdge: E
     if (targets.length === 1) {
       const target = targets[0] as Target<N, E>
       if (target.node !== to) {
         throw new Error('cannot remove non-existent connection')
       }
-      const edge = target.edge
+      removedEdge = target.edge
       this.connectionMap.delete(from)
-
-      this.rebuildNodeKeyCache()
-      this.rebuildLinkKeyCache()
-      return edge
     } else {
       let index = -1
       for (let i = 0; i < targets.length; i++) {
@@ -216,13 +235,23 @@ export class Connections<N extends NodeKey, E extends Edge> {
       // swap_remove equivalent
       const lastIdx = targets.length - 1
       const removed = targets[index] as Target<N, E>
+      removedEdge = removed.edge
       targets[index] = targets[lastIdx] as Target<N, E>
-      targets.pop() as Target<N, E>
-
-      this.rebuildNodeKeyCache()
-      this.rebuildLinkKeyCache()
-      return removed.edge
+      targets.pop()
     }
+
+    // Incremental cache update
+    this.linkKeyCache.delete(toLinkKey(from, to))
+    
+    // Check if nodes should be removed from cache
+    if (!this.connectionMap.has(from) && !this.hasInbound(from)) {
+      this.nodeKeyCache.delete(from)
+    }
+    if (!this.connectionMap.has(to) && !this.hasInbound(to)) {
+      this.nodeKeyCache.delete(to)
+    }
+    
+    return removedEdge
   }
 
   deleteNode(node: N): Array<Connection<N, E>> {
@@ -232,6 +261,7 @@ export class Connections<N extends NodeKey, E extends Edge> {
       const targets = this.getTargets(node)
       for (const target of targets) {
         removedConnections.push([node, target.node, target.edge])
+        this.linkKeyCache.delete(toLinkKey(node, target.node))
       }
       this.connectionMap.delete(node)
     }
@@ -244,6 +274,7 @@ export class Connections<N extends NodeKey, E extends Edge> {
       if (index !== -1) {
         const [target] = targets.splice(index, 1) as [target: Target<N, E>]
         removedConnections.push([source, node, target.edge])
+        this.linkKeyCache.delete(toLinkKey(source, node))
         if (targets.length === 0) {
           deleteKeys.push(source)
         }
@@ -254,8 +285,12 @@ export class Connections<N extends NodeKey, E extends Edge> {
       this.connectionMap.delete(sourceKey)
     }
 
+    // Incremental node cache update
+    this.nodeKeyCache.delete(node)
+    
+    // After significant changes like deleteNode, it's safer to rebuild the cache
     this.rebuildNodeKeyCache()
-    this.rebuildLinkKeyCache()
+    
     return removedConnections
   }
 
@@ -263,29 +298,47 @@ export class Connections<N extends NodeKey, E extends Edge> {
   ///
   /// If 'from' is reachable from 'to', then addition will cause cycle
   createsCycle(from: N, to: N): boolean {
-    const visited = new Set<string>([to])
-    const queue: N[] = [to]
+    const visited = Connections.visitedPool
+    const queue = Connections.queuePool
+    
+    visited.clear()
+    queue.length = 0
+    
+    visited.add(to)
+    queue.push(to)
     let front = 0
 
+    let found = false
     while (front < queue.length) {
       const source = queue[front] as N
       front++
 
       if (source === from) {
-        return true
+        found = true
+        break
       }
 
-      for (const { node: target } of this.getTargets(source)) {
-        if (!visited.has(target)) {
-          visited.add(target)
-          queue.push(target)
+      const info = this.connectionMap.get(source)
+      if (info !== undefined) {
+        const targets = info.targets
+        for (let i = 0; i < targets.length; i++) {
+          const target = targets[i]!.node
+          if (!visited.has(target)) {
+            visited.add(target)
+            queue.push(target)
+          }
         }
       }
     }
-    return false
+    
+    // Clear pool for next use
+    visited.clear()
+    queue.length = 0
+    
+    return found
   }
 
-  *sortTopologically(): Generator<Action<N, E>, void, undefined> {
+  sortTopologically(): Array<Action<N, E>> {
     // Store number of incoming connections for all nodes
     const backwardCount = new Map<NodeKey, number>()
 
@@ -298,35 +351,37 @@ export class Connections<N extends NodeKey, E extends Edge> {
 
     // Initialize stack with nodes that have no incoming connections
     const stack: N[] = []
-    for (const nodeKey of this.connectionMap.keys()) {
+    for (const nodeKey of this.nodeKeyCache) {
       if ((backwardCount.get(nodeKey) ?? 0) === 0) {
-        const node = this.connectionMap.get(nodeKey)?.node
-        if (node == null) {
-          throw new Error('cannot find node')
-        }
-        stack.push(node)
+        stack.push(nodeKey as N)
       }
     }
 
+    const result: Array<Action<N, E>> = []
     // Create topological order
     while (stack.length > 0) {
       const node = stack.pop() as N
-      yield [node]
+      result.push([node])
 
-      // Process all outgoing connections from the current node
-      for (const target of this.getTargets(node)) {
-        yield [node, target.node, target.edge]
+      const info = this.connectionMap.get(node)
+      if (info !== undefined) {
+        const targets = info.targets
+        for (let i = 0; i < targets.length; i++) {
+          const target = targets[i]!
+          result.push([node, target.node, target.edge])
 
-        // Reduce backward count by 1
-        const count = backwardCount.get(target.node) as number
-        backwardCount.set(target.node, count - 1)
+          // Reduce backward count by 1
+          const count = (backwardCount.get(target.node) ?? 0) - 1
+          backwardCount.set(target.node, count)
 
-        // Add nodes with no incoming connections to the stack
-        if (backwardCount.get(target.node) === 0) {
-          stack.push(target.node)
+          // Add nodes with no incoming connections to the stack
+          if (count === 0) {
+            stack.push(target.node)
+          }
         }
       }
     }
+    return result
   }
 
   prune(inputs: Set<N>, outputs: Set<N>, collect: boolean): Set<N> {
@@ -357,9 +412,11 @@ export class Connections<N extends NodeKey, E extends Edge> {
     let done = false
     while (!done) {
       const danglingInputs: N[] = []
-      for (const node of this.connectionMap.keys()) {
-        if (!inputs.has(node) && (backwardCount.get(node) ?? 0) === 0) {
-          danglingInputs.push(node)
+      for (const node of this.nodeKeyCache) {
+        if (!inputs.has(node as N) && (backwardCount.get(node) ?? 0) === 0) {
+          if (this.connectionMap.has(node as N)) {
+             danglingInputs.push(node as N)
+          }
         }
       }
       if (danglingInputs.length === 0) {
@@ -369,13 +426,15 @@ export class Connections<N extends NodeKey, E extends Edge> {
         const targets = this.connectionMap.get(node)?.targets
         backwardCount.delete(node)
         this.connectionMap.delete(node)
-        if (targets === undefined) {
-          throw new Error('cannot find targets')
-        }
-        for (const target of targets) {
-          const count = backwardCount.get(target.node)
-          if (count !== undefined) {
-            backwardCount.set(target.node, count - 1)
+        this.nodeKeyCache.delete(node) 
+        
+        if (targets !== undefined) {
+          for (const target of targets) {
+            const count = backwardCount.get(target.node)
+            if (count !== undefined) {
+              backwardCount.set(target.node, count - 1)
+              this.linkKeyCache.delete(toLinkKey(node, target.node)) 
+            }
           }
         }
       }
@@ -402,41 +461,36 @@ export class Connections<N extends NodeKey, E extends Edge> {
 
     let done = false
     while (!done) {
-      let deletedNode = false
-
-      for (const source of this.connectionMap.keys()) {
-        const targets = this.connectionMap.get(source)?.targets ?? []
-        let allTargetsToDelete = true
-        const deleteIndexes: number[] = []
-
-        for (let i = 0; i < targets.length; i++) {
-          const node = (targets[i] as Target<N, E>).node
-          if (!outputs.has(node) && !this.connectionMap.has(node)) {
-            deleteIndexes.push(i)
-            if (collect) {
-              pruned.add(node)
-            }
-          } else {
-            allTargetsToDelete = false
-          }
-        }
-
-        if (deleteIndexes.length > 0) {
-          deletedNode = true
-
-          if (allTargetsToDelete) {
-            this.connectionMap.delete(source)
-          } else {
-            // Remove targets from end to start to prevent index shifting
-            for (let i = deleteIndexes.length - 1; i >= 0; i--) {
-              targets.splice(deleteIndexes[i] as number, 1)
-            }
+      const danglingOutputs: N[] = []
+      
+      for (const nodeKey of this.nodeKeyCache) {
+        const node = nodeKey as N
+        if (!outputs.has(node) && !this.connectionMap.has(node)) {
+          if (this.hasInbound(node)) {
+            danglingOutputs.push(node)
           }
         }
       }
 
-      if (!deletedNode) {
+      if (danglingOutputs.length === 0) {
         done = true
+      }
+
+      for (const node of danglingOutputs) {
+        if (collect) {
+          pruned.add(node)
+        }
+        for (const [source, info] of this.connectionMap.entries()) {
+          const index = info.targets.findIndex(t => t.node === node)
+          if (index !== -1) {
+            info.targets.splice(index, 1)
+            this.linkKeyCache.delete(toLinkKey(source, node))
+            if (info.targets.length === 0) {
+              this.connectionMap.delete(source)
+            }
+          }
+        }
+        this.nodeKeyCache.delete(node)
       }
     }
 

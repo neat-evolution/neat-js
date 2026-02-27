@@ -11,14 +11,17 @@ function isWeightNumber(value: WeightFn | number): value is number {
 }
 
 export class QuadPoint {
-  public readonly x: number
-  public readonly y: number
-  public readonly width: number
-  public readonly weight: number
-  public readonly depth: number
+  private static pool: QuadPoint[] = []
+  private static weightsPool: number[] = []
+
+  public x: number
+  public y: number
+  public width: number
+  public weight: number
+  public depth: number
   public variance: number
   public children: null | QuadPoint[]
-  public readonly options: ESHyperNEATGenomeOptions
+  public options: ESHyperNEATGenomeOptions
 
   constructor(
     x: number,
@@ -31,11 +34,45 @@ export class QuadPoint {
     this.x = x
     this.y = y
     this.width = width
-    this.weight = isWeightNumber(weightFn) ? weightFn : weightFn(x, y)
     this.depth = depth
+    this.options = options
+    this.weight = isWeightNumber(weightFn) ? weightFn : weightFn(x, y)
     this.variance = 0.0
     this.children = null
-    this.options = options
+  }
+
+  public static acquire(
+    x: number,
+    y: number,
+    width: number,
+    depth: number,
+    weightFn: WeightFn | number,
+    options: ESHyperNEATGenomeOptions
+  ): QuadPoint {
+    const point = this.pool.pop()
+    if (point) {
+      point.x = x
+      point.y = y
+      point.width = width
+      point.depth = depth
+      point.options = options
+      point.weight = isWeightNumber(weightFn) ? weightFn : weightFn(x, y)
+      point.variance = 0.0
+      point.children = null
+      return point
+    }
+    return new QuadPoint(x, y, width, depth, weightFn, options)
+  }
+
+  public static release(point: QuadPoint): void {
+    if (point.children) {
+      for (let i = 0; i < point.children.length; i++) {
+        const child = point.children[i]
+        if (child) this.release(child)
+      }
+    }
+    point.children = null
+    this.pool.push(point)
   }
 
   /// Collect weight of all nodes in tree. If root is true, collect the root's weight. If
@@ -49,8 +86,11 @@ export class QuadPoint {
       weights.push(this.weight)
     }
     if (this.children !== null) {
-      for (const child of this.children.values()) {
-        child.collectLeafWeights(weights, internal, internal)
+      for (let i = 0; i < 4; i++) {
+        const child = this.children[i]
+        if (child !== undefined) {
+          child.collectLeafWeights(weights, internal, internal)
+        }
       }
     }
   }
@@ -60,7 +100,8 @@ export class QuadPoint {
       return 0.0
     }
 
-    const weights: number[] = []
+    const weights = QuadPoint.weightsPool
+    weights.length = 0
     this.collectLeafWeights(weights, root, branch)
 
     const len = weights.length
@@ -80,12 +121,13 @@ export class QuadPoint {
       // mean weight
       let sum = 0
       for (let i = 0; i < len; i++) {
-        sum += weights[i] as number
+        sum += weights[i]!
       }
       centroid = sum / len
     }
 
-    for (const weight of weights) {
+    for (let i = 0; i < len; i++) {
+      const weight = weights[i]!
       const square = ((centroid - weight) / dw) ** 2
       sumSquares += square
       if (square > maxSquare) {
@@ -95,6 +137,9 @@ export class QuadPoint {
 
     this.variance = this.options.maxVariance ? maxSquare : sumSquares / len
 
+    // Clear pool for next use
+    weights.length = 0
+    
     return this.variance
   }
 
@@ -103,64 +148,64 @@ export class QuadPoint {
     const width = this.width / 2.0
     const depth = this.depth + 1
 
-    const child = (x: number, y: number) =>
-      new QuadPoint(this.x + x, this.y + y, width, depth, f, this.options)
-
     this.children = [
-      child(-width, -width),
-      child(-width, width),
-      child(width, width),
-      child(width, -width),
+      QuadPoint.acquire(this.x - width, this.y - width, width, depth, f, this.options),
+      QuadPoint.acquire(this.x - width, this.y + width, width, depth, f, this.options),
+      QuadPoint.acquire(this.x + width, this.y + width, width, depth, f, this.options),
+      QuadPoint.acquire(this.x + width, this.y - width, width, depth, f, this.options),
     ]
 
-    let minWeight = Infinity
-    let maxWeight = -Infinity
+    const child0 = this.children[0]!
+    let minWeight = child0.weight
+    let maxWeight = child0.weight
 
-    for (const child of this.children) {
-      if (child.weight < minWeight) {
-        minWeight = child.weight
-      }
-      if (child.weight > maxWeight) {
-        maxWeight = child.weight
+    for (let i = 1; i < 4; i++) {
+      const child = this.children[i]
+      if (child !== undefined) {
+        const w = child.weight
+        if (w < minWeight) minWeight = w
+        if (w > maxWeight) maxWeight = w
       }
     }
 
     return [minWeight, maxWeight]
   }
 
-  /// Yields all children if this parent (self) should be expanded
-  *expand(deltaWeight: number): Iterable<QuadPoint> {
+  /// Returns an iterable of children if this parent (self) should be expanded
+  expand(deltaWeight: number): QuadPoint[] | null {
     const expand =
       this.depth + 1 < this.options.initialResolution ||
       (this.depth + 1 < this.options.maxResolution &&
         this.calcVariance(deltaWeight, true, true) >
           this.options.divisionThreshold)
 
-    if (expand && this.children !== null && this.children.length > 0) {
-      for (let i = 0; i < Math.min(this.children.length, 4); i++) {
-        yield this.children[i] as QuadPoint
-      }
+    if (expand && this.children !== null) {
+      return this.children
     }
+    return null
   }
 
-  /// Yields children with high variance. Pushes children with low
-  /// variance to connections, if their band value is above band threshold.
-  *extract(
+  /// Extracts children with high variance.
+  extract(
     f: WeightFn,
     connections: Array<Target<PointKey, number>>,
     deltaWeight: number
-  ): Iterable<QuadPoint> {
-    const width = this.width
-
+  ): QuadPoint[] {
+    const childrenToExpand: QuadPoint[] = []
     if (this.children === null) {
-      return
+      return childrenToExpand
     }
-    for (const child of this.children) {
+
+    const width = this.width
+    for (let i = 0; i < 4; i++) {
+      const child = this.children[i]
+      if (child === undefined) continue
+
       if (
         child.calcVariance(deltaWeight, false, true) <=
         this.options.varianceThreshold
       ) {
-        let bandValue: number
+        let bandValue = 0.0
         if (this.options.bandThreshold > 0.0) {
           const leftMinus = f(child.x - width, child.y)
           const rightMinus = f(child.x + width, child.y)
@@ -172,9 +217,8 @@ export class QuadPoint {
           const dUp = Math.abs(child.weight - upMinus)
           const dDown = Math.abs(child.weight - downMinus)
           bandValue = Math.max(Math.min(dUp, dDown), Math.min(dLeft, dRight))
-        } else {
-          bandValue = 0.0
         }
+        
         if (bandValue >= this.options.bandThreshold) {
           connections.push({
             node: toPointKey([child.x, child.y]),
@@ -184,8 +228,9 @@ export class QuadPoint {
       }
       // Use stored variance
       if (child.variance > this.options.varianceThreshold) {
-        yield child
+        childrenToExpand.push(child)
       }
     }
+    return childrenToExpand
   }
 }

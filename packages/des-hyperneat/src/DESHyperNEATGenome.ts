@@ -158,8 +158,10 @@ export class DESHyperNEATGenome extends CoreGenome<
     await super.mutate()
     const rng = threadRNG()
 
-    const nodeMutProb = 3.0 / this.hiddenNodes.size
-    const linkMutProb = 3.0 / this.links.size
+    const nodeMutProb =
+      3.0 /
+      Math.max(1, this.hiddenNodes.size + this.inputs.size + this.outputs.size)
+    const linkMutProb = 3.0 / Math.max(1, this.links.size)
 
     for (const nodeMap of [this.hiddenNodes, this.inputs, this.outputs]) {
       for (const node of nodeMap.values()) {
@@ -178,30 +180,35 @@ export class DESHyperNEATGenome extends CoreGenome<
     if (rng.gen() < this.genomeOptions.mutateNodeDepthProbability) {
       const totalSize =
         this.inputs.size + this.hiddenNodes.size + this.outputs.size
-      const randomIndex = rng.genRange(0, totalSize)
+      if (totalSize > 0) {
+        const randomIndex = rng.genRange(0, totalSize)
 
-      let i = 0
-      let map: Map<NodeKey, DESHyperNEATNode>
-      let limit: number
+        let i = 0
+        let map: Map<NodeKey, DESHyperNEATNode> | undefined
+        let limit: number = 0
 
-      if (randomIndex < this.inputs.size) {
-        map = this.inputs
-        limit = this.genomeOptions.maxInputSubstrateDepth
-      } else if (randomIndex < this.inputs.size + this.hiddenNodes.size) {
-        map = this.hiddenNodes
-        limit = this.genomeOptions.maxHiddenSubstrateDepth
-        i = this.inputs.size
-      } else {
-        map = this.outputs
-        limit = this.genomeOptions.maxOutputSubstrateDepth
-        i = this.inputs.size + this.hiddenNodes.size
-      }
-      for (const node of map.values()) {
-        if (i === randomIndex) {
-          this.mutateNodeDepth(node, limit)
-          break
+        if (randomIndex < this.inputs.size) {
+          map = this.inputs
+          limit = this.genomeOptions.maxInputSubstrateDepth
+        } else if (randomIndex < this.inputs.size + this.hiddenNodes.size) {
+          map = this.hiddenNodes
+          limit = this.genomeOptions.maxHiddenSubstrateDepth
+          i = this.inputs.size
+        } else {
+          map = this.outputs
+          limit = this.genomeOptions.maxOutputSubstrateDepth
+          i = this.inputs.size + this.hiddenNodes.size
         }
-        i++
+
+        if (map !== undefined) {
+          for (const node of map.values()) {
+            if (i === randomIndex) {
+              this.mutateNodeDepth(node, limit)
+              break
+            }
+            i++
+          }
+        }
       }
     }
   }
@@ -234,28 +241,33 @@ export class DESHyperNEATGenome extends CoreGenome<
   }
 
   override toFactoryOptions(): DESHyperNEATGenomeFactoryOptions {
-    const inputs: DESHyperNEATNodeData[] = []
-    const hiddenNodes: DESHyperNEATNodeData[] = []
-    const outputs: DESHyperNEATNodeData[] = []
-    const links: DESHyperNEATLinkData[] = []
+    const inputs: DESHyperNEATNodeData[] = new Array(this.inputs.size)
+    const hiddenNodes: DESHyperNEATNodeData[] = new Array(this.hiddenNodes.size)
+    const outputs: DESHyperNEATNodeData[] = new Array(this.outputs.size)
+    const links: DESHyperNEATLinkData[] = new Array(this.links.size)
+
+    let i = 0
     for (const node of this.inputs.values()) {
-      inputs.push([node.id, node.cppn.toFactoryOptions(), node.depth])
+      inputs[i++] = [node.id, node.cppn.toFactoryOptions(), node.depth]
     }
+    i = 0
     for (const node of this.hiddenNodes.values()) {
-      hiddenNodes.push([node.id, node.cppn.toFactoryOptions(), node.depth])
+      hiddenNodes[i++] = [node.id, node.cppn.toFactoryOptions(), node.depth]
     }
+    i = 0
     for (const node of this.outputs.values()) {
-      outputs.push([node.id, node.cppn.toFactoryOptions(), node.depth])
+      outputs[i++] = [node.id, node.cppn.toFactoryOptions(), node.depth]
     }
+    i = 0
     for (const link of this.links.values()) {
-      links.push([
+      links[i++] = [
         link.from,
         link.to,
         link.weight,
         link.innovation,
         link.cppn.toFactoryOptions(),
         link.depth,
-      ])
+      ]
     }
 
     return {

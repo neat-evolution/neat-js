@@ -6,6 +6,7 @@ import {
 } from '@neat-evolution/cppn'
 import {
   DatasetEnvironment,
+  type DatasetOptions,
   defaultDatasetOptions,
   loadDataset,
 } from '@neat-evolution/dataset-environment'
@@ -28,6 +29,7 @@ import {
   type EvolutionOptions,
   type ReproducerFactory,
 } from '@neat-evolution/evolution'
+import type { ExecutorFactory } from '@neat-evolution/executor'
 import {
   defaultHyperNEATGenomeOptions,
   HyperNEATAlgorithm,
@@ -50,26 +52,39 @@ export enum Methods {
 
 export const method = Methods.DES_HyperNEAT
 
+export interface DemoOptions {
+  method?: Methods
+  evolutionOptions?: Partial<EvolutionOptions<any, any>>
+  datasetOptions?: Partial<DatasetOptions>
+}
+
 export const demo = async (
   createReproducer: ReproducerFactory<any, any>,
-  createEvaluator: EvaluatorFactory<any, any>
+  createEvaluator: EvaluatorFactory<any, any>,
+  createExecutor?: ExecutorFactory,
+  options: DemoOptions = {}
 ) => {
-  const datasetOptions = defaultDatasetOptions
-  datasetOptions.dataset = new URL(
-    // FIXME: make dataset pathname an env variable
-    '../../generated/iris',
-    import.meta.url
-  ).pathname
-  datasetOptions.validationFraction = 0.1
-  datasetOptions.testFraction = 0.1
+  const selectedMethod = options.method ?? method
+  const datasetOptions: DatasetOptions = {
+    ...defaultDatasetOptions,
+    dataset: new URL(
+      // FIXME: make dataset pathname an env variable
+      '../../generated/iris',
+      import.meta.url
+    ).pathname,
+    validationFraction: 0.1,
+    testFraction: 0.1,
+    ...options.datasetOptions,
+  }
 
   const dataset = await loadDataset(datasetOptions)
   const environment = new DatasetEnvironment(dataset)
 
   const evolutionOptions: EvolutionOptions<any, any> = {
     ...defaultEvolutionOptions,
-    iterations: 5,
-    secondsLimit: 20,
+    iterations: 2,
+    secondsLimit: 5,
+    ...options.evolutionOptions,
   }
 
   // Create evaluation strategy for genome fitness evaluation
@@ -82,6 +97,7 @@ export const demo = async (
       case Methods.NEAT: {
         const evaluator = createEvaluator(NEATAlgorithm, environment, {
           strategy,
+          createExecutor,
         })
         return await neat(
           createReproducer as NEATReproducerFactory,
@@ -95,6 +111,7 @@ export const demo = async (
       case Methods.CPPN: {
         const evaluator = createEvaluator(CPPNAlgorithm, environment, {
           strategy,
+          createExecutor,
         })
         return await cppn(
           createReproducer,
@@ -108,6 +125,7 @@ export const demo = async (
       case Methods.HyperNEAT: {
         const evaluator = createEvaluator(HyperNEATAlgorithm, environment, {
           strategy,
+          createExecutor,
         })
         return await hyperneat(
           createReproducer,
@@ -121,6 +139,7 @@ export const demo = async (
       case Methods.ES_HyperNEAT: {
         const evaluator = createEvaluator(ESHyperNEATAlgorithm, environment, {
           strategy,
+          createExecutor,
         })
         return await eshyperneat(
           createReproducer,
@@ -134,6 +153,7 @@ export const demo = async (
       case Methods.DES_HyperNEAT: {
         const evaluator = createEvaluator(DESHyperNEATAlgorithm, environment, {
           strategy,
+          createExecutor,
         })
         return await deshyperneat(
           createReproducer,
@@ -147,6 +167,6 @@ export const demo = async (
       }
     }
   }
-  const best = await evolve(method)
+  const best = await evolve(selectedMethod)
   return best
 }

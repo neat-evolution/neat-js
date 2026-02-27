@@ -1,6 +1,6 @@
-export type Inputs = number[]
+export type Inputs = number[] | Float64Array
 export type BatchInputs = Inputs[]
-export type Outputs = number[]
+export type Outputs = number[] | Float64Array
 export type BatchOutputs = Outputs[]
 
 export interface SyncExecutor {

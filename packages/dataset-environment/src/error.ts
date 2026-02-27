@@ -2,21 +2,20 @@ import type { Matrix, Vector } from './types.js'
 
 export const normalize = (list: Vector): Vector => {
   let sum = 0
+  const len = list.length
 
   // Calculate the sum of all elements
-  for (const val of list) {
-    sum += val
+  for (let i = 0; i < len; i++) {
+    sum += list[i] as number
   }
 
-  // Normalize the list in place if the sum is not zero
+  // Normalize the list if the sum is not zero
   if (sum !== 0) {
-    for (let i = 0; i < list.length; i++) {
-      const val = list[i]
-      if (val === undefined) {
-        throw new Error('Undefined value encountered during normalization')
-      }
-      list[i] = val / sum
+    const result = new Array(len)
+    for (let i = 0; i < len; i++) {
+      result[i] = (list[i] as number) / sum
     }
+    return result
   }
 
   return list
@@ -27,18 +26,23 @@ export const mse = (
   predictions: Matrix,
   norm: boolean
 ): number => {
-  if (targets.length === 0) {
+  const len = targets.length
+  if (len === 0) {
     return 0
   }
-  if (targets.length !== predictions.length) {
+  if (len !== predictions.length) {
     throw new Error('Mismatched lengths between targets and predictions')
   }
   let totalError = 0
-  for (const [i, target] of targets.entries()) {
-    totalError += mseSingle(target, predictions[i] as Vector, norm)
+  for (let i = 0; i < len; i++) {
+    totalError += mseSingle(
+      targets[i] as Vector,
+      predictions[i] as Vector,
+      norm
+    )
   }
 
-  return totalError / targets.length
+  return totalError / len
 }
 
 export const mseSingle = (
@@ -46,7 +50,8 @@ export const mseSingle = (
   prediction: Vector,
   norm: boolean
 ): number => {
-  if (target.length !== prediction.length) {
+  const len = target.length
+  if (len !== prediction.length) {
     throw new Error('Mismatched lengths between target and prediction vectors.')
   }
 
@@ -54,12 +59,13 @@ export const mseSingle = (
 
   let error = 0
 
-  for (const [i, t] of target.entries()) {
+  for (let i = 0; i < len; i++) {
+    const t = target[i] as number
     const p = normalizedPrediction[i] as number
     error += (t - p) ** 2
   }
 
-  return target.length > 0 ? error / target.length : 0
+  return len > 0 ? error / len : 0
 }
 
 export const crossentropy = (
@@ -90,19 +96,24 @@ export const crossentropySingle = (
   prediction: Vector,
   norm: boolean
 ): number => {
-  let pred = norm ? normalize(prediction) : prediction
+  const len = prediction.length
+  if (len === 0) {
+    return 0
+  }
+  const pred = norm ? normalize(prediction) : prediction
 
-  // Bound pred values
-  for (let i = 0; i < pred.length; i++) {
-    pred[i] = Math.min(ma, Math.max(mi, pred[i] as number))
+  // Bound pred values - need to create a copy if we're bounding
+  const boundedPred = new Array(len)
+  for (let i = 0; i < len; i++) {
+    boundedPred[i] = Math.min(ma, Math.max(mi, pred[i] as number))
   }
 
   // Normalize again
-  pred = normalize(pred)
+  const finalPred = normalize(boundedPred)
 
   let sum = 0
   for (let i = 0; i < target.length; i++) {
-    sum += (target[i] as number) * Math.log(pred[i] as number)
+    sum += (target[i] as number) * Math.log(finalPred[i] as number)
   }
 
   return -sum

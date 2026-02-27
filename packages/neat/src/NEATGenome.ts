@@ -6,8 +6,8 @@ import {
   type LinkFactoryOptions,
   type NodeFactoryOptions,
   NodeType,
-  nodeRefToKey,
   type StateData,
+  toNodeKey,
 } from '@neat-evolution/core'
 
 import { createGenome } from './createGenome.js'
@@ -67,32 +67,38 @@ export class NEATGenome extends CoreGenome<
     )
   }
 
+  protected override hydrate(factoryOptions: NEATGenomeFactoryOptions): void {
+    const hiddenNodesData = factoryOptions.hiddenNodes
+    for (let i = 0; i < hiddenNodesData.length; i++) {
+      const id = hiddenNodesData[i]!
+      const node = this.createNode(
+        { type: NodeType.Hidden, id },
+        this.config.node(),
+        this.state.node()
+      )
+      this.hiddenNodes.set(toNodeKey(NodeType.Hidden, id), node)
+    }
+
+    const linksData = factoryOptions.links
+    for (let i = 0; i < linksData.length; i++) {
+      const [fromKey, toKey, weight, innovation] = linksData[i]!
+      const linkFactoryOptions: LinkFactoryOptions = {
+        from: fromKey,
+        to: toKey,
+        weight,
+        innovation,
+      }
+      const link = this.createLink(
+        linkFactoryOptions,
+        this.config.link(),
+        this.state.link()
+      )
+      this.insertLink(link, true)
+    }
+  }
+
   override init(factoryOptions?: NEATGenomeFactoryOptions): void {
     super.init(factoryOptions)
-    if (factoryOptions != null) {
-      for (const id of factoryOptions.hiddenNodes) {
-        const node = this.createNode(
-          { type: NodeType.Hidden, id },
-          this.config.node(),
-          this.state.node()
-        )
-        this.hiddenNodes.set(nodeRefToKey(node), node)
-      }
-      for (const [fromKey, toKey, weight, innovation] of factoryOptions.links) {
-        const linkFactoryOptions: LinkFactoryOptions = {
-          from: fromKey,
-          to: toKey,
-          weight,
-          innovation,
-        }
-        const link = this.createLink(
-          linkFactoryOptions,
-          this.config.link(),
-          this.state.link()
-        )
-        this.insertLink(link, true)
-      }
-    }
   }
 
   override toJSON(): NEATGenomeData {
@@ -105,15 +111,17 @@ export class NEATGenome extends CoreGenome<
   }
 
   override toFactoryOptions(): NEATGenomeFactoryOptions {
-    const hiddenNodes: NEATHiddenNodeData[] = []
-    const links: NEATLinkData[] = []
+    const hiddenNodes: NEATHiddenNodeData[] = new Array(this.hiddenNodes.size)
+    const links: NEATLinkData[] = new Array(this.links.size)
 
+    let i = 0
     for (const node of this.hiddenNodes.values()) {
-      hiddenNodes.push(node.id)
+      hiddenNodes[i++] = node.id
     }
 
+    i = 0
     for (const link of this.links.values()) {
-      links.push([link.from, link.to, link.weight, link.innovation])
+      links[i++] = [link.from, link.to, link.weight, link.innovation]
     }
 
     return {

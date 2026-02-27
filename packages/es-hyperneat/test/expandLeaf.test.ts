@@ -6,7 +6,7 @@ describe('QuadPoint.expand', () => {
   test.each([
     ...testCases.entries(),
   ])('should expand leaf for test case #%d', (_index, testCase: TestCase) => {
-    const result = Array.from(testCase.leaf.expand(testCase.deltaWeight))
+    const result = Array.from(testCase.leaf.expand(testCase.deltaWeight) ?? [])
     expect(result).toEqual(testCase.expandedLeaves)
   })
 })

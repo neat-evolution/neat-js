@@ -2,6 +2,7 @@ import type { Environment } from '@neat-evolution/environment'
 import { type ExecutorFactory, isAsyncExecutor } from '@neat-evolution/executor'
 
 import type { Evaluator, FitnessData } from './Evaluator.js'
+import type { EvaluatorFactoryOptions } from './EvaluatorFactoryOptions.js'
 import type { GenomeEntries, GenomeEntry } from './GenomeEntries.js'
 import type { AnyAlgorithm } from './types.js'
 
@@ -17,11 +18,11 @@ export class TestEvaluator<EFO> implements Evaluator<EFO> {
   constructor(
     algorithm: AnyAlgorithm<any>,
     environment: Environment<EFO>,
-    createExecutor: ExecutorFactory
+    options: EvaluatorFactoryOptions<any>
   ) {
     this.algorithm = algorithm
     this.environment = environment
-    this.createExecutor = createExecutor
+    this.createExecutor = options.createExecutor
   }
 
   private async worker(entry: GenomeEntry<any>): Promise<FitnessData> {
