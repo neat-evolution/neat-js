@@ -2,6 +2,21 @@
   "name": "@neat-evolution/dataset-environment",
   "entries": [
     {
+      "date": "Fri, 27 Feb 2026 09:07:42 GMT",
+      "version": "0.5.6",
+      "tag": "@neat-evolution/dataset-environment_v0.5.6",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/dataset-environment",
+            "commit": "04407adc07afdf632ae5eb3973f0874e75c828d6",
+            "comment": "refactor DatasetEnvironment and error handling for better performance and type safety"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 26 Feb 2026 22:05:36 GMT",
       "version": "0.5.4",
       "tag": "@neat-evolution/dataset-environment_v0.5.4",

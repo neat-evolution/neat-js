@@ -2,6 +2,21 @@
   "name": "@neat-evolution/executor",
   "entries": [
     {
+      "date": "Fri, 27 Feb 2026 09:07:42 GMT",
+      "version": "0.3.11",
+      "tag": "@neat-evolution/executor_v0.3.11",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/executor",
+            "commit": "04407adc07afdf632ae5eb3973f0874e75c828d6",
+            "comment": "optimize phenotype execution using Float64Array and cached activation functions"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 26 Feb 2026 22:05:36 GMT",
       "version": "0.3.9",
       "tag": "@neat-evolution/executor_v0.3.9",

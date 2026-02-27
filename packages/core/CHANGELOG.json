@@ -2,6 +2,21 @@
   "name": "@neat-evolution/core",
   "entries": [
     {
+      "date": "Fri, 27 Feb 2026 09:07:42 GMT",
+      "version": "0.3.9",
+      "tag": "@neat-evolution/core_v0.3.9",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/core",
+            "commit": "04407adc07afdf632ae5eb3973f0874e75c828d6",
+            "comment": "optimize CoreGenome distance and crossover logic; implement static object pooling for Connections and incremental cache updates"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 26 Feb 2026 22:05:36 GMT",
       "version": "0.3.7",
       "tag": "@neat-evolution/core_v0.3.7",

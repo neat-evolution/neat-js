@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/es-hyperneat
 
-<!-- This log was last generated on Thu, 26 Feb 2026 22:05:36 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 27 Feb 2026 09:07:42 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.6.6
+
+Fri, 27 Feb 2026 09:07:42 GMT
+
+### Patches
+
+- optimize QuadPoint with object pooling and refactor findConnections for performance (github@heygrady.net)
 
 ## 0.6.4
 

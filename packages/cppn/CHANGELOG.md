@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/cppn
 
-<!-- This log was last generated on Thu, 26 Feb 2026 22:05:36 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 27 Feb 2026 09:07:42 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.6.6
+
+Fri, 27 Feb 2026 09:07:42 GMT
+
+### Patches
+
+- optimize CPPNGenome initialization and serialization (github@heygrady.net)
 
 ## 0.6.4
 

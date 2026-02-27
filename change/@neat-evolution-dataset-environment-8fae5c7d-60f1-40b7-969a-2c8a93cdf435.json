@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "refactor DatasetEnvironment and error handling for better performance and type safety",
-  "packageName": "@neat-evolution/dataset-environment",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

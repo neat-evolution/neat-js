@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "fix tsconfig.types.json configuration",
-  "packageName": "@neat-evolution/evaluation-strategy",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

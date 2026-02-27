@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/demo
 
-<!-- This log was last generated on Thu, 26 Feb 2026 22:05:36 GMT and should not be manually modified. -->
+<!-- This log was last generated on Fri, 27 Feb 2026 09:07:42 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.5.10
+
+Fri, 27 Feb 2026 09:07:42 GMT
+
+### Patches
+
+- optimize evolution and network execution performance (github@heygrady.net)
 
 ## 0.5.8
 

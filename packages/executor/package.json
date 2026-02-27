@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/executor",
-  "version": "0.3.9",
+  "version": "0.3.11",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",

@@ -2,6 +2,21 @@
   "name": "@neat-evolution/es-hyperneat",
   "entries": [
     {
+      "date": "Fri, 27 Feb 2026 09:07:42 GMT",
+      "version": "0.6.6",
+      "tag": "@neat-evolution/es-hyperneat_v0.6.6",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/es-hyperneat",
+            "commit": "04407adc07afdf632ae5eb3973f0874e75c828d6",
+            "comment": "optimize QuadPoint with object pooling and refactor findConnections for performance"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 26 Feb 2026 22:05:36 GMT",
       "version": "0.6.4",
       "tag": "@neat-evolution/es-hyperneat_v0.6.4",

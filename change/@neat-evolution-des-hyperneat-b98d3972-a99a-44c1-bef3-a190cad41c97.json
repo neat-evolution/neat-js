@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "optimize DESHyperNEATGenome serialization",
-  "packageName": "@neat-evolution/des-hyperneat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

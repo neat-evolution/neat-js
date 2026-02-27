@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "optimize CPPNGenome initialization and serialization",
-  "packageName": "@neat-evolution/cppn",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}
