@@ -1053,10 +1053,12 @@ __metadata:
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
     "@vitest/coverage-v8": "npm:^4.0.14"
     concurrently: "npm:^9.2.1"
+    execa: "npm:^9.6.1"
     lint-staged: "npm:^16.2.7"
     nodemon: "npm:^3.1.11"
     quick-lru: "npm:^7.3.0"
     rimraf: "npm:^6.1.2"
+    turbo: "npm:^2.8.11"
     typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.14"
   languageName: unknown
@@ -6307,9 +6309,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"turbo-darwin-64@npm:2.8.11":
+  version: 2.8.11
+  resolution: "turbo-darwin-64@npm:2.8.11"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
 "turbo-darwin-arm64@npm:2.6.1":
   version: 2.6.1
   resolution: "turbo-darwin-arm64@npm:2.6.1"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"turbo-darwin-arm64@npm:2.8.11":
+  version: 2.8.11
+  resolution: "turbo-darwin-arm64@npm:2.8.11"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
@@ -6321,9 +6337,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"turbo-linux-64@npm:2.8.11":
+  version: 2.8.11
+  resolution: "turbo-linux-64@npm:2.8.11"
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
 "turbo-linux-arm64@npm:2.6.1":
   version: 2.6.1
   resolution: "turbo-linux-arm64@npm:2.6.1"
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"turbo-linux-arm64@npm:2.8.11":
+  version: 2.8.11
+  resolution: "turbo-linux-arm64@npm:2.8.11"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
@@ -6335,9 +6365,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"turbo-windows-64@npm:2.8.11":
+  version: 2.8.11
+  resolution: "turbo-windows-64@npm:2.8.11"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
 "turbo-windows-arm64@npm:2.6.1":
   version: 2.6.1
   resolution: "turbo-windows-arm64@npm:2.6.1"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"turbo-windows-arm64@npm:2.8.11":
+  version: 2.8.11
+  resolution: "turbo-windows-arm64@npm:2.8.11"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
@@ -6368,6 +6412,35 @@ __metadata:
   bin:
     turbo: bin/turbo
   checksum: 10/7bbd7cd3d36ba4d9061c32b07f1d86de946add71d29b5d9098841c195d2d6d60128db2da8b4fa1ed9c69959e544d0e4b063ecf47fdbfb70d7248bfb4dac8f30a
+  languageName: node
+  linkType: hard
+
+"turbo@npm:^2.8.11":
+  version: 2.8.11
+  resolution: "turbo@npm:2.8.11"
+  dependencies:
+    turbo-darwin-64: "npm:2.8.11"
+    turbo-darwin-arm64: "npm:2.8.11"
+    turbo-linux-64: "npm:2.8.11"
+    turbo-linux-arm64: "npm:2.8.11"
+    turbo-windows-64: "npm:2.8.11"
+    turbo-windows-arm64: "npm:2.8.11"
+  dependenciesMeta:
+    turbo-darwin-64:
+      optional: true
+    turbo-darwin-arm64:
+      optional: true
+    turbo-linux-64:
+      optional: true
+    turbo-linux-arm64:
+      optional: true
+    turbo-windows-64:
+      optional: true
+    turbo-windows-arm64:
+      optional: true
+  bin:
+    turbo: bin/turbo
+  checksum: 10/5ac765e3f35b69ad9daf398a35c44b5db237640f17a234bbbd344594e4b1da014ed592dbc0e87d908548a8c6ad72037c2526baba57091e99765160b14ed4cd2a
   languageName: node
   linkType: hard
 

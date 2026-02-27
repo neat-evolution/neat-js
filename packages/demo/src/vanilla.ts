@@ -13,11 +13,11 @@ const createEvaluator: EvaluatorFactory<any, any> = (
   algorithm: AnyAlgorithm<any>,
   environment: Environment<any>
 ) => {
-  return createVanillaEvaluator(algorithm, environment, createExecutor)
+  return createVanillaEvaluator(algorithm, environment, { createExecutor })
 }
 
 try {
-  await demo(createReproducer, createEvaluator)
+  await demo(createReproducer, createEvaluator, createExecutor)
 } catch (error) {
   console.error(error)
   throw error

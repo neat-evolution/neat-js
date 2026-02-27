@@ -151,8 +151,9 @@ export class CoreGenome<
     this.init(factoryOptions)
   }
 
-  protected init(_factoryOptions?: GFO): void {
-    for (let i = 0; i < this.initConfig.inputs; i++) {
+  protected init(factoryOptions?: GFO): void {
+    const inputsCount = this.initConfig.inputs
+    for (let i = 0; i < inputsCount; i++) {
       const node = this.createNode(
         { type: NodeType.Input, id: i },
         this.config.node(),
@@ -161,7 +162,8 @@ export class CoreGenome<
       this.inputs.set(nodeRefToKey(node), node)
     }
 
-    for (let i = 0; i < this.initConfig.outputs; i++) {
+    const outputsCount = this.initConfig.outputs
+    for (let i = 0; i < outputsCount; i++) {
       const node = this.createNode(
         { type: NodeType.Output, id: i },
         this.config.node(),
@@ -169,6 +171,15 @@ export class CoreGenome<
       )
       this.outputs.set(nodeRefToKey(node), node)
     }
+
+    if (factoryOptions != null) {
+      // Inlined hydration for better performance and simplicity
+      this.hydrate(factoryOptions)
+    }
+  }
+
+  protected hydrate(_factoryOptions: GFO): void {
+    // To be implemented in subclasses if they use specialized factory options
   }
 
   clone(): G {
@@ -209,79 +220,59 @@ export class CoreGenome<
     const neatConfig = this.config.neat()
 
     let linkDifferences = 0
-    let linkDistance = 0
-    let linkCount = this.links.size
+    let weightDistance = 0
+    let linkMatchingCount = 0
+    
+    const thisLinks = this.links
+    const otherLinks = other.links
 
-    for (const [linkKey, link] of this.links.entries()) {
-      const link2 = other.links.get(linkKey)
+    for (const [linkKey, link] of thisLinks) {
+      const link2 = otherLinks.get(linkKey)
       if (link2 !== undefined) {
-        linkDistance += link.distance(link2)
+        weightDistance += link.distance(link2)
+        linkMatchingCount++
       } else {
         linkDifferences++
       }
     }
-
-    for (const linkKey of other.links.keys()) {
-      if (!this.links.has(linkKey)) {
-        linkDifferences++
-        linkCount++
-      }
-    }
-
-    const linkDist =
-      linkCount === 0 ? 0 : (linkDifferences + linkDistance) / linkCount
+    
+    linkDifferences += (otherLinks.size - linkMatchingCount)
+    const linkUnionSize = thisLinks.size + otherLinks.size - linkMatchingCount
+    const linkDist = linkUnionSize === 0 ? 0 : (linkDifferences + weightDistance) / linkUnionSize
 
     let nodeDifferences = 0
     let nodeDistance = 0
-    let nodeCount = this.hiddenNodes.size
-
+    let nodeMatchingCount = 0
+    
+    const nodeMaps: Array<[Map<NodeKey, N>, Map<NodeKey, N>]> = [[this.hiddenNodes, other.hiddenNodes]]
     if (!neatConfig.onlyHiddenNodeDistance) {
-      nodeCount += this.inputs.size + this.outputs.size
+      nodeMaps.push([this.inputs, other.inputs])
+      nodeMaps.push([this.outputs, other.outputs])
     }
 
-    for (const [nodeKey, node] of this.hiddenNodes.entries()) {
-      const node2 = other.hiddenNodes.get(nodeKey)
-      if (node2 !== undefined) {
-        nodeDistance += node.distance(node2)
-      } else {
-        nodeDifferences++
-      }
-    }
+    let thisNodeCount = 0
+    let otherNodeCount = 0
 
-    for (const nodeKey of other.hiddenNodes.keys()) {
-      if (!this.hiddenNodes.has(nodeKey)) {
-        nodeDifferences++
-        nodeCount++
-      }
-    }
-
-    if (!neatConfig.onlyHiddenNodeDistance) {
-      const nodeMaps: Array<[map: Map<string, N>, checkMap: Map<string, N>]> = [
-        [this.inputs, other.inputs],
-        [this.outputs, other.outputs],
-      ]
-      for (const [map, checkMap] of nodeMaps) {
-        for (const [nodeKey, node] of map.entries()) {
-          const node2 = checkMap.get(nodeKey)
-          if (node2 !== undefined) {
-            nodeDistance += node.distance(node2)
-          } else {
-            nodeDifferences++
-          }
-        }
-      }
-      for (const map of [other.inputs, other.outputs]) {
-        for (const nodeKey of map.keys()) {
-          if (!this.inputs.has(nodeKey) && !this.outputs.has(nodeKey)) {
-            nodeDifferences++
-            nodeCount++
-          }
+    for (let i = 0; i < nodeMaps.length; i++) {
+      const [map1, map2] = nodeMaps[i]!
+      thisNodeCount += map1.size
+      otherNodeCount += map2.size
+      
+      for (const [nodeKey, node] of map1) {
+        const node2 = map2.get(nodeKey)
+        if (node2 !== undefined) {
+          nodeDistance += node.distance(node2)
+          nodeMatchingCount++
+        } else {
+          nodeDifferences++
         }
       }
     }
+    
+    nodeDifferences += (otherNodeCount - nodeMatchingCount)
+    const nodeUnionSize = thisNodeCount + otherNodeCount - nodeMatchingCount
 
-    const nodeDist =
-      nodeCount === 0 ? 0 : (nodeDifferences + nodeDistance) / nodeCount
+    const nodeDist = nodeUnionSize === 0 ? 0 : (nodeDifferences + nodeDistance) / nodeUnionSize
 
     return (
       neatConfig.linkDistanceWeight * linkDist +
@@ -290,7 +281,6 @@ export class CoreGenome<
   }
 
   crossover(other: G, fitness: number, otherFitness: number): G {
-    // Let parent1 be the fitter parent
     const [parent1, parent2] =
       fitness > otherFitness ? [this, other] : [other, this]
 
@@ -301,21 +291,21 @@ export class CoreGenome<
       this.initConfig
     )
 
-    // Copy links only in fitter parent, perform crossover if in both parents
-    for (const [linkKey, link] of parent1.links.entries()) {
-      const link2 = parent2.links.get(linkKey)
-      if (link2 != null) {
+    const parent2Links = parent2.links
+    for (const [linkKey, link] of parent1.links) {
+      const link2 = parent2Links.get(linkKey)
+      if (link2 !== undefined) {
         genome.insertLink(link.crossover(link2, fitness, otherFitness), true)
       } else {
-        genome.insertLink(link.clone(), false)
+        genome.insertLink(link.clone(), true)
       }
     }
 
-    // Copy nodes only in fitter parent, perform crossover if in both parents
     if (parent1.initConfig.inputs !== parent2.initConfig.inputs) {
-      for (const [nodeKey, node] of parent1.inputs.entries()) {
-        const node2 = parent2.inputs.get(nodeKey)
-        if (node2 != null) {
+      const parent2Inputs = parent2.inputs
+      for (const [nodeKey, node] of parent1.inputs) {
+        const node2 = parent2Inputs.get(nodeKey)
+        if (node2 !== undefined) {
           genome.inputs.set(
             nodeKey,
             node.crossover(node2, fitness, otherFitness)
@@ -326,9 +316,10 @@ export class CoreGenome<
       }
     }
 
-    for (const [nodeKey, node] of parent1.hiddenNodes.entries()) {
-      const node2 = parent2.hiddenNodes.get(nodeKey)
-      if (node2 != null) {
+    const parent2Hidden = parent2.hiddenNodes
+    for (const [nodeKey, node] of parent1.hiddenNodes) {
+      const node2 = parent2Hidden.get(nodeKey)
+      if (node2 !== undefined) {
         genome.hiddenNodes.set(
           nodeKey,
           node.crossover(node2, fitness, otherFitness)
@@ -339,9 +330,10 @@ export class CoreGenome<
     }
 
     if (parent1.initConfig.outputs !== parent2.initConfig.outputs) {
-      for (const [nodeKey, node] of parent1.outputs.entries()) {
-        const node2 = parent2.outputs.get(nodeKey)
-        if (node2 != null) {
+      const parent2Outputs = parent2.outputs
+      for (const [nodeKey, node] of parent1.outputs) {
+        const node2 = parent2Outputs.get(nodeKey)
+        if (node2 !== undefined) {
           genome.outputs.set(
             nodeKey,
             node.crossover(node2, fitness, otherFitness)
@@ -355,11 +347,6 @@ export class CoreGenome<
     return genome
   }
 
-  /**
-   * @deprecated prefer getNodeByKey(nodeKey) to avoid unnecessary conversions
-   * @param {NodeRef} nodeRef the reference to the node
-   * @returns {N | undefined} a node or undefined
-   */
   getNode(nodeRef: NodeRef): N | undefined {
     switch (nodeRef.type) {
       case NodeType.Input:
@@ -392,14 +379,12 @@ export class CoreGenome<
     to: NodeKey,
     newNodeKey: NodeKey
   ): Promise<void> {
-    // Retrieve the link to be split
     const linkKey = toLinkKey(from, to)
     const link = this.links.get(linkKey) as L
     if (link == null) {
       throw new Error('Unable to split nonexistent link')
     }
 
-    // Remove old link and connection
     this.links.delete(linkKey)
     this.connections.delete(from, to)
 
@@ -412,7 +397,6 @@ export class CoreGenome<
         this.state.node()
       )
 
-    // Insert new hidden node
     this.hiddenNodes.set(newNodeKey, !isSafe ? newNode.clone() : newNode)
 
     type LinkDetails = [
@@ -446,7 +430,6 @@ export class CoreGenome<
         await this.state.getConnectInnovation(newNodeKey, to),
       ]
     }
-    // NOTE: only async in des-hyperneat
     const link1 = await link.identity({
       from: link1Details[0],
       to: link1Details[1],
@@ -474,14 +457,15 @@ export class CoreGenome<
   }
 
   mutateLinkWeight(): void {
-    if (this.links.size === 0) {
+    const linkSize = this.links.size
+    if (linkSize === 0) {
       return
     }
     const neatConfig = this.config.neat()
     const rng = threadRNG()
 
     if (neatConfig.mutateOnlyOneLink) {
-      const linkIndex = rng.genRange(0, this.links.size)
+      const linkIndex = rng.genRange(0, linkSize)
       let i = 0
       for (const link of this.links.values()) {
         if (i === linkIndex) {
@@ -492,30 +476,24 @@ export class CoreGenome<
         i++
       }
     } else {
+      const weightSize = neatConfig.mutateLinkWeightSize
       for (const link of this.links.values()) {
-        link.weight += (rng.gen() - 0.5) * 2 * neatConfig.mutateLinkWeightSize
+        link.weight += (rng.gen() - 0.5) * 2 * weightSize
       }
     }
   }
 
   async mutationAddNode(): Promise<void> {
-    if (this.links.size === 0) {
+    const linkSize = this.links.size
+    if (linkSize === 0) {
       return
     }
+    const linksArray = Array.from(this.links.values())
+    const rng = threadRNG()
+    
     for (let i = 0; i < 50; i++) {
-      const linkIndex = threadRNG().genRange(0, this.links.size)
-      let i = 0
-      let link: L | null = null
-      for (const l of this.links.values()) {
-        if (i === linkIndex) {
-          link = l
-          break
-        }
-        i++
-      }
-      if (link === null) {
-        throw new Error('Unable to find link')
-      }
+      const linkIndex = rng.genRange(0, linkSize)
+      const link = linksArray[linkIndex]!
 
       const newNodeKey = await this.state
         .neat()
@@ -523,9 +501,7 @@ export class CoreGenome<
 
       const linkFromKey = toLinkKey(link.from, newNodeKey)
       const linkToKey = toLinkKey(newNodeKey, link.to)
-      if (linkFromKey.includes('NaN') || linkToKey.includes('NaN')) {
-        console.log(linkFromKey, linkToKey)
-      }
+      
       if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
         await this.splitLink(link.from, link.to, newNodeKey)
         break
@@ -544,44 +520,43 @@ export class CoreGenome<
     }
 
     const sourceNodes: N[] = []
-    const sourceWeights: number[] = []
     const wheel: number[] = []
 
     for (const nodes of [this.inputs, this.hiddenNodes]) {
-      for (const [nodeKey, node] of nodes.entries()) {
-        sourceNodes.push(node)
+      for (const [nodeKey, node] of nodes) {
         const edgeCount = this.connections.getTargetsLength(nodeKey)
         const weight = numTargets - edgeCount
-        sourceWeights.push(weight)
-        wheel.push((wheel[wheel.length - 1] ?? 0) + weight)
+        if (weight > 0) {
+          sourceNodes.push(node)
+          wheel.push((wheel[wheel.length - 1] ?? 0) + weight)
+        }
       }
     }
 
-    const lastWheelValue = wheel[wheel.length - 1] as number
+    const lastWheelValue = wheel[wheel.length - 1] ?? 0
 
-    // Network is fully saturated with links
     if (lastWheelValue <= 0) {
       return
     }
 
     const val = rng.genRange(1, lastWheelValue + 1)
     const sourceIndex = binarySearchFirst(wheel, val)
-    const source = sourceNodes[sourceIndex] as N
+    const source = sourceNodes[sourceIndex]!
     const sourceKey = nodeRefToKey(source)
 
     const targetNodes: N[] = []
 
     for (const nodes of [this.hiddenNodes, this.outputs]) {
-      for (const [nodeKey, node] of nodes.entries()) {
+      for (const [nodeKey, node] of nodes) {
         if (!this.links.has(toLinkKey(sourceKey, nodeKey))) {
           targetNodes.push(node)
         }
       }
     }
-    shuffle(targetNodes, threadRNG())
+    shuffle(targetNodes, rng)
 
-    // Try to create link with potential target nodes in random order
-    for (const target of targetNodes) {
+    for (let i = 0; i < targetNodes.length; i++) {
+      const target = targetNodes[i]!
       const targetKey = nodeRefToKey(target)
       if (!this.connections.createsCycle(sourceKey, targetKey)) {
         const innovation = await this.state
@@ -610,14 +585,15 @@ export class CoreGenome<
   }
 
   mutationRemoveLink(): void {
-    if (this.links.size === 0) {
+    const linkSize = this.links.size
+    if (linkSize === 0) {
       return
     }
 
-    const randomIndex = threadRNG().genRange(0, this.links.size)
+    const randomIndex = threadRNG().genRange(0, linkSize)
     let currentIndex = 0
 
-    for (const [linkKey, link] of this.links.entries()) {
+    for (const [linkKey, link] of this.links) {
       if (currentIndex === randomIndex) {
         this.links.delete(linkKey)
         this.connections.delete(link.from, link.to)
@@ -628,11 +604,12 @@ export class CoreGenome<
   }
 
   mutationRemoveNode(): void {
-    if (this.hiddenNodes.size === 0) {
+    const hiddenSize = this.hiddenNodes.size
+    if (hiddenSize === 0) {
       return
     }
 
-    const randomIndex = threadRNG().genRange(0, this.hiddenNodes.size)
+    const randomIndex = threadRNG().genRange(0, hiddenSize)
     let currentIndex = 0
 
     for (const nodeKey of this.hiddenNodes.keys()) {

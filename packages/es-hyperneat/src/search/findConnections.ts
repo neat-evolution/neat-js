@@ -16,33 +16,63 @@ export function findConnections(
   reverse: boolean,
   options: ESHyperNEATGenomeOptions
 ): Array<Target<PointKey, number>> {
+  // Pre-allocate input array to avoid repeated allocations
+  const cppnInput = new Float64Array(4)
+  if (reverse) {
+    cppnInput[2] = x
+    cppnInput[3] = y
+  } else {
+    cppnInput[0] = x
+    cppnInput[1] = y
+  }
+
   const f: WeightFn = (x2: number, y2: number): number => {
-    const input = reverse ? [x2, y2, x, y] : [x, y, x2, y2]
-    return cppn.execute(input)[0] as number
+    if (reverse) {
+      cppnInput[0] = x2
+      cppnInput[1] = y2
+    } else {
+      cppnInput[2] = x2
+      cppnInput[3] = y2
+    }
+    // execute now returns Float64Array, and the first element is the weight
+    const result = cppn.execute(cppnInput)
+    return (result as any)[0] ?? 0
   }
 
   const connections: Array<Target<PointKey, number>> = []
-  const root = new QuadPoint(0.0, 0.0, 1.0, 1, f, options)
+  const root = QuadPoint.acquire(0.0, 0.0, 1.0, 1, f, options)
   let minWeight = root.weight
   let maxWeight = root.weight
 
   let leaves: QuadPoint[] = [root]
   while (leaves.length > 0) {
     const newLeaves: QuadPoint[] = []
-    for (const leaf of leaves) {
+    for (let i = 0; i < leaves.length; i++) {
+      const leaf = leaves[i]
+      if (leaf === undefined) continue
       const [mi, ma] = leaf.createChildren(f)
-      minWeight = Math.min(minWeight, mi)
-      maxWeight = Math.max(maxWeight, ma)
+      if (mi < minWeight) minWeight = mi
+      if (ma > maxWeight) maxWeight = ma
     }
-    for (const leaf of leaves) {
-      for (const child of leaf.expand(maxWeight - minWeight)) {
-        newLeaves.push(child)
+    const deltaWeight = maxWeight - minWeight
+    for (let i = 0; i < leaves.length; i++) {
+      const leaf = leaves[i]
+      if (leaf === undefined) continue
+      const children = leaf.expand(deltaWeight)
+      if (children !== null) {
+        for (let j = 0; j < 4; j++) {
+          const child = children[j]
+          if (child !== undefined) {
+            newLeaves.push(child)
+          }
+        }
       }
     }
     leaves = newLeaves
   }
   // If all weight values are the same, no nodes will be collected.
   if (minWeight === maxWeight) {
+    QuadPoint.release(root)
     return connections
   }
 
@@ -53,9 +83,19 @@ export function findConnections(
       connections.length < options.maxDiscoveries)
   ) {
     const newLeaves: QuadPoint[] = []
-    for (const leaf of leaves) {
-      for (const child of leaf.extract(f, connections, maxWeight - minWeight)) {
-        newLeaves.push(child)
+    for (let i = 0; i < leaves.length; i++) {
+      const leaf = leaves[i]
+      if (leaf === undefined) continue
+      const expandedChildren = leaf.extract(
+        f,
+        connections,
+        maxWeight - minWeight
+      )
+      for (let j = 0; j < expandedChildren.length; j++) {
+        const child = expandedChildren[j]
+        if (child !== undefined) {
+          newLeaves.push(child)
+        }
       }
     }
     leaves = newLeaves
@@ -63,9 +103,18 @@ export function findConnections(
 
   // If the collection was limited by maxDiscoveries, nodes at the current depth in the tree
   // are included, since either they or their children would be if the search continues.
-  for (const leaf of leaves) {
-    connections.push({ node: toPointKey([leaf.x, leaf.y]), edge: leaf.weight })
+  for (let i = 0; i < leaves.length; i++) {
+    const leaf = leaves[i]
+    if (leaf !== undefined) {
+      connections.push({
+        node: toPointKey([leaf.x, leaf.y]),
+        edge: leaf.weight,
+      })
+    }
   }
+
+  // Release the entire tree back to the pool
+  QuadPoint.release(root)
 
   // Only return the weights with the highest absolute value.
   if (options.maxOutgoing > 0 && connections.length > options.maxOutgoing) {

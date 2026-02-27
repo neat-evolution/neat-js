@@ -1,5 +1,7 @@
 import type { InitConfig } from '@neat-evolution/core'
 
+import type { Matrix } from './types.js'
+
 export type Dimensions = InitConfig
 
 export interface Dataset {
@@ -7,12 +9,12 @@ export interface Dataset {
   isClassification: boolean
   oneHotOutput: boolean
 
-  trainingInputs: number[][]
-  trainingTargets: number[][]
-  validationInputs: number[][]
-  validationTargets: number[][]
-  testInputs: number[][]
-  testTargets: number[][]
+  trainingInputs: Matrix
+  trainingTargets: Matrix
+  validationInputs: Matrix
+  validationTargets: Matrix
+  testInputs: Matrix
+  testTargets: Matrix
 
   totalCount: number
   trainingCount: number

@@ -73,7 +73,7 @@ describe('Population class', () => {
     genomeOptions = defaultNEATGenomeOptions
     populationOptions = defaultPopulationOptions
     environment = await createEnvironment()
-    evaluator = createEvaluator(NEATAlgorithm, environment, createExecutor)
+    evaluator = createEvaluator(NEATAlgorithm, environment, { createExecutor })
   })
 
   test('should correctly initialize', () => {

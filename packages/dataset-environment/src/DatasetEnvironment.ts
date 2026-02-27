@@ -7,6 +7,7 @@ import type { Executor, SyncExecutor } from '@neat-evolution/executor'
 import type { Dataset } from './Dataset.js'
 import { datasetToSharedBuffer } from './datasetToSharedBuffer.js'
 import { crossentropy, mse } from './error.js'
+import type { Matrix } from './types.js'
 
 export class DatasetEnvironment implements Environment<SharedArrayBuffer> {
   public readonly dataset: Dataset
@@ -21,7 +22,7 @@ export class DatasetEnvironment implements Environment<SharedArrayBuffer> {
     }
   }
 
-  private fitness(targets: number[][], predictions: number[][]): number {
+  private fitness(targets: Matrix, predictions: Matrix): number {
     const norm = this.dataset.isClassification && this.dataset.oneHotOutput
     if (norm) {
       return Math.exp(-crossentropy(targets, predictions, norm))
