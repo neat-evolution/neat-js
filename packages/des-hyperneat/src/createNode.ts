@@ -1,7 +1,6 @@
 import type { NEATConfigOptions, NodeFactory } from '@neat-evolution/core'
 
-import type { CustomState } from './CustomState.js'
-import type { CustomStateData } from './CustomStateData.js'
+import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import {
   type DESHyperNEATGenomeOptions,
   defaultDESHyperNEATGenomeOptions,
@@ -9,20 +8,14 @@ import {
 import { DESHyperNEATNode } from './DESHyperNEATNode.js'
 import type { DESHyperNEATNodeFactoryOptions } from './DESHyperNEATNodeFactoryOptions.js'
 
-export type DESHyperNEATNodeFactory = NodeFactory<
-  DESHyperNEATNodeFactoryOptions,
-  NEATConfigOptions,
-  CustomStateData,
-  CustomState,
-  DESHyperNEATNode
->
+export type DESHyperNEATNodeFactory = NodeFactory<DESHyperNEATContext>
 
 export const createNodeFactory =
   (options: DESHyperNEATGenomeOptions): DESHyperNEATNodeFactory =>
   (
     factoryOptions: DESHyperNEATNodeFactoryOptions,
     config: NEATConfigOptions,
-    state: CustomState
+    state: DESHyperNEATContext['State']['Node']
   ): DESHyperNEATNode => {
     return new DESHyperNEATNode(
       options,

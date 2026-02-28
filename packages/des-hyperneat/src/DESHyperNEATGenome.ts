@@ -1,7 +1,6 @@
 import {
   CoreGenome,
   type InitConfig,
-  type NEATConfigOptions,
   type NodeKey,
   NodeType,
   nodeRefToKey,
@@ -9,14 +8,10 @@ import {
 } from '@neat-evolution/core'
 import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
 import { threadRNG } from '@neat-evolution/utils'
-import type { CustomState } from './CustomState.js'
-import type { CustomStateData } from './CustomStateData.js'
+import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import type { DESHyperNEATGenomeFactory } from './createGenome.js'
 import { createLinkFactory } from './createLink.js'
 import { createNodeFactory } from './createNode.js'
-import type { DESHyperNEATConfig } from './DESHyperNEATConfig.js'
-import type { DESHyperNEATConfigData } from './DESHyperNEATConfigData.js'
-import type { DESHyperNEATConfigFactoryOptions } from './DESHyperNEATConfigFactoryOptions.js'
 import type { DESHyperNEATGenomeData } from './DESHyperNEATGenomeData.js'
 import type {
   DESHyperNEATGenomeFactoryOptions,
@@ -24,39 +19,13 @@ import type {
   DESHyperNEATNodeData,
 } from './DESHyperNEATGenomeFactoryOptions.js'
 import type { DESHyperNEATGenomeOptions } from './DESHyperNEATGenomeOptions.js'
-import type { DESHyperNEATLink } from './DESHyperNEATLink.js'
 import type { DESHyperNEATLinkFactoryOptions } from './DESHyperNEATLinkFactoryOptions.js'
 import type { DESHyperNEATNode } from './DESHyperNEATNode.js'
-import type { DESHyperNEATNodeFactoryOptions } from './DESHyperNEATNodeFactoryOptions.js'
-import type { DESHyperNEATState } from './DESHyperNEATState.js'
-import type { DESHyperNEATStateData } from './DESHyperNEATStateData.js'
 
-export class DESHyperNEATGenome extends CoreGenome<
-  DESHyperNEATConfigFactoryOptions,
-  NEATConfigOptions,
-  NEATConfigOptions,
-  DESHyperNEATConfigData,
-  DESHyperNEATConfig,
-  CustomStateData,
-  CustomStateData,
-  CustomState,
-  CustomState,
-  DESHyperNEATStateData,
-  DESHyperNEATState,
-  DESHyperNEATNodeData,
-  DESHyperNEATLinkData,
-  DESHyperNEATGenomeFactoryOptions,
-  DESHyperNEATGenomeOptions,
-  DESHyperNEATGenomeData,
-  DESHyperNEATNodeFactoryOptions,
-  DESHyperNEATNode,
-  DESHyperNEATLinkFactoryOptions,
-  DESHyperNEATLink,
-  DESHyperNEATGenome
-> {
+export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
   constructor(
-    config: DESHyperNEATConfig,
-    state: DESHyperNEATState,
+    config: DESHyperNEATContext['Config']['Type'],
+    state: DESHyperNEATContext['State']['Type'],
     genomeOptions: DESHyperNEATGenomeOptions,
     initConfig: InitConfig,
     createGenome: DESHyperNEATGenomeFactory,

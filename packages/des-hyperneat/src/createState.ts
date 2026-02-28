@@ -1,17 +1,11 @@
 import type { StateFactory } from '@neat-evolution/core'
 
-import type { CustomState } from './CustomState.js'
-import type { CustomStateData } from './CustomStateData.js'
+import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import { DESHyperNEATState } from './DESHyperNEATState.js'
 import type { DESHyperNEATStateData } from './DESHyperNEATStateData.js'
 
-export const createState: StateFactory<
-  CustomStateData,
-  CustomStateData,
-  CustomState,
-  CustomState,
-  DESHyperNEATStateData,
-  DESHyperNEATState
-> = (stateFactoryOptions?: DESHyperNEATStateData) => {
+export const createState: StateFactory<DESHyperNEATContext> = (
+  stateFactoryOptions?: DESHyperNEATStateData
+) => {
   return new DESHyperNEATState(stateFactoryOptions)
 }

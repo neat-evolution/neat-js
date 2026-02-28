@@ -12,20 +12,13 @@ import {
 } from '@neat-evolution/cppn'
 import { threadRNG } from '@neat-evolution/utils'
 
-import type { CustomState } from './CustomState.js'
-import type { CustomStateData } from './CustomStateData.js'
+import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import type { DESHyperNEATGenomeOptions } from './DESHyperNEATGenomeOptions.js'
 import type { DESHyperNEATLinkFactoryOptions } from './DESHyperNEATLinkFactoryOptions.js'
 import { isCPPNGenome } from './DESHyperNEATNodeFactoryOptions.js'
 import { insertIdentity } from './genome/insertIdentity.js'
 
-export class DESHyperNEATLink extends CoreLink<
-  DESHyperNEATLinkFactoryOptions,
-  NEATConfigOptions,
-  CustomStateData,
-  CustomState,
-  DESHyperNEATLink
-> {
+export class DESHyperNEATLink extends CoreLink<DESHyperNEATContext> {
   options: DESHyperNEATGenomeOptions
   cppn: CPPNGenome<CPPNGenomeOptions>
   depth: number
@@ -34,14 +27,8 @@ export class DESHyperNEATLink extends CoreLink<
     options: DESHyperNEATGenomeOptions,
     factoryOptions: DESHyperNEATLinkFactoryOptions,
     config: NEATConfigOptions,
-    state: CustomState,
-    createLink: LinkFactory<
-      DESHyperNEATLinkFactoryOptions,
-      NEATConfigOptions,
-      CustomStateData,
-      CustomState,
-      DESHyperNEATLink
-    >
+    state: DESHyperNEATContext['State']['Link'],
+    createLink: LinkFactory<DESHyperNEATContext>
   ) {
     super(factoryOptions, config, state, createLink)
     this.options = options
