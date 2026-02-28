@@ -1,12 +1,9 @@
-import type { ConfigData } from './ConfigData.js'
-import type { ConfigFactoryOptions } from './ConfigFactoryOptions.js'
-import type { ConfigOptions } from './ConfigOptions.js'
-import type { ConfigProvider } from './ConfigProvider.js'
+import type { AlgorithmContext } from '../contexts/AlgorithmContext.js'
+import type {
+  ConfigFactoryOptionsOf,
+  ConfigTypeOf,
+} from '../contexts/helpers.js'
 
-export type ConfigFactory<
-  CFO extends ConfigFactoryOptions,
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
-  CD extends ConfigData,
-  C extends ConfigProvider<NCO, LCO, CD>,
-> = (factoryOptions: CFO) => C
+export type ConfigFactory<Ctx extends AlgorithmContext> = (
+  factoryOptions: ConfigFactoryOptionsOf<Ctx>
+) => ConfigTypeOf<Ctx>

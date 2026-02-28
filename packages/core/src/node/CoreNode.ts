@@ -1,38 +1,37 @@
-import type { ConfigOptions } from '../config/ConfigOptions.js'
-import type { ExtendedState } from '../state/StateProvider.js'
+import type { AlgorithmContext } from '../contexts/AlgorithmContext.js'
+import type {
+  ConfigNodeOptionsOf,
+  NodeFactoryOptionsOf,
+  NodeTypeOf,
+  StateNodeDataOf,
+  StateNodeOf,
+} from '../contexts/helpers.js'
 
 import type { Node } from './Node.js'
 import type { NodeData } from './NodeData.js'
 import type { NodeFactory } from './NodeFactory.js'
-import type { NodeFactoryOptions } from './NodeFactoryOptions.js'
 import type { NodeId } from './NodeRef.js'
 import type { NodeType } from './NodeType.js'
 import { toNodeKey } from './nodeRefToKey.js'
 
-export class CoreNode<
-  NFO extends NodeFactoryOptions,
-  NCO extends ConfigOptions,
-  NSD,
-  NS extends ExtendedState<NSD>,
-  N extends CoreNode<NFO, NCO, NSD, NS, N>,
-> implements Node<NFO, NCO, NSD, NS, N>
+export class CoreNode<Ctx extends AlgorithmContext> implements Node<Ctx>
 {
   // NodeRef
   public readonly type: NodeType
   public readonly id: NodeId
 
   // NodeExtension
-  public readonly config: NCO
-  public readonly state: NS
+  public readonly config: ConfigNodeOptionsOf<Ctx>
+  public readonly state: StateNodeOf<Ctx>
 
   // NodeFactory
-  public readonly createNode: NodeFactory<NFO, NCO, NSD, NS, N>
+  public readonly createNode: NodeFactory<Ctx>
 
   constructor(
-    factoryOptions: NFO,
-    config: NCO,
-    state: NS,
-    createNode: NodeFactory<NFO, NCO, NSD, NS, N>
+    factoryOptions: NodeFactoryOptionsOf<Ctx>,
+    config: ConfigNodeOptionsOf<Ctx>,
+    state: StateNodeOf<Ctx>,
+    createNode: NodeFactory<Ctx>
   ) {
     this.type = factoryOptions.type
     this.id = factoryOptions.id
@@ -41,18 +40,22 @@ export class CoreNode<
     this.createNode = createNode
   }
 
-  crossover(other: N, _fitness: number, _otherFitness: number): N {
+  crossover(
+    other: NodeTypeOf<Ctx>,
+    _fitness: number,
+    _otherFitness: number
+  ): NodeTypeOf<Ctx> {
     if (this.type !== other.type || this.id !== other.id) {
       throw new Error('Mismatch in crossover')
     }
     return this.createNode(this.toFactoryOptions(), this.config, this.state)
   }
 
-  clone(): N {
+  clone(): NodeTypeOf<Ctx> {
     return this.createNode(this.toFactoryOptions(), this.config, this.state)
   }
 
-  distance(_other: N): number {
+  distance(_other: NodeTypeOf<Ctx>): number {
     return 0
   }
 
@@ -62,21 +65,29 @@ export class CoreNode<
 
   /**
    * Must override
-   * @returns {NodeData<NFO, NCO, NSD>} node data
+   * @returns node data
    */
-  toJSON(): NodeData<NFO, NCO, NSD> {
+  toJSON(): NodeData<
+    NodeFactoryOptionsOf<Ctx>,
+    ConfigNodeOptionsOf<Ctx>,
+    StateNodeDataOf<Ctx>
+  > {
     return {
       config: this.config,
       state: this.state?.toJSON() ?? null,
       factoryOptions: this.toFactoryOptions(),
-    } as unknown as NodeData<NFO, NCO, NSD>
+    } as NodeData<
+      NodeFactoryOptionsOf<Ctx>,
+      ConfigNodeOptionsOf<Ctx>,
+      StateNodeDataOf<Ctx>
+    >
   }
 
   /**
    * Must override
-   * @returns {NFO} node factory options
+   * @returns node factory options
    */
-  toFactoryOptions(): NFO {
-    return { type: this.type, id: this.id } as unknown as NFO
+  toFactoryOptions(): NodeFactoryOptionsOf<Ctx> {
+    return { type: this.type, id: this.id } as NodeFactoryOptionsOf<Ctx>
   }
 }
