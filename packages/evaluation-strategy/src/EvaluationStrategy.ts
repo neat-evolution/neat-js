@@ -11,7 +11,7 @@ import type { EvaluationContext } from './EvaluationContext.js'
  * An evaluation strategy orchestrates how a set of genome entries are evaluated
  * using a given environment and executor factory.
  */
-export interface EvaluationStrategy<G extends AnyGenome<G>> {
+export interface EvaluationStrategy<G extends AnyGenome<any>> {
   /**
    * Evaluates a collection of genome entries and returns their fitness data.
    * The strategy determines the pattern of evaluation (e.g., individual, batch, tournament).
