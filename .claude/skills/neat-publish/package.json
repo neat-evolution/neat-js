@@ -13,6 +13,7 @@
     "generate-change-files": "node scripts/generate-change-files.js",
     "lint": "biome lint",
     "merge-and-release": "node scripts/merge-and-release.js",
+    "verify": "node scripts/verify.js",
     "test": "vitest run --passWithNoTests",
     "test:dev": "vitest"
   },
