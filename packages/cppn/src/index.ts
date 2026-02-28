@@ -1,5 +1,6 @@
 export { createConfig, createLink, createState } from '@neat-evolution/neat'
 export * from './CPPNAlgorithm.js'
+export * from './CPPNContext.js'
 export * from './CPPNGenome.js'
 export * from './CPPNGenomeData.js'
 export * from './CPPNGenomeFactoryOptions.js'

@@ -6,17 +6,12 @@ import {
 } from '@neat-evolution/core'
 import { threadRNG } from '@neat-evolution/utils'
 
+import type { CPPNContext } from './CPPNContext.js'
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
 import type { CPPNNodeOptions } from './CPPNNodeOptions.js'
 import { createNode } from './createNode.js'
 
-export class CPPNNode extends CoreNode<
-  CPPNNodeFactoryOptions,
-  null,
-  null,
-  null,
-  CPPNNode
-> {
+export class CPPNNode extends CoreNode<CPPNContext> {
   public activation: Activation
   public bias: number
 

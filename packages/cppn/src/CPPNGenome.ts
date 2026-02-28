@@ -1,25 +1,21 @@
 import {
   type Activation,
-  type ConfigData,
-  type ConfigFactoryOptions,
   CoreGenome,
   type InitConfig,
+  type LinkFactory,
   type LinkFactoryOptions,
   type NodeKey,
   NodeType,
   nodeKeyToType,
-  type StateData,
   toNodeKey,
 } from '@neat-evolution/core'
 import {
-  createLink,
-  type NEATConfig,
-  type NEATLink,
+  createLink as createNEATLink,
   type NEATLinkData,
-  type NEATState,
 } from '@neat-evolution/neat'
 import { threadRNG } from '@neat-evolution/utils'
 
+import type { CPPNContext } from './CPPNContext.js'
 import type { CPPNGenomeData } from './CPPNGenomeData.js'
 import type {
   CPPNGenomeFactoryOptions,
@@ -27,42 +23,32 @@ import type {
 } from './CPPNGenomeFactoryOptions.js'
 import type { CPPNGenomeOptions } from './CPPNGenomeOptions.js'
 import type { CPPNNode } from './CPPNNode.js'
-import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
 import type { CPPNGenomeFactory } from './createGenome.js'
 import { createNodeFactory } from './createNode.js'
 
 export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
-  ConfigFactoryOptions,
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  CPPNNodeData,
-  NEATLinkData,
-  CPPNGenomeFactoryOptions,
-  GO,
-  CPPNGenomeData<GO>,
-  CPPNNodeFactoryOptions,
-  CPPNNode,
-  LinkFactoryOptions,
-  NEATLink,
-  CPPNGenome<GO>
+  CPPNContext<GO>
 > {
   constructor(
-    config: NEATConfig,
-    state: NEATState,
+    config: CPPNContext<GO>['Config']['Type'],
+    state: CPPNContext<GO>['State']['Type'],
     options: GO,
     initConfig: InitConfig,
     createGenome: CPPNGenomeFactory<GO>,
     factoryOptions?: CPPNGenomeFactoryOptions
   ) {
-    const createNode = createNodeFactory(options)
+    const createNode = createNodeFactory<GO>(options)
+    const createLink = ((
+      factoryOptions,
+      config,
+      state
+    ) => {
+      return createNEATLink(
+        factoryOptions,
+        config as never,
+        state as never
+      ) as unknown as CPPNContext<GO>['Link']['Type']
+    }) as LinkFactory<CPPNContext<GO>>
     super(
       config,
       state,

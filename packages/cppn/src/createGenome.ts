@@ -1,39 +1,16 @@
-import type {
-  ConfigData,
-  GenomeFactory,
-  InitConfig,
-  StateData,
-} from '@neat-evolution/core'
-import type { NEATConfig, NEATLinkData, NEATState } from '@neat-evolution/neat'
+import type { GenomeFactory, InitConfig } from '@neat-evolution/core'
 
+import type { CPPNContext } from './CPPNContext.js'
 import { CPPNGenome } from './CPPNGenome.js'
-import type {
-  CPPNGenomeFactoryOptions,
-  CPPNNodeData,
-} from './CPPNGenomeFactoryOptions.js'
+import type { CPPNGenomeFactoryOptions } from './CPPNGenomeFactoryOptions.js'
 import type { CPPNGenomeOptions } from './CPPNGenomeOptions.js'
 
-export type CPPNGenomeFactory<GO extends CPPNGenomeOptions> = GenomeFactory<
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  CPPNNodeData,
-  NEATLinkData,
-  CPPNGenomeFactoryOptions,
-  GO,
-  CPPNGenome<GO>
->
+export type CPPNGenomeFactory<GO extends CPPNGenomeOptions> =
+  GenomeFactory<CPPNContext<GO>>
 
 export const createGenome: CPPNGenomeFactory<CPPNGenomeOptions> = (
-  configProvider: NEATConfig,
-  stateProvider: NEATState,
+  configProvider: CPPNContext['Config']['Type'],
+  stateProvider: CPPNContext['State']['Type'],
   genomeOptions: CPPNGenomeOptions,
   initConfig: InitConfig,
   genomeFactoryOptions?: CPPNGenomeFactoryOptions

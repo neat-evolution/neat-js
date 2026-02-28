@@ -1,61 +1,22 @@
-import type {
-  Algorithm,
-  ConfigData,
-  ConfigFactoryOptions,
-  LinkFactoryOptions,
-  StateData,
-} from '@neat-evolution/core'
-import type {
-  NEATConfig,
-  NEATLink,
-  NEATLinkData,
-  NEATState,
-} from '@neat-evolution/neat'
-import { createConfig, createState } from '@neat-evolution/neat'
-
-import type { CPPNGenome } from './CPPNGenome.js'
-import type { CPPNGenomeData } from './CPPNGenomeData.js'
-import type {
-  CPPNGenomeFactoryOptions,
-  CPPNNodeData,
-} from './CPPNGenomeFactoryOptions.js'
+import type { Algorithm } from '@neat-evolution/core'
 import {
-  type CPPNGenomeOptions,
+  createConfig as createNEATConfig,
+  createState as createNEATState,
+} from '@neat-evolution/neat'
+
+import type { CPPNContext } from './CPPNContext.js'
+import {
   defaultCPPNGenomeOptions,
 } from './CPPNGenomeOptions.js'
-import type { CPPNNode } from './CPPNNode.js'
-import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
 import { createGenome } from './createGenome.js'
 import { createPhenotype } from './createPhenotype.js'
 
-export const CPPNAlgorithm: Algorithm<
-  ConfigFactoryOptions,
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  CPPNNodeData,
-  NEATLinkData,
-  CPPNGenomeFactoryOptions,
-  CPPNGenomeOptions,
-  CPPNGenomeData<CPPNGenomeOptions>,
-  CPPNNodeFactoryOptions,
-  CPPNNode,
-  LinkFactoryOptions,
-  NEATLink,
-  CPPNGenome<CPPNGenomeOptions>
-> = {
+export const CPPNAlgorithm: Algorithm<CPPNContext> = {
   name: 'CPPN',
   pathname: '@neat-evolution/cppn',
   defaultOptions: defaultCPPNGenomeOptions,
-  createConfig,
+  createConfig: (factoryOptions) => createNEATConfig(factoryOptions),
   createGenome,
   createPhenotype,
-  createState,
+  createState: () => createNEATState(),
 }
