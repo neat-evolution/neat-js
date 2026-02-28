@@ -1,9 +1,9 @@
 import type {
-  ConfigData,
-  Genome,
-  GenomeFactoryOptions,
-  GenomeOptions,
-  StateData,
+  AlgorithmContext,
+  ConfigDataOf,
+  GenomeFactoryOptionsOf,
+  GenomeOptionsOf,
+  StateDataOf,
 } from '@neat-evolution/core'
 import { threadRNG } from '@neat-evolution/utils'
 
@@ -15,43 +15,18 @@ import type { SpeciesOptions } from './SpeciesOptions.js'
 /// Collection of similar organisms
 // The lock is used to add new organisms without affecting the reproduction of the previous generation.
 // It is unlocked after reproduction, which will remove the previous generation and keep the new.
-export class Species<
-  CD extends ConfigData,
-  SD extends StateData,
-  HND,
-  LD,
-  GFO extends GenomeFactoryOptions<HND, LD>,
-  GO extends GenomeOptions,
-  G extends Genome<
-    any,
-    any,
-    CD,
-    any,
-    any,
-    any,
-    any,
-    any,
-    SD,
-    any,
-    HND,
-    LD,
-    GFO,
-    GO,
-    any,
-    G
-  >,
-> {
+export class Species<Ctx extends AlgorithmContext> {
   public readonly speciesOptions: SpeciesOptions
 
   // internal state
   public readonly speciesState: SpeciesState
 
   // organism set
-  public organisms: Array<Organism<CD, SD, HND, LD, GFO, GO, G>>
+  public organisms: Array<Organism<Ctx>>
 
   constructor(
     speciesOptions: SpeciesOptions,
-    speciesFactoryOptions?: SpeciesFactoryOptions<CD, SD, HND, LD, GFO, GO, G>
+    speciesFactoryOptions?: SpeciesFactoryOptions
   ) {
     this.speciesOptions = speciesOptions
     const speciesState = speciesFactoryOptions?.speciesState
@@ -98,7 +73,7 @@ export class Species<
   }
 
   /// Determine wether a new organism is compatible
-  isCompatible(other: Organism<CD, SD, HND, LD, GFO, GO, G>): boolean {
+  isCompatible(other: Organism<Ctx>): boolean {
     const organism = this.organisms[0]
     if (organism != null) {
       return organism.distance(other) < this.speciesOptions.speciationThreshold
@@ -107,7 +82,7 @@ export class Species<
   }
 
   /// Add an organism
-  push(individual: Organism<CD, SD, HND, LD, GFO, GO, G>): void {
+  push(individual: Organism<Ctx>): void {
     this.organisms.push(individual)
   }
 
@@ -122,7 +97,7 @@ export class Species<
 
   /// Iterate organisms. Adheres to lock.
   *organismValues(): Generator<
-    Organism<CD, SD, HND, LD, GFO, GO, G>,
+    Organism<Ctx>,
     void,
     void
   > {
@@ -138,7 +113,7 @@ export class Species<
 
   /// Enumerate organisms. Adheres to lock.
   *organismEntries(): Generator<
-    [index: number, organism: Organism<CD, SD, HND, LD, GFO, GO, G>],
+    [index: number, organism: Organism<Ctx>],
     void,
     void
   > {
@@ -153,7 +128,7 @@ export class Species<
   }
 
   /// Get random organism. Adheres to lock.
-  randomOrganism(): Organism<CD, SD, HND, LD, GFO, GO, G> | null {
+  randomOrganism(): Organism<Ctx> | null {
     const randomIndex = threadRNG().genRange(0, this.size)
     let i = 0
     for (const organism of this.organismValues()) {
@@ -284,8 +259,8 @@ export class Species<
     this.speciesState.elites = this.speciesOptions.guaranteedElites
   }
 
-  tournamentSelect(k: number): Organism<CD, SD, HND, LD, GFO, GO, G> | null {
-    let best: Organism<CD, SD, HND, LD, GFO, GO, G> | null = null
+  tournamentSelect(k: number): Organism<Ctx> | null {
+    let best: Organism<Ctx> | null = null
     let bestFitness: number | null = null
 
     for (let i = 0; i < k; i++) {
@@ -304,7 +279,14 @@ export class Species<
     return best
   }
 
-  toJSON(): SpeciesData<CD, SD, HND, LD, GFO, GO> {
+  toJSON(): SpeciesData<
+    ConfigDataOf<Ctx>,
+    StateDataOf<Ctx>,
+    any,
+    any,
+    GenomeFactoryOptionsOf<Ctx>,
+    GenomeOptionsOf<Ctx>
+  > {
     const config = this.organisms[0]?.genome.config.toJSON() ?? null
     const state = this.organisms[0]?.genome.state.toJSON() ?? null
     const genomeOptions = this.organisms[0]?.genome.genomeOptions ?? null
@@ -328,7 +310,7 @@ export class Species<
     }
   }
 
-  toFactoryOptions(): SpeciesFactoryOptions<CD, SD, HND, LD, GFO, GO, G> {
+  toFactoryOptions(): SpeciesFactoryOptions {
     return {
       speciesState: this.speciesState,
       organisms: this.organisms,

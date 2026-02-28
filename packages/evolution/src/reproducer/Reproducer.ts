@@ -2,30 +2,11 @@ import type { Genome } from '@neat-evolution/core'
 
 import type { Organism } from '../Organism.js'
 
-export interface Reproducer<
-  G extends Genome<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    G
-  >,
-> {
+export interface Reproducer {
   copyElites: (
     speciesIds: number[]
-  ) => Promise<Array<Organism<any, any, any, any, any, any, G>>>
+  ) => Promise<Array<Organism<any> & { genome: Genome<any> }>>
   reproduce: (
     speciesIds: number[]
-  ) => Promise<Array<Organism<any, any, any, any, any, any, G>>>
+  ) => Promise<Array<Organism<any> & { genome: Genome<any> }>>
 }

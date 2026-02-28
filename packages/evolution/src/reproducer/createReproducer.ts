@@ -1,4 +1,3 @@
-import type { CoreGenome } from '@neat-evolution/core'
 import { threadRNG } from '@neat-evolution/utils'
 
 import type { Organism } from '../Organism.js'
@@ -9,71 +8,17 @@ import type { Reproducer } from './Reproducer.js'
 import type { ReproducerFactory } from './ReproducerFactory.js'
 
 // FIXME: is ReproducerFactory<any, any, undefined> the best way to do this?
-export const createReproducer: ReproducerFactory<any, any> = <
-  G extends CoreGenome<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    G
-  >,
-  P extends Population<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    G,
-    any
-  >,
+export const createReproducer: ReproducerFactory<any> = <
+  P extends Population<any>,
 >(
   population: P
-): Reproducer<G> => {
+): Reproducer => {
   const rng = threadRNG()
   return {
     copyElites: async (speciesIds: number[]) => {
-      const organisms: Array<Organism<any, any, any, any, any, any, G>> = []
+      const organisms: Array<Organism<any>> = []
       for (const i of speciesIds) {
-        const species = population.species.get(i) as Species<
-          any,
-          any,
-          any,
-          any,
-          any,
-          any,
-          G
-        >
+        const species = population.species.get(i) as Species<any>
         // Steal elites from number of offsprings
         const elitesTakenFromOffspring = Math.min(
           population.populationOptions.elitesFromOffspring,
@@ -84,15 +29,7 @@ export const createReproducer: ReproducerFactory<any, any> = <
 
         // Directly copy elites, without crossover or mutation
         for (let j = 0; j < species.elites; j++) {
-          const organism = species.organisms[j % species.size] as Organism<
-            any,
-            any,
-            any,
-            any,
-            any,
-            any,
-            G
-          >
+          const organism = species.organisms[j % species.size] as Organism<any>
           const elite = organism.asElite()
           organisms.push(elite)
           population.push(elite, true)
@@ -101,18 +38,10 @@ export const createReproducer: ReproducerFactory<any, any> = <
       return organisms
     },
     reproduce: async (speciesIds: number[]) => {
-      const organisms: Array<Organism<any, any, any, any, any, any, G>> = []
+      const organisms: Array<Organism<any>> = []
 
       for (const i of speciesIds) {
-        const species = population.species.get(i) as Species<
-          any,
-          any,
-          any,
-          any,
-          any,
-          any,
-          G
-        >
+        const species = population.species.get(i) as Species<any>
         const reproductions = Math.floor(species.offsprings)
 
         // Breed new organisms
@@ -133,7 +62,7 @@ export const createReproducer: ReproducerFactory<any, any> = <
             throw new Error('Unable to gather father organism')
           }
 
-          let child: Organism<any, any, any, any, any, any, G>
+          let child: Organism<any>
           if (
             rng.gen() <
             population.populationOptions.asexualReproductionProbability
