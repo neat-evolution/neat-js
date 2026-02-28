@@ -40,6 +40,15 @@ yarn check   # Build, test, lint, beachball check, manypkg check
 
 Fix any errors before committing.
 
+For faster iteration while work is still in progress, use the targeted verifier:
+
+```bash
+node .claude/skills/neat-publish/scripts/verify.js
+node .claude/skills/neat-publish/scripts/verify.js --check
+```
+
+That checks changed workspaces in parallel and returns JSON with exact repro commands for failures.
+
 ## Phase 2: Create PR
 
 When ready, push and create PR:
@@ -117,6 +126,7 @@ When GitHub Actions fail, investigate the root cause rather than re-running the 
 | Task                | Command                                                                |
 | ------------------- | ---------------------------------------------------------------------- |
 | Check status        | `node .claude/skills/neat-publish/scripts/check-status.js`             |
+| Verify changes      | `node .claude/skills/neat-publish/scripts/verify.js`                   |
 | Create PR           | `gh pr create --title "..." --body "..."`                              |
 | Generate changes    | `node .claude/skills/neat-publish/scripts/generate-change-files.js`    |
 | Merge and release   | `node .claude/skills/neat-publish/scripts/merge-and-release.js`        |
@@ -126,3 +136,4 @@ When GitHub Actions fail, investigate the root cause rather than re-running the 
 | Manual change file  | `yarn beachball change --no-commit --package <pkg> --type <t> --message "<m>"` |
 
 See [references/beachball.md](references/beachball.md) for beachball details.
+See [references/verify.md](references/verify.md) for verifier options and output details.
