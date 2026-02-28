@@ -23,7 +23,7 @@ export const breedOrganism = async (
     throw new Error('Unable to gather father organism')
   }
 
-  let child: Organism<any, any, any, any, any, any, any>
+  let child: Organism<any>
   if (
     context.rng.gen() <
     context.threadInfo.populationOptions.asexualReproductionProbability
