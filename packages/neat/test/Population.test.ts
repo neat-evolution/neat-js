@@ -1,9 +1,4 @@
-import {
-  type ConfigData,
-  defaultNEATConfigOptions,
-  type InitConfig,
-  type StateData,
-} from '@neat-evolution/core'
+import { defaultNEATConfigOptions, type InitConfig } from '@neat-evolution/core'
 import {
   DatasetEnvironment,
   defaultDatasetOptions,
@@ -36,11 +31,8 @@ import {
   defaultNEATGenomeOptions,
   NEATAlgorithm,
   type NEATConfig,
-  type NEATGenome,
-  type NEATGenomeFactoryOptions,
   type NEATGenomeOptions,
-  type NEATHiddenNodeData,
-  type NEATLinkData,
+  type NEATContext,
   type NEATPopulation,
 } from '../src/index.js'
 
@@ -254,15 +246,7 @@ describe('Population class', () => {
 
     test('should update the number of new elites and offsprings for each species', async () => {
       const dataMap = new Map<
-        Species<
-          ConfigData,
-          StateData,
-          NEATHiddenNodeData,
-          NEATLinkData,
-          NEATGenomeFactoryOptions,
-          NEATGenomeOptions,
-          NEATGenome
-        >,
+        Species<NEATContext>,
         { elites: number; offsprings: number }
       >()
 

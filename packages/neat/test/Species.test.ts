@@ -1,8 +1,4 @@
-import {
-  type ConfigData,
-  defaultNEATConfigOptions,
-  type StateData,
-} from '@neat-evolution/core'
+import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   defaultSpeciesOptions,
   Organism,
@@ -15,15 +11,11 @@ import { createConfig } from '../src/createConfig.js'
 import { createGenome } from '../src/createGenome.js'
 import { createState } from '../src/createState.js'
 import type { NEATGenome } from '../src/NEATGenome.js'
-import type {
-  NEATGenomeFactoryOptions,
-  NEATHiddenNodeData,
-  NEATLinkData,
-} from '../src/NEATGenomeFactoryOptions.js'
 import {
   defaultNEATGenomeOptions,
   type NEATGenomeOptions,
 } from '../src/NEATGenomeOptions.js'
+import type { NEATContext } from '../src/NEATContext.js'
 import type { NEATState } from '../src/NEATState.js'
 
 describe('Species class', () => {
@@ -62,40 +54,16 @@ describe('Species class', () => {
   describe('Species constructor', () => {
     test('should correctly initialize', () => {
       const options: SpeciesOptions = defaultSpeciesOptions
-      const species = new Species<
-        ConfigData,
-        StateData,
-        NEATHiddenNodeData,
-        NEATLinkData,
-        NEATGenomeFactoryOptions,
-        NEATGenomeOptions,
-        NEATGenome
-      >(options)
+      const species = new Species<NEATContext>(options)
       expect(species.organisms.length).toBe(0)
     })
   })
 
   describe('Species push', () => {
     test('should add organism to species', async () => {
-      const species = new Species<
-        ConfigData,
-        StateData,
-        NEATHiddenNodeData,
-        NEATLinkData,
-        NEATGenomeFactoryOptions,
-        NEATGenomeOptions,
-        NEATGenome
-      >(defaultSpeciesOptions)
+      const species = new Species<NEATContext>(defaultSpeciesOptions)
       const genome = await createSeasonedGenome()
-      const organism = new Organism<
-        ConfigData,
-        StateData,
-        NEATHiddenNodeData,
-        NEATLinkData,
-        NEATGenomeFactoryOptions,
-        NEATGenomeOptions,
-        NEATGenome
-      >(genome)
+      const organism = new Organism<NEATContext>(genome)
       species.push(organism)
       expect(species.organisms.length).toBe(1)
     })
@@ -107,35 +75,11 @@ describe('Species class', () => {
         ...defaultSpeciesOptions,
         speciationThreshold: 1,
       }
-      const species = new Species<
-        ConfigData,
-        StateData,
-        NEATHiddenNodeData,
-        NEATLinkData,
-        NEATGenomeFactoryOptions,
-        NEATGenomeOptions,
-        NEATGenome
-      >(options)
+      const species = new Species<NEATContext>(options)
       const genome1 = await createSeasonedGenome()
       const genome2 = await createSeasonedGenome()
-      const organism1 = new Organism<
-        ConfigData,
-        StateData,
-        NEATHiddenNodeData,
-        NEATLinkData,
-        NEATGenomeFactoryOptions,
-        NEATGenomeOptions,
-        NEATGenome
-      >(genome1)
-      const organism2 = new Organism<
-        ConfigData,
-        StateData,
-        NEATHiddenNodeData,
-        NEATLinkData,
-        NEATGenomeFactoryOptions,
-        NEATGenomeOptions,
-        NEATGenome
-      >(genome2)
+      const organism1 = new Organism<NEATContext>(genome1)
+      const organism2 = new Organism<NEATContext>(genome2)
       species.push(organism1)
       const result = species.isCompatible(organism2)
       expect(result).toBe(true)
@@ -146,35 +90,11 @@ describe('Species class', () => {
         ...defaultSpeciesOptions,
         speciationThreshold: 0,
       }
-      const species = new Species<
-        ConfigData,
-        StateData,
-        NEATHiddenNodeData,
-        NEATLinkData,
-        NEATGenomeFactoryOptions,
-        NEATGenomeOptions,
-        NEATGenome
-      >(options)
+      const species = new Species<NEATContext>(options)
       const genome1 = await createSeasonedGenome()
       const genome2 = await createSeasonedGenome()
-      const organism1 = new Organism<
-        ConfigData,
-        StateData,
-        NEATHiddenNodeData,
-        NEATLinkData,
-        NEATGenomeFactoryOptions,
-        NEATGenomeOptions,
-        NEATGenome
-      >(genome1)
-      const organism2 = new Organism<
-        ConfigData,
-        StateData,
-        NEATHiddenNodeData,
-        NEATLinkData,
-        NEATGenomeFactoryOptions,
-        NEATGenomeOptions,
-        NEATGenome
-      >(genome2)
+      const organism1 = new Organism<NEATContext>(genome1)
+      const organism2 = new Organism<NEATContext>(genome2)
       species.push(organism1)
       const result = species.isCompatible(organism2)
       expect(result).toBe(false)
