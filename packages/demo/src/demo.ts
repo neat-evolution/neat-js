@@ -27,6 +27,7 @@ import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
   type EvolutionOptions,
+  type Population,
   type ReproducerFactory,
 } from '@neat-evolution/evolution'
 import type { ExecutorFactory } from '@neat-evolution/executor'
@@ -59,7 +60,7 @@ export interface DemoOptions {
 }
 
 export const demo = async (
-  createReproducer: ReproducerFactory<any, any>,
+  createReproducer: ReproducerFactory<Population<any>>,
   createEvaluator: EvaluatorFactory<any, any>,
   createExecutor?: ExecutorFactory,
   options: DemoOptions = {}
