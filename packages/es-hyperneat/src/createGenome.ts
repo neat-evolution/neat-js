@@ -1,16 +1,15 @@
-import type { InitConfig } from '@neat-evolution/core'
+import type { GenomeFactory, InitConfig } from '@neat-evolution/core'
 import {
   CPPNGenome,
-  type CPPNGenomeFactory,
   type CPPNGenomeFactoryOptions,
 } from '@neat-evolution/cppn'
-import type { NEATConfig, NEATState } from '@neat-evolution/neat'
 
+import type { ESHyperNEATContext } from './ESHyperNEATContext.js'
 import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
 
-export const createGenome: CPPNGenomeFactory<ESHyperNEATGenomeOptions> = (
-  configProvider: NEATConfig,
-  stateProvider: NEATState,
+export const createGenome: GenomeFactory<ESHyperNEATContext> = (
+  configProvider: ESHyperNEATContext['Config']['Type'],
+  stateProvider: ESHyperNEATContext['State']['Type'],
   genomeOptions: ESHyperNEATGenomeOptions,
   _initConfig: InitConfig,
   genomeFactoryOptions?: CPPNGenomeFactoryOptions
