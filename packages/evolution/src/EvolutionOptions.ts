@@ -2,31 +2,8 @@ import type { Organism } from './Organism.js'
 import type { Population } from './Population.js'
 
 export interface EvolutionOptions<
-  P extends Population<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >,
-  O extends Organism<any, any, any, any, any, any, any>,
+  P extends Population<any>,
+  O extends Organism<any>,
 > {
   threadCount: number
   iterations: number
@@ -46,31 +23,8 @@ export interface EvolutionOptions<
 }
 
 export const defaultEvolutionOptions: EvolutionOptions<
-  Population<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >,
-  Organism<any, any, any, any, any, any, any>
+  Population<any>,
+  Organism<any>
 > = {
   threadCount: 0,
   iterations: 100,

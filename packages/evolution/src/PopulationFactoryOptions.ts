@@ -1,6 +1,5 @@
 import type {
   ConfigData,
-  Genome,
   GenomeFactoryOptions,
   GenomeOptions,
   StateData,
@@ -54,26 +53,8 @@ export const toPopulationDataSpecies = <
   LD,
   GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
-  G extends Genome<
-    any,
-    any,
-    CD,
-    any,
-    any,
-    any,
-    any,
-    any,
-    SD,
-    any,
-    HND,
-    LD,
-    GFO,
-    GO,
-    any,
-    G
-  >,
 >(
-  species: Species<CD, SD, HND, LD, GFO, GO, G>
+  species: Species<any>
 ): PopulationDataSpecies<CD, SD, HND, LD, GFO, GO> => {
   const data = species.toJSON()
   return {
