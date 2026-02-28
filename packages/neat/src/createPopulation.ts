@@ -1,11 +1,4 @@
-import type {
-  ConfigData,
-  ConfigFactoryOptions,
-  LinkFactoryOptions,
-  NEATConfigOptions,
-  NodeFactoryOptions,
-  StateData,
-} from '@neat-evolution/core'
+import type { NEATConfigOptions } from '@neat-evolution/core'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
@@ -17,91 +10,33 @@ import type {
 import { Population } from '@neat-evolution/evolution'
 
 import { NEATAlgorithm } from './NEATAlgorithm.js'
-import type { NEATConfig } from './NEATConfig.js'
-import type { NEATGenome } from './NEATGenome.js'
-import type { NEATGenomeData } from './NEATGenomeData.js'
-import type {
-  NEATGenomeFactoryOptions,
-  NEATHiddenNodeData,
-  NEATLinkData,
-} from './NEATGenomeFactoryOptions.js'
+import type { NEATContext } from './NEATContext.js'
 import type { NEATGenomeOptions } from './NEATGenomeOptions.js'
-import type { NEATLink } from './NEATLink.js'
-import type { NEATNode } from './NEATNode.js'
-import type { NEATState } from './NEATState.js'
 
-export type NEATPopulation = Population<
-  ConfigFactoryOptions,
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  NEATHiddenNodeData,
-  NEATLinkData,
-  NEATGenomeFactoryOptions,
-  NEATGenomeOptions,
-  NEATGenomeData,
-  NodeFactoryOptions,
-  NEATNode,
-  LinkFactoryOptions,
-  NEATLink,
-  NEATGenome,
-  typeof NEATAlgorithm
->
+export type NEATPopulation = Population<NEATContext>
 
-export type NEATReproducerFactory = ReproducerFactory<
-  NEATGenome,
-  NEATPopulation
->
+export type NEATReproducerFactory = ReproducerFactory<NEATPopulation>
 
-export const createPopulation: PopulationFactory<
-  ConfigFactoryOptions,
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  NEATHiddenNodeData,
-  NEATLinkData,
-  NEATGenomeFactoryOptions,
-  NEATGenomeOptions,
-  NEATGenomeData,
-  NodeFactoryOptions,
-  NEATNode,
-  LinkFactoryOptions,
-  NEATLink,
-  NEATGenome
-> = (
+export const createPopulation: PopulationFactory<NEATContext> = (
   createReproducer: NEATReproducerFactory,
   evaluator: Evaluator<any>,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: NEATGenomeOptions,
   populationFactoryOptions?: PopulationFactoryOptions<
-    ConfigData,
-    StateData,
-    NEATHiddenNodeData,
-    NEATLinkData,
-    NEATGenomeFactoryOptions,
-    NEATGenomeOptions
+    NEATContext['Config']['Data'],
+    NEATContext['State']['Data'],
+    NEATContext['Node']['HiddenData'],
+    NEATContext['Link']['Data'],
+    NEATContext['Genome']['FactoryOptions'],
+    NEATContext['Genome']['Options']
   >
 ): NEATPopulation => {
   const configProvider = NEATAlgorithm.createConfig({
     neat: neatConfigOptions ?? defaultNEATConfigOptions,
   })
   const initConfig = evaluator.environment.description
-  const population: NEATPopulation = new Population(
+  const population: NEATPopulation = new Population<NEATContext>(
     createReproducer,
     evaluator,
     NEATAlgorithm,

@@ -1,19 +1,15 @@
 import {
-  type ConfigData,
-  type ConfigFactoryOptions,
   CoreGenome,
   type InitConfig,
   type LinkFactoryOptions,
-  type NodeFactoryOptions,
   NodeType,
-  type StateData,
   toNodeKey,
 } from '@neat-evolution/core'
 
 import { createGenome } from './createGenome.js'
 import { createLink } from './createLink.js'
 import { createNode } from './createNode.js'
-import type { NEATConfig } from './NEATConfig.js'
+import type { NEATContext } from './NEATContext.js'
 import type { NEATGenomeData } from './NEATGenomeData.js'
 import type {
   NEATGenomeFactoryOptions,
@@ -21,36 +17,11 @@ import type {
   NEATLinkData,
 } from './NEATGenomeFactoryOptions.js'
 import type { NEATGenomeOptions } from './NEATGenomeOptions.js'
-import type { NEATLink } from './NEATLink.js'
-import type { NEATNode } from './NEATNode.js'
-import type { NEATState } from './NEATState.js'
 
-export class NEATGenome extends CoreGenome<
-  ConfigFactoryOptions,
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  NEATHiddenNodeData,
-  NEATLinkData,
-  NEATGenomeFactoryOptions,
-  NEATGenomeOptions,
-  NEATGenomeData,
-  NodeFactoryOptions,
-  NEATNode,
-  LinkFactoryOptions,
-  NEATLink,
-  NEATGenome
-> {
+export class NEATGenome extends CoreGenome<NEATContext> {
   constructor(
-    config: NEATConfig,
-    state: NEATState,
+    config: NEATContext['Config']['Type'],
+    state: NEATContext['State']['Type'],
     options: NEATGenomeOptions,
     initConfig: InitConfig,
     factoryOptions?: NEATGenomeFactoryOptions

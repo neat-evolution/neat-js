@@ -1,39 +1,13 @@
-import type {
-  ConfigData,
-  GenomeFactory,
-  InitConfig,
-  StateData,
-} from '@neat-evolution/core'
+import type { GenomeFactory, InitConfig } from '@neat-evolution/core'
 
-import type { NEATConfig } from './NEATConfig.js'
+import type { NEATContext } from './NEATContext.js'
 import { NEATGenome } from './NEATGenome.js'
-import type {
-  NEATGenomeFactoryOptions,
-  NEATHiddenNodeData,
-  NEATLinkData,
-} from './NEATGenomeFactoryOptions.js'
+import type { NEATGenomeFactoryOptions } from './NEATGenomeFactoryOptions.js'
 import type { NEATGenomeOptions } from './NEATGenomeOptions.js'
-import type { NEATState } from './NEATState.js'
 
-export const createGenome: GenomeFactory<
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  NEATHiddenNodeData,
-  NEATLinkData,
-  NEATGenomeFactoryOptions,
-  NEATGenomeOptions,
-  NEATGenome
-> = (
-  configProvider: NEATConfig,
-  stateProvider: NEATState,
+export const createGenome: GenomeFactory<NEATContext> = (
+  configProvider: NEATContext['Config']['Type'],
+  stateProvider: NEATContext['State']['Type'],
   genomeOptions: NEATGenomeOptions,
   initConfig: InitConfig,
   genomeFactoryOptions?: NEATGenomeFactoryOptions
