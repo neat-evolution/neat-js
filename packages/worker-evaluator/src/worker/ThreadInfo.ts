@@ -7,29 +7,13 @@ import type {
 import type { Environment } from '@neat-evolution/environment'
 import type { ExecutorFactory } from '@neat-evolution/executor'
 
-export type AnyGenomeFactory = GenomeFactory<
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any
->
+export type AnyGenomeFactory = GenomeFactory<any>
 
 export interface ThreadInfo {
-  createConfig: ConfigFactory<any, any, any, any, any>
+  createConfig: ConfigFactory<any>
   createExecutor: ExecutorFactory
   createGenome: AnyGenomeFactory
   createPhenotype: PhenotypeFactory<any>
-  createState: StateFactory<any, any, any, any, any, any>
+  createState: StateFactory<any>
   environment: Environment<any>
 }
