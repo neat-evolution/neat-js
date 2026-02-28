@@ -1,4 +1,3 @@
-import type { CoreGenome } from '@neat-evolution/core'
 import {
   Organism,
   type Reproducer,
@@ -25,33 +24,8 @@ import {
 import type { AnyPopulation } from './types.js'
 import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
 
-export class WorkerReproducer<
-  G extends CoreGenome<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    G
-  >,
-> implements Reproducer<G>
-{
-  public readonly population: AnyPopulation<G>
+export class WorkerReproducer implements Reproducer {
+  public readonly population: AnyPopulation
   public readonly algorithmPathname: string
   public readonly threadCount: number
   public readonly initPromise: Promise<void>
@@ -60,7 +34,7 @@ export class WorkerReproducer<
   private readonly pool: WorkerPool
   private readonly dispatcher: Dispatcher
 
-  constructor(population: AnyPopulation<G>, options: WorkerReproducerOptions) {
+  constructor(population: AnyPopulation, options: WorkerReproducerOptions) {
     this.options = options
     this.population = population
     this.algorithmPathname =
@@ -160,15 +134,7 @@ export class WorkerReproducer<
     context: DispatcherContext
   ) {
     const { speciesId } = action.payload
-    const species = this.population.species.get(speciesId) as Species<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >
+    const species = this.population.species.get(speciesId) as Species<any>
     const organism = species.tournamentSelect(
       this.population.populationOptions.tournamentSize
     )
@@ -217,19 +183,10 @@ export class WorkerReproducer<
 
   async copyElites(
     speciesIds: number[]
-  ): Promise<Array<Organism<any, any, any, any, any, any, G>>> {
-    const promises: Array<Promise<Organism<any, any, any, any, any, any, G>>> =
-      []
+  ): Promise<Array<Organism<any>>> {
+    const promises: Array<Promise<Organism<any>>> = []
     for (const i of speciesIds) {
-      const species = this.population.species.get(i) as Species<
-        any,
-        any,
-        any,
-        any,
-        any,
-        any,
-        any
-      >
+      const species = this.population.species.get(i) as Species<any>
       // Steal elites from number of offsprings
       const elitesTakenFromOffspring = Math.min(
         this.population.populationOptions.elitesFromOffspring,
@@ -240,15 +197,7 @@ export class WorkerReproducer<
 
       // Directly copy elites, without crossover or mutation
       for (let j = 0; j < species.elites; j++) {
-        const organism = species.organisms[j % species.size] as Organism<
-          any,
-          any,
-          any,
-          any,
-          any,
-          any,
-          G
-        >
+        const organism = species.organisms[j % species.size] as Organism<any>
         promises.push(this.eliteOrganism(organism))
       }
     }
@@ -256,8 +205,8 @@ export class WorkerReproducer<
   }
 
   async eliteOrganism(
-    organism: Organism<any, any, any, any, any, any, G>
-  ): Promise<Organism<any, any, any, any, any, any, G>> {
+    organism: Organism<any>
+  ): Promise<Organism<any>> {
     await this.initPromise
 
     const data = await this.dispatcher.call<OrganismPayload<any>>(
@@ -284,7 +233,7 @@ export class WorkerReproducer<
 
   async reproduce(
     speciesIds: number[]
-  ): Promise<Array<Organism<any, any, any, any, any, any, G>>> {
+  ): Promise<Array<Organism<any>>> {
     const result = await Promise.all(
       speciesIds.map(
         async (speciesId) => await this.reproduceSpecies(speciesId)
@@ -295,20 +244,11 @@ export class WorkerReproducer<
 
   async reproduceSpecies(
     speciesId: number
-  ): Promise<Array<Organism<any, any, any, any, any, any, G>>> {
-    const species = this.population.species.get(speciesId) as Species<
-      any,
-      any,
-      any,
-      any,
-      any,
-      any,
-      any
-    >
+  ): Promise<Array<Organism<any>>> {
+    const species = this.population.species.get(speciesId) as Species<any>
     const reproductions = Math.floor(species.offsprings)
 
-    const promises: Array<Promise<Organism<any, any, any, any, any, any, G>>> =
-      []
+    const promises: Array<Promise<Organism<any>>> = []
     for (let _ = 0; _ < reproductions; _++) {
       promises.push(this.breedOrganism(speciesId))
     }
@@ -317,7 +257,7 @@ export class WorkerReproducer<
 
   async breedOrganism(
     speciesId: number
-  ): Promise<Organism<any, any, any, any, any, any, G>> {
+  ): Promise<Organism<any>> {
     await this.initPromise
 
     const data = await this.dispatcher.call<OrganismPayload<any>>(

@@ -1,4 +1,3 @@
-import type { CoreGenome } from '@neat-evolution/core'
 import type { ReproducerFactory } from '@neat-evolution/evolution'
 
 import type { AnyPopulation } from './types.js'
@@ -9,36 +8,12 @@ export interface Terminable {
   terminate: () => Promise<void>
 }
 
-export const createReproducerFactory = <
-  G extends CoreGenome<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    G
-  >,
->(
+export const createReproducerFactory = (
   options: WorkerReproducerOptions,
   terminables: Set<Terminable>
-): ReproducerFactory<G, AnyPopulation<G>> => {
-  return (population) => {
-    const reproducer = new WorkerReproducer<G>(population, options)
+): ReproducerFactory<AnyPopulation> => {
+  return (population: AnyPopulation) => {
+    const reproducer = new WorkerReproducer(population, options)
     terminables.add(reproducer)
     return reproducer
   }

@@ -9,7 +9,7 @@ import type { ReproducerHandlerContext } from './ThreadContext.js'
 
 export const populationTournamentSelect = async (
   context: ReproducerHandlerContext
-): Promise<Organism<any, any, any, any, any, any, any>> => {
+): Promise<Organism<any>> => {
   if (context.threadInfo == null) {
     throw new Error('populationTournamentSelect threadInfo not initialized')
   }

@@ -1,5 +1,4 @@
 import type {
-  ConfigData,
   ConfigFactory,
   ConfigProvider,
   GenomeFactory,
@@ -14,31 +13,15 @@ import type { WorkerReproducerOptions } from '../WorkerReproducerOptions.js'
 import type { WorkerState } from '../WorkerState.js'
 
 export interface PartialAlgorithm {
-  createConfig: ConfigFactory<any, any, any, any, any>
-  createGenome: GenomeFactory<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >
+  createConfig: ConfigFactory<any>
+  createGenome: GenomeFactory<any>
 }
 
-export interface ThreadInfo<CD extends ConfigData, GO extends GenomeOptions> {
+export interface ThreadInfo<GO extends GenomeOptions = any> {
   reproducerOptions?: WorkerReproducerOptions
   populationOptions: PopulationOptions
   stateProvider: WorkerState<any, any, any, any, any>
-  configProvider: ConfigProvider<any, any, CD>
+  configProvider: ConfigProvider<any, any, any>
   genomeOptions: GO
   initConfig: InitConfig
   algorithm: PartialAlgorithm
@@ -46,7 +29,7 @@ export interface ThreadInfo<CD extends ConfigData, GO extends GenomeOptions> {
 
 export interface ThreadContext {
   rng: RNG
-  threadInfo: ThreadInfo<any, any> | null
+  threadInfo: ThreadInfo<any> | null
 }
 
 export type ReproducerHandlerContext = ThreadContext & WorkerContext
