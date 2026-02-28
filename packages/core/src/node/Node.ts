@@ -1,27 +1,34 @@
-import type { ConfigOptions } from '../config/ConfigOptions.js'
-import type { ExtendedState } from '../state/StateProvider.js'
-
+import type { AlgorithmContext } from '../contexts/AlgorithmContext.js'
+import type {
+  ConfigNodeOptionsOf,
+  NodeFactoryOptionsOf,
+  NodeTypeOf,
+  StateNodeDataOf,
+  StateNodeOf,
+} from '../contexts/helpers.js'
 import type { NodeData } from './NodeData.js'
 import type { NodeFactory } from './NodeFactory.js'
-import type { NodeFactoryOptions } from './NodeFactoryOptions.js'
 import type { NodeRef } from './NodeRef.js'
 
-export interface Node<
-  NFO extends NodeFactoryOptions,
-  NCO extends ConfigOptions,
-  NSD,
-  NS extends ExtendedState<NSD>,
-  N extends Node<NFO, NCO, NSD, NS, N>,
-> extends NodeRef {
+export interface Node<Ctx extends AlgorithmContext> extends NodeRef {
   // NodeExtension
-  config: NCO
-  state: NS
+  config: ConfigNodeOptionsOf<Ctx>
+  state: StateNodeOf<Ctx>
 
   // NodeFactory
-  createNode: NodeFactory<NFO, NCO, NSD, NS, N>
+  createNode: NodeFactory<Ctx>
 
-  crossover: (other: N, fitness: number, otherFitness: number) => N
-  distance: (other: N) => number
-  toJSON: () => NodeData<NFO, NCO, NSD>
-  toFactoryOptions: () => NFO
+  crossover: (
+    other: NodeTypeOf<Ctx>,
+    fitness: number,
+    otherFitness: number
+  ) => NodeTypeOf<Ctx>
+  clone: () => NodeTypeOf<Ctx>
+  distance: (other: NodeTypeOf<Ctx>) => number
+  toJSON: () => NodeData<
+    NodeFactoryOptionsOf<Ctx>,
+    ConfigNodeOptionsOf<Ctx>,
+    StateNodeDataOf<Ctx>
+  >
+  toFactoryOptions: () => NodeFactoryOptionsOf<Ctx>
 }

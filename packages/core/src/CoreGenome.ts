@@ -1,138 +1,55 @@
 import { binarySearchFirst, shuffle, threadRNG } from '@neat-evolution/utils'
 import { Connections } from './Connections.js'
-import type { ConfigData } from './config/ConfigData.js'
-import type { ConfigFactoryOptions } from './config/ConfigFactoryOptions.js'
-import type { ConfigOptions } from './config/ConfigOptions.js'
-import type { CoreConfig } from './config/CoreConfig.js'
+import type { AlgorithmContext } from './contexts/AlgorithmContext.js'
+import type {
+  ConfigTypeOf,
+  GenomeDataOf,
+  GenomeFactoryOptionsOf,
+  GenomeOptionsOf,
+  GenomeTypeOf,
+  LinkTypeOf,
+  NodeTypeOf,
+  StateTypeOf,
+} from './contexts/helpers.js'
 import type { Genome } from './genome/Genome.js'
-import type { GenomeData } from './genome/GenomeData.js'
 import type { GenomeFactory } from './genome/GenomeFactory.js'
-import type { GenomeFactoryOptions } from './genome/GenomeFactoryOptions.js'
-import type { GenomeOptions } from './genome/GenomeOptions.js'
 import type { InitConfig } from './genome/InitConfig.js'
-import type { CoreLink } from './link/CoreLink.js'
 import type { LinkFactory } from './link/LinkFactory.js'
 import type { LinkFactoryOptions } from './link/LinkFactoryOptions.js'
 import { type LinkKey, linkRefToKey, toLinkKey } from './link/linkRefToKey.js'
-import type { CoreNode } from './node/CoreNode.js'
 import type { NodeFactory } from './node/NodeFactory.js'
-import type { NodeFactoryOptions } from './node/NodeFactoryOptions.js'
 import type { NodeRef } from './node/NodeRef.js'
 import { NodeType } from './node/NodeType.js'
 import { nodeKeyToRef, nodeKeyToType } from './node/nodeKeyToRef.js'
 import { type NodeKey, nodeRefToKey } from './node/nodeRefToKey.js'
-import type { CoreState } from './state/CoreState.js'
 import type { InnovationKey } from './state/hashInnovationKey.js'
-import type { StateData } from './state/StateData.js'
-import type { ExtendedState } from './state/StateProvider.js'
 
-export class CoreGenome<
-  // Genome
-  CFO extends ConfigFactoryOptions,
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
-  CD extends ConfigData,
-  C extends CoreConfig<CFO, NCO, LCO, CD>,
-  NSD,
-  LSD,
-  NS extends ExtendedState<NSD>,
-  LS extends ExtendedState<LSD>,
-  SD extends StateData,
-  S extends CoreState<NSD, LSD, NS, LS, SD>,
-  HND,
-  LD,
-  GFO extends GenomeFactoryOptions<HND, LD>,
-  GO extends GenomeOptions,
-  GD extends GenomeData<CD, SD, HND, LD, GFO, GO>,
-  // CoreNode
-  NFO extends NodeFactoryOptions,
-  N extends CoreNode<NFO, NCO, NSD, NS, N>,
-  // CoreLink
-  LFO extends LinkFactoryOptions,
-  L extends CoreLink<LFO, LCO, LSD, LS, L>,
-  // CoreGenome
-  G extends CoreGenome<
-    CFO,
-    NCO,
-    LCO,
-    CD,
-    C,
-    NSD,
-    LSD,
-    NS,
-    LS,
-    SD,
-    S,
-    HND,
-    LD,
-    GFO,
-    GO,
-    GD,
-    NFO,
-    N,
-    LFO,
-    L,
-    G
-  >,
-> implements
-    Genome<NCO, LCO, CD, C, NSD, LSD, NS, LS, SD, S, HND, LD, GFO, GO, GD, G>
+export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
 {
-  public readonly config: C
-  public readonly state: S
-  public readonly genomeOptions: GO
+  public readonly config: ConfigTypeOf<Ctx>
+  public readonly state: StateTypeOf<Ctx>
+  public readonly genomeOptions: GenomeOptionsOf<Ctx>
   public readonly initConfig: InitConfig
 
-  public readonly inputs: Map<NodeKey, N>
-  public readonly hiddenNodes: Map<NodeKey, N>
-  public readonly outputs: Map<NodeKey, N>
-  public readonly links: Map<LinkKey, L>
+  public readonly inputs: Map<NodeKey, NodeTypeOf<Ctx>>
+  public readonly hiddenNodes: Map<NodeKey, NodeTypeOf<Ctx>>
+  public readonly outputs: Map<NodeKey, NodeTypeOf<Ctx>>
+  public readonly links: Map<LinkKey, LinkTypeOf<Ctx>>
   public readonly connections: Connections<NodeKey, number>
 
-  public readonly createNode: NodeFactory<NFO, NCO, NSD, NS, N>
-  public readonly createLink: LinkFactory<LFO, LCO, LSD, LS, L>
-  public readonly createGenome: GenomeFactory<
-    NCO,
-    LCO,
-    CD,
-    C,
-    NSD,
-    LSD,
-    NS,
-    LS,
-    SD,
-    S,
-    HND,
-    LD,
-    GFO,
-    GO,
-    G
-  >
+  public readonly createNode: NodeFactory<Ctx>
+  public readonly createLink: LinkFactory<Ctx>
+  public readonly createGenome: GenomeFactory<Ctx>
 
   constructor(
-    config: C,
-    state: S,
-    genomeOptions: GO,
+    config: ConfigTypeOf<Ctx>,
+    state: StateTypeOf<Ctx>,
+    genomeOptions: GenomeOptionsOf<Ctx>,
     initConfig: InitConfig,
-    createNode: NodeFactory<NFO, NCO, NSD, NS, N>,
-    createLink: LinkFactory<LFO, LCO, LSD, LS, L>,
-    createGenome: GenomeFactory<
-      NCO,
-      LCO,
-      CD,
-      C,
-      NSD,
-      LSD,
-      NS,
-      LS,
-      SD,
-      S,
-      HND,
-      LD,
-      GFO,
-      GO,
-      G
-    >,
-    factoryOptions?: GFO
+    createNode: NodeFactory<Ctx>,
+    createLink: LinkFactory<Ctx>,
+    createGenome: GenomeFactory<Ctx>,
+    factoryOptions?: GenomeFactoryOptionsOf<Ctx>
   ) {
     this.config = config
     this.genomeOptions = genomeOptions
@@ -142,16 +59,16 @@ export class CoreGenome<
     this.createLink = createLink
     this.createGenome = createGenome
 
-    this.inputs = new Map<NodeKey, N>()
-    this.hiddenNodes = new Map<NodeKey, N>()
-    this.outputs = new Map<NodeKey, N>()
-    this.links = new Map<LinkKey, L>()
+    this.inputs = new Map<NodeKey, NodeTypeOf<Ctx>>()
+    this.hiddenNodes = new Map<NodeKey, NodeTypeOf<Ctx>>()
+    this.outputs = new Map<NodeKey, NodeTypeOf<Ctx>>()
+    this.links = new Map<LinkKey, LinkTypeOf<Ctx>>()
     this.connections = new Connections<NodeKey, number>()
 
     this.init(factoryOptions)
   }
 
-  protected init(factoryOptions?: GFO): void {
+  protected init(factoryOptions?: GenomeFactoryOptionsOf<Ctx>): void {
     const inputsCount = this.initConfig.inputs
     for (let i = 0; i < inputsCount; i++) {
       const node = this.createNode(
@@ -178,11 +95,11 @@ export class CoreGenome<
     }
   }
 
-  protected hydrate(_factoryOptions: GFO): void {
+  protected hydrate(_factoryOptions: GenomeFactoryOptionsOf<Ctx>): void {
     // To be implemented in subclasses if they use specialized factory options
   }
 
-  clone(): G {
+  clone(): GenomeTypeOf<Ctx> {
     return this.createGenome(
       this.config,
       this.state,
@@ -216,7 +133,7 @@ export class CoreGenome<
     }
   }
 
-  distance(other: G): number {
+  distance(other: GenomeTypeOf<Ctx>): number {
     const neatConfig = this.config.neat()
 
     let linkDifferences = 0
@@ -244,7 +161,9 @@ export class CoreGenome<
     let nodeDistance = 0
     let nodeMatchingCount = 0
     
-    const nodeMaps: Array<[Map<NodeKey, N>, Map<NodeKey, N>]> = [[this.hiddenNodes, other.hiddenNodes]]
+    const nodeMaps: Array<
+      [Map<NodeKey, NodeTypeOf<Ctx>>, Map<NodeKey, NodeTypeOf<Ctx>>]
+    > = [[this.hiddenNodes, other.hiddenNodes]]
     if (!neatConfig.onlyHiddenNodeDistance) {
       nodeMaps.push([this.inputs, other.inputs])
       nodeMaps.push([this.outputs, other.outputs])
@@ -280,7 +199,11 @@ export class CoreGenome<
     )
   }
 
-  crossover(other: G, fitness: number, otherFitness: number): G {
+  crossover(
+    other: GenomeTypeOf<Ctx>,
+    fitness: number,
+    otherFitness: number
+  ): GenomeTypeOf<Ctx> {
     const [parent1, parent2] =
       fitness > otherFitness ? [this, other] : [other, this]
 
@@ -347,7 +270,7 @@ export class CoreGenome<
     return genome
   }
 
-  getNode(nodeRef: NodeRef): N | undefined {
+  getNode(nodeRef: NodeRef): NodeTypeOf<Ctx> | undefined {
     switch (nodeRef.type) {
       case NodeType.Input:
         return this.inputs.get(nodeRefToKey(nodeRef))
@@ -360,7 +283,7 @@ export class CoreGenome<
     }
   }
 
-  getNodeByKey(nodeKey: NodeKey): N | undefined {
+  getNodeByKey(nodeKey: NodeKey): NodeTypeOf<Ctx> | undefined {
     const type = nodeKey[0]
     switch (type) {
       case NodeType.Input:
@@ -380,7 +303,7 @@ export class CoreGenome<
     newNodeKey: NodeKey
   ): Promise<void> {
     const linkKey = toLinkKey(from, to)
-    const link = this.links.get(linkKey) as L
+    const link = this.links.get(linkKey) as LinkTypeOf<Ctx>
     if (link == null) {
       throw new Error('Unable to split nonexistent link')
     }
@@ -446,7 +369,7 @@ export class CoreGenome<
     this.insertLink(link2, isSafe)
   }
 
-  insertLink(link: L, isSafe?: boolean): void {
+  insertLink(link: LinkTypeOf<Ctx>, isSafe?: boolean): void {
     const knownNotToCreateCycle =
       isSafe === true || !this.connections.createsCycle(link.from, link.to)
 
@@ -519,7 +442,7 @@ export class CoreGenome<
       return
     }
 
-    const sourceNodes: N[] = []
+    const sourceNodes: NodeTypeOf<Ctx>[] = []
     const wheel: number[] = []
 
     for (const nodes of [this.inputs, this.hiddenNodes]) {
@@ -544,7 +467,7 @@ export class CoreGenome<
     const source = sourceNodes[sourceIndex]!
     const sourceKey = nodeRefToKey(source)
 
-    const targetNodes: N[] = []
+    const targetNodes: NodeTypeOf<Ctx>[] = []
 
     for (const nodes of [this.hiddenNodes, this.outputs]) {
       for (const [nodeKey, node] of nodes) {
@@ -625,11 +548,11 @@ export class CoreGenome<
     }
   }
 
-  toJSON(): GD {
+  toJSON(): GenomeDataOf<Ctx> {
     throw new Error('toJSON not implemented.')
   }
 
-  toFactoryOptions(): GFO {
+  toFactoryOptions(): GenomeFactoryOptionsOf<Ctx> {
     throw new Error('toFactoryOptions not implemented.')
   }
 }

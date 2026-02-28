@@ -1,56 +1,36 @@
-import type { ConfigOptions } from '../config/ConfigOptions.js'
-import type { ConfigProvider } from '../config/ConfigProvider.js'
-import type { ConfigData } from '../index.js'
-import type { StateData } from '../state/StateData.js'
-import type { ExtendedState, StateProvider } from '../state/StateProvider.js'
+import type { AlgorithmContext } from '../contexts/AlgorithmContext.js'
+import type {
+  ConfigTypeOf,
+  GenomeDataOf,
+  GenomeFactoryOptionsOf,
+  GenomeOptionsOf,
+  GenomeTypeOf,
+  StateTypeOf,
+} from '../contexts/helpers.js'
+import type { LinkKey } from '../link/linkRefToKey.js'
+import type { NodeKey } from '../node/nodeRefToKey.js'
+import type { LinkTypeOf, NodeTypeOf } from '../contexts/helpers.js'
+import type { InitConfig } from './InitConfig.js'
 
-import type { GenomeData } from './GenomeData.js'
-import type { GenomeFactoryOptions } from './GenomeFactoryOptions.js'
-import type { GenomeOptions } from './GenomeOptions.js'
+export interface Genome<Ctx extends AlgorithmContext> {
+  readonly config: ConfigTypeOf<Ctx>
+  readonly state: StateTypeOf<Ctx>
+  readonly genomeOptions: GenomeOptionsOf<Ctx>
+  readonly initConfig: InitConfig
+  readonly inputs: Map<NodeKey, NodeTypeOf<Ctx>>
+  readonly hiddenNodes: Map<NodeKey, NodeTypeOf<Ctx>>
+  readonly outputs: Map<NodeKey, NodeTypeOf<Ctx>>
+  readonly links: Map<LinkKey, LinkTypeOf<Ctx>>
 
-export interface Genome<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
-  CD extends ConfigData,
-  C extends ConfigProvider<NCO, LCO, CD>,
-  NSD,
-  LSD,
-  NS extends ExtendedState<NSD>,
-  LS extends ExtendedState<LSD>,
-  SD extends StateData,
-  S extends StateProvider<NSD, LSD, NS, LS, SD>,
-  HND,
-  LD,
-  GFO extends GenomeFactoryOptions<HND, LD>,
-  GO extends GenomeOptions,
-  GD extends GenomeData<CD, SD, HND, LD, GFO, GO>,
-  G extends Genome<
-    NCO,
-    LCO,
-    CD,
-    C,
-    NSD,
-    LSD,
-    NS,
-    LS,
-    SD,
-    S,
-    HND,
-    LD,
-    GFO,
-    GO,
-    GD,
-    G
-  >,
-> {
-  readonly config: C
-  readonly state: S
-  readonly genomeOptions: GO
-
-  clone: () => G
-  crossover: (other: G, fitness: number, otherFitness: number) => G
+  clone: () => GenomeTypeOf<Ctx>
+  crossover: (
+    other: GenomeTypeOf<Ctx>,
+    fitness: number,
+    otherFitness: number
+  ) => GenomeTypeOf<Ctx>
   mutate: () => Promise<void>
-  distance: (other: G) => number
-  toJSON: () => GD
-  toFactoryOptions: () => GFO
+  distance: (other: GenomeTypeOf<Ctx>) => number
+  insertLink: (link: LinkTypeOf<Ctx>, isSafe?: boolean) => void
+  toJSON: () => GenomeDataOf<Ctx>
+  toFactoryOptions: () => GenomeFactoryOptionsOf<Ctx>
 }

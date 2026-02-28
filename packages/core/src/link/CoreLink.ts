@@ -1,7 +1,13 @@
-import type { ConfigOptions } from '../config/ConfigOptions.js'
+import type { AlgorithmContext } from '../contexts/AlgorithmContext.js'
+import type {
+  ConfigLinkOptionsOf,
+  LinkFactoryOptionsOf,
+  LinkTypeOf,
+  StateLinkDataOf,
+  StateLinkOf,
+} from '../contexts/helpers.js'
 import type { NodeKey } from '../node/nodeRefToKey.js'
 import type { InnovationKey } from '../state/hashInnovationKey.js'
-import type { ExtendedState } from '../state/StateProvider.js'
 
 import type { Link } from './Link.js'
 import type { LinkData } from './LinkData.js'
@@ -9,13 +15,7 @@ import type { LinkFactory } from './LinkFactory.js'
 import type { LinkFactoryOptions } from './LinkFactoryOptions.js'
 import { toLinkKey } from './linkRefToKey.js'
 
-export class CoreLink<
-  LFO extends LinkFactoryOptions,
-  LCO extends ConfigOptions,
-  LSD,
-  LS extends ExtendedState<LSD>,
-  L extends CoreLink<LFO, LCO, LSD, LS, L>,
-> implements Link<LFO, LCO, LSD, LS, L>
+export class CoreLink<Ctx extends AlgorithmContext> implements Link<Ctx>
 {
   // LinkRef
   public readonly from: NodeKey
@@ -26,17 +26,17 @@ export class CoreLink<
   public readonly innovation: InnovationKey
 
   // LinkExtension
-  public readonly config: LCO
-  public readonly state: LS
+  public readonly config: ConfigLinkOptionsOf<Ctx>
+  public readonly state: StateLinkOf<Ctx>
 
   // LinkFactory
-  public readonly createLink: LinkFactory<LFO, LCO, LSD, LS, L>
+  public readonly createLink: LinkFactory<Ctx>
 
   constructor(
-    factoryOptions: LFO,
-    config: LCO,
-    state: LS,
-    createLink: LinkFactory<LFO, LCO, LSD, LS, L>
+    factoryOptions: LinkFactoryOptionsOf<Ctx>,
+    config: ConfigLinkOptionsOf<Ctx>,
+    state: StateLinkOf<Ctx>,
+    createLink: LinkFactory<Ctx>
   ) {
     this.from = factoryOptions.from
     this.to = factoryOptions.to
@@ -51,21 +51,27 @@ export class CoreLink<
   /**
    * Creates a new link; Only async in des-hyperneat
    * @param {LinkFactoryOptions} linkFactoryOptions core link factory options with no extensions
-   * @returns {L | Promise<L>} a Link
+   * @returns a Link
    */
-  public identity(linkFactoryOptions: LinkFactoryOptions): L | Promise<L> {
+  public identity(
+    linkFactoryOptions: LinkFactoryOptions
+  ): LinkTypeOf<Ctx> | Promise<LinkTypeOf<Ctx>> {
     return this.createLink(linkFactoryOptions, this.config, this.state)
   }
 
-  public cloneWith(linkFactoryOptions: LinkFactoryOptions): L {
+  public cloneWith(linkFactoryOptions: LinkFactoryOptions): LinkTypeOf<Ctx> {
     return this.createLink(linkFactoryOptions, this.config, this.state)
   }
 
-  public clone(): L {
+  public clone(): LinkTypeOf<Ctx> {
     return this.createLink(this.toFactoryOptions(), this.config, this.state)
   }
 
-  crossover(other: L, _fitness: number, _otherFitness: number): L {
+  crossover(
+    other: LinkTypeOf<Ctx>,
+    _fitness: number,
+    _otherFitness: number
+  ): LinkTypeOf<Ctx> {
     if (
       this.from !== other.from ||
       this.to !== other.to ||
@@ -78,7 +84,7 @@ export class CoreLink<
     return this.createLink(factoryOptions, this.config, this.state)
   }
 
-  distance(other: L): number {
+  distance(other: LinkTypeOf<Ctx>): number {
     return Math.tanh(Math.abs(this.weight - other.weight))
   }
 
@@ -88,26 +94,34 @@ export class CoreLink<
 
   /**
    * Must override
-   * @returns {LinkData<LFO, LCO, LSD>} link data
+   * @returns link data
    */
-  toJSON(): LinkData<LFO, LCO, LSD> {
+  toJSON(): LinkData<
+    LinkFactoryOptionsOf<Ctx>,
+    ConfigLinkOptionsOf<Ctx>,
+    StateLinkDataOf<Ctx>
+  > {
     return {
       config: this.config,
       state: this.state?.toJSON() ?? null,
       factoryOptions: this.toFactoryOptions(),
-    } as unknown as LinkData<LFO, LCO, LSD>
+    } as LinkData<
+      LinkFactoryOptionsOf<Ctx>,
+      ConfigLinkOptionsOf<Ctx>,
+      StateLinkDataOf<Ctx>
+    >
   }
 
   /**
    * Must override
-   * @returns {LFO} link factory options
+   * @returns link factory options
    */
-  toFactoryOptions(): LFO {
+  toFactoryOptions(): LinkFactoryOptionsOf<Ctx> {
     return {
       from: this.from,
       to: this.to,
       weight: this.weight,
       innovation: this.innovation,
-    } as unknown as LFO
+    } as LinkFactoryOptionsOf<Ctx>
   }
 }

@@ -1,90 +1,10 @@
-import type { Algorithm, CoreGenome, Genome } from './index.js'
+import type { Algorithm, AlgorithmContext, Genome } from './index.js'
 
-export type AnyAlgorithm<
-  G extends CoreGenome<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    G
-  >,
-> = Algorithm<
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  G
->
+export type AnyAlgorithm<Ctx extends AlgorithmContext = AlgorithmContext> =
+  Algorithm<Ctx>
 
-export type AnyGenome<
-  G extends Genome<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    G
-  >,
-> = Genome<
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  G
->
+export type AnyGenome<Ctx extends AlgorithmContext = AlgorithmContext> =
+  Genome<Ctx>
 
 export type FitnessData = [
   speciesIndex: number,
@@ -92,10 +12,10 @@ export type FitnessData = [
   fitness: number,
 ]
 
-export type GenomeEntry<G extends AnyGenome<G>> = [
+export type GenomeEntry<G extends AnyGenome<any>> = [
   speciesIndex: number,
   organismIndex: number,
   genome: G,
 ]
 
-export type GenomeEntries<G extends AnyGenome<G>> = Iterable<GenomeEntry<G>>
+export type GenomeEntries<G extends AnyGenome<any>> = Iterable<GenomeEntry<G>>
