@@ -1,7 +1,6 @@
 import type { LinkFactory, NEATConfigOptions } from '@neat-evolution/core'
 
-import type { CustomState } from './CustomState.js'
-import type { CustomStateData } from './CustomStateData.js'
+import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import {
   type DESHyperNEATGenomeOptions,
   defaultDESHyperNEATGenomeOptions,
@@ -9,20 +8,14 @@ import {
 import { DESHyperNEATLink } from './DESHyperNEATLink.js'
 import type { DESHyperNEATLinkFactoryOptions } from './DESHyperNEATLinkFactoryOptions.js'
 
-export type DESHyperNEATLinkFactory = LinkFactory<
-  DESHyperNEATLinkFactoryOptions,
-  NEATConfigOptions,
-  CustomStateData,
-  CustomState,
-  DESHyperNEATLink
->
+export type DESHyperNEATLinkFactory = LinkFactory<DESHyperNEATContext>
 
 export const createLinkFactory =
   (options: DESHyperNEATGenomeOptions): DESHyperNEATLinkFactory =>
   (
     factoryOptions: DESHyperNEATLinkFactoryOptions,
     config: NEATConfigOptions,
-    state: CustomState
+    state: DESHyperNEATContext['State']['Link']
   ) => {
     return new DESHyperNEATLink(
       options,

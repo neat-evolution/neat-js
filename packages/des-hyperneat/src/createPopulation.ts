@@ -8,58 +8,15 @@ import type {
 } from '@neat-evolution/evolution'
 import { Population } from '@neat-evolution/evolution'
 
-import type { CustomState } from './CustomState.js'
-import type { CustomStateData } from './CustomStateData.js'
 import { DESHyperNEATAlgorithm } from './DESHyperNEATAlgorithm.js'
-import type { DESHyperNEATConfig } from './DESHyperNEATConfig.js'
-import type { DESHyperNEATConfigData } from './DESHyperNEATConfigData.js'
-import type { DESHyperNEATConfigFactoryOptions } from './DESHyperNEATConfigFactoryOptions.js'
-import type { DESHyperNEATGenome } from './DESHyperNEATGenome.js'
-import type { DESHyperNEATGenomeData } from './DESHyperNEATGenomeData.js'
-import type {
-  DESHyperNEATGenomeFactoryOptions,
-  DESHyperNEATLinkData,
-  DESHyperNEATNodeData,
-} from './DESHyperNEATGenomeFactoryOptions.js'
+import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import type { DESHyperNEATGenomeOptions } from './DESHyperNEATGenomeOptions.js'
-import type { DESHyperNEATLink } from './DESHyperNEATLink.js'
-import type { DESHyperNEATLinkFactoryOptions } from './DESHyperNEATLinkFactoryOptions.js'
-import type { DESHyperNEATNode } from './DESHyperNEATNode.js'
-import type { DESHyperNEATNodeFactoryOptions } from './DESHyperNEATNodeFactoryOptions.js'
-import type { DESHyperNEATState } from './DESHyperNEATState.js'
-import type { DESHyperNEATStateData } from './DESHyperNEATStateData.js'
 import type { TopologyConfigOptions } from './TopologyConfigOptions.js'
 import { topologyInitConfig } from './topology/topologyInitConfig.js'
 
-export type DESHyperNEATPopulation = Population<
-  DESHyperNEATConfigFactoryOptions,
-  NEATConfigOptions,
-  NEATConfigOptions,
-  DESHyperNEATConfigData,
-  DESHyperNEATConfig,
-  CustomStateData,
-  CustomStateData,
-  CustomState,
-  CustomState,
-  DESHyperNEATStateData,
-  DESHyperNEATState,
-  DESHyperNEATNodeData,
-  DESHyperNEATLinkData,
-  DESHyperNEATGenomeFactoryOptions,
-  DESHyperNEATGenomeOptions,
-  DESHyperNEATGenomeData,
-  DESHyperNEATNodeFactoryOptions,
-  DESHyperNEATNode,
-  DESHyperNEATLinkFactoryOptions,
-  DESHyperNEATLink,
-  DESHyperNEATGenome,
-  typeof DESHyperNEATAlgorithm
->
+export type DESHyperNEATPopulation = Population<DESHyperNEATContext>
 
-export type DESHyperNEATReproducerFactory = ReproducerFactory<
-  DESHyperNEATGenome,
-  DESHyperNEATPopulation
->
+export type DESHyperNEATReproducerFactory = ReproducerFactory<DESHyperNEATPopulation>
 
 // FIXME: not a valid PopulationFactory
 export const createPopulation = (
@@ -71,12 +28,12 @@ export const createPopulation = (
   populationOptions: PopulationOptions,
   genomeOptions: DESHyperNEATGenomeOptions,
   populationFactoryOptions?: PopulationFactoryOptions<
-    DESHyperNEATConfigData,
-    DESHyperNEATStateData,
-    DESHyperNEATNodeData,
-    DESHyperNEATLinkData,
-    DESHyperNEATGenomeFactoryOptions,
-    DESHyperNEATGenomeOptions
+    DESHyperNEATContext['Config']['Data'],
+    DESHyperNEATContext['State']['Data'],
+    DESHyperNEATContext['Node']['HiddenData'],
+    DESHyperNEATContext['Link']['Data'],
+    DESHyperNEATContext['Genome']['FactoryOptions'],
+    DESHyperNEATContext['Genome']['Options']
   >
 ): DESHyperNEATPopulation => {
   const configProvider = DESHyperNEATAlgorithm.createConfig({
@@ -96,7 +53,7 @@ export const createPopulation = (
     genomeOptions
   )
 
-  const population: DESHyperNEATPopulation = new Population(
+  const population: DESHyperNEATPopulation = new Population<DESHyperNEATContext>(
     createReproducer,
     evaluator,
     DESHyperNEATAlgorithm,
