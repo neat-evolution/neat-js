@@ -1,20 +1,5 @@
-import type {
-  ConfigData,
-  ConfigFactoryOptions,
-  InitConfig,
-  LinkFactoryOptions,
-  NEATConfigOptions,
-  StateData,
-} from '@neat-evolution/core'
+import type { InitConfig, NEATConfigOptions } from '@neat-evolution/core'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
-import type {
-  CPPNGenome,
-  CPPNGenomeData,
-  CPPNGenomeFactoryOptions,
-  CPPNNode,
-  CPPNNodeData,
-  CPPNNodeFactoryOptions,
-} from '@neat-evolution/cppn'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import type {
   PopulationFactory,
@@ -23,81 +8,28 @@ import type {
   ReproducerFactory,
 } from '@neat-evolution/evolution'
 import { Population } from '@neat-evolution/evolution'
-import type {
-  NEATConfig,
-  NEATLink,
-  NEATLinkData,
-  NEATState,
-} from '@neat-evolution/neat'
 
 import { HyperNEATAlgorithm } from './HyperNEATAlgorithm.js'
+import type { HyperNEATContext } from './HyperNEATContext.js'
 import type { HyperNEATGenomeOptions } from './HyperNEATGenomeOptions.js'
 
-export type HyperNEATPopulation = Population<
-  ConfigFactoryOptions,
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  CPPNNodeData,
-  NEATLinkData,
-  CPPNGenomeFactoryOptions,
-  HyperNEATGenomeOptions,
-  CPPNGenomeData<HyperNEATGenomeOptions>,
-  CPPNNodeFactoryOptions,
-  CPPNNode,
-  LinkFactoryOptions,
-  NEATLink,
-  CPPNGenome<HyperNEATGenomeOptions>,
-  typeof HyperNEATAlgorithm
->
+export type HyperNEATPopulation = Population<HyperNEATContext>
 
-export type HyperNEATReproducerFactory = ReproducerFactory<
-  CPPNGenome<HyperNEATGenomeOptions>,
-  HyperNEATPopulation
->
+export type HyperNEATReproducerFactory = ReproducerFactory<HyperNEATPopulation>
 
-export const createPopulation: PopulationFactory<
-  ConfigFactoryOptions,
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  CPPNNodeData,
-  NEATLinkData,
-  CPPNGenomeFactoryOptions,
-  HyperNEATGenomeOptions,
-  CPPNGenomeData<HyperNEATGenomeOptions>,
-  CPPNNodeFactoryOptions,
-  CPPNNode,
-  LinkFactoryOptions,
-  NEATLink,
-  CPPNGenome<HyperNEATGenomeOptions>
-> = (
+export const createPopulation: PopulationFactory<HyperNEATContext> = (
   createReproducer: HyperNEATReproducerFactory,
   evaluator: Evaluator<any>,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: HyperNEATGenomeOptions,
   populationFactoryOptions?: PopulationFactoryOptions<
-    ConfigData,
-    StateData,
-    CPPNNodeData,
-    NEATLinkData,
-    CPPNGenomeFactoryOptions,
-    HyperNEATGenomeOptions
+    HyperNEATContext['Config']['Data'],
+    HyperNEATContext['State']['Data'],
+    HyperNEATContext['Node']['HiddenData'],
+    HyperNEATContext['Link']['Data'],
+    HyperNEATContext['Genome']['FactoryOptions'],
+    HyperNEATContext['Genome']['Options']
   >
 ): HyperNEATPopulation => {
   const configProvider = HyperNEATAlgorithm.createConfig({
@@ -113,7 +45,7 @@ export const createPopulation: PopulationFactory<
     outputs: 2,
   }
 
-  const population: HyperNEATPopulation = new Population(
+  const population: HyperNEATPopulation = new Population<HyperNEATContext>(
     createReproducer,
     evaluator,
     HyperNEATAlgorithm,

@@ -1,61 +1,22 @@
-import type {
-  Algorithm,
-  ConfigData,
-  ConfigFactoryOptions,
-  LinkFactoryOptions,
-  StateData,
-} from '@neat-evolution/core'
-import type {
-  CPPNGenome,
-  CPPNGenomeData,
-  CPPNGenomeFactoryOptions,
-  CPPNNode,
-  CPPNNodeData,
-  CPPNNodeFactoryOptions,
-} from '@neat-evolution/cppn'
-import type {
-  NEATConfig,
-  NEATLink,
-  NEATLinkData,
-  NEATState,
+import type { Algorithm } from '@neat-evolution/core'
+import {
+  createConfig as createNEATConfig,
+  createState as createNEATState,
 } from '@neat-evolution/neat'
-import { createConfig, createState } from '@neat-evolution/neat'
 
+import type { HyperNEATContext } from './HyperNEATContext.js'
 import { createGenome } from './createGenome.js'
 import { createPhenotype } from './createPhenotype.js'
 import {
   defaultHyperNEATGenomeOptions,
-  type HyperNEATGenomeOptions,
 } from './HyperNEATGenomeOptions.js'
 
-export const HyperNEATAlgorithm: Algorithm<
-  ConfigFactoryOptions,
-  null,
-  null,
-  ConfigData,
-  NEATConfig,
-  null,
-  null,
-  null,
-  null,
-  StateData,
-  NEATState,
-  CPPNNodeData,
-  NEATLinkData,
-  CPPNGenomeFactoryOptions,
-  HyperNEATGenomeOptions,
-  CPPNGenomeData<HyperNEATGenomeOptions>,
-  CPPNNodeFactoryOptions,
-  CPPNNode,
-  LinkFactoryOptions,
-  NEATLink,
-  CPPNGenome<HyperNEATGenomeOptions>
-> = {
+export const HyperNEATAlgorithm: Algorithm<HyperNEATContext> = {
   name: 'HyperNEAT',
   pathname: '@neat-evolution/hyperneat',
   defaultOptions: defaultHyperNEATGenomeOptions,
-  createConfig,
+  createConfig: (factoryOptions) => createNEATConfig(factoryOptions),
   createGenome,
   createPhenotype,
-  createState,
+  createState: () => createNEATState(),
 }
