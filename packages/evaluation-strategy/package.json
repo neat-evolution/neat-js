@@ -32,6 +32,7 @@
     "lint": "biome lint",
     "precommit": "lint-staged",
     "test": "vitest --passWithNoTests --run",
+    "benchmark": "vitest bench --run --passWithNoTests",
     "check": "tsgo --noEmit"
   },
   "dependencies": {
