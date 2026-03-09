@@ -6,6 +6,18 @@ import type {
   StandardEnvironment,
 } from '../src/index.js'
 
+const mockExecutor: Executor = {
+  isAsync: false,
+  execute: () => [],
+  executeBatch: () => [],
+}
+
+const mockSyncExecutor: SyncExecutor = {
+  isAsync: false,
+  execute: () => [],
+  executeBatch: () => [],
+}
+
 describe('StandardEnvironment', () => {
   test('can be implemented without batch methods (backward compatible)', () => {
     class SimpleEnvironment implements StandardEnvironment<null> {
@@ -86,9 +98,9 @@ describe('StandardEnvironment', () => {
     }
 
     const env = new TestEnvironment()
-    const mockExecutor1: Executor = {} as any
-    const mockExecutor2: Executor = {} as any
-    const mockExecutor3: Executor = {} as any
+    const mockExecutor1: Executor = mockExecutor
+    const mockExecutor2: Executor = mockExecutor
+    const mockExecutor3: Executor = mockExecutor
     const mockExecutors = [mockExecutor1, mockExecutor2, mockExecutor3]
 
     expect(env.evaluateBatchAsync).toBeDefined()
@@ -154,8 +166,8 @@ describe('StandardEnvironment', () => {
     }
 
     const env = new SyncBatchEnvironment()
-    const mockExecutor1: SyncExecutor = {} as any
-    const mockExecutor2: SyncExecutor = {} as any
+    const mockExecutor1: SyncExecutor = mockSyncExecutor
+    const mockExecutor2: SyncExecutor = mockSyncExecutor
     const mockExecutors = [mockExecutor1, mockExecutor2]
 
     expect(env.evaluateBatch).toBeDefined()
