@@ -3,8 +3,10 @@ import {
   type InitConfig,
   type NodeRefTuple,
   NodeType,
+  nodeKeyToType,
   nodeRefToKey,
   nodeTupleToKey,
+  toLinkKey,
 } from '@neat-evolution/core'
 import { beforeEach, describe, expect, test } from 'vitest'
 
@@ -111,8 +113,18 @@ describe('NEATGenome class', () => {
         outputNode = [NodeType.Output, 0]
         hiddenNodes = [node1[1]]
         links = [
-          [nodeTupleToKey(inputNode), nodeTupleToKey(node1), 1, '1'],
-          [nodeTupleToKey(node1), nodeTupleToKey(outputNode), 1, '1'],
+          [
+            nodeTupleToKey(inputNode),
+            nodeTupleToKey(node1),
+            1,
+            toLinkKey(nodeTupleToKey(inputNode), nodeTupleToKey(node1)),
+          ],
+          [
+            nodeTupleToKey(node1),
+            nodeTupleToKey(outputNode),
+            1,
+            toLinkKey(nodeTupleToKey(node1), nodeTupleToKey(outputNode)),
+          ],
         ]
         data = {
           ...defaultData,
@@ -160,11 +172,11 @@ describe('NEATGenome class', () => {
       const x = genome.config.neat().initialLinkWeightSize
       expect(genome.links.size).toBe(1)
       const newLink = Array.from(genome.links.values())[0] as NEATLink
-      expect(newLink.from[0]).toBe('I')
-      expect(newLink.to[0]).toBe('O')
+      expect(nodeKeyToType(newLink.from)).toBe(NodeType.Input)
+      expect(nodeKeyToType(newLink.to)).toBe(NodeType.Output)
       expect(newLink.weight).toBeGreaterThanOrEqual(-x)
       expect(newLink.weight).toBeLessThanOrEqual(x)
-      expect(newLink.innovation).toBe('I0:O0')
+      expect(newLink.innovation).toBe(toLinkKey(newLink.from, newLink.to))
     })
 
     describe('mutationAddNode', () => {

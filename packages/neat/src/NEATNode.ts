@@ -1,7 +1,6 @@
 import { CoreNode, type NodeFactoryOptions } from '@neat-evolution/core'
-
-import type { NEATContext } from './NEATContext.js'
 import { createNode } from './createNode.js'
+import type { NEATContext } from './NEATContext.js'
 
 export class NEATNode extends CoreNode<NEATContext> {
   constructor(factoryOptions: NodeFactoryOptions) {

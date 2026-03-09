@@ -41,7 +41,10 @@ export class NEATGenome extends CoreGenome<NEATContext> {
   protected override hydrate(factoryOptions: NEATGenomeFactoryOptions): void {
     const hiddenNodesData = factoryOptions.hiddenNodes
     for (let i = 0; i < hiddenNodesData.length; i++) {
-      const id = hiddenNodesData[i]!
+      const id = hiddenNodesData[i]
+      if (id == null) {
+        continue
+      }
       const node = this.createNode(
         { type: NodeType.Hidden, id },
         this.config.node(),
@@ -52,7 +55,11 @@ export class NEATGenome extends CoreGenome<NEATContext> {
 
     const linksData = factoryOptions.links
     for (let i = 0; i < linksData.length; i++) {
-      const [fromKey, toKey, weight, innovation] = linksData[i]!
+      const linkData = linksData[i]
+      if (linkData == null) {
+        continue
+      }
+      const [fromKey, toKey, weight, innovation] = linkData
       const linkFactoryOptions: LinkFactoryOptions = {
         from: fromKey,
         to: toKey,
