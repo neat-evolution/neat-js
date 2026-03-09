@@ -1,11 +1,7 @@
-import type {
-  AnyGenome,
-  FitnessData,
-  GenomeEntry,
-} from '@neat-evolution/core'
+import type { AnyGenome, FitnessData, GenomeEntry } from '@neat-evolution/core'
 import type { DispatcherContext } from '@neat-evolution/worker-actions'
 
-export interface EvaluationContext<G extends AnyGenome<any>>
+export interface EvaluationContext<G extends AnyGenome = AnyGenome>
   extends DispatcherContext {
   /**
    * Evaluates a single genome, 1-to-1.

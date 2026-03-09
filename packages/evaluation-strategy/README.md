@@ -23,7 +23,7 @@ export interface EvaluationContext {
    * @param genomeEntry - Genome to evaluate
    * @returns Promise resolving to fitness data
    */
-  evaluateGenomeEntry(genomeEntry: GenomeEntry<any>): Promise<FitnessData>
+  evaluateGenomeEntry(genomeEntry: GenomeEntry): Promise<FitnessData>
 
   /**
    * Evaluates a batch of genome entries together (critical for tournaments)
@@ -31,7 +31,7 @@ export interface EvaluationContext {
    * @returns Promise resolving to array of fitness data
    */
   evaluateGenomeEntryBatch(
-    genomeEntries: Array<GenomeEntry<any>>
+    genomeEntries: Array<GenomeEntry>
   ): Promise<FitnessData[]>
 }
 ```
@@ -50,7 +50,7 @@ export interface EvaluationStrategy {
    */
   evaluate(
     context: EvaluationContext,
-    genomeEntries: GenomeEntries<any>
+    genomeEntries: GenomeEntries
   ): AsyncIterable<FitnessData>
 }
 ```
@@ -146,7 +146,7 @@ class BatchStrategy implements EvaluationStrategy {
 
   async *evaluate(
     context: EvaluationContext,
-    genomeEntries: GenomeEntries<any>
+    genomeEntries: GenomeEntries
   ): AsyncIterable<FitnessData> {
     const entries = Array.from(genomeEntries)
 
