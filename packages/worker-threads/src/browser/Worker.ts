@@ -33,7 +33,7 @@ export class Worker {
     this.webWorker.removeEventListener(type, listener as EventListener)
   }
 
-  postMessage(message: any, transferList?: Transferable[]) {
+  postMessage(message: unknown, transferList?: Transferable[]) {
     // @ts-expect-error no interface in common
     this.webWorker.postMessage(message, transferList)
   }

@@ -1,4 +1,4 @@
-export class CompatMessageEvent<T = any> {
+export class CompatMessageEvent<T = unknown> {
   readonly data: T
   readonly type: 'message'
 
@@ -8,6 +8,6 @@ export class CompatMessageEvent<T = any> {
   }
 }
 
-export type WorkerMessageEvent<T = any> =
+export type WorkerMessageEvent<T = unknown> =
   | MessageEvent<T>
   | CompatMessageEvent<T>

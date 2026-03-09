@@ -28,7 +28,7 @@ export class Worker {
   }
 
   addEventListener(type: WorkerEventTypes, listener: MessageListenerFn) {
-    const nodeListener = (message: any) => {
+    const nodeListener = (message: unknown) => {
       listener(new CompatMessageEvent(message))
     }
     this.listenerMap.set(listener, nodeListener)
@@ -43,7 +43,10 @@ export class Worker {
     this.nodeWorker.off(type, nodeListener)
   }
 
-  postMessage(message: any, transferList?: Array<ArrayBuffer | MessagePort>) {
+  postMessage(
+    message: unknown,
+    transferList?: Array<ArrayBuffer | MessagePort>
+  ) {
     this.nodeWorker.postMessage(new CompatMessageEvent(message), transferList)
   }
 
