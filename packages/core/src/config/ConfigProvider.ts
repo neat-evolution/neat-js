@@ -4,9 +4,9 @@ import type { ConfigData } from './ConfigData.js'
 import type { ConfigOptions } from './ConfigOptions.js'
 
 export interface ConfigProvider<
-  NCO extends ConfigOptions,
-  LCO extends ConfigOptions,
-  CD extends ConfigData,
+  NCO extends ConfigOptions = ConfigOptions,
+  LCO extends ConfigOptions = ConfigOptions,
+  CD extends ConfigData = ConfigData,
 > {
   neat: () => NEATConfigOptions
   node: () => NCO

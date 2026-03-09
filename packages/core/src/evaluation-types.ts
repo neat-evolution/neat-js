@@ -12,10 +12,12 @@ export type FitnessData = [
   fitness: number,
 ]
 
-export type GenomeEntry<G extends AnyGenome<any>> = [
+export type GenomeEntry<G extends AnyGenome = AnyGenome> = [
   speciesIndex: number,
   organismIndex: number,
   genome: G,
 ]
 
-export type GenomeEntries<G extends AnyGenome<any>> = Iterable<GenomeEntry<G>>
+export type GenomeEntries<G extends AnyGenome = AnyGenome> = Iterable<
+  GenomeEntry<G>
+>

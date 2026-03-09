@@ -104,7 +104,7 @@ pub struct Innovation {
 ### Architecture
 
 The neat-js implementation eliminates the registry entirely in favor of
-deterministic hashing:
+deterministic computed identities:
 
 ```typescript
 // CoreState.ts
@@ -121,32 +121,23 @@ class CoreState {
       from: NodeKey,
       to: NodeKey,
    ): InnovationKey | Promise<InnovationKey> {
-      return from + ":" + to;
+      return toLinkKey(from, to);
    }
 }
 ```
 
 ### How It Works
 
-1. **Connection Innovation**: Simply concatenates the source and target node
-   keys: `"h123:o0"` (hidden node 123 to output 0)
+1. **Connection Innovation**: Computes a deterministic numeric link/innovation
+   identity from `(from, to)`
 
 2. **Split Innovation**:
    - Takes the existing link's innovation key (e.g., `"i0:o0"`)
    - Hashes it deterministically using a djb2-style hash function
    - Returns a new hidden node key based on the hash
 
-3. **Hash Function** (`hashInnovationKey`):
-   ```typescript
-   const hashNodeKey = (key: string, hash: number = 0) => {
-      for (let i = 0; i < key.length; i++) {
-         const char = key.charCodeAt(i);
-         hash = (hash << 5) - hash + char;
-         hash >>>= 0;
-      }
-      return hash;
-   };
-   ```
+3. **Split Innovation Hashing**: Hidden node ids are still derived
+   deterministically from the split innovation key.
 
 ### Key Characteristics
 
@@ -156,7 +147,7 @@ class CoreState {
 - **Worker-friendly**: No synchronization needed; each worker can compute
   innovations independently
 - **Bounded memory**: No registry growth; only a small LRU cache for performance
-- **String-based keys**: Uses human-readable string keys instead of numeric IDs
+- **Numeric keys**: Uses numeric node, link, and innovation identities
 
 ---
 
@@ -177,7 +168,7 @@ The original NEAT paper describes three key uses for innovation numbers:
 | Aspect                  | Rust (Registry)        | neat-js (Hashing)     | Equivalent?   |
 | ----------------------- | ---------------------- | --------------------- | ------------- |
 | Same mutation → same ID | ✅ Registry lookup     | ✅ Deterministic hash | **Yes**       |
-| Gene alignment          | ✅ Numeric comparison  | ✅ String comparison  | **Yes**       |
+| Gene alignment          | ✅ Numeric comparison  | ✅ Numeric comparison | **Yes**       |
 | Speciation              | ✅ Innovation counting | ✅ Key set comparison | **Yes**       |
 | Temporal ordering       | ✅ Chronological       | ❌ Hash-based         | **No**        |
 | Cross-run consistency   | ❌ Run-dependent       | ✅ Always consistent  | **Different** |
@@ -214,19 +205,15 @@ irrelevant.
 
 #### 1. Hash Collisions
 
-**Risk**: Two different link splits could theoretically produce the same hash.
+**Risk**: Two different links or link splits could theoretically produce the same hash.
 
 **Mitigation**:
 
-- The djb2-style hash has good distribution properties
-- Node keys include type prefixes (`i`, `h`, `o`) reducing collision likelihood
-- Even with 32-bit hashes, billions of unique innovations are possible
-- The LRU cache prevents recomputation but doesn't affect correctness
+- The implementation now uses numeric node keys and numeric pair hashing
+- The current design was chosen because it removed substantial string churn and memory pressure
+- If this tradeoff proves insufficient, the next step would be exact pair/adjacency identity internally
 
-**Assessment**: Low risk. Hash collisions in this context would need to occur
-between commonly-split links, and even then, the result is merely that two
-different structural mutations might share an identifier — which could slightly
-reduce diversity but wouldn't break the algorithm.
+**Assessment**: Accepted tradeoff for this codebase. The current runtime design favors fast scalar numeric identities over exact pair structures.
 
 #### 2. Loss of Temporal Information
 
@@ -289,7 +276,7 @@ reproducibility and debugging.
 The core algorithmic requirements of NEAT are preserved:
 
 1. ✅ **Structural innovation tracking**: Same mutation → same identifier
-2. ✅ **Meaningful crossover**: Gene alignment works correctly via string key
+2. ✅ **Meaningful crossover**: Gene alignment works correctly via numeric key
    comparison
 3. ✅ **Speciation**: Genome distance calculation remains valid
 4. ✅ **Competing conventions protection**: Identical structural mutations in

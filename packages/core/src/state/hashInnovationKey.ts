@@ -1,40 +1,30 @@
 import QuickLRU from 'quick-lru'
 
-// Create a QuickLRU cache instance
-export const innovationHashCache = new QuickLRU<string, string>({
+export const innovationHashCache = new QuickLRU<number, number>({
   maxSize: 1000,
 })
 
-/** `${sourceKey}:${targetKey}` */
-export type InnovationKey = string
+export type InnovationKey = number
 
-const hashNodeKey = (key: string, hash: number = 0) => {
-  for (let i = 0; i < key.length; i++) {
-    const char = key.charCodeAt(i)
-    hash = (hash << 5) - hash + char
-    hash >>>= 0
-  }
-  return hash
+const mix32 = (value: number): number => {
+  value ^= value >>> 16
+  value = Math.imul(value, 0x85ebca6b)
+  value ^= value >>> 13
+  value = Math.imul(value, 0xc2b2ae35)
+  value ^= value >>> 16
+  return value >>> 0
 }
 
-export const hashInnovationKey = (innovationKey: InnovationKey): string => {
-  const cachedHashString = innovationHashCache.get(innovationKey)
-
-  if (cachedHashString !== undefined) {
-    return cachedHashString
+export const hashInnovationKey = (innovationKey: InnovationKey): number => {
+  const cached = innovationHashCache.get(innovationKey)
+  if (cached !== undefined) {
+    return cached
   }
 
-  const [sourceKey, targetKey] = innovationKey.split(':') as [
-    sourceKey: string,
-    targetKey: string,
-  ]
-  let hash = hashNodeKey(sourceKey)
-  hash = hashNodeKey(targetKey, hash)
+  const low = innovationKey >>> 0
+  const high = Math.floor(innovationKey / 0x100000000) >>> 0
+  const hash = mix32(low ^ mix32(high ^ 0x9e3779b9))
 
-  const hashString = hash.toString(36)
-
-  // Store the computed hash in the cache
-  innovationHashCache.set(innovationKey, hashString)
-
-  return hashString
+  innovationHashCache.set(innovationKey, hash)
+  return hash
 }

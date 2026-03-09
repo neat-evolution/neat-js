@@ -4,6 +4,6 @@ import type {
   ConfigTypeOf,
 } from '../contexts/helpers.js'
 
-export type ConfigFactory<Ctx extends AlgorithmContext> = (
+export type ConfigFactory<Ctx extends AlgorithmContext = AlgorithmContext> = (
   factoryOptions: ConfigFactoryOptionsOf<Ctx>
 ) => ConfigTypeOf<Ctx>

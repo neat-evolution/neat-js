@@ -20,11 +20,11 @@ export interface NEATState extends State<StateData> {
 }
 
 export interface StateProvider<
-  NSD,
-  LSD,
-  NS extends ExtendedState<NSD>,
-  LS extends ExtendedState<LSD>,
-  SD extends StateData,
+  NSD = unknown,
+  LSD = unknown,
+  NS extends ExtendedState<NSD> = ExtendedState<NSD>,
+  LS extends ExtendedState<LSD> = ExtendedState<LSD>,
+  SD extends StateData = StateData,
 > {
   neat: () => NEATState
   node: () => NS

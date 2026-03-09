@@ -1,22 +1,35 @@
 import type { NodeRef, NodeRefTuple } from './NodeRef.js'
-import type { NodeType } from './NodeType.js'
-import type { NodeKey } from './nodeRefToKey.js'
+import { NodeType } from './NodeType.js'
+import { type NodeKey, nodeKeyShift } from './nodeRefToKey.js'
 
-/**
- * @param {NodeKey} key a node key in the form of `${type}${id}`
- * @returns {NodeRef} a node ref
- */
+const bitsToNodeType = (bits: number): NodeType => {
+  switch (bits) {
+    case 0:
+      return NodeType.Input
+    case 1:
+      return NodeType.Hidden
+    case 2:
+      return NodeType.Output
+    default:
+      throw new Error(`Unknown node key type bits: ${bits}`)
+  }
+}
+
 export const nodeKeyToRef = (key: NodeKey): NodeRef => {
   return {
-    type: key.charAt(0) as NodeType,
-    id: key.substring(1),
+    type: bitsToNodeType(Math.floor(key / nodeKeyShift)),
+    id: key >>> 0,
   }
 }
 
 export const nodeKeyToType = (key: NodeKey): NodeType => {
-  return key.charAt(0) as NodeType
+  return bitsToNodeType(Math.floor(key / nodeKeyShift))
+}
+
+export const nodeKeyToId = (key: NodeKey): number => {
+  return key >>> 0
 }
 
 export const nodeKeyToRefTuple = (key: NodeKey): NodeRefTuple => {
-  return [key.charAt(0) as NodeType, key.substring(1)]
+  return [nodeKeyToType(key), nodeKeyToId(key)]
 }

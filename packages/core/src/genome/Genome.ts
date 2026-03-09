@@ -5,14 +5,15 @@ import type {
   GenomeFactoryOptionsOf,
   GenomeOptionsOf,
   GenomeTypeOf,
+  LinkTypeOf,
+  NodeTypeOf,
   StateTypeOf,
 } from '../contexts/helpers.js'
 import type { LinkKey } from '../link/linkRefToKey.js'
 import type { NodeKey } from '../node/nodeRefToKey.js'
-import type { LinkTypeOf, NodeTypeOf } from '../contexts/helpers.js'
 import type { InitConfig } from './InitConfig.js'
 
-export interface Genome<Ctx extends AlgorithmContext> {
+export interface Genome<Ctx extends AlgorithmContext = AlgorithmContext> {
   readonly config: ConfigTypeOf<Ctx>
   readonly state: StateTypeOf<Ctx>
   readonly genomeOptions: GenomeOptionsOf<Ctx>
