@@ -5,22 +5,21 @@ import {
   PhenotypeActionType,
   type PhenotypeFactory,
 } from '@neat-evolution/core'
-import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
+import type {
+  CPPNContext,
+  CPPNGenome,
+  CPPNGenomeOptions,
+} from '@neat-evolution/cppn'
 import { createPhenotype as createCPPNPhenotype } from '@neat-evolution/cppn'
 import { createExecutor } from '@neat-evolution/executor'
-import {
-  fromPointKey,
-  type Point,
-  type PointKey,
-  parseNodes,
-  toPointKey,
-} from '@neat-evolution/hyperneat'
+import { type Point, parseNodes } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
 import { exploreSubstrate } from './search/exploreSubstrate.js'
 
 export const createPhenotype: PhenotypeFactory<
-  CPPNGenome<ESHyperNEATGenomeOptions>
+  CPPNGenome<ESHyperNEATGenomeOptions>,
+  CPPNContext<ESHyperNEATGenomeOptions>
 > = (genome) => {
   const initConfig = genome.genomeOptions.initConfig
   if (initConfig == null) {
@@ -44,6 +43,25 @@ export const createPhenotype: PhenotypeFactory<
     createCPPNPhenotype(genome as unknown as CPPNGenome<CPPNGenomeOptions>)
   )
 
+  const pointIdByX = new Map<number, Map<number, number>>()
+  const pointById = new Map<number, Point>()
+  let nextPointId = 0
+  const getOrCreatePointId = (point: Point): number => {
+    const [x, y] = point
+    let yMap = pointIdByX.get(x)
+    if (yMap == null) {
+      yMap = new Map<number, number>()
+      pointIdByX.set(x, yMap)
+    }
+    const existing = yMap.get(y)
+    if (existing != null) return existing
+    const id = nextPointId
+    nextPointId++
+    yMap.set(y, id)
+    pointById.set(id, point)
+    return id
+  }
+
   const [layers, forwardConnections] = exploreSubstrate(
     inputNodes,
     outputNodes,
@@ -51,7 +69,8 @@ export const createPhenotype: PhenotypeFactory<
     depth,
     false,
     false,
-    genome.genomeOptions
+    genome.genomeOptions,
+    getOrCreatePointId
   )
 
   const [reverseLayers, reverseConnections] = exploreSubstrate(
@@ -61,22 +80,23 @@ export const createPhenotype: PhenotypeFactory<
     1,
     true,
     false,
-    genome.genomeOptions
+    genome.genomeOptions,
+    getOrCreatePointId
   )
 
-  const connections = new Connections<PointKey, number>(forwardConnections)
-  connections.extend(new Connections<PointKey, number>(reverseConnections))
+  const connections = new Connections<number, number>(forwardConnections)
+  connections.extend(new Connections<number, number>(reverseConnections))
 
-  const inputNodeKeys = new Set<PointKey>()
-  const nodes = new Set<PointKey>()
+  const inputNodeKeys = new Set<number>()
+  const nodes = new Set<number>()
   for (const node of inputNodes) {
-    const nodeKey = toPointKey(node)
+    const nodeKey = getOrCreatePointId(node)
     inputNodeKeys.add(nodeKey)
     nodes.add(nodeKey)
   }
-  const outputNodeKeys = new Set<PointKey>()
+  const outputNodeKeys = new Set<number>()
   for (const node of outputNodes) {
-    outputNodeKeys.add(toPointKey(node))
+    outputNodeKeys.add(getOrCreatePointId(node))
   }
 
   const pruned = connections.prune(inputNodeKeys, outputNodeKeys, true)
@@ -84,7 +104,7 @@ export const createPhenotype: PhenotypeFactory<
   for (let i = 1; i < layers.length; i++) {
     const layer = layers[i] as Point[]
     for (const node of layer) {
-      const nodeKey = toPointKey(node)
+      const nodeKey = getOrCreatePointId(node)
       if (!pruned.has(nodeKey)) {
         nodes.add(nodeKey)
       }
@@ -93,7 +113,7 @@ export const createPhenotype: PhenotypeFactory<
 
   for (const layer of reverseLayers) {
     for (const node of layer) {
-      const nodeKey = toPointKey(node)
+      const nodeKey = getOrCreatePointId(node)
       if (!pruned.has(nodeKey)) {
         nodes.add(nodeKey)
       }
@@ -101,7 +121,7 @@ export const createPhenotype: PhenotypeFactory<
   }
 
   for (const node of outputNodes) {
-    nodes.add(toPointKey(node))
+    nodes.add(getOrCreatePointId(node))
   }
 
   const firstOutputId = nodes.size - outputNodes.length
@@ -115,7 +135,7 @@ export const createPhenotype: PhenotypeFactory<
     outputs.push(i)
   }
 
-  const nodeMapping = new Map<PointKey, number>()
+  const nodeMapping = new Map<number, number>()
   let i = 0
   for (const node of nodes) {
     nodeMapping.set(node, i)
@@ -130,7 +150,7 @@ export const createPhenotype: PhenotypeFactory<
       actions.push([PhenotypeActionType.Link, fromIndex, toIndex, action[2]])
     } else {
       const nodeIndex = nodeMapping.get(action[0]) as number
-      const [x, y] = fromPointKey(action[0])
+      const [x, y] = pointById.get(action[0]) as Point
       const [, bias] = cppn.execute([
         0.0,
         0.0,

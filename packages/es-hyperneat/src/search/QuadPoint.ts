@@ -1,10 +1,14 @@
-import type { Target } from '@neat-evolution/core'
-import { type PointKey, toPointKey } from '@neat-evolution/hyperneat'
+import type { Point } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
 
 import type { WeightFn } from './findConnections.js'
 import { quickSelectMedian } from './quickSelectMedian.js'
+
+type PointEdge = {
+  node: Point
+  edge: number
+}
 
 function isWeightNumber(value: WeightFn | number): value is number {
   return typeof value === 'number'
@@ -13,6 +17,7 @@ function isWeightNumber(value: WeightFn | number): value is number {
 export class QuadPoint {
   private static pool: QuadPoint[] = []
   private static weightsPool: number[] = []
+  private static traversalPool: QuadPoint[] = []
 
   public x: number
   public y: number
@@ -49,14 +54,14 @@ export class QuadPoint {
     weightFn: WeightFn | number,
     options: ESHyperNEATGenomeOptions
   ): QuadPoint {
-    const point = this.pool.pop()
+    const point = QuadPoint.pool.pop()
     if (point) {
       point.x = x
       point.y = y
       point.width = width
       point.depth = depth
       point.options = options
-      point.weight = isWeightNumber(weightFn) ? weightFn : weightFn(x, y)
+      point.weight = typeof weightFn === 'number' ? weightFn : weightFn(x, y)
       point.variance = 0.0
       point.children = null
       return point
@@ -65,23 +70,59 @@ export class QuadPoint {
   }
 
   public static release(point: QuadPoint): void {
-    if (point.children) {
-      for (let i = 0; i < point.children.length; i++) {
-        const child = point.children[i]
-        if (child) this.release(child)
-      }
+    const children = point.children
+    if (children) {
+      const child0 = children[0]
+      if (child0) QuadPoint.release(child0)
+      const child1 = children[1]
+      if (child1) QuadPoint.release(child1)
+      const child2 = children[2]
+      if (child2) QuadPoint.release(child2)
+      const child3 = children[3]
+      if (child3) QuadPoint.release(child3)
     }
     point.children = null
-    this.pool.push(point)
+    QuadPoint.pool.push(point)
   }
 
   /// Collect weight of all nodes in tree. If root is true, collect the root's weight. If
   /// internal is true, collect all internal node weights. Always collect leaf node weights.
+  private collectLeafWeightsLeafOnly(weights: number[]): void {
+    const stack = QuadPoint.traversalPool
+    let top = 0
+    stack[top++] = this
+
+    while (top > 0) {
+      const node = stack[--top]
+      if (node === undefined) continue
+      const children = node.children
+      if (children === null) {
+        weights.push(node.weight)
+        continue
+      }
+
+      // Push in reverse so LIFO traversal visits 0..3, matching the old recursive order.
+      for (let i = 3; i >= 0; i--) {
+        const child = children[i]
+        if (child !== undefined) {
+          stack[top++] = child
+        }
+      }
+    }
+
+    stack.length = 0
+  }
+
   collectLeafWeights(
     weights: number[],
     root: boolean,
     internal: boolean
   ): void {
+    if (this.options.onlyLeafVariance) {
+      this.collectLeafWeightsLeafOnly(weights)
+      return
+    }
+
     if ((root && !this.options.onlyLeafVariance) || this.children === null) {
       weights.push(this.weight)
     }
@@ -100,6 +141,67 @@ export class QuadPoint {
       return 0.0
     }
 
+    if (this.options.onlyLeafVariance && !this.options.medianVariance) {
+      const dw = this.options.relativeVariance ? deltaWeight : 1.0
+      const stack = QuadPoint.traversalPool
+      let top = 0
+      stack[top++] = this
+
+      let count = 0
+      let sum = 0
+      while (top > 0) {
+        const node = stack[--top]
+        if (node === undefined) continue
+        const children = node.children
+        if (children === null) {
+          sum += node.weight
+          count++
+          continue
+        }
+        for (let i = 3; i >= 0; i--) {
+          const child = children[i]
+          if (child !== undefined) {
+            stack[top++] = child
+          }
+        }
+      }
+
+      if (count === 0) {
+        stack.length = 0
+        return 0.0
+      }
+
+      const centroid = sum / count
+      let sumSquares = 0
+      let maxSquare = 0
+
+      stack[top++] = this
+      while (top > 0) {
+        const node = stack[--top]
+        if (node === undefined) continue
+        const children = node.children
+        if (children === null) {
+          const normalized = (centroid - node.weight) / dw
+          const square = normalized * normalized
+          sumSquares += square
+          if (square > maxSquare) {
+            maxSquare = square
+          }
+          continue
+        }
+        for (let i = 3; i >= 0; i--) {
+          const child = children[i]
+          if (child !== undefined) {
+            stack[top++] = child
+          }
+        }
+      }
+
+      stack.length = 0
+      this.variance = this.options.maxVariance ? maxSquare : sumSquares / count
+      return this.variance
+    }
+
     const weights = QuadPoint.weightsPool
     weights.length = 0
     this.collectLeafWeights(weights, root, branch)
@@ -115,20 +217,27 @@ export class QuadPoint {
 
     let centroid: number
     if (this.options.medianVariance) {
-      // median weight
-      centroid = quickSelectMedian([...weights])
+      // Safe to select in place because order is not used after this point.
+      centroid = quickSelectMedian(weights)
     } else {
       // mean weight
       let sum = 0
       for (let i = 0; i < len; i++) {
-        sum += weights[i]!
+        const weight = weights[i]
+        if (weight !== undefined) {
+          sum += weight
+        }
       }
       centroid = sum / len
     }
 
     for (let i = 0; i < len; i++) {
-      const weight = weights[i]!
-      const square = ((centroid - weight) / dw) ** 2
+      const weight = weights[i]
+      if (weight === undefined) {
+        continue
+      }
+      const normalized = (centroid - weight) / dw
+      const square = normalized * normalized
       sumSquares += square
       if (square > maxSquare) {
         maxSquare = square
@@ -139,7 +248,7 @@ export class QuadPoint {
 
     // Clear pool for next use
     weights.length = 0
-    
+
     return this.variance
   }
 
@@ -149,13 +258,44 @@ export class QuadPoint {
     const depth = this.depth + 1
 
     this.children = [
-      QuadPoint.acquire(this.x - width, this.y - width, width, depth, f, this.options),
-      QuadPoint.acquire(this.x - width, this.y + width, width, depth, f, this.options),
-      QuadPoint.acquire(this.x + width, this.y + width, width, depth, f, this.options),
-      QuadPoint.acquire(this.x + width, this.y - width, width, depth, f, this.options),
+      QuadPoint.acquire(
+        this.x - width,
+        this.y - width,
+        width,
+        depth,
+        f,
+        this.options
+      ),
+      QuadPoint.acquire(
+        this.x - width,
+        this.y + width,
+        width,
+        depth,
+        f,
+        this.options
+      ),
+      QuadPoint.acquire(
+        this.x + width,
+        this.y + width,
+        width,
+        depth,
+        f,
+        this.options
+      ),
+      QuadPoint.acquire(
+        this.x + width,
+        this.y - width,
+        width,
+        depth,
+        f,
+        this.options
+      ),
     ]
 
-    const child0 = this.children[0]!
+    const child0 = this.children[0]
+    if (child0 == null) {
+      throw new Error('QuadPoint children were not initialized')
+    }
     let minWeight = child0.weight
     let maxWeight = child0.weight
 
@@ -186,51 +326,102 @@ export class QuadPoint {
   }
 
   /// Extracts children with high variance.
-  extract(
+  private extractInternal<TNode>(
     f: WeightFn,
-    connections: Array<Target<PointKey, number>>,
-    deltaWeight: number
-  ): QuadPoint[] {
-    const childrenToExpand: QuadPoint[] = []
+    connections: Array<{ node: TNode; edge: number }>,
+    deltaWeight: number,
+    toNode: (x: number, y: number) => TNode,
+    childrenToExpand: QuadPoint[]
+  ): void {
     if (this.children === null) {
-      return childrenToExpand
+      return
     }
 
+    const varianceThreshold = this.options.varianceThreshold
+    const bandThreshold = this.options.bandThreshold
     const width = this.width
-    for (let i = 0; i < 4; i++) {
-      const child = this.children[i]
-      if (child === undefined) continue
 
-      if (
-        child.calcVariance(deltaWeight, false, true) <=
-        this.options.varianceThreshold
-      ) {
-        let bandValue = 0.0
-        if (this.options.bandThreshold > 0.0) {
-          const leftMinus = f(child.x - width, child.y)
-          const rightMinus = f(child.x + width, child.y)
-          const upMinus = f(child.x, child.y - width)
-          const downMinus = f(child.x, child.y + width)
-
-          const dLeft = Math.abs(child.weight - leftMinus)
-          const dRight = Math.abs(child.weight - rightMinus)
-          const dUp = Math.abs(child.weight - upMinus)
-          const dDown = Math.abs(child.weight - downMinus)
-          bandValue = Math.max(Math.min(dUp, dDown), Math.min(dLeft, dRight))
-        }
-        
-        if (bandValue >= this.options.bandThreshold) {
+    if (bandThreshold <= 0.0) {
+      for (let i = 0; i < 4; i++) {
+        const child = this.children[i]
+        if (child === undefined) continue
+        const variance = child.calcVariance(deltaWeight, false, true)
+        if (variance <= varianceThreshold) {
           connections.push({
-            node: toPointKey([child.x, child.y]),
+            node: toNode(child.x, child.y),
             edge: child.weight,
           })
         }
+        if (variance > varianceThreshold) {
+          childrenToExpand.push(child)
+        }
       }
-      // Use stored variance
-      if (child.variance > this.options.varianceThreshold) {
+      return
+    }
+
+    for (let i = 0; i < 4; i++) {
+      const child = this.children[i]
+      if (child === undefined) continue
+      const variance = child.calcVariance(deltaWeight, false, true)
+      if (variance <= varianceThreshold) {
+        const childX = child.x
+        const childY = child.y
+        const childWeight = child.weight
+        let include = false
+
+        const dUp = Math.abs(childWeight - f(childX, childY - width))
+        if (dUp >= bandThreshold) {
+          const dDown = Math.abs(childWeight - f(childX, childY + width))
+          if (dDown >= bandThreshold) {
+            include = true
+          }
+        }
+
+        if (!include) {
+          const dLeft = Math.abs(childWeight - f(childX - width, childY))
+          if (dLeft >= bandThreshold) {
+            const dRight = Math.abs(childWeight - f(childX + width, childY))
+            if (dRight >= bandThreshold) {
+              include = true
+            }
+          }
+        }
+
+        if (include) {
+          connections.push({
+            node: toNode(childX, childY),
+            edge: childWeight,
+          })
+        }
+      }
+      if (variance > varianceThreshold) {
         childrenToExpand.push(child)
       }
     }
+  }
+
+  extractPointsInto(
+    f: WeightFn,
+    connections: PointEdge[],
+    deltaWeight: number,
+    childrenToExpand: QuadPoint[]
+  ): void {
+    this.extractInternal(
+      f,
+      connections,
+      deltaWeight,
+      (x, y) => [x, y],
+      childrenToExpand
+    )
+  }
+
+  extractPoints(
+    f: WeightFn,
+    connections: PointEdge[],
+    deltaWeight: number
+  ): QuadPoint[] {
+    const childrenToExpand: QuadPoint[] = []
+    this.extractPointsInto(f, connections, deltaWeight, childrenToExpand)
     return childrenToExpand
   }
 }

@@ -1,64 +1,63 @@
 import type { Connection } from '@neat-evolution/core'
 import type { SyncExecutor } from '@neat-evolution/executor'
-import {
-  fromPointKey,
-  type Point,
-  type PointKey,
-  toPointKey,
-} from '@neat-evolution/hyperneat'
+import type { Point } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
 
-import { findConnections } from './findConnections.js'
+import { findConnectionsPoints } from './findConnections.js'
 
 /// Iteratively explore substrate by calling find_connections on discovered nodes
-export function exploreSubstrate(
+export function exploreSubstrate<K extends number>(
   inputs: Point[],
   outputs: Point[],
   cppn: SyncExecutor,
   depth: number,
   reverse: boolean,
   allowConnectionsToInput: boolean,
-  options: ESHyperNEATGenomeOptions
-): [Point[][], Array<Connection<PointKey, number>>] {
-  const outputSet = new Set<PointKey>()
+  options: ESHyperNEATGenomeOptions,
+  keyOf: (point: Point) => K
+): [Point[][], Array<Connection<K, number>>] {
+  const outputSet = new Set<K>()
   for (const output of outputs) {
-    outputSet.add(toPointKey(output))
+    outputSet.add(keyOf(output))
   }
-  const visited = new Set<PointKey>()
+  const visited = new Set<K>()
   if (!allowConnectionsToInput) {
     for (const input of inputs) {
-      visited.add(toPointKey(input))
+      visited.add(keyOf(input))
     }
   }
   const nodes: Point[][] = [inputs]
-  const connections: Array<Connection<PointKey, number>> = []
+  const connections: Array<Connection<K, number>> = []
   const resolutionReciprocal = 1 / options.resolution
 
   for (let d = 0; d < depth; d++) {
-    const discoveries: Array<Connection<PointKey, number>> = []
+    const discoveries: Array<Connection<K, number>> = []
+    const discoveredPointsByKey = new Map<K, Point>()
     const layer = nodes[d] as Point[]
+
     // Search from all nodes within previous layer of discoveries
     for (const node of layer) {
       const [x, y] = node
-      const targets = findConnections(
+      const targets = findConnectionsPoints(
         x * resolutionReciprocal,
         y * resolutionReciprocal,
         cppn,
         reverse,
         options
       )
-      const nodeKey = toPointKey(node)
+      const nodeKey = keyOf(node)
       for (const target of targets) {
-        const targetPoint = fromPointKey(target.node)
+        const targetPoint = target.node
         // Use Math.trunc to match Rust's `as i64` truncation toward zero
         const targetNode: Point = [
           Math.trunc(targetPoint[0] * options.resolution),
           Math.trunc(targetPoint[1] * options.resolution),
         ]
-        const targetKey = toPointKey(targetNode)
+        const targetKey = keyOf(targetNode)
         if (!visited.has(targetKey)) {
           discoveries.push([nodeKey, targetKey, target.edge])
+          discoveredPointsByKey.set(targetKey, targetNode)
         }
       }
     }
@@ -72,14 +71,17 @@ export function exploreSubstrate(
 
     // Collect all unique target nodes
     // Avoid further exploration from output nodes
-    const nextNodes = new Set<PointKey>()
+    const nextNodes = new Set<K>()
     const nextLayer: Point[] = []
     for (const connection of discoveries) {
       const toKey = connection[1]
       if (!outputSet.has(toKey) && !nextNodes.has(toKey)) {
         nextNodes.add(toKey)
         visited.add(toKey)
-        nextLayer.push(fromPointKey(toKey))
+        const targetNode = discoveredPointsByKey.get(toKey)
+        if (targetNode !== undefined) {
+          nextLayer.push(targetNode)
+        }
       }
     }
 
