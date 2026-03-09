@@ -6,9 +6,9 @@ import { TestEvaluator } from './TestEvaluator.js'
 import type { AnyAlgorithm } from './types.js'
 
 export const createEvaluator = <EFO>(
-  algorithm: AnyAlgorithm<any>,
+  algorithm: AnyAlgorithm,
   environment: Environment<EFO>,
-  options: EvaluatorFactoryOptions<any>
+  options: EvaluatorFactoryOptions
 ): Evaluator<EFO> => {
   return new TestEvaluator(algorithm, environment, options)
 }

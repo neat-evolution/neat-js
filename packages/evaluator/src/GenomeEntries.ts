@@ -1,1 +1,1 @@
-export type { GenomeEntry, GenomeEntries } from '@neat-evolution/core'
+export type { GenomeEntries, GenomeEntry } from '@neat-evolution/core'

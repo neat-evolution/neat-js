@@ -7,15 +7,15 @@ import type {
 } from '../src/index.js'
 
 describe('EvaluationContext', () => {
+  const dummyGenome = {} as unknown as GenomeEntry[2]
+
   test('can be implemented with both required methods', () => {
     class TestContext implements EvaluationContext {
-      async evaluateSingle(entry: GenomeEntry<any>): Promise<FitnessData> {
+      async evaluateSingle(entry: GenomeEntry): Promise<FitnessData> {
         return [entry[0], entry[1], 1.0]
       }
 
-      async evaluateBatch(
-        entries: Array<GenomeEntry<any>>
-      ): Promise<FitnessData[]> {
+      async evaluateBatch(entries: Array<GenomeEntry>): Promise<FitnessData[]> {
         return entries.map((e) => [e[0], e[1], 1.0])
       }
     }
@@ -35,7 +35,7 @@ describe('EvaluationContext', () => {
       },
     }
 
-    const entry: GenomeEntry<any> = [2, 5, {} as any]
+    const entry: GenomeEntry = [2, 5, dummyGenome]
     const result = await context.evaluateSingle(entry)
 
     expect(result).toEqual([2, 5, 42.5])
@@ -54,10 +54,10 @@ describe('EvaluationContext', () => {
       },
     }
 
-    const batch: Array<GenomeEntry<any>> = [
-      [0, 1, {} as any],
-      [0, 2, {} as any],
-      [1, 0, {} as any],
+    const batch: Array<GenomeEntry> = [
+      [0, 1, dummyGenome],
+      [0, 2, dummyGenome],
+      [1, 0, dummyGenome],
     ]
     const results = await context.evaluateBatch(batch)
 
