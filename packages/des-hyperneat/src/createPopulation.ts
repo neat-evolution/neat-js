@@ -16,12 +16,13 @@ import { topologyInitConfig } from './topology/topologyInitConfig.js'
 
 export type DESHyperNEATPopulation = Population<DESHyperNEATContext>
 
-export type DESHyperNEATReproducerFactory = ReproducerFactory<DESHyperNEATPopulation>
+export type DESHyperNEATReproducerFactory =
+  ReproducerFactory<DESHyperNEATPopulation>
 
 // FIXME: not a valid PopulationFactory
 export const createPopulation = (
   createReproducer: DESHyperNEATReproducerFactory,
-  evaluator: Evaluator<any>,
+  evaluator: Evaluator,
   // FIXME: should be TopologyConfigOptions & Partial<NeatConfigOptions>
   topologyConfigOptions: TopologyConfigOptions,
   cppnConfigOptions: NEATConfigOptions,
@@ -53,16 +54,17 @@ export const createPopulation = (
     genomeOptions
   )
 
-  const population: DESHyperNEATPopulation = new Population<DESHyperNEATContext>(
-    createReproducer,
-    evaluator,
-    DESHyperNEATAlgorithm,
-    configProvider,
-    populationOptions,
-    genomeOptions,
-    initConfig,
-    populationFactoryOptions
-  )
+  const population: DESHyperNEATPopulation =
+    new Population<DESHyperNEATContext>(
+      createReproducer,
+      evaluator,
+      DESHyperNEATAlgorithm,
+      configProvider,
+      populationOptions,
+      genomeOptions,
+      initConfig,
+      populationFactoryOptions
+    )
 
   return population
 }
