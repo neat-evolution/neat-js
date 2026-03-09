@@ -42,12 +42,17 @@ export class WorkerPool {
         console.log(`[WorkerPool] Waiting for worker ${i} to be ready...`)
       }
       const readyPromise = new Promise<void>((resolve) => {
-        const handler = (event: any) => {
+        const handler = (event: { data?: unknown }) => {
           if (this.verbose) {
             console.log(`[WorkerPool] Worker ${i} sent a message`, event)
           }
           const message = event.data ?? event
-          if (message?.type === WORKER_READY) {
+          if (
+            message != null &&
+            typeof message === 'object' &&
+            'type' in message &&
+            message.type === WORKER_READY
+          ) {
             worker.removeEventListener('message', handler)
             if (this.verbose) {
               console.log(`[WorkerPool] Worker ${i} is ready`)
