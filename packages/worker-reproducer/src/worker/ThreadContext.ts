@@ -8,20 +8,21 @@ import type {
 import type { PopulationOptions } from '@neat-evolution/evolution'
 import type { RNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
-
+import type QuickLRU from 'quick-lru'
+import type { OrganismPayload } from '../actions.js'
 import type { WorkerReproducerOptions } from '../WorkerReproducerOptions.js'
 import type { WorkerState } from '../WorkerState.js'
 
 export interface PartialAlgorithm {
-  createConfig: ConfigFactory<any>
-  createGenome: GenomeFactory<any>
+  createConfig: ConfigFactory
+  createGenome: GenomeFactory
 }
 
-export interface ThreadInfo<GO extends GenomeOptions = any> {
+export interface ThreadInfo<GO extends GenomeOptions = GenomeOptions> {
   reproducerOptions?: WorkerReproducerOptions
   populationOptions: PopulationOptions
-  stateProvider: WorkerState<any, any, any, any, any>
-  configProvider: ConfigProvider<any, any, any>
+  stateProvider: WorkerState
+  configProvider: ConfigProvider
   genomeOptions: GO
   initConfig: InitConfig
   algorithm: PartialAlgorithm
@@ -29,7 +30,9 @@ export interface ThreadInfo<GO extends GenomeOptions = any> {
 
 export interface ThreadContext {
   rng: RNG
-  threadInfo: ThreadInfo<any> | null
+  threadInfo: ThreadInfo | null
+  speciesSelectionCache?: QuickLRU<number, Array<OrganismPayload>>
+  populationSelectionCache?: Array<OrganismPayload>
 }
 
 export type ReproducerHandlerContext = ThreadContext & WorkerContext

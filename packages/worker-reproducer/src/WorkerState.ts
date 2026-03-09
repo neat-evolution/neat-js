@@ -14,7 +14,7 @@ import type { ReproducerHandlerContext } from './worker/ThreadContext.js'
 export type GetSplitInnovationFn = (
   innovationKey: InnovationKey,
   stateType: StateType,
-  stateKey: string | null,
+  stateKey: LinkKey | null,
   context: ReproducerHandlerContext
 ) => Promise<NodeKey>
 
@@ -22,7 +22,7 @@ export type GetConnectInnovationFn = (
   from: NodeKey,
   to: NodeKey,
   stateType: StateType,
-  stateKey: string | null,
+  stateKey: LinkKey | null,
   context: ReproducerHandlerContext
 ) => Promise<InnovationKey>
 
@@ -33,14 +33,14 @@ export type SetCPPNStateRedirectFn = (
 ) => void
 
 export class WorkerState<
-  NSD,
-  LSD,
-  NS extends ExtendedState<NSD>,
-  LS extends ExtendedState<LSD>,
-  SD extends StateData,
+  NSD = unknown,
+  LSD = unknown,
+  NS extends ExtendedState<NSD> = ExtendedState<NSD>,
+  LS extends ExtendedState<LSD> = ExtendedState<LSD>,
+  SD extends StateData = StateData,
 > extends CoreState<NSD, LSD, NS, LS, SD> {
   public readonly stateType: StateType
-  public readonly stateKey: string | null
+  public readonly stateKey: LinkKey | null
   public readonly enableCustomState: boolean
   public readonly custom: WorkerCustomState | null
 
@@ -50,7 +50,7 @@ export class WorkerState<
     setCPPNStateRedirectFn: SetCPPNStateRedirectFn,
     context: ReproducerHandlerContext,
     stateType: StateType = StateType.NEAT,
-    stateKey: string | null = null,
+    stateKey: LinkKey | null = null,
     enableCustomState: boolean = false,
     singleCPPNState: boolean | undefined
   ) {

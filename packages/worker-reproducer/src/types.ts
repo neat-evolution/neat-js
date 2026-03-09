@@ -1,3 +1,3 @@
 import type { Population } from '@neat-evolution/evolution'
 
-export type AnyPopulation = Population<any>
+export type AnyPopulation = Population

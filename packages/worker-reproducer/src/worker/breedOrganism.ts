@@ -13,20 +13,21 @@ export const breedOrganism = async (
   if (context.threadInfo == null) {
     throw new Error('breedOrganism threadInfo not initialized')
   }
+  const threadInfo = context.threadInfo
   const father =
     context.rng.gen() <
-    context.threadInfo.populationOptions.interspeciesReproductionProbability
-      ? await populationTournamentSelect(context) // Interspecies breeding
-      : await speciesTournamentSelect(payload.speciesId, context) // Breeding within species
+    threadInfo.populationOptions.interspeciesReproductionProbability
+      ? await populationTournamentSelect(context)
+      : await speciesTournamentSelect(payload.speciesId, context)
 
   if (father == null) {
     throw new Error('Unable to gather father organism')
   }
 
-  let child: Organism<any>
+  let child: Organism
   if (
     context.rng.gen() <
-    context.threadInfo.populationOptions.asexualReproductionProbability
+    threadInfo.populationOptions.asexualReproductionProbability
   ) {
     child = father.asElite()
   } else {
