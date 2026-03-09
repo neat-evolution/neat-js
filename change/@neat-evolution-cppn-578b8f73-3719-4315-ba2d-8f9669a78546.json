@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "Fix formatting and type-check issues across the workspace.",
+  "packageName": "@neat-evolution/cppn",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
