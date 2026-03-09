@@ -5,6 +5,23 @@ import { afterEach, describe, expect, test, vi } from 'vitest'
 import { handleEvaluateBatch } from '../../src/worker/handleEvaluateBatch.js'
 import type { ThreadContext } from '../../src/worker/ThreadContext.js'
 
+const stubConfigProvider = {} as unknown as NonNullable<
+  ThreadContext['genomeFactoryConfig']
+>['configProvider']
+const stubStateProvider = {} as unknown as NonNullable<
+  ThreadContext['genomeFactoryConfig']
+>['stateProvider']
+const stubGenomeOptions = {} as unknown as NonNullable<
+  ThreadContext['genomeFactoryConfig']
+>['genomeOptions']
+const stubInitConfig = {} as unknown as NonNullable<
+  ThreadContext['genomeFactoryConfig']
+>['initConfig']
+const stubThreadInfo = {} as unknown as NonNullable<ThreadContext['threadInfo']>
+const stubGenomeFactoryOptions = {
+  genomeData: { nodes: [], links: [] },
+} as unknown as GenomeFactoryOptions
+
 describe('handleEvaluateBatch', () => {
   afterEach(() => {
     vi.clearAllMocks()
@@ -19,22 +36,22 @@ describe('handleEvaluateBatch', () => {
 
     const mockThreadContext: ThreadContext = {
       genomeFactoryConfig: {
-        configProvider: {} as any,
-        stateProvider: {} as any,
-        genomeOptions: {} as any,
-        initConfig: {} as any,
+        configProvider: stubConfigProvider,
+        stateProvider: stubStateProvider,
+        genomeOptions: stubGenomeOptions,
+        initConfig: stubInitConfig,
       },
       threadInfo: {
         createGenome: vi.fn().mockReturnValue({}),
         createPhenotype: vi.fn().mockReturnValue({}),
         createExecutor: vi.fn().mockReturnValue({ isAsync: false }),
         environment: mockEnvironment,
-      } as any,
+      } as unknown as typeof stubThreadInfo,
     }
 
-    const batchGenomeOptions: Array<GenomeFactoryOptions<any, any>> = [
-      { genomeData: { nodes: [], links: [] } } as any,
-      { genomeData: { nodes: [], links: [] } } as any,
+    const batchGenomeOptions: Array<GenomeFactoryOptions> = [
+      stubGenomeFactoryOptions,
+      stubGenomeFactoryOptions,
     ]
 
     const result = await handleEvaluateBatch(

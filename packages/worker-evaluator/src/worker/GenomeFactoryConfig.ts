@@ -6,8 +6,8 @@ import type {
 } from '@neat-evolution/core'
 
 export interface GenomeFactoryConfig {
-  configProvider: ConfigProvider<any, any, any>
-  stateProvider: StateProvider<any, any, any, any, any>
+  configProvider: ConfigProvider
+  stateProvider: StateProvider
   genomeOptions: GenomeOptions
   initConfig: InitConfig
 }

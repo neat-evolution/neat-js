@@ -5,7 +5,7 @@ import type { InitGenomeFactoryPayload } from '../actions.js'
 import type { ThreadContext } from './ThreadContext.js'
 
 export type HandleInitGenomeFn = (
-  payload: InitGenomeFactoryPayload<any, any>,
+  payload: InitGenomeFactoryPayload,
   context: ThreadContext & Partial<WorkerContext>
 ) => Promise<void>
 

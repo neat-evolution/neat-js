@@ -34,14 +34,14 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
 
   const genome = createGenome(
     configProvider,
-    stateProvider,
+    stateProvider as never,
     genomeOptions,
     initConfig,
     genomeFactoryOptions
   )
 
   // create the phenotype and executor
-  const phenotype = createPhenotype(genome)
+  const phenotype = createPhenotype(genome as never)
 
   const executor: Executor = createExecutor(phenotype)
 

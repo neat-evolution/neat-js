@@ -28,8 +28,8 @@ import {
 } from './actions.js'
 import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'
 
-export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
-  public readonly algorithm: AnyAlgorithm<any>
+export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
+  public readonly algorithm: AnyAlgorithm
   public readonly algorithmPathname: string
   public readonly enableAsync = true
 
@@ -47,16 +47,16 @@ export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
   /**
    * Evaluation context exposing worker pool functionality to evaluation strategies
    */
-  public readonly evaluationContext: EvaluationContext<any>
+  public readonly evaluationContext: EvaluationContext
 
   /**
    * Evaluation strategy determining how genomes are evaluated
    * Defaults to IndividualStrategy for backward compatibility
    */
-  private readonly strategy: EvaluationStrategy<any>
+  private readonly strategy: EvaluationStrategy
 
   constructor(
-    algorithm: AnyAlgorithm<any>,
+    algorithm: AnyAlgorithm,
     environment: Environment<EFO>,
     options: WorkerEvaluatorOptions
   ) {
@@ -152,13 +152,11 @@ export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
 
   async terminate() {
     await this.initPromise
-    await this.dispatcher.broadcast(terminateAction())
+    await this.dispatcher.broadcast(terminateAction(null))
     await this.pool.terminate()
   }
 
-  async *evaluate(
-    genomeEntries: GenomeEntries<any>
-  ): AsyncIterable<FitnessData> {
+  async *evaluate(genomeEntries: GenomeEntries): AsyncIterable<FitnessData> {
     await this.initPromise
     // Delegate to strategy, passing the evaluation context
     yield* this.strategy.evaluate(this.evaluationContext, genomeEntries)
@@ -171,7 +169,7 @@ export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
    * @returns {Promise<FitnessData>} Fitness data for the genome
    */
   private async evaluateGenomeEntry(
-    genomeEntry: GenomeEntry<any>,
+    genomeEntry: GenomeEntry,
     seed?: string
   ): Promise<FitnessData> {
     await this.initPromise
@@ -193,7 +191,7 @@ export class WorkerEvaluator<EFO> implements Evaluator<EFO> {
    * @returns {Promise<FitnessData[]>} Array of fitness data for each genome
    */
   private async evaluateGenomeEntryBatch(
-    genomeEntries: Array<GenomeEntry<any>>,
+    genomeEntries: Array<GenomeEntry>,
     seed?: string
   ): Promise<FitnessData[]> {
     await this.initPromise

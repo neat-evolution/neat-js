@@ -5,7 +5,7 @@ import { WorkerEvaluator } from './WorkerEvaluator.js'
 import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'
 
 export const createEvaluator = <EFO>(
-  algorithm: AnyAlgorithm<any>,
+  algorithm: AnyAlgorithm,
   environment: Environment<EFO>,
   options: WorkerEvaluatorOptions
 ): Evaluator<EFO> => {
