@@ -3,6 +3,8 @@ import type {
   ConfigDataOf,
   GenomeFactoryOptionsOf,
   GenomeOptionsOf,
+  LinkDataOf,
+  NodeHiddenDataOf,
   StateDataOf,
 } from '@neat-evolution/core'
 import { threadRNG } from '@neat-evolution/utils'
@@ -15,7 +17,7 @@ import type { SpeciesOptions } from './SpeciesOptions.js'
 /// Collection of similar organisms
 // The lock is used to add new organisms without affecting the reproduction of the previous generation.
 // It is unlocked after reproduction, which will remove the previous generation and keep the new.
-export class Species<Ctx extends AlgorithmContext> {
+export class Species<Ctx extends AlgorithmContext = AlgorithmContext> {
   public readonly speciesOptions: SpeciesOptions
 
   // internal state
@@ -26,7 +28,7 @@ export class Species<Ctx extends AlgorithmContext> {
 
   constructor(
     speciesOptions: SpeciesOptions,
-    speciesFactoryOptions?: SpeciesFactoryOptions
+    speciesFactoryOptions?: SpeciesFactoryOptions<Ctx>
   ) {
     this.speciesOptions = speciesOptions
     const speciesState = speciesFactoryOptions?.speciesState
@@ -96,11 +98,7 @@ export class Species<Ctx extends AlgorithmContext> {
   }
 
   /// Iterate organisms. Adheres to lock.
-  *organismValues(): Generator<
-    Organism<Ctx>,
-    void,
-    void
-  > {
+  *organismValues(): Generator<Organism<Ctx>, void, void> {
     const size = this.size
     for (let i = 0; i < size; i++) {
       const organism = this.organisms[i]
@@ -172,7 +170,7 @@ export class Species<Ctx extends AlgorithmContext> {
       adjustedFitness /= size
 
       // Avoid zero fitness
-      if (adjustedFitness <= 0.0 || !isFinite(adjustedFitness)) {
+      if (adjustedFitness <= 0.0 || !Number.isFinite(adjustedFitness)) {
         adjustedFitness = 0.0001
       }
 
@@ -282,8 +280,8 @@ export class Species<Ctx extends AlgorithmContext> {
   toJSON(): SpeciesData<
     ConfigDataOf<Ctx>,
     StateDataOf<Ctx>,
-    any,
-    any,
+    NodeHiddenDataOf<Ctx>,
+    LinkDataOf<Ctx>,
     GenomeFactoryOptionsOf<Ctx>,
     GenomeOptionsOf<Ctx>
   > {
@@ -310,7 +308,7 @@ export class Species<Ctx extends AlgorithmContext> {
     }
   }
 
-  toFactoryOptions(): SpeciesFactoryOptions {
+  toFactoryOptions(): SpeciesFactoryOptions<Ctx> {
     return {
       speciesState: this.speciesState,
       organisms: this.organisms,

@@ -1,4 +1,5 @@
 import type {
+  AlgorithmContext,
   ConfigData,
   GenomeFactoryOptions,
   GenomeOptions,
@@ -6,7 +7,7 @@ import type {
 } from '@neat-evolution/core'
 
 import type { Species } from './Species.js'
-import type { SpeciesData } from './SpeciesData.js'
+import type { SpeciesData, SpeciesDataOrganism } from './SpeciesData.js'
 
 export type PopulationDataSpecies<
   CD extends ConfigData,
@@ -47,6 +48,7 @@ export interface PopulationFactoryOptions<
 }
 
 export const toPopulationDataSpecies = <
+  Ctx extends AlgorithmContext,
   CD extends ConfigData,
   SD extends StateData,
   HND,
@@ -54,11 +56,11 @@ export const toPopulationDataSpecies = <
   GFO extends GenomeFactoryOptions<HND, LD>,
   GO extends GenomeOptions,
 >(
-  species: Species<any>
+  species: Species<Ctx>
 ): PopulationDataSpecies<CD, SD, HND, LD, GFO, GO> => {
   const data = species.toJSON()
   return {
-    organisms: data.organisms,
+    organisms: data.organisms as Array<SpeciesDataOrganism<HND, LD, GFO>>,
     speciesState: data.speciesState,
   }
 }

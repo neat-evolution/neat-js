@@ -4,13 +4,15 @@ import type {
   GenomeFactoryOptionsOf,
   GenomeOptionsOf,
   GenomeTypeOf,
+  LinkDataOf,
+  NodeHiddenDataOf,
   StateDataOf,
 } from '@neat-evolution/core'
 
 import type { OrganismData } from './OrganismData.js'
 import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
 
-export class Organism<Ctx extends AlgorithmContext> {
+export class Organism<Ctx extends AlgorithmContext = AlgorithmContext> {
   public readonly genome: GenomeTypeOf<Ctx>
   public readonly generation: number
 
@@ -53,17 +55,14 @@ export class Organism<Ctx extends AlgorithmContext> {
 
   // Produce an elite for the next generation
   asElite(): Organism<Ctx> {
-    return new Organism<Ctx>(
-      this.genome.clone(),
-      this.generation + 1
-    )
+    return new Organism<Ctx>(this.genome.clone(), this.generation + 1)
   }
 
   toJSON(): OrganismData<
     ConfigDataOf<Ctx>,
     StateDataOf<Ctx>,
-    any,
-    any,
+    NodeHiddenDataOf<Ctx>,
+    LinkDataOf<Ctx>,
     GenomeFactoryOptionsOf<Ctx>,
     GenomeOptionsOf<Ctx>
   > {
