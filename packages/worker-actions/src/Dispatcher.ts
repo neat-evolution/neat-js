@@ -38,7 +38,7 @@ export class Dispatcher {
 
     for (const worker of workers) {
       // We use the standard EventTarget interface on the Worker abstraction
-      worker.addEventListener('message', (event: any) => {
+      worker.addEventListener('message', (event: { data: unknown }) => {
         // event.data contains the serialized message
         if (this.verbose) {
           console.log('[Dispatcher] Raw message received', event.data)
@@ -66,25 +66,28 @@ export class Dispatcher {
     message: WorkerMessage,
     options?: { timeout?: number }
   ): Promise<T> {
+    const worker = await this.pool.acquire()
+    try {
+      return await this.callOnWorker<T>(worker, message, options)
+    } finally {
+      this.pool.release(worker)
+    }
+  }
+
+  public async callOnWorker<T>(
+    worker: Worker,
+    message: WorkerMessage,
+    options?: { timeout?: number }
+  ): Promise<T> {
     const { messageWithId, promise, callId } = this.callManager.createCall<T>(
       message,
       options
     )
-
-    // Send
-    this.pool
-      .acquire()
-      .then((w: Worker) => {
-        try {
-          this.postMessage(w, messageWithId)
-        } finally {
-          this.pool.release(w)
-        }
-      })
-      .catch((err: any) => {
-        this.callManager.rejectCall(callId, err)
-      })
-
+    try {
+      this.postMessage(worker, messageWithId)
+    } catch (err: unknown) {
+      this.callManager.rejectCall(callId, err)
+    }
     return await promise
   }
 
@@ -113,11 +116,11 @@ export class Dispatcher {
     worker.postMessage(message, transferList)
   }
 
-  private _onMessage(incoming: any, worker: Worker) {
+  private _onMessage(incoming: unknown, worker: Worker) {
     if (this.verbose) {
       console.log('[Dispatcher] _onMessage received:', incoming)
     }
-    if (incoming == null || typeof incoming !== 'object') return
+    if (!isWorkerMessage(incoming)) return
     const message = incoming as WorkerMessage
 
     if (this.verbose) {
@@ -142,47 +145,45 @@ export class Dispatcher {
     }
     // 2. Handle Spontaneous Events (Worker -> Main)
     // This allows workers to "send" messages back to the main thread
-    if (isWorkerMessage(incoming)) {
-      const listeners = this.eventListeners.get(message.type)
+    const listeners = this.eventListeners.get(message.type)
+    if (this.verbose) {
+      console.log(
+        '[Dispatcher] _onMessage: Found listeners:',
+        listeners?.size ?? 0
+      )
+    }
+    if (listeners != null) {
+      const context: DispatcherContext = {
+        // Targeted send (reply to specific worker)
+        send: (msg: WorkerMessage) => {
+          if (this.verbose) {
+            console.log('[Dispatcher] context.send called with:', msg.type)
+          }
+          this.postMessage(worker, msg)
+        },
+        call: this.call.bind(this),
+        broadcast: this.broadcast.bind(this),
+        addMessageHandler: this.addMessageHandler.bind(this),
+        removeMessageHandler: this.removeMessageHandler.bind(this),
+
+        // Deprecated aliases
+        dispatch: (msg: WorkerMessage) => {
+          this.postMessage(worker, msg)
+        },
+        request: this.call.bind(this),
+        addActionHandler: this.addMessageHandler.bind(this),
+        removeActionHandler: this.removeMessageHandler.bind(this),
+      }
+
       if (this.verbose) {
         console.log(
-          '[Dispatcher] _onMessage: Found listeners:',
-          listeners?.size ?? 0
+          '[Dispatcher] _onMessage: Calling',
+          listeners.size,
+          'listener(s)'
         )
       }
-      if (listeners != null) {
-        const context: DispatcherContext = {
-          // Targeted send (reply to specific worker)
-          send: (msg: WorkerMessage) => {
-            if (this.verbose) {
-              console.log('[Dispatcher] context.send called with:', msg.type)
-            }
-            this.postMessage(worker, msg)
-          },
-          call: this.call.bind(this),
-          broadcast: this.broadcast.bind(this),
-          addMessageHandler: this.addMessageHandler.bind(this),
-          removeMessageHandler: this.removeMessageHandler.bind(this),
-
-          // Deprecated aliases
-          dispatch: (msg: WorkerMessage) => {
-            this.postMessage(worker, msg)
-          },
-          request: this.call.bind(this),
-          addActionHandler: this.addMessageHandler.bind(this),
-          removeActionHandler: this.removeMessageHandler.bind(this),
-        }
-
-        if (this.verbose) {
-          console.log(
-            '[Dispatcher] _onMessage: Calling',
-            listeners.size,
-            'listener(s)'
-          )
-        }
-        for (const listener of listeners) {
-          listener(message, context)
-        }
+      for (const listener of listeners) {
+        listener(message, context)
       }
     }
   }

@@ -4,17 +4,25 @@ import type { WorkerMessage } from '../types.js'
 // --- Core Message Creators ---
 const identityPayloadCreator = <P>(payload: P) => payload
 
-export function createMessage<P = any>(
+export function createMessage<
+  P = unknown,
+  Args extends unknown[] = [payload: P],
+>(
   type: string,
-  payloadCreator: (...args: any[]) => P = identityPayloadCreator<P>,
-  metaCreator?: (...args: any[]) => any
+  payloadCreator: (...args: Args) => P = identityPayloadCreator as unknown as (
+    ...args: Args
+  ) => P,
+  metaCreator?: (...args: Args) => WorkerMessage<P>['meta']
 ) {
-  const messageCreator = (...args: any[]): WorkerMessage<P> => {
+  const messageCreator = (...args: Args): WorkerMessage<P> => {
     const payload = payloadCreator(...args)
     const message: WorkerMessage<P> = { type, payload }
 
     if (metaCreator != null) {
-      message.meta = metaCreator(...args)
+      const meta = metaCreator(...args)
+      if (meta != null) {
+        message.meta = meta
+      }
     }
 
     return message
@@ -29,21 +37,26 @@ export const createAction = createMessage
 
 // --- Bulk Creation Utilities ---
 
-type PayloadCreator = (...args: any[]) => any
+type PayloadCreator<Args extends unknown[] = unknown[], Result = unknown> = (
+  ...args: Args
+) => Result
 
 interface MessageMap {
   [key: string]: PayloadCreator | MessageMap
 }
 
-export function createMessages(messageMap: MessageMap, prefix = ''): any {
-  const messages: any = {}
+export function createMessages(
+  messageMap: MessageMap,
+  prefix = ''
+): Record<string, unknown> {
+  const messages: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(messageMap)) {
     const type = prefix.length > 0 ? `${prefix}/${key}` : key
 
     if (typeof value === 'function') {
       // It's a payload creator
-      messages[key] = createMessage(type, value as any)
+      messages[key] = createMessage(type, value)
     } else if (typeof value === 'object' && value !== null) {
       // Recursive definition
       messages[key] = createMessages(value, type)
@@ -65,8 +78,11 @@ export function bindMessageCreators(
   const bound: Record<string, PayloadCreator> = {}
 
   for (const [key, creator] of Object.entries(messageCreators)) {
-    bound[key] = async (...args: any[]) => {
+    bound[key] = async (...args: unknown[]) => {
       const message = creator(...args)
+      if (!isWorkerMessage(message)) {
+        throw new Error('Message creator must return a WorkerMessage')
+      }
       // Default to call (RPC) for bound messages as it covers both use cases safely
       return await dispatcher.call(message)
     }
@@ -78,10 +94,11 @@ export function bindMessageCreators(
 /** @deprecated Use bindMessageCreators */
 export const bindActionCreators = bindMessageCreators
 
-export function isWorkerMessage(message: any): message is WorkerMessage {
+export function isWorkerMessage(message: unknown): message is WorkerMessage {
   return (
     typeof message === 'object' &&
     message !== null &&
+    'type' in message &&
     typeof message.type === 'string'
   )
 }

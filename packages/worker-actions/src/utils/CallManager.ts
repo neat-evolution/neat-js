@@ -7,8 +7,8 @@ export interface CallOptions {
 }
 
 interface PendingCall {
-  deferred: DeferredPromise<any>
-  timeoutId?: any
+  deferred: DeferredPromise<unknown>
+  timeoutId?: ReturnType<typeof setTimeout>
 }
 
 export class CallManager {
@@ -46,7 +46,7 @@ export class CallManager {
 
     // 3. Setup Deferred Promise
     const deferred = pDefer<T>()
-    let timeoutId: any
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
 
     if (options?.timeout != null && options.timeout > 0) {
       timeoutId = setTimeout(() => {
@@ -60,7 +60,13 @@ export class CallManager {
       }, options.timeout)
     }
 
-    this.pendingCalls.set(callId, { deferred, timeoutId })
+    const pendingCall: PendingCall = {
+      deferred: deferred as DeferredPromise<unknown>,
+    }
+    if (timeoutId !== undefined) {
+      pendingCall.timeoutId = timeoutId
+    }
+    this.pendingCalls.set(callId, pendingCall)
 
     return {
       callId,
@@ -69,7 +75,7 @@ export class CallManager {
     }
   }
 
-  public resolveCall(callId: string, payload: any) {
+  public resolveCall(callId: string, payload: unknown) {
     const call = this.pendingCalls.get(callId)
     if (call != null) {
       if (this.verbose) {
@@ -85,7 +91,7 @@ export class CallManager {
     return false
   }
 
-  public rejectCall(callId: string, error: any) {
+  public rejectCall(callId: string, error: unknown) {
     const call = this.pendingCalls.get(callId)
     if (call != null) {
       if (this.verbose) {
