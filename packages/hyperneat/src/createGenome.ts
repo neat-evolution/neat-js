@@ -1,8 +1,5 @@
 import type { GenomeFactory, InitConfig } from '@neat-evolution/core'
-import {
-  CPPNGenome,
-  type CPPNGenomeFactoryOptions,
-} from '@neat-evolution/cppn'
+import { CPPNGenome, type CPPNGenomeFactoryOptions } from '@neat-evolution/cppn'
 
 import type { HyperNEATContext } from './HyperNEATContext.js'
 import type { HyperNEATGenomeOptions } from './HyperNEATGenomeOptions.js'

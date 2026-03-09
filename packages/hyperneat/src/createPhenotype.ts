@@ -5,6 +5,7 @@ import {
   type PhenotypeFactory,
 } from '@neat-evolution/core'
 import {
+  type CPPNContext,
   type CPPNGenome,
   type CPPNGenomeOptions,
   createPhenotype as createCPPNPhenotype,
@@ -16,7 +17,8 @@ import { isSubstrateLinkAction } from './SubstrateAction.js'
 import { load } from './substrate/load.js'
 
 export const createPhenotype: PhenotypeFactory<
-  CPPNGenome<HyperNEATGenomeOptions>
+  CPPNGenome<HyperNEATGenomeOptions>,
+  CPPNContext<HyperNEATGenomeOptions>
 > = (genome) => {
   const phenotype = createCPPNPhenotype(
     genome as unknown as CPPNGenome<CPPNGenomeOptions>
