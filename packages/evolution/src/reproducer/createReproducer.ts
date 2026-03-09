@@ -5,20 +5,16 @@ import type { Population } from '../Population.js'
 import type { Species } from '../Species.js'
 
 import type { Reproducer } from './Reproducer.js'
-import type { ReproducerFactory } from './ReproducerFactory.js'
 
-// FIXME: is ReproducerFactory<any, any, undefined> the best way to do this?
-export const createReproducer: ReproducerFactory<any> = <
-  P extends Population<any>,
->(
+export const createReproducer = <P extends Population>(
   population: P
 ): Reproducer => {
   const rng = threadRNG()
   return {
     copyElites: async (speciesIds: number[]) => {
-      const organisms: Array<Organism<any>> = []
+      const organisms: Array<Organism> = []
       for (const i of speciesIds) {
-        const species = population.species.get(i) as Species<any>
+        const species = population.species.get(i) as Species
         // Steal elites from number of offsprings
         const elitesTakenFromOffspring = Math.min(
           population.populationOptions.elitesFromOffspring,
@@ -29,7 +25,7 @@ export const createReproducer: ReproducerFactory<any> = <
 
         // Directly copy elites, without crossover or mutation
         for (let j = 0; j < species.elites; j++) {
-          const organism = species.organisms[j % species.size] as Organism<any>
+          const organism = species.organisms[j % species.size] as Organism
           const elite = organism.asElite()
           organisms.push(elite)
           population.push(elite, true)
@@ -38,10 +34,10 @@ export const createReproducer: ReproducerFactory<any> = <
       return organisms
     },
     reproduce: async (speciesIds: number[]) => {
-      const organisms: Array<Organism<any>> = []
+      const organisms: Array<Organism> = []
 
       for (const i of speciesIds) {
-        const species = population.species.get(i) as Species<any>
+        const species = population.species.get(i) as Species
         const reproductions = Math.floor(species.offsprings)
 
         // Breed new organisms
@@ -62,7 +58,7 @@ export const createReproducer: ReproducerFactory<any> = <
             throw new Error('Unable to gather father organism')
           }
 
-          let child: Organism<any>
+          let child: Organism
           if (
             rng.gen() <
             population.populationOptions.asexualReproductionProbability

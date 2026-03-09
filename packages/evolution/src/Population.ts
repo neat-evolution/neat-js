@@ -5,9 +5,8 @@ import type {
   ConfigTypeOf,
   GenomeFactoryOptionsOf,
   GenomeOptionsOf,
-  GenomeTypeOf,
-  LinkDataOf,
   InitConfig,
+  LinkDataOf,
   NodeHiddenDataOf,
   StateDataOf,
   StateTypeOf,
@@ -29,9 +28,10 @@ import type { PopulationOptions } from './PopulationOptions.js'
 import type { Reproducer } from './reproducer/Reproducer.js'
 import type { ReproducerFactory } from './reproducer/ReproducerFactory.js'
 import { Species } from './Species.js'
+import type { SpeciesFactoryOptions } from './SpeciesFactoryOptions.js'
 
-export class Population<Ctx extends AlgorithmContext> {
-  public readonly evaluator: Evaluator<any>
+export class Population<Ctx extends AlgorithmContext = AlgorithmContext> {
+  public readonly evaluator: Evaluator
   public readonly reproducer: Reproducer
   public readonly algorithm: Algorithm<Ctx>
   public readonly configProvider: ConfigTypeOf<Ctx>
@@ -50,7 +50,7 @@ export class Population<Ctx extends AlgorithmContext> {
 
   constructor(
     createReproducer: ReproducerFactory<Population<Ctx>>,
-    evaluator: Evaluator<any>,
+    evaluator: Evaluator,
     algorithm: Algorithm<Ctx>,
     configProvider: ConfigTypeOf<Ctx>,
     populationOptions: PopulationOptions,
@@ -121,7 +121,7 @@ export class Population<Ctx extends AlgorithmContext> {
             hydrateOrganism(genomeFactoryOptions, organismFactoryOptions)
           )
         }
-        const speciesFactoryOptions = {
+        const speciesFactoryOptions: SpeciesFactoryOptions<Ctx> = {
           organisms,
           speciesState: speciesData.speciesState,
         }
@@ -295,7 +295,7 @@ export class Population<Ctx extends AlgorithmContext> {
     }
 
     // Perform copyElites and reproduce simultaneously
-    const promises: Array<Promise<Array<Organism<any>>>> = []
+    const promises: Array<Promise<Array<Organism>>> = []
 
     // Directly copy elites, without crossover or mutation
     promises.push(this.reproducer.copyElites(speciesIds))
@@ -425,10 +425,10 @@ export class Population<Ctx extends AlgorithmContext> {
   }
 
   /// Enumerate genomes. Adheres to lock.
-  *genomeEntries(): IterableIterator<GenomeEntry<GenomeTypeOf<Ctx>>> {
+  *genomeEntries(): IterableIterator<GenomeEntry> {
     for (const [speciesIndex, species] of this.species.entries()) {
       for (const [organismIndex, { genome }] of species.organismEntries()) {
-        yield [speciesIndex, organismIndex, genome]
+        yield [speciesIndex, organismIndex, genome] as GenomeEntry
       }
     }
   }

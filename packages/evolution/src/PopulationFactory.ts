@@ -17,7 +17,7 @@ import type { ReproducerFactory } from './reproducer/ReproducerFactory.js'
 
 export type PopulationFactory<Ctx extends AlgorithmContext> = (
   createReproducer: ReproducerFactory<Population<Ctx>>,
-  evaluator: Evaluator<any>,
+  evaluator: Evaluator,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: GenomeOptionsOf<Ctx>,
