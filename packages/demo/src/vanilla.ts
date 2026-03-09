@@ -9,9 +9,9 @@ import { createExecutor } from '@neat-evolution/executor'
 
 import { demo } from './demo.js'
 
-const createEvaluator: EvaluatorFactory<any, any> = (
-  algorithm: AnyAlgorithm<any>,
-  environment: Environment<any>
+const createEvaluator: EvaluatorFactory = (
+  algorithm: AnyAlgorithm,
+  environment: Environment
 ) => {
   return createVanillaEvaluator(algorithm, environment, { createExecutor })
 }

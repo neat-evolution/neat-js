@@ -1,4 +1,5 @@
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
+import type { CPPNReproducerFactory } from '@neat-evolution/cppn'
 import {
   CPPNAlgorithm,
   cppn,
@@ -10,6 +11,7 @@ import {
   defaultDatasetOptions,
   loadDataset,
 } from '@neat-evolution/dataset-environment'
+import type { DESHyperNEATReproducerFactory } from '@neat-evolution/des-hyperneat'
 import {
   DESHyperNEATAlgorithm,
   defaultDESHyperNEATGenomeOptions,
@@ -19,21 +21,24 @@ import {
 import {
   defaultESHyperNEATGenomeOptions,
   ESHyperNEATAlgorithm,
+  type ESHyperNEATReproducerFactory,
   eshyperneat,
 } from '@neat-evolution/es-hyperneat'
 import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
-import type { EvaluatorFactory } from '@neat-evolution/evaluator'
+import type { AnyAlgorithm, EvaluatorFactory } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
   type EvolutionOptions,
   type Population,
+  type PopulationOptions,
   type ReproducerFactory,
 } from '@neat-evolution/evolution'
 import type { ExecutorFactory } from '@neat-evolution/executor'
 import {
   defaultHyperNEATGenomeOptions,
   HyperNEATAlgorithm,
+  type HyperNEATReproducerFactory,
   hyperneat,
 } from '@neat-evolution/hyperneat'
 import {
@@ -55,13 +60,13 @@ export const method = Methods.DES_HyperNEAT
 
 export interface DemoOptions {
   method?: Methods
-  evolutionOptions?: Partial<EvolutionOptions<any, any>>
+  evolutionOptions?: Partial<EvolutionOptions>
   datasetOptions?: Partial<DatasetOptions>
 }
 
 export const demo = async (
-  createReproducer: ReproducerFactory<Population<any>>,
-  createEvaluator: EvaluatorFactory<any, any>,
+  createReproducer: ReproducerFactory<Population>,
+  createEvaluator: EvaluatorFactory,
   createExecutor?: ExecutorFactory,
   options: DemoOptions = {}
 ) => {
@@ -81,11 +86,14 @@ export const demo = async (
   const dataset = await loadDataset(datasetOptions)
   const environment = new DatasetEnvironment(dataset)
 
-  const evolutionOptions: EvolutionOptions<any, any> = {
+  const evolutionOptions: EvolutionOptions = {
     ...defaultEvolutionOptions,
     iterations: 2,
     secondsLimit: 5,
     ...options.evolutionOptions,
+  }
+  const populationOptions: PopulationOptions = {
+    ...defaultPopulationOptions,
   }
 
   // Create evaluation strategy for genome fitness evaluation
@@ -96,73 +104,93 @@ export const demo = async (
   const evolve = async (method: Methods) => {
     switch (method) {
       case Methods.NEAT: {
-        const evaluator = createEvaluator(NEATAlgorithm, environment, {
-          strategy,
-          createExecutor,
-        })
+        const evaluator = createEvaluator(
+          NEATAlgorithm as AnyAlgorithm,
+          environment,
+          {
+            strategy,
+            createExecutor,
+          }
+        )
         return await neat(
           createReproducer as NEATReproducerFactory,
           evaluator,
           evolutionOptions,
           defaultNEATConfigOptions,
-          defaultPopulationOptions,
+          populationOptions,
           defaultNEATGenomeOptions
         )
       }
       case Methods.CPPN: {
-        const evaluator = createEvaluator(CPPNAlgorithm, environment, {
-          strategy,
-          createExecutor,
-        })
+        const evaluator = createEvaluator(
+          CPPNAlgorithm as AnyAlgorithm,
+          environment,
+          {
+            strategy,
+            createExecutor,
+          }
+        )
         return await cppn(
-          createReproducer,
+          createReproducer as CPPNReproducerFactory,
           evaluator,
           evolutionOptions,
           defaultNEATConfigOptions,
-          defaultPopulationOptions,
+          populationOptions,
           defaultCPPNGenomeOptions
         )
       }
       case Methods.HyperNEAT: {
-        const evaluator = createEvaluator(HyperNEATAlgorithm, environment, {
-          strategy,
-          createExecutor,
-        })
+        const evaluator = createEvaluator(
+          HyperNEATAlgorithm as AnyAlgorithm,
+          environment,
+          {
+            strategy,
+            createExecutor,
+          }
+        )
         return await hyperneat(
-          createReproducer,
+          createReproducer as HyperNEATReproducerFactory,
           evaluator,
           evolutionOptions,
           defaultNEATConfigOptions,
-          defaultPopulationOptions,
+          populationOptions,
           defaultHyperNEATGenomeOptions
         )
       }
       case Methods.ES_HyperNEAT: {
-        const evaluator = createEvaluator(ESHyperNEATAlgorithm, environment, {
-          strategy,
-          createExecutor,
-        })
+        const evaluator = createEvaluator(
+          ESHyperNEATAlgorithm as AnyAlgorithm,
+          environment,
+          {
+            strategy,
+            createExecutor,
+          }
+        )
         return await eshyperneat(
-          createReproducer,
+          createReproducer as ESHyperNEATReproducerFactory,
           evaluator,
           evolutionOptions,
           defaultNEATConfigOptions,
-          defaultPopulationOptions,
+          populationOptions,
           defaultESHyperNEATGenomeOptions
         )
       }
       case Methods.DES_HyperNEAT: {
-        const evaluator = createEvaluator(DESHyperNEATAlgorithm, environment, {
-          strategy,
-          createExecutor,
-        })
+        const evaluator = createEvaluator(
+          DESHyperNEATAlgorithm as AnyAlgorithm,
+          environment,
+          {
+            strategy,
+            createExecutor,
+          }
+        )
         return await deshyperneat(
-          createReproducer,
+          createReproducer as DESHyperNEATReproducerFactory,
           evaluator,
           evolutionOptions,
           defaultTopologyConfigOptions,
           defaultNEATConfigOptions,
-          defaultPopulationOptions,
+          populationOptions,
           defaultDESHyperNEATGenomeOptions
         )
       }

@@ -8,12 +8,17 @@ describe('demo benchmark', () => {
   bench(
     'DES-HyperNEAT demo',
     async () => {
-      await demo(createReproducer, createEvaluator, createExecutor, {
-        evolutionOptions: {
-          iterations: 1,
-          secondsLimit: 2,
-        },
-      })
+      await demo(
+        createReproducer as never,
+        createEvaluator as never,
+        createExecutor,
+        {
+          evolutionOptions: {
+            iterations: 1,
+            secondsLimit: 2,
+          },
+        }
+      )
     },
     {
       iterations: 1,

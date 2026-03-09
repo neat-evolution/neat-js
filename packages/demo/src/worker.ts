@@ -13,23 +13,40 @@ import {
 } from '@neat-evolution/worker-reproducer'
 import { hardwareConcurrency } from '@neat-evolution/worker-threads'
 
-import { demo, Methods, method } from './demo.js'
+import { method as defaultMethod, demo, Methods } from './demo.js'
 
 const workerThreadLimit = hardwareConcurrency - 1
 
 const terminables = new Set<Terminable>()
 
-const createReproducer: ReproducerFactory<Population<any>> = createReproducerFactory(
+function parseMethodArg(argv: string[]): Methods {
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]
+    if (arg === '--method' && argv[i + 1]) {
+      const raw = argv[i + 1] as Methods
+      if (Object.values(Methods).includes(raw)) return raw
+      console.warn(
+        `Unsupported method "${raw}", falling back to ${defaultMethod}`
+      )
+      return defaultMethod
+    }
+  }
+  return defaultMethod
+}
+
+const selectedMethod = parseMethodArg(process.argv.slice(2))
+
+const createReproducer: ReproducerFactory<Population> = createReproducerFactory(
   {
     threadCount: workerThreadLimit,
-    enableCustomState: (method as unknown) === Methods.DES_HyperNEAT,
+    enableCustomState: selectedMethod === Methods.DES_HyperNEAT,
   },
   terminables
 )
 
-const createEvaluator: EvaluatorFactory<any, any> = (
-  algorithm: AnyAlgorithm<any>,
-  environment: Environment<any>
+const createEvaluator: EvaluatorFactory = (
+  algorithm: AnyAlgorithm,
+  environment: Environment
 ) => {
   // Explicitly use IndividualStrategy for demonstration purposes.
   // This overrides any strategy passed in via options, ensuring the demo
@@ -44,11 +61,13 @@ const createEvaluator: EvaluatorFactory<any, any> = (
     strategy, // Pass the explicitly created strategy
     verbose: false,
   })
-  terminables.add(evaluator as WorkerEvaluator<any>)
+  terminables.add(evaluator as WorkerEvaluator)
   return evaluator
 }
 try {
-  await demo(createReproducer, createEvaluator, createExecutor)
+  await demo(createReproducer, createEvaluator, createExecutor, {
+    method: selectedMethod,
+  })
 } catch (e) {
   console.error(e)
 }

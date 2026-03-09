@@ -21,13 +21,13 @@ import type {
 } from '@neat-evolution/neat'
 
 const knownNodes = new Set<string>()
-const linksMap = new Map<string, NEATLinkData>()
+const linksMap = new Map<number, NEATLinkData>()
 const hiddenNodes: NEATHiddenNodeData[] = []
 const links: NEATLinkData[] = []
 
 export let genomeFitness: number | null = null
 export const genomeConnections: Array<Connection<NodeKey, number>> = []
-export const genomeActions: Array<Action<string, number>> = []
+export const genomeActions: Array<Action<NodeKey, number>> = []
 export const genomeFactoryOptions: NEATGenomeFactoryOptions = {
   hiddenNodes,
   links,
@@ -172,7 +172,7 @@ for (const line of lines) {
         nodeRefToKey(fromNode),
         nodeRefToKey(toNode),
         parseFloat(weight),
-        innovation,
+        parseInt(innovation, 10),
       ]
       links.push(genomeDataLink)
       linksMap.set(linkKey, genomeDataLink)

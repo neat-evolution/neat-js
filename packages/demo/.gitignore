@@ -2,3 +2,6 @@
 dist
 coverage
 generated
+.artifacts
+profile.json
+profile-worker.json
