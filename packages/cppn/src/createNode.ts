@@ -1,9 +1,9 @@
 import type { NodeFactory, NodeTypeOf } from '@neat-evolution/core'
 
 import type { CPPNContext } from './CPPNContext.js'
+import type { CPPNGenomeOptions } from './CPPNGenomeOptions.js'
 import { CPPNNode } from './CPPNNode.js'
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
-import type { CPPNGenomeOptions } from './CPPNGenomeOptions.js'
 import {
   type CPPNNodeOptions,
   defaultCPPNNodeOptions,

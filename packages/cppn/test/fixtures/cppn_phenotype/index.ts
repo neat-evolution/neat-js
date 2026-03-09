@@ -7,7 +7,9 @@ import type {
 } from '@neat-evolution/core'
 import {
   defaultNEATConfigOptions,
+  NodeType,
   PhenotypeActionType,
+  toNodeKey,
 } from '@neat-evolution/core'
 import {
   createConfig,
@@ -98,6 +100,22 @@ const jsonNodeRefToNodeId = (jsonNodeRef: string): number => {
   return Number(nodeId)
 }
 
+const jsonNodeRefToNodeKey = (jsonNodeRef: string): number => {
+  const type = jsonNodeRef.charAt(0)
+  const id = jsonNodeRefToNodeId(jsonNodeRef)
+
+  switch (type) {
+    case 'I':
+      return toNodeKey(NodeType.Input, id)
+    case 'H':
+      return toNodeKey(NodeType.Hidden, id)
+    case 'O':
+      return toNodeKey(NodeType.Output, id)
+    default:
+      throw new Error(`Unknown node ref: ${jsonNodeRef}`)
+  }
+}
+
 const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
   const hiddenNodes: CPPNNodeData[] = []
   const outputs: CPPNNodeData[] = []
@@ -109,7 +127,12 @@ const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
     outputs.push([jsonNodeRefToNodeId(id), node.bias, node.activation])
   }
   for (const link of Object.values(genome.neat.links)) {
-    links.push([link.from, link.to, link.weight, String(link.innovation)])
+    links.push([
+      jsonNodeRefToNodeKey(link.from),
+      jsonNodeRefToNodeKey(link.to),
+      link.weight,
+      link.innovation,
+    ])
   }
   return {
     hiddenNodes,

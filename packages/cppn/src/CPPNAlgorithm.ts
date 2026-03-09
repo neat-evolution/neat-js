@@ -5,9 +5,7 @@ import {
 } from '@neat-evolution/neat'
 
 import type { CPPNContext } from './CPPNContext.js'
-import {
-  defaultCPPNGenomeOptions,
-} from './CPPNGenomeOptions.js'
+import { defaultCPPNGenomeOptions } from './CPPNGenomeOptions.js'
 import { createGenome } from './createGenome.js'
 import { createPhenotype } from './createPhenotype.js'
 

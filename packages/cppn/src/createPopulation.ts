@@ -19,7 +19,7 @@ export type CPPNReproducerFactory = ReproducerFactory<CPPNPopulation>
 
 export const createPopulation: PopulationFactory<CPPNContext> = (
   createReproducer: CPPNReproducerFactory,
-  evaluator: Evaluator<any>,
+  evaluator: Evaluator,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: CPPNGenomeOptions,
