@@ -19,7 +19,7 @@ export type HyperNEATReproducerFactory = ReproducerFactory<HyperNEATPopulation>
 
 export const createPopulation: PopulationFactory<HyperNEATContext> = (
   createReproducer: HyperNEATReproducerFactory,
-  evaluator: Evaluator<any>,
+  evaluator: Evaluator,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: HyperNEATGenomeOptions,

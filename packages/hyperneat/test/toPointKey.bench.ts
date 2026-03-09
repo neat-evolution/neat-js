@@ -15,7 +15,7 @@ const toJoinPointKey = (point: Point): string => {
 }
 
 const toPlusPointKey = (point: Point): string => {
-  return point[0] + ',' + point[1]
+  return `${point[0]},${point[1]}`
 }
 
 const toTemplatePointKey = (point: Point): string => {

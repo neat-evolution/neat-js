@@ -14,8 +14,8 @@ import type { HyperNEATGenomeOptions } from './HyperNEATGenomeOptions.js'
 
 export const hyperneat = async (
   createReproducer: HyperNEATReproducerFactory,
-  evaluator: Evaluator<any>,
-  evolutionOptions: EvolutionOptions<any, any>,
+  evaluator: Evaluator,
+  evolutionOptions: EvolutionOptions,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: HyperNEATGenomeOptions
@@ -28,7 +28,7 @@ export const hyperneat = async (
     genomeOptions
   )
 
-  await evolve(population, evolutionOptions)
+  await evolve(population as never, evolutionOptions as never)
 
   return population.best()
 }
