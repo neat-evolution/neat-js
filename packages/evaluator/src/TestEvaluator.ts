@@ -8,7 +8,7 @@ import type { AnyAlgorithm } from './types.js'
 
 // FIXME: write tests for correctness
 export class TestEvaluator<EFO> implements Evaluator<EFO> {
-  public readonly algorithm: AnyAlgorithm<any>
+  public readonly algorithm: AnyAlgorithm
   public readonly enableAsync = true
 
   public readonly environment: Environment<EFO>
@@ -16,16 +16,16 @@ export class TestEvaluator<EFO> implements Evaluator<EFO> {
   public readonly createExecutor: ExecutorFactory
 
   constructor(
-    algorithm: AnyAlgorithm<any>,
+    algorithm: AnyAlgorithm,
     environment: Environment<EFO>,
-    options: EvaluatorFactoryOptions<any>
+    options: EvaluatorFactoryOptions
   ) {
     this.algorithm = algorithm
     this.environment = environment
     this.createExecutor = options.createExecutor
   }
 
-  private async worker(entry: GenomeEntry<any>): Promise<FitnessData> {
+  private async worker(entry: GenomeEntry): Promise<FitnessData> {
     const [speciesIndex, organismIndex, genome] = entry
     const phenotype = this.algorithm.createPhenotype(genome)
     const executor = this.createExecutor(phenotype)
@@ -44,9 +44,7 @@ export class TestEvaluator<EFO> implements Evaluator<EFO> {
     // no-op
   }
 
-  async *evaluate(
-    genomeEntries: GenomeEntries<any>
-  ): AsyncIterable<FitnessData> {
+  async *evaluate(genomeEntries: GenomeEntries): AsyncIterable<FitnessData> {
     const promises: Array<Promise<FitnessData>> = []
     for (const data of genomeEntries) {
       promises.push(this.worker(data))
