@@ -1,21 +1,21 @@
-import type { Target } from '@neat-evolution/core'
 import type { SyncExecutor } from '@neat-evolution/executor'
-import { type PointKey, toPointKey } from '@neat-evolution/hyperneat'
+import type { Point } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
 
 import { QuadPoint } from './QuadPoint.js'
 
 export type WeightFn = (x: number, y: number) => number
+type PointTarget = { node: Point; edge: number }
 
 /// Single iteration search for new nodes and connections from a given point.
-export function findConnections(
+export function findConnectionsPoints(
   x: number,
   y: number,
   cppn: SyncExecutor,
   reverse: boolean,
   options: ESHyperNEATGenomeOptions
-): Array<Target<PointKey, number>> {
+): PointTarget[] {
   // Pre-allocate input array to avoid repeated allocations
   const cppnInput = new Float64Array(4)
   if (reverse) {
@@ -36,10 +36,10 @@ export function findConnections(
     }
     // execute now returns Float64Array, and the first element is the weight
     const result = cppn.execute(cppnInput)
-    return (result as any)[0] ?? 0
+    return result[0] ?? 0
   }
 
-  const connections: Array<Target<PointKey, number>> = []
+  const connections: PointTarget[] = []
   const root = QuadPoint.acquire(0.0, 0.0, 1.0, 1, f, options)
   let minWeight = root.weight
   let maxWeight = root.weight
@@ -86,17 +86,7 @@ export function findConnections(
     for (let i = 0; i < leaves.length; i++) {
       const leaf = leaves[i]
       if (leaf === undefined) continue
-      const expandedChildren = leaf.extract(
-        f,
-        connections,
-        maxWeight - minWeight
-      )
-      for (let j = 0; j < expandedChildren.length; j++) {
-        const child = expandedChildren[j]
-        if (child !== undefined) {
-          newLeaves.push(child)
-        }
-      }
+      leaf.extractPointsInto(f, connections, maxWeight - minWeight, newLeaves)
     }
     leaves = newLeaves
   }
@@ -107,7 +97,7 @@ export function findConnections(
     const leaf = leaves[i]
     if (leaf !== undefined) {
       connections.push({
-        node: toPointKey([leaf.x, leaf.y]),
+        node: [leaf.x, leaf.y],
         edge: leaf.weight,
       })
     }

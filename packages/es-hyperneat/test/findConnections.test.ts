@@ -1,18 +1,18 @@
-import type { Target } from '@neat-evolution/core'
 import { createPhenotype } from '@neat-evolution/cppn'
+import type { Point } from '@neat-evolution/hyperneat'
 import { describe, expect, test } from 'vitest'
 
-import { findConnections } from '../src/index.js'
+import { findConnectionsPoints } from '../src/index.js'
 
 import { type TestCase, testCases } from './fixtures/find_connections/index.js'
 
-const sortTargets = (targets: Array<Target<string, number>>) => {
+const sortTargets = (targets: Array<{ node: Point; edge: number }>) => {
   return [...targets].sort((a, b) => {
-    return a.node > b.node ? 1 : a.node < b.node ? -1 : a.edge - b.edge
+    return a.node[0] - b.node[0] || a.node[1] - b.node[1] || a.edge - b.edge
   })
 }
 
-describe('findConnections', () => {
+describe('findConnectionsPoints', () => {
   test.each([
     ...testCases.entries(),
   ])('should export the same factoryOptions for test case #%d', (_index, testCase: TestCase) => {
@@ -35,7 +35,7 @@ describe('findConnections', () => {
   test.each([
     ...testCases.entries(),
   ])('should return targets for test case #%d', (_index, testCase: TestCase) => {
-    const targets = findConnections(...testCase.args)
+    const targets = findConnectionsPoints(...testCase.args)
     expect(sortTargets(targets)).toEqual(sortTargets(testCase.targets))
   })
 })

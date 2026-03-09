@@ -1,5 +1,4 @@
-import type { Target } from '@neat-evolution/core'
-import type { PointKey } from '@neat-evolution/hyperneat'
+import type { Point } from '@neat-evolution/hyperneat'
 import { describe, expect, test } from 'vitest'
 
 import type { WeightFn } from '../src/index.js'
@@ -9,18 +8,18 @@ import { type TestCase, testCases } from './fixtures/extract_leaf/index.js'
 const cloneArgs = (
   args: [
     f: WeightFn,
-    connections: Array<Target<PointKey, number>>,
+    connections: Array<{ node: Point; edge: number }>,
     deltaWeight: number,
   ]
 ) => {
   return [args[0], args[1].map((target) => ({ ...target })), args[2]] as [
     f: WeightFn,
-    connections: Array<Target<PointKey, number>>,
+    connections: Array<{ node: Point; edge: number }>,
     deltaWeight: number,
   ]
 }
 
-describe('QuadPoint.extract', () => {
+describe('QuadPoint.extractPoints', () => {
   test.each([
     ...testCases.entries(),
   ])('should export the same factoryOptions for test case #%d', (_index, testCase: TestCase) => {
@@ -50,7 +49,7 @@ describe('QuadPoint.extract', () => {
     ...testCases.entries(),
   ])('should extract leaf for test case #%d', (_index, testCase: TestCase) => {
     const args = cloneArgs(testCase.args)
-    const result = Array.from(testCase.leaf.extract(...args))
+    const result = testCase.leaf.extractPoints(...args)
     expect(result.length).toEqual(testCase.extractedLeaves.length)
     expect(result).toEqual(testCase.extractedLeaves)
   })
@@ -60,10 +59,13 @@ describe('QuadPoint.extract', () => {
   ])('should mutate connections for test case #%d', (_index, testCase: TestCase) => {
     const args = cloneArgs(testCase.args)
     expect(args[1]).toEqual(testCase.beforeConnections)
-    Array.from(testCase.leaf.extract(...args))
+    testCase.leaf.extractPoints(...args)
     expect(args[1]).toEqual(testCase.afterConnections)
     for (const [i, target] of args[1].entries()) {
-      const expected = testCase.afterConnections[i] as Target<string, number>
+      const expected = testCase.afterConnections[i] as {
+        node: Point
+        edge: number
+      }
       expect(target.node).toEqual(expected.node)
       expect(target.edge).toBeCloseTo(expected.edge, 10)
     }

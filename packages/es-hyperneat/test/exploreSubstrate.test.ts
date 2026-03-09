@@ -1,3 +1,4 @@
+import type { Connection } from '@neat-evolution/core'
 import { createPhenotype } from '@neat-evolution/cppn'
 import type { Point } from '@neat-evolution/hyperneat'
 import { describe, expect, test } from 'vitest'
@@ -11,6 +12,14 @@ const sortLayers = (layers: Point[][]): Point[][] => {
     return layer.sort((a, b) => {
       return a[0] - b[0] || a[1] - b[1]
     })
+  })
+}
+
+const sortConnections = (
+  connections: Array<Connection<number, number>>
+): Array<Connection<number, number>> => {
+  return [...connections].sort((a, b) => {
+    return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]
   })
 }
 
@@ -45,11 +54,13 @@ describe('exploreSubstrate', () => {
     ...testCases.entries(),
   ])('should return connections for test case #%d', (_index, testCase: TestCase) => {
     const [, connections] = exploreSubstrate(...testCase.args)
-    for (const [i, connection] of connections.entries()) {
-      const expected = testCase.connections[i] as [string, string, number]
-      expect(connection[0]).toEqual(expected[0])
-      expect(connection[1]).toEqual(expected[1])
-      expect(connection[2]).toBeCloseTo(expected[2], 10)
+    const actual = sortConnections(connections)
+    const expected = sortConnections(testCase.connections)
+    for (const [i, connection] of actual.entries()) {
+      const expectedConnection = expected[i] as [number, number, number]
+      expect(connection[0]).toEqual(expectedConnection[0])
+      expect(connection[1]).toEqual(expectedConnection[1])
+      expect(connection[2]).toBeCloseTo(expectedConnection[2], 10)
     }
   })
 })

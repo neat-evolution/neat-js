@@ -21,9 +21,9 @@ export interface ExpandLeafData {
   expanded_leaves: QuadPointJSONData[]
 }
 
-async function readJSONFile(filePath: string): Promise<any> {
+async function readJSONFile<T>(filePath: string): Promise<T> {
   const data = await fs.readFile(filePath, 'utf-8')
-  return JSON.parse(data)
+  return JSON.parse(data) as T
 }
 
 const jsonDir = new URL('.', import.meta.url).pathname
@@ -33,11 +33,10 @@ const files = await fs.readdir(jsonDir)
 const jsonFiles = files.filter((file) => file.endsWith('.json'))
 
 const rawTestCases = await Promise.all(
-  jsonFiles.map(
-    (file) =>
-      readJSONFile(
-        new URL(`${jsonDir}/${file}`, import.meta.url).pathname
-      ) as Promise<ExpandLeafData>
+  jsonFiles.map((file) =>
+    readJSONFile<ExpandLeafData>(
+      new URL(`${jsonDir}/${file}`, import.meta.url).pathname
+    )
   )
 )
 

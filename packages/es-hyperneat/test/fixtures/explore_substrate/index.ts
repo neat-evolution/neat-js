@@ -5,9 +5,11 @@ import {
   type Connection,
   defaultNEATConfigOptions,
   type InitConfig,
+  NodeType,
   type Phenotype,
   type PhenotypeAction,
   PhenotypeActionType,
+  toNodeKey,
 } from '@neat-evolution/core'
 import {
   type CPPNGenome,
@@ -18,11 +20,7 @@ import {
   defaultCPPNGenomeOptions,
 } from '@neat-evolution/cppn'
 import { createExecutor, type SyncExecutor } from '@neat-evolution/executor'
-import {
-  type Point,
-  type PointKey,
-  toPointKey,
-} from '@neat-evolution/hyperneat'
+import type { Point } from '@neat-evolution/hyperneat'
 import {
   createConfig,
   createState,
@@ -117,6 +115,22 @@ const jsonNodeRefToNodeId = (jsonNodeRef: string): number => {
   return Number(nodeId)
 }
 
+const jsonNodeRefToNodeKey = (jsonNodeRef: string): number => {
+  const type = jsonNodeRef.charAt(0)
+  const id = jsonNodeRefToNodeId(jsonNodeRef)
+
+  switch (type) {
+    case 'I':
+      return toNodeKey(NodeType.Input, id)
+    case 'H':
+      return toNodeKey(NodeType.Hidden, id)
+    case 'O':
+      return toNodeKey(NodeType.Output, id)
+    default:
+      throw new Error(`Unknown node ref: ${jsonNodeRef}`)
+  }
+}
+
 const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
   const hiddenNodes: CPPNNodeData[] = []
   const outputs: CPPNNodeData[] = []
@@ -128,7 +142,12 @@ const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
     outputs.push([jsonNodeRefToNodeId(id), node.bias, node.activation])
   }
   for (const link of Object.values(genome.neat.links)) {
-    links.push([link.from, link.to, link.weight, String(link.innovation)])
+    links.push([
+      jsonNodeRefToNodeKey(link.from),
+      jsonNodeRefToNodeKey(link.to),
+      link.weight,
+      link.innovation,
+    ])
   }
   return {
     hiddenNodes,
@@ -158,16 +177,6 @@ const createCPPNGenome = (
     initConfig,
     genomeFactoryOptions
   )
-}
-
-const toConnections = (
-  connections: ConnectionJSONData[]
-): Array<Connection<PointKey, number>> => {
-  return connections.map((connection) => {
-    const from = toPointKey(connection.from)
-    const to = toPointKey(connection.to)
-    return [from, to, connection.edge]
-  })
 }
 
 const isActivationAction = (
@@ -204,12 +213,13 @@ export interface TestCase {
     reverse: boolean,
     allowConnectionsToInput: boolean,
     options: ESHyperNEATGenomeOptions,
+    keyOf: (point: Point) => number,
   ]
   genome: CPPNGenome<CPPNGenomeOptions>
   factoryOptions: CPPNGenomeFactoryOptions
   phenotype: Phenotype
   nodes: Point[][]
-  connections: Array<Connection<PointKey, number>>
+  connections: Array<Connection<number, number>>
 }
 
 export const testCases: TestCase[] = rawTestCases.map(
@@ -234,6 +244,22 @@ export const testCases: TestCase[] = rawTestCases.map(
       actions: createActions(phenotypeData.actions),
     }
     const cppn = createExecutor(phenotype)
+    const pointIdByX = new Map<number, Map<number, number>>()
+    let nextPointId = 0
+    const getPointId = (point: Point): number => {
+      const [x, y] = point
+      let yMap = pointIdByX.get(x)
+      if (yMap == null) {
+        yMap = new Map<number, number>()
+        pointIdByX.set(x, yMap)
+      }
+      const existing = yMap.get(y)
+      if (existing != null) return existing
+      const id = nextPointId
+      nextPointId++
+      yMap.set(y, id)
+      return id
+    }
     return {
       filePath,
       args: [
@@ -244,12 +270,17 @@ export const testCases: TestCase[] = rawTestCases.map(
         reverse,
         allowConnectionsToInput,
         defaultESHyperNEATGenomeOptions,
+        getPointId,
       ],
       genome,
       factoryOptions,
       phenotype,
       nodes,
-      connections: toConnections(connections),
+      connections: connections.map((connection) => [
+        getPointId(connection.from),
+        getPointId(connection.to),
+        connection.edge,
+      ]),
     }
   }
 )

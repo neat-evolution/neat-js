@@ -4,10 +4,11 @@ import {
   type Activation,
   defaultNEATConfigOptions,
   type InitConfig,
+  NodeType,
   type Phenotype,
   type PhenotypeAction,
   PhenotypeActionType,
-  type Target,
+  toNodeKey,
 } from '@neat-evolution/core'
 import {
   type CPPNGenome,
@@ -20,11 +21,7 @@ import {
   defaultCPPNGenomeOptions,
 } from '@neat-evolution/cppn'
 import { createExecutor } from '@neat-evolution/executor'
-import {
-  type Point,
-  type PointKey,
-  toPointKey,
-} from '@neat-evolution/hyperneat'
+import type { Point } from '@neat-evolution/hyperneat'
 import type { NEATLinkData } from '@neat-evolution/neat'
 
 import {
@@ -126,6 +123,22 @@ const jsonNodeRefToNodeId = (jsonNodeRef: string): number => {
   return Number(nodeId)
 }
 
+const jsonNodeRefToNodeKey = (jsonNodeRef: string): number => {
+  const type = jsonNodeRef.charAt(0)
+  const id = jsonNodeRefToNodeId(jsonNodeRef)
+
+  switch (type) {
+    case 'I':
+      return toNodeKey(NodeType.Input, id)
+    case 'H':
+      return toNodeKey(NodeType.Hidden, id)
+    case 'O':
+      return toNodeKey(NodeType.Output, id)
+    default:
+      throw new Error(`Unknown node ref: ${jsonNodeRef}`)
+  }
+}
+
 const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
   const hiddenNodes: CPPNNodeData[] = []
   const outputs: CPPNNodeData[] = []
@@ -137,7 +150,12 @@ const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
     outputs.push([jsonNodeRefToNodeId(id), node.bias, node.activation])
   }
   for (const link of Object.values(genome.neat.links)) {
-    links.push([link.from, link.to, link.weight, String(link.innovation)])
+    links.push([
+      jsonNodeRefToNodeKey(link.from),
+      jsonNodeRefToNodeKey(link.to),
+      link.weight,
+      link.innovation,
+    ])
   }
   return {
     hiddenNodes,
@@ -171,10 +189,9 @@ const createCPPNGenome = (
 
 const toTargets = (
   results: TargetJSONData[]
-): Array<Target<PointKey, number>> => {
+): Array<{ node: Point; edge: number }> => {
   return results.map((target) => {
-    const node = toPointKey(target.node)
-    return { node, edge: target.edge }
+    return { node: target.node, edge: target.edge }
   })
 }
 
@@ -261,12 +278,12 @@ export interface TestCase {
   filePath: string
   args: [
     f: WeightFn,
-    connections: Array<Target<PointKey, number>>,
+    connections: Array<{ node: Point; edge: number }>,
     deltaWeight: number,
   ]
   leaf: QuadPoint
-  beforeConnections: Array<Target<PointKey, number>>
-  afterConnections: Array<Target<PointKey, number>>
+  beforeConnections: Array<{ node: Point; edge: number }>
+  afterConnections: Array<{ node: Point; edge: number }>
   bandValues: BandValue[]
   genome: CPPNGenome<CPPNGenomeOptions>
   phenotype: Phenotype

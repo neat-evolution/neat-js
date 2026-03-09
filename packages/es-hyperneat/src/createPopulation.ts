@@ -15,11 +15,12 @@ import type { ESHyperNEATGenomeOptions } from './ESHyperNEATGenomeOptions.js'
 
 export type ESHyperNEATPopulation = Population<ESHyperNEATContext>
 
-export type ESHyperNEATReproducerFactory = ReproducerFactory<ESHyperNEATPopulation>
+export type ESHyperNEATReproducerFactory =
+  ReproducerFactory<ESHyperNEATPopulation>
 
 export const createPopulation: PopulationFactory<ESHyperNEATContext> = (
   createReproducer: ESHyperNEATReproducerFactory,
-  evaluator: Evaluator<any>,
+  evaluator: Evaluator,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: ESHyperNEATGenomeOptions,
