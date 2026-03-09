@@ -5,8 +5,8 @@ import {
   loadDataset,
 } from '@neat-evolution/dataset-environment'
 import {
+  type AnyAlgorithm,
   type FitnessData,
-  type GenomeEntry,
   TestEvaluator,
 } from '@neat-evolution/evaluator'
 import {
@@ -25,6 +25,7 @@ import {
   NEATGenome,
   type NEATGenomeOptions,
   type NEATPopulation,
+  type NEATReproducerFactory,
 } from '@neat-evolution/neat'
 import { beforeEach, describe, expect, test } from 'vitest'
 
@@ -42,6 +43,8 @@ describe('PopulationFactory', () => {
   let population: NEATPopulation
   let populationOptions: PopulationOptions
   let genomeOptions: NEATGenomeOptions
+  const neatCreateReproducer =
+    createReproducer as unknown as NEATReproducerFactory
 
   beforeEach(async () => {
     const datasetOptions = {
@@ -54,7 +57,9 @@ describe('PopulationFactory', () => {
 
     const dataset = await loadDataset(datasetOptions)
     const environment = new DatasetEnvironment(dataset)
-    evaluator = new TestEvaluator(algorithm, environment, { createExecutor })
+    evaluator = new TestEvaluator(algorithm as AnyAlgorithm, environment, {
+      createExecutor,
+    })
 
     configProvider = algorithm.createConfig({ neat: defaultNEATConfigOptions })
     populationOptions = { ...defaultPopulationOptions }
@@ -64,7 +69,7 @@ describe('PopulationFactory', () => {
     }
     // 1. Create a population
     population = new Population(
-      createReproducer,
+      neatCreateReproducer,
       evaluator,
       algorithm,
       configProvider,
@@ -85,7 +90,7 @@ describe('PopulationFactory', () => {
     }
 
     // 3. Evolve it for 10 iterations
-    await evolve(population, evolutionOptions)
+    await evolve(population as never, evolutionOptions as never)
   })
 
   test('population.toJSON', async () => {
@@ -106,7 +111,7 @@ describe('PopulationFactory', () => {
   test('hydrate population from factoryOptions', () => {
     const factoryOptions = population.toFactoryOptions()
     const hydratedPopulation: NEATPopulation = new Population(
-      createReproducer,
+      neatCreateReproducer,
       evaluator,
       algorithm,
       configProvider,
@@ -126,7 +131,7 @@ describe('PopulationFactory', () => {
   test('hydrate population from data', () => {
     const data = population.toJSON()
     const hydratedPopulation: NEATPopulation = new Population(
-      createReproducer,
+      neatCreateReproducer,
       evaluator,
       algorithm,
       configProvider,
@@ -176,7 +181,9 @@ describe('PopulationFactory', () => {
 
     // evaluate
     const fitnessResults: FitnessData[] = []
-    for await (const fitnessData of evaluator.evaluate([[0, 0, genome]])) {
+    for await (const fitnessData of evaluator.evaluate([
+      [0, 0, genome],
+    ] as never)) {
       fitnessResults.push(fitnessData)
     }
 
@@ -193,7 +200,7 @@ describe('PopulationFactory', () => {
 
     const factoryOptions = population.toFactoryOptions()
     const hydratedPopulation: NEATPopulation = new Population(
-      createReproducer,
+      neatCreateReproducer,
       evaluator,
       algorithm,
       configProvider,
@@ -208,18 +215,14 @@ describe('PopulationFactory', () => {
       throw new Error('hydratedGenome is undefined')
     }
 
-    const phenotypeData: GenomeEntry<NEATGenome> = [0, 0, genome]
-    const hydratedPhenotypeData: GenomeEntry<NEATGenome> = [
-      1,
-      1,
-      hydratedGenome,
-    ]
+    const phenotypeData = [0, 0, genome] as const
+    const hydratedPhenotypeData = [1, 1, hydratedGenome] as const
 
     const fitnessResults: FitnessData[] = []
     for await (const fitnessData of evaluator.evaluate([
       phenotypeData,
       hydratedPhenotypeData,
-    ])) {
+    ] as never)) {
       fitnessResults.push(fitnessData)
     }
 
