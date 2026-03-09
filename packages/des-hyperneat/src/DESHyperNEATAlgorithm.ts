@@ -4,9 +4,7 @@ import { createGenome } from './createGenome.js'
 import { createPhenotype } from './createPhenotype.js'
 import { createState } from './createState.js'
 import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
-import {
-  defaultDESHyperNEATGenomeOptions,
-} from './DESHyperNEATGenomeOptions.js'
+import { defaultDESHyperNEATGenomeOptions } from './DESHyperNEATGenomeOptions.js'
 
 export const DESHyperNEATAlgorithm: Algorithm<DESHyperNEATContext> = {
   name: 'DES-HyperNEAT',

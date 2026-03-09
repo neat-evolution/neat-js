@@ -62,7 +62,7 @@ export class CustomState implements State<CustomStateData> {
   }
 
   toJSON() {
-    const uniqueCPPNStates: Array<[key: string, value: StateData]> = []
+    const uniqueCPPNStates: Array<[key: LinkKey, value: StateData]> = []
     for (const [key, value] of this.uniqueCPPNStates.entries()) {
       uniqueCPPNStates.push([key, value.toJSON()])
     }

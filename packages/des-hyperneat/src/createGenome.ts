@@ -1,7 +1,4 @@
-import type {
-  GenomeFactory,
-  InitConfig,
-} from '@neat-evolution/core'
+import type { GenomeFactory, InitConfig } from '@neat-evolution/core'
 
 import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import { DESHyperNEATGenome } from './DESHyperNEATGenome.js'

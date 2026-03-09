@@ -9,7 +9,9 @@ import type {
 } from '@neat-evolution/core'
 import {
   defaultNEATConfigOptions,
+  NodeType,
   PhenotypeActionType,
+  toNodeKey,
 } from '@neat-evolution/core'
 import type { CPPNNodeData } from '@neat-evolution/cppn'
 import type { NEATLinkData } from '@neat-evolution/neat'
@@ -133,6 +135,22 @@ const jsonNodeRefToNodeId = (jsonNodeRef: string): number => {
   return Number(nodeId)
 }
 
+const jsonNodeRefToNodeKey = (jsonNodeRef: string): NodeKey => {
+  const type = jsonNodeRef.charAt(0)
+  const id = jsonNodeRefToNodeId(jsonNodeRef)
+
+  switch (type) {
+    case 'I':
+      return toNodeKey(NodeType.Input, id)
+    case 'H':
+      return toNodeKey(NodeType.Hidden, id)
+    case 'O':
+      return toNodeKey(NodeType.Output, id)
+    default:
+      throw new Error(`Unknown node ref: ${jsonNodeRef}`)
+  }
+}
+
 const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
   const hiddenNodes: CPPNNodeData[] = []
   const outputs: CPPNNodeData[] = []
@@ -144,7 +162,12 @@ const toCPPNFactoryOptions = (genome: CPPNGenomeJSONData) => {
     outputs.push([jsonNodeRefToNodeId(id), node.bias, node.activation])
   }
   for (const link of Object.values(genome.neat.links)) {
-    links.push([link.from, link.to, link.weight, String(link.innovation)])
+    links.push([
+      jsonNodeRefToNodeKey(link.from),
+      jsonNodeRefToNodeKey(link.to),
+      link.weight,
+      link.innovation,
+    ])
   }
   return {
     hiddenNodes,
@@ -184,10 +207,10 @@ const toDESHyperNEATFactoryOptions = (
   }
   for (const link of Object.values(genome.neat.links)) {
     links.push([
-      link.neat.from,
-      link.neat.to,
+      jsonNodeRefToNodeKey(link.neat.from),
+      jsonNodeRefToNodeKey(link.neat.to),
       link.neat.weight,
-      String(link.neat.innovation),
+      link.neat.innovation,
       toCPPNFactoryOptions(link.cppn),
       link.depth,
     ])
@@ -251,7 +274,7 @@ const createConnections = (
   const result: Array<Connection<NodeKey, null>> = []
   for (const [key, connection] of Object.entries(connections)) {
     for (const { node } of connection) {
-      result.push([key, node, null])
+      result.push([jsonNodeRefToNodeKey(key), jsonNodeRefToNodeKey(node), null])
     }
   }
   return result

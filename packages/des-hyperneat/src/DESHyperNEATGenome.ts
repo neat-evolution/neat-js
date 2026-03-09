@@ -3,15 +3,16 @@ import {
   type InitConfig,
   type NodeKey,
   NodeType,
+  nodeKeyToType,
   nodeRefToKey,
   toLinkKey,
 } from '@neat-evolution/core'
 import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
 import { threadRNG } from '@neat-evolution/utils'
-import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import type { DESHyperNEATGenomeFactory } from './createGenome.js'
 import { createLinkFactory } from './createLink.js'
 import { createNodeFactory } from './createNode.js'
+import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import type { DESHyperNEATGenomeData } from './DESHyperNEATGenomeData.js'
 import type {
   DESHyperNEATGenomeFactoryOptions,
@@ -115,7 +116,7 @@ export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
 
   getDepth(node: NodeKey): number | undefined {
     if (this.genomeOptions.staticSubstrateDepth >= 0) {
-      return node[0] === NodeType.Hidden
+      return nodeKeyToType(node) === NodeType.Hidden
         ? this.genomeOptions.staticSubstrateDepth
         : 0
     } else {
