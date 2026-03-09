@@ -1,5 +1,6 @@
 import { threadRNG } from '@neat-evolution/utils'
 import { Handler, type WorkerContext } from '@neat-evolution/worker-actions'
+import QuickLRU from 'quick-lru'
 
 import {
   ActionType,
@@ -18,41 +19,28 @@ const handler = new Handler()
 const threadContext: ThreadContext & Partial<WorkerContext> = {
   rng: threadRNG(),
   threadInfo: null,
+  speciesSelectionCache: new QuickLRU({ maxSize: 32 }),
+  populationSelectionCache: [],
 }
 
-handler.register(
-  ActionType.INIT_REPRODUCER,
-  async (payload: InitReproducerPayload<any, any>, context) => {
-    // Copy WorkerContext properties once during init (like worker-evaluator)
-    for (const [key, value] of Object.entries(context)) {
-      ;(threadContext as any)[key] = value
-    }
-    await initThread(payload, threadContext as ThreadContext & WorkerContext)
-  }
-)
+function getThreadContext(): ThreadContext & WorkerContext {
+  return threadContext as ThreadContext & WorkerContext
+}
 
-handler.register(
-  ActionType.REQUEST_ELITE_ORGANISM,
-  (payload: OrganismPayload<any>) => {
-    return eliteOrganism(
-      payload,
-      threadContext as ThreadContext & WorkerContext
-    )
-  }
-)
-
-handler.register(
-  ActionType.REQUEST_BREED_ORGANISM,
-  async (payload: SpeciesPayload) => {
-    return await breedOrganism(
-      payload,
-      threadContext as ThreadContext & WorkerContext
-    )
-  }
-)
-
-handler.register(ActionType.TERMINATE, () => {
-  return null
+handler.register(ActionType.INIT_REPRODUCER, async (payload, context) => {
+  // Copy WorkerContext properties once during init (like worker-evaluator)
+  Object.assign(threadContext, context)
+  await initThread(payload as InitReproducerPayload, getThreadContext())
 })
+
+handler.register(ActionType.REQUEST_ELITE_ORGANISM, (payload) => {
+  return eliteOrganism(payload as OrganismPayload, getThreadContext())
+})
+
+handler.register(ActionType.REQUEST_BREED_ORGANISM, async (payload) => {
+  return await breedOrganism(payload as SpeciesPayload, getThreadContext())
+})
+
+handler.register(ActionType.TERMINATE, () => null)
 
 handler.ready()

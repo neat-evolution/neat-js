@@ -12,17 +12,29 @@ import { WorkerPool } from '@neat-evolution/worker-pool'
 
 import {
   ActionType,
+  type BatchPayload,
   type CPPNStateRedirectPayload,
   type EmptyPayload,
   initReproducer,
+  type OrganismBatchPayload,
   type OrganismPayload,
   requestBreedOrganism,
   requestEliteOrganism,
+  type SpeciesBatchPayload,
   type SpeciesPayload,
   terminate as terminateAction,
 } from './actions.js'
 import type { AnyPopulation } from './types.js'
 import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
+
+interface CloneableCustomState {
+  custom: {
+    cloneState: (
+      key: CPPNStateRedirectPayload['key'],
+      oldKey: CPPNStateRedirectPayload['oldKey']
+    ) => void
+  }
+}
 
 export class WorkerReproducer implements Reproducer {
   public readonly population: AnyPopulation
@@ -61,17 +73,25 @@ export class WorkerReproducer implements Reproducer {
     })
 
     // Add handlers for requests from workers
-    this.dispatcher.addMessageHandler(
+    this.addTypedMessageHandler(
       ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT,
       this.handleRequestPopulationTournamentSelect.bind(this)
     )
 
-    this.dispatcher.addMessageHandler(
+    this.addTypedMessageHandler(
       ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT,
       this.handleRequestSpeciesTournamentSelect.bind(this)
     )
+    this.addTypedMessageHandler(
+      ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT_BATCH,
+      this.handleRequestPopulationTournamentSelectBatch.bind(this)
+    )
+    this.addTypedMessageHandler(
+      ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT_BATCH,
+      this.handleRequestSpeciesTournamentSelectBatch.bind(this)
+    )
 
-    this.dispatcher.addMessageHandler(
+    this.addTypedMessageHandler(
       ActionType.REQUEST_SET_CPPN_STATE_REDIRECT,
       this.handleRequestSetCPPNStateRedirect.bind(this)
     )
@@ -81,43 +101,67 @@ export class WorkerReproducer implements Reproducer {
 
   protected async initWorkers() {
     await this.pool.ready()
-
-    await this.dispatcher.broadcast(
-      initReproducer({
-        reproducerOptions: this.options,
-        populationOptions: this.population.populationOptions,
-        configData: this.population.configProvider.toJSON(),
-        genomeOptions: this.population.genomeOptions,
-        initConfig: this.population.initConfig,
-        algorithmPathname: this.algorithmPathname,
+    const workers = this.pool.getWorkers()
+    await Promise.all(
+      workers.map(async (worker, workerIndex) => {
+        await this.dispatcher.callOnWorker(
+          worker,
+          initReproducer({
+            workerIndex,
+            reproducerOptions: this.options,
+            populationOptions: this.population.populationOptions,
+            configData: this.population.configProvider.toJSON(),
+            genomeOptions: this.population.genomeOptions,
+            initConfig: this.population.initConfig,
+            algorithmPathname: this.algorithmPathname,
+          })
+        )
       })
     )
   }
 
   async terminate() {
     await this.initPromise
-    await this.dispatcher.broadcast(terminateAction())
+    await this.dispatcher.broadcast(terminateAction(null))
     await this.pool.terminate()
+  }
+
+  private addTypedMessageHandler<P>(
+    type: string,
+    handler: (action: WorkerMessage<P>, context: DispatcherContext) => void
+  ) {
+    this.dispatcher.addMessageHandler(type, (action, context) => {
+      handler(action as WorkerMessage<P>, context)
+    })
   }
 
   protected handleRequestPopulationTournamentSelect(
     action: WorkerMessage<EmptyPayload>,
     context: DispatcherContext
   ) {
-    const organism = this.population.tournamentSelect(
-      this.population.populationOptions.interspeciesTournamentSize
-    )
-    if (organism == null) {
-      throw new Error('No organism found')
-    }
-    // FIXME: OrganismPayload<GFO>
-    const responsePayload: OrganismPayload<any> = {
-      genome: organism.genome.toFactoryOptions(),
-      organismState: organism.toFactoryOptions(),
-    }
+    const responsePayload = this.selectPopulationPayload(1).organisms[0]
+    if (responsePayload == null) throw new Error('No organism found')
     // For worker→main→worker RPC, we need to use context.send with proper meta
     if (action.meta?.callId != null) {
-      const responseAction: WorkerMessage<OrganismPayload<any>> = {
+      const responseAction: WorkerMessage<OrganismPayload> = {
+        type: 'RESPONSE',
+        payload: responsePayload,
+        meta: {
+          callId: action.meta.callId,
+          isResponse: true,
+        },
+      }
+      context.send(responseAction)
+    }
+  }
+
+  protected handleRequestPopulationTournamentSelectBatch(
+    action: WorkerMessage<BatchPayload>,
+    context: DispatcherContext
+  ) {
+    const responsePayload = this.selectPopulationPayload(action.payload.count)
+    if (action.meta?.callId != null) {
+      const responseAction: WorkerMessage<OrganismBatchPayload> = {
         type: 'RESPONSE',
         payload: responsePayload,
         meta: {
@@ -133,20 +177,13 @@ export class WorkerReproducer implements Reproducer {
     action: WorkerMessage<SpeciesPayload>,
     context: DispatcherContext
   ) {
-    const { speciesId } = action.payload
-    const species = this.population.species.get(speciesId) as Species<any>
-    const organism = species.tournamentSelect(
-      this.population.populationOptions.tournamentSize
-    )
-    if (organism == null) {
-      throw new Error('No organism found')
-    }
-    const responsePayload: OrganismPayload<any> = {
-      genome: organism.genome.toFactoryOptions(),
-      organismState: organism.toFactoryOptions(),
-    }
+    const responsePayload = this.selectSpeciesPayload(
+      action.payload.speciesId,
+      1
+    ).organisms[0]
+    if (responsePayload == null) throw new Error('No organism found')
     if (action.meta?.callId != null) {
-      const responseAction: WorkerMessage<OrganismPayload<any>> = {
+      const responseAction: WorkerMessage<OrganismPayload> = {
         type: 'RESPONSE',
         payload: responsePayload,
         meta: {
@@ -158,12 +195,73 @@ export class WorkerReproducer implements Reproducer {
     }
   }
 
+  protected handleRequestSpeciesTournamentSelectBatch(
+    action: WorkerMessage<SpeciesBatchPayload>,
+    context: DispatcherContext
+  ) {
+    const { speciesId, count } = action.payload
+    const responsePayload = this.selectSpeciesPayload(speciesId, count)
+    if (action.meta?.callId != null) {
+      const responseAction: WorkerMessage<OrganismBatchPayload> = {
+        type: 'RESPONSE',
+        payload: responsePayload,
+        meta: {
+          callId: action.meta.callId,
+          isResponse: true,
+        },
+      }
+      context.send(responseAction)
+    }
+  }
+
+  private selectPopulationPayload(count: number): OrganismBatchPayload {
+    const organisms: Array<OrganismPayload> = []
+    const safeCount = Math.max(1, Math.trunc(count))
+    for (let i = 0; i < safeCount; i++) {
+      const organism = this.population.tournamentSelect(
+        this.population.populationOptions.interspeciesTournamentSize
+      )
+      if (organism == null) continue
+      organisms.push({
+        genome: organism.genome.toFactoryOptions(),
+        organismState: organism.toFactoryOptions(),
+      })
+    }
+    if (organisms.length === 0) {
+      throw new Error('No organism found')
+    }
+    return { organisms }
+  }
+
+  private selectSpeciesPayload(
+    speciesId: number,
+    count: number
+  ): OrganismBatchPayload {
+    const species = this.population.species.get(speciesId) as Species
+    const organisms: Array<OrganismPayload> = []
+    const safeCount = Math.max(1, Math.trunc(count))
+    for (let i = 0; i < safeCount; i++) {
+      const organism = species.tournamentSelect(
+        this.population.populationOptions.tournamentSize
+      )
+      if (organism == null) continue
+      organisms.push({
+        genome: organism.genome.toFactoryOptions(),
+        organismState: organism.toFactoryOptions(),
+      })
+    }
+    if (organisms.length === 0) {
+      throw new Error('No organism found')
+    }
+    return { organisms }
+  }
+
   protected handleRequestSetCPPNStateRedirect(
     action: WorkerMessage<CPPNStateRedirectPayload>,
     context: DispatcherContext
   ) {
     const state = this.population.stateProvider.neat()
-    if (state.custom?.cloneState == null) {
+    if (!this.hasCloneableCustomState(state)) {
       throw new Error('State provider does not support custom state')
     }
     state.custom.cloneState(action.payload.key, action.payload.oldKey)
@@ -181,12 +279,25 @@ export class WorkerReproducer implements Reproducer {
     }
   }
 
-  async copyElites(
-    speciesIds: number[]
-  ): Promise<Array<Organism<any>>> {
-    const promises: Array<Promise<Organism<any>>> = []
+  private hasCloneableCustomState(
+    state: ReturnType<AnyPopulation['stateProvider']['neat']>
+  ): state is ReturnType<AnyPopulation['stateProvider']['neat']> &
+    CloneableCustomState {
+    return (
+      'custom' in state &&
+      state.custom != null &&
+      typeof state.custom === 'object' &&
+      'cloneState' in state.custom &&
+      typeof state.custom.cloneState === 'function'
+    )
+  }
+
+  async copyElites(speciesIds: number[]): Promise<Array<Organism>> {
+    await this.initPromise
+
+    const promises: Array<Promise<Organism>> = []
     for (const i of speciesIds) {
-      const species = this.population.species.get(i) as Species<any>
+      const species = this.population.species.get(i) as Species
       // Steal elites from number of offsprings
       const elitesTakenFromOffspring = Math.min(
         this.population.populationOptions.elitesFromOffspring,
@@ -197,19 +308,15 @@ export class WorkerReproducer implements Reproducer {
 
       // Directly copy elites, without crossover or mutation
       for (let j = 0; j < species.elites; j++) {
-        const organism = species.organisms[j % species.size] as Organism<any>
+        const organism = species.organisms[j % species.size] as Organism
         promises.push(this.eliteOrganism(organism))
       }
     }
     return await Promise.all(promises)
   }
 
-  async eliteOrganism(
-    organism: Organism<any>
-  ): Promise<Organism<any>> {
-    await this.initPromise
-
-    const data = await this.dispatcher.call<OrganismPayload<any>>(
+  async eliteOrganism(organism: Organism): Promise<Organism> {
+    const data = await this.dispatcher.call<OrganismPayload>(
       requestEliteOrganism({
         genome: organism.genome.toFactoryOptions(),
         organismState: organism.toFactoryOptions(),
@@ -231,9 +338,9 @@ export class WorkerReproducer implements Reproducer {
     return elite
   }
 
-  async reproduce(
-    speciesIds: number[]
-  ): Promise<Array<Organism<any>>> {
+  async reproduce(speciesIds: number[]): Promise<Array<Organism>> {
+    await this.initPromise
+
     const result = await Promise.all(
       speciesIds.map(
         async (speciesId) => await this.reproduceSpecies(speciesId)
@@ -242,25 +349,19 @@ export class WorkerReproducer implements Reproducer {
     return result.flat()
   }
 
-  async reproduceSpecies(
-    speciesId: number
-  ): Promise<Array<Organism<any>>> {
-    const species = this.population.species.get(speciesId) as Species<any>
+  async reproduceSpecies(speciesId: number): Promise<Array<Organism>> {
+    const species = this.population.species.get(speciesId) as Species
     const reproductions = Math.floor(species.offsprings)
 
-    const promises: Array<Promise<Organism<any>>> = []
-    for (let _ = 0; _ < reproductions; _++) {
-      promises.push(this.breedOrganism(speciesId))
+    const tasks: Array<Promise<Organism>> = []
+    for (let i = 0; i < reproductions; i++) {
+      tasks.push(this.breedOrganism(speciesId))
     }
-    return await Promise.all(promises)
+    return await Promise.all(tasks)
   }
 
-  async breedOrganism(
-    speciesId: number
-  ): Promise<Organism<any>> {
-    await this.initPromise
-
-    const data = await this.dispatcher.call<OrganismPayload<any>>(
+  async breedOrganism(speciesId: number): Promise<Organism> {
+    const data = await this.dispatcher.call<OrganismPayload>(
       requestBreedOrganism({
         speciesId,
       })

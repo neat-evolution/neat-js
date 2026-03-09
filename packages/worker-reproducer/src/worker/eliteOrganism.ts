@@ -5,7 +5,7 @@ import type { OrganismPayload } from '../actions.js'
 import type { ReproducerHandlerContext } from './ThreadContext.js'
 
 export const eliteOrganism = (
-  payload: OrganismPayload<any>,
+  payload: OrganismPayload,
   context: ReproducerHandlerContext
 ) => {
   if (context.threadInfo == null) {
@@ -24,6 +24,7 @@ export const eliteOrganism = (
     payload.organismState.generation,
     payload.organismState
   )
+
   const elite = organism.asElite()
 
   const responsePayload = {

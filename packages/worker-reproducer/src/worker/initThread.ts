@@ -1,20 +1,29 @@
+import QuickLRU from 'quick-lru'
 import { type InitReproducerPayload, StateType } from '../actions.js'
 import { WorkerState } from '../WorkerState.js'
 
 import { setCPPNStateRedirect } from './customState/setCPPNStateRedirect.js'
 import type { ReproducerHandlerContext } from './ThreadContext.js'
 
+const getSingleCPPNState = (
+  genomeOptions: InitReproducerPayload['genomeOptions']
+) =>
+  'singleCPPNState' in genomeOptions &&
+  typeof genomeOptions.singleCPPNState === 'boolean'
+    ? genomeOptions.singleCPPNState
+    : undefined
+
 export const initThread = async (
-  payload: InitReproducerPayload<any, any>,
+  payload: InitReproducerPayload,
   context: ReproducerHandlerContext
 ) => {
-  const stateProvider = new WorkerState<any, any, any, any, any>(
+  const stateProvider = new WorkerState(
     setCPPNStateRedirect,
     context,
     StateType.NEAT,
     null,
     payload.reproducerOptions.enableCustomState,
-    payload.genomeOptions.singleCPPNState
+    getSingleCPPNState(payload.genomeOptions)
   )
 
   const { createConfig, createGenome } = await import(
@@ -35,6 +44,8 @@ export const initThread = async (
       createGenome,
     },
   }
+  context.speciesSelectionCache = new QuickLRU({ maxSize: 32 })
+  context.populationSelectionCache = []
 
   // Return null to signal success - Handler will automatically send response
   return null
