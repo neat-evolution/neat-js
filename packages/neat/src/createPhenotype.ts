@@ -4,16 +4,17 @@ import {
   type NodeRefTuple,
   NodeType,
   nodeKeyToRefTuple,
+  nodeKeyToType,
   nodeTupleToKey,
   type Phenotype,
   type PhenotypeAction,
   PhenotypeActionType,
   type PhenotypeFactory,
 } from '@neat-evolution/core'
-
+import type { NEATContext } from './NEATContext.js'
 import type { NEATGenome } from './NEATGenome.js'
 
-export const createPhenotype: PhenotypeFactory<NEATGenome> = (
+export const createPhenotype: PhenotypeFactory<NEATGenome, NEATContext> = (
   genome: NEATGenome
 ): Phenotype => {
   // Sort genomes network topologically
@@ -69,7 +70,7 @@ export const createPhenotype: PhenotypeFactory<NEATGenome> = (
         PhenotypeActionType.Activation,
         nodeMapping.get(node) as number,
         0,
-        node[0] === NodeType.Output
+        nodeKeyToType(node) === NodeType.Output
           ? genome.genomeOptions.outputActivation
           : genome.genomeOptions.hiddenActivation,
       ])

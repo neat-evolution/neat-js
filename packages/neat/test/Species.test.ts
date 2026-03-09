@@ -10,12 +10,12 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { createConfig } from '../src/createConfig.js'
 import { createGenome } from '../src/createGenome.js'
 import { createState } from '../src/createState.js'
+import type { NEATContext } from '../src/NEATContext.js'
 import type { NEATGenome } from '../src/NEATGenome.js'
 import {
   defaultNEATGenomeOptions,
   type NEATGenomeOptions,
 } from '../src/NEATGenomeOptions.js'
-import type { NEATContext } from '../src/NEATContext.js'
 import type { NEATState } from '../src/NEATState.js'
 
 describe('Species class', () => {

@@ -4,7 +4,11 @@ import {
   defaultDatasetOptions,
   loadDataset,
 } from '@neat-evolution/dataset-environment'
-import { createEvaluator, type Evaluator } from '@neat-evolution/evaluator'
+import {
+  type AnyAlgorithm,
+  createEvaluator,
+  type Evaluator,
+} from '@neat-evolution/evaluator'
 import {
   createReproducer,
   defaultPopulationOptions,
@@ -31,9 +35,10 @@ import {
   defaultNEATGenomeOptions,
   NEATAlgorithm,
   type NEATConfig,
-  type NEATGenomeOptions,
   type NEATContext,
+  type NEATGenomeOptions,
   type NEATPopulation,
+  type NEATReproducerFactory,
 } from '../src/index.js'
 
 const createEnvironment = async () => {
@@ -59,18 +64,22 @@ describe('Population class', () => {
     inputs: 1,
     outputs: 1,
   }
+  const neatCreateReproducer =
+    createReproducer as unknown as NEATReproducerFactory
 
   beforeEach(async () => {
     configProvider = createConfig({ neat: defaultNEATConfigOptions })
     genomeOptions = defaultNEATGenomeOptions
     populationOptions = defaultPopulationOptions
     environment = await createEnvironment()
-    evaluator = createEvaluator(NEATAlgorithm, environment, { createExecutor })
+    evaluator = createEvaluator(NEATAlgorithm as AnyAlgorithm, environment, {
+      createExecutor,
+    })
   })
 
   test('should correctly initialize', () => {
     const population: NEATPopulation = new Population(
-      createReproducer,
+      neatCreateReproducer,
       evaluator,
       NEATAlgorithm,
       configProvider,
@@ -99,7 +108,7 @@ describe('Population class', () => {
     let population: NEATPopulation
     beforeEach(() => {
       population = new Population(
-        createReproducer,
+        neatCreateReproducer,
         evaluator,
         NEATAlgorithm,
         configProvider,
@@ -118,7 +127,7 @@ describe('Population class', () => {
     let population: NEATPopulation
     beforeEach(async () => {
       population = new Population(
-        createReproducer,
+        neatCreateReproducer,
         evaluator,
         NEATAlgorithm,
         configProvider,
@@ -136,7 +145,7 @@ describe('Population class', () => {
       let speciesCount = 0
       for (let i = 0; i < 100; i++) {
         population = new Population(
-          createReproducer,
+          neatCreateReproducer,
           evaluator,
           NEATAlgorithm,
           configProvider,
@@ -166,7 +175,7 @@ describe('Population class', () => {
     let population: NEATPopulation
     beforeEach(async () => {
       population = new Population(
-        createReproducer,
+        neatCreateReproducer,
         evaluator,
         NEATAlgorithm,
         configProvider,
@@ -226,11 +235,11 @@ describe('Population class', () => {
         await population.evolve()
         for (const spyObj of speciesSpies) {
           const orderedSpies: MockInstance[] = [
-            spyObj['adjustFitness'] as MockInstance,
-            spyObj['calculateOffsprings'] as MockInstance,
-            spyObj['retainBest'] as MockInstance,
-            spyObj['age'] as MockInstance,
-            spyObj['removeOld'] as MockInstance,
+            spyObj.adjustFitness as MockInstance,
+            spyObj.calculateOffsprings as MockInstance,
+            spyObj.retainBest as MockInstance,
+            spyObj.age as MockInstance,
+            spyObj.removeOld as MockInstance,
           ]
           for (const [i, spy] of orderedSpies.entries()) {
             const nextSpy = orderedSpies[i + 1]

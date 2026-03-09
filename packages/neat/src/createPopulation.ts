@@ -19,7 +19,7 @@ export type NEATReproducerFactory = ReproducerFactory<NEATPopulation>
 
 export const createPopulation: PopulationFactory<NEATContext> = (
   createReproducer: NEATReproducerFactory,
-  evaluator: Evaluator<any>,
+  evaluator: Evaluator,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: NEATGenomeOptions,

@@ -12,7 +12,9 @@ import type { NEATGenome } from '../src/NEATGenome.js'
 import { testCases } from './fixtures/fitness/testCases.js'
 
 vi.mock('@neat-evolution/utils', async () => {
-  const actual: any = await vi.importActual('@neat-evolution/utils')
+  const actual = await vi.importActual<typeof import('@neat-evolution/utils')>(
+    '@neat-evolution/utils'
+  )
   return {
     ...actual,
     shuffle: vi.fn((array) => array),
