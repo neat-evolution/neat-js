@@ -96,15 +96,16 @@ describe('loadDataset', () => {
   test('should fail to load a mismatched dataset from a file', async () => {
     const options = defaultDatasetOptions
     options.dataset = new URL('./fixtures/mismatched', import.meta.url).pathname
-    let error: any
+    let error: unknown
     try {
       await loadDataset(options)
     } catch (err) {
       error = err
     }
-    expect(error.message.startsWith('Unable to load dataset from file')).toBe(
-      true
-    )
+    expect(error).toBeInstanceOf(Error)
+    expect(
+      (error as Error).message.startsWith('Unable to load dataset from file')
+    ).toBe(true)
   })
 
   test('should add bias input', async () => {

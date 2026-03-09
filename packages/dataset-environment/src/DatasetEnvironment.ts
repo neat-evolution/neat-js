@@ -28,7 +28,7 @@ export class DatasetEnvironment implements Environment<SharedArrayBuffer> {
       return Math.exp(-crossentropy(targets, predictions, norm))
     } else {
       const e = 1.0 - mse(targets, predictions, norm)
-      return isFinite(e) ? e : 0.0
+      return Number.isFinite(e) ? e : 0.0
     }
   }
 
