@@ -67,20 +67,29 @@ export const createExecutor: SyncExecutorFactory = (
     for (let i = 0; i < inputsCount; i++) {
       const inputIndex = inputsMap[i]
       if (inputIndex !== undefined) {
-        values[i] = (inputs as any)[inputIndex] ?? 0
+        values[i] = inputs[inputIndex] ?? 0
       }
     }
 
     // Do forward pass
     for (let i = 0; i < actionsWithFunctions.length; i++) {
-      const action = actionsWithFunctions[i]!
+      const action = actionsWithFunctions[i]
+      if (action == null) {
+        continue
+      }
 
       if (action.type === PhenotypeActionType.Link) {
-        // Use non-null assertion as we know these indices are within bounds
-        values[action.to]! += values[action.from]! * action.weight
+        const nextValue = values[action.to]
+        const fromValue = values[action.from]
+        if (nextValue !== undefined && fromValue !== undefined) {
+          values[action.to] = nextValue + fromValue * action.weight
+        }
       } else {
         const fn = action.fn as ActivationFunction
-        values[action.node] = fn(values[action.node]! + action.bias)
+        const nodeValue = values[action.node]
+        if (nodeValue !== undefined) {
+          values[action.node] = fn(nodeValue + action.bias)
+        }
       }
     }
 
