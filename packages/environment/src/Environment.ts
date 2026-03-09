@@ -4,7 +4,7 @@ import type { RNG } from '@neat-evolution/utils'
 
 export type EnvironmentDescription = InitConfig
 
-export interface Environment<EFO> {
+export interface Environment<EFO = unknown> {
   description: EnvironmentDescription
   /** Force async evaluation in the evaluator */
   isAsync: boolean
@@ -15,4 +15,4 @@ export interface Environment<EFO> {
   toFactoryOptions: () => EFO
 }
 
-export type StandardEnvironment<EFO> = Environment<EFO>
+export type StandardEnvironment<EFO = unknown> = Environment<EFO>
