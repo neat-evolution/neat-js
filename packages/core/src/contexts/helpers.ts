@@ -11,7 +11,11 @@ import type { LinkFactoryOptions } from '../link/LinkFactoryOptions.js'
 import type { Node } from '../node/Node.js'
 import type { NodeFactoryOptions } from '../node/NodeFactoryOptions.js'
 import type { StateData } from '../state/StateData.js'
-import type { ExtendedState, NEATState, StateProvider } from '../state/StateProvider.js'
+import type {
+  ExtendedState,
+  NEATState,
+  StateProvider,
+} from '../state/StateProvider.js'
 import type { AlgorithmContext } from './AlgorithmContext.js'
 
 export type ConfigFactoryOptionsOf<Ctx extends AlgorithmContext> =
@@ -20,8 +24,8 @@ export type ConfigNodeOptionsOf<Ctx extends AlgorithmContext> =
   Ctx['Config']['NodeOptions'] & ConfigOptions
 export type ConfigLinkOptionsOf<Ctx extends AlgorithmContext> =
   Ctx['Config']['LinkOptions'] & ConfigOptions
-export type ConfigDataOf<Ctx extends AlgorithmContext> =
-  Ctx['Config']['Data'] & ConfigData
+export type ConfigDataOf<Ctx extends AlgorithmContext> = Ctx['Config']['Data'] &
+  ConfigData
 export type ConfigTypeOf<Ctx extends AlgorithmContext> = Ctx['Config']['Type'] &
   ConfigProvider<
     ConfigNodeOptionsOf<Ctx>,
@@ -29,10 +33,12 @@ export type ConfigTypeOf<Ctx extends AlgorithmContext> = Ctx['Config']['Type'] &
     ConfigDataOf<Ctx>
   >
 
-export type StateNodeDataOf<Ctx extends AlgorithmContext> = Ctx['State']['NodeData']
-export type StateLinkDataOf<Ctx extends AlgorithmContext> = Ctx['State']['LinkData']
-export type StateDataOf<Ctx extends AlgorithmContext> =
-  Ctx['State']['Data'] & StateData
+export type StateNodeDataOf<Ctx extends AlgorithmContext> =
+  Ctx['State']['NodeData']
+export type StateLinkDataOf<Ctx extends AlgorithmContext> =
+  Ctx['State']['LinkData']
+export type StateDataOf<Ctx extends AlgorithmContext> = Ctx['State']['Data'] &
+  StateData
 export type StateNodeOf<Ctx extends AlgorithmContext> = Ctx['State']['Node'] &
   ExtendedState<StateNodeDataOf<Ctx>>
 export type StateLinkOf<Ctx extends AlgorithmContext> = Ctx['State']['Link'] &
@@ -47,7 +53,8 @@ export type StateTypeOf<Ctx extends AlgorithmContext> = Ctx['State']['Type'] &
     StateDataOf<Ctx>
   >
 
-export type NodeHiddenDataOf<Ctx extends AlgorithmContext> = Ctx['Node']['HiddenData']
+export type NodeHiddenDataOf<Ctx extends AlgorithmContext> =
+  Ctx['Node']['HiddenData']
 export type NodeFactoryOptionsOf<Ctx extends AlgorithmContext> =
   Ctx['Node']['FactoryOptions'] & NodeFactoryOptions
 export type NodeTypeOf<Ctx extends AlgorithmContext> = Ctx['Node']['Type'] &

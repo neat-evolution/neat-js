@@ -8,7 +8,7 @@ import type {
 } from '../contexts/helpers.js'
 import type { InitConfig } from './InitConfig.js'
 
-export type GenomeFactory<Ctx extends AlgorithmContext> = (
+export type GenomeFactory<Ctx extends AlgorithmContext = AlgorithmContext> = (
   configProvider: ConfigTypeOf<Ctx>,
   stateProvider: StateTypeOf<Ctx>,
   genomeOptions: GenomeOptionsOf<Ctx>,

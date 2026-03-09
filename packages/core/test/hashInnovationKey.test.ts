@@ -6,29 +6,31 @@ import {
 } from '../src/state/hashInnovationKey.js'
 
 describe('hashInnovationKey', () => {
-  // Optional: Reset any global state if necessary before each test
   beforeEach(() => {
-    // Reset any needed state
     innovationHashCache.clear()
   })
 
   test('should generate consistent hash for the same input', () => {
-    const innovationKey = 'I1:H2'
+    const innovationKey = 0x123456789abc
     const hash1 = hashInnovationKey(innovationKey)
     const hash2 = hashInnovationKey(innovationKey)
+
     expect(hash1).toBe(hash2)
-    expect(hash1).toBe('1bo4y')
+    expect(typeof hash1).toBe('number')
+    expect(innovationHashCache.get(innovationKey)).toBe(hash1)
   })
 
   test('should generate different hashes for different inputs', () => {
-    const hash1 = hashInnovationKey('I1:H2')
-    const hash2 = hashInnovationKey('H3:O1')
+    const hash1 = hashInnovationKey(0x123456789abc)
+    const hash2 = hashInnovationKey(0xfedcba98765)
+
     expect(hash1).not.toBe(hash2)
-    expect(hash2).toBe('1b2st')
   })
 
-  test('should generate hashes for hidden inputs', () => {
-    const hash1 = hashInnovationKey('H1bo4y:1b2st')
-    expect(hash1).toBe('1yuen5z')
+  test('should incorporate both high and low bits of the innovation key', () => {
+    const lowOnly = hashInnovationKey(0x000000001234)
+    const highOnly = hashInnovationKey(0x123400000000)
+
+    expect(lowOnly).not.toBe(highOnly)
   })
 })

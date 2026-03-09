@@ -20,12 +20,11 @@ import { type LinkKey, linkRefToKey, toLinkKey } from './link/linkRefToKey.js'
 import type { NodeFactory } from './node/NodeFactory.js'
 import type { NodeRef } from './node/NodeRef.js'
 import { NodeType } from './node/NodeType.js'
-import { nodeKeyToRef, nodeKeyToType } from './node/nodeKeyToRef.js'
+import { nodeKeyToId, nodeKeyToType } from './node/nodeKeyToRef.js'
 import { type NodeKey, nodeRefToKey } from './node/nodeRefToKey.js'
 import type { InnovationKey } from './state/hashInnovationKey.js'
 
-export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
-{
+export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
   public readonly config: ConfigTypeOf<Ctx>
   public readonly state: StateTypeOf<Ctx>
   public readonly genomeOptions: GenomeOptionsOf<Ctx>
@@ -139,7 +138,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
     let linkDifferences = 0
     let weightDistance = 0
     let linkMatchingCount = 0
-    
+
     const thisLinks = this.links
     const otherLinks = other.links
 
@@ -152,15 +151,18 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
         linkDifferences++
       }
     }
-    
-    linkDifferences += (otherLinks.size - linkMatchingCount)
+
+    linkDifferences += otherLinks.size - linkMatchingCount
     const linkUnionSize = thisLinks.size + otherLinks.size - linkMatchingCount
-    const linkDist = linkUnionSize === 0 ? 0 : (linkDifferences + weightDistance) / linkUnionSize
+    const linkDist =
+      linkUnionSize === 0
+        ? 0
+        : (linkDifferences + weightDistance) / linkUnionSize
 
     let nodeDifferences = 0
     let nodeDistance = 0
     let nodeMatchingCount = 0
-    
+
     const nodeMaps: Array<
       [Map<NodeKey, NodeTypeOf<Ctx>>, Map<NodeKey, NodeTypeOf<Ctx>>]
     > = [[this.hiddenNodes, other.hiddenNodes]]
@@ -173,10 +175,14 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
     let otherNodeCount = 0
 
     for (let i = 0; i < nodeMaps.length; i++) {
-      const [map1, map2] = nodeMaps[i]!
+      const nodeMapPair = nodeMaps[i]
+      if (nodeMapPair == null) {
+        continue
+      }
+      const [map1, map2] = nodeMapPair
       thisNodeCount += map1.size
       otherNodeCount += map2.size
-      
+
       for (const [nodeKey, node] of map1) {
         const node2 = map2.get(nodeKey)
         if (node2 !== undefined) {
@@ -187,11 +193,12 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
         }
       }
     }
-    
-    nodeDifferences += (otherNodeCount - nodeMatchingCount)
+
+    nodeDifferences += otherNodeCount - nodeMatchingCount
     const nodeUnionSize = thisNodeCount + otherNodeCount - nodeMatchingCount
 
-    const nodeDist = nodeUnionSize === 0 ? 0 : (nodeDifferences + nodeDistance) / nodeUnionSize
+    const nodeDist =
+      nodeUnionSize === 0 ? 0 : (nodeDifferences + nodeDistance) / nodeUnionSize
 
     return (
       neatConfig.linkDistanceWeight * linkDist +
@@ -284,7 +291,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
   }
 
   getNodeByKey(nodeKey: NodeKey): NodeTypeOf<Ctx> | undefined {
-    const type = nodeKey[0]
+    const type = nodeKeyToType(nodeKey)
     switch (type) {
       case NodeType.Input:
         return this.inputs.get(nodeKey)
@@ -315,7 +322,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
     const newNode =
       this.hiddenNodes.get(newNodeKey) ??
       this.createNode(
-        nodeKeyToRef(newNodeKey),
+        { type: nodeKeyToType(newNodeKey), id: nodeKeyToId(newNodeKey) },
         this.config.node(),
         this.state.node()
       )
@@ -413,10 +420,13 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
     }
     const linksArray = Array.from(this.links.values())
     const rng = threadRNG()
-    
+
     for (let i = 0; i < 50; i++) {
       const linkIndex = rng.genRange(0, linkSize)
-      const link = linksArray[linkIndex]!
+      const link = linksArray[linkIndex]
+      if (link == null) {
+        continue
+      }
 
       const newNodeKey = await this.state
         .neat()
@@ -424,7 +434,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
 
       const linkFromKey = toLinkKey(link.from, newNodeKey)
       const linkToKey = toLinkKey(newNodeKey, link.to)
-      
+
       if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
         await this.splitLink(link.from, link.to, newNodeKey)
         break
@@ -464,7 +474,10 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
 
     const val = rng.genRange(1, lastWheelValue + 1)
     const sourceIndex = binarySearchFirst(wheel, val)
-    const source = sourceNodes[sourceIndex]!
+    const source = sourceNodes[sourceIndex]
+    if (source == null) {
+      return
+    }
     const sourceKey = nodeRefToKey(source)
 
     const targetNodes: NodeTypeOf<Ctx>[] = []
@@ -479,7 +492,10 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx>
     shuffle(targetNodes, rng)
 
     for (let i = 0; i < targetNodes.length; i++) {
-      const target = targetNodes[i]!
+      const target = targetNodes[i]
+      if (target == null) {
+        continue
+      }
       const targetKey = nodeRefToKey(target)
       if (!this.connections.createsCycle(sourceKey, targetKey)) {
         const innovation = await this.state

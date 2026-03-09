@@ -15,8 +15,7 @@ import type { LinkFactory } from './LinkFactory.js'
 import type { LinkFactoryOptions } from './LinkFactoryOptions.js'
 import { toLinkKey } from './linkRefToKey.js'
 
-export class CoreLink<Ctx extends AlgorithmContext> implements Link<Ctx>
-{
+export class CoreLink<Ctx extends AlgorithmContext> implements Link<Ctx> {
   // LinkRef
   public readonly from: NodeKey
   public readonly to: NodeKey
@@ -89,7 +88,7 @@ export class CoreLink<Ctx extends AlgorithmContext> implements Link<Ctx>
   }
 
   toString(): string {
-    return toLinkKey(this.from, this.to)
+    return String(toLinkKey(this.from, this.to))
   }
 
   /**

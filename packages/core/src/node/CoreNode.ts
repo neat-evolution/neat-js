@@ -14,7 +14,8 @@ import type { NodeId } from './NodeRef.js'
 import type { NodeType } from './NodeType.js'
 import { toNodeKey } from './nodeRefToKey.js'
 
-export class CoreNode<Ctx extends AlgorithmContext> implements Node<Ctx>
+export class CoreNode<Ctx extends AlgorithmContext = AlgorithmContext>
+  implements Node<Ctx>
 {
   // NodeRef
   public readonly type: NodeType
@@ -60,7 +61,7 @@ export class CoreNode<Ctx extends AlgorithmContext> implements Node<Ctx>
   }
 
   toString(): string {
-    return toNodeKey(this.type, this.id)
+    return String(toNodeKey(this.type, this.id))
   }
 
   /**

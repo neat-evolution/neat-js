@@ -3,7 +3,6 @@ import {
   createConfig,
   createState,
   defaultNEATGenomeOptions,
-  NEATAlgorithm,
   NEATGenome,
 } from '@neat-evolution/neat'
 
