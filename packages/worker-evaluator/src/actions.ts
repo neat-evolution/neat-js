@@ -21,12 +21,12 @@ export interface InitPayload {
   algorithmPathname: string
   createExecutorPathname: string
   createEnvironmentPathname: string
-  environmentData: any
+  environmentData: unknown
 }
 
 export interface InitGenomeFactoryPayload<
-  CD extends ConfigData,
-  GO extends GenomeOptions,
+  CD extends ConfigData = ConfigData,
+  GO extends GenomeOptions = GenomeOptions,
 > {
   configData: CD
   genomeOptions: GO
@@ -34,12 +34,12 @@ export interface InitGenomeFactoryPayload<
 }
 
 export interface EvaluateGenomePayload {
-  genomeOptions: GenomeFactoryOptions<any, any>
+  genomeOptions: GenomeFactoryOptions
   seed?: string | undefined
 }
 
 export interface EvaluateBatchPayload {
-  genomeOptions: Array<GenomeFactoryOptions<any, any>>
+  genomeOptions: Array<GenomeFactoryOptions>
   seed?: string | undefined
 }
 
@@ -54,9 +54,9 @@ export const initEvaluator = createMessage<InitPayload>(
   ActionType.INIT_EVALUATOR
 )
 
-export const initGenomeFactory = createMessage<
-  InitGenomeFactoryPayload<any, any>
->(ActionType.INIT_GENOME_FACTORY)
+export const initGenomeFactory = createMessage<InitGenomeFactoryPayload>(
+  ActionType.INIT_GENOME_FACTORY
+)
 
 export const requestEvaluateGenome = createMessage<EvaluateGenomePayload>(
   ActionType.REQUEST_EVALUATE_GENOME

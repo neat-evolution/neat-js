@@ -20,7 +20,7 @@ export interface WorkerEvaluatorOptions {
    * Evaluation strategy to use for orchestrating genome evaluation.
    * Defaults to IndividualStrategy if not provided.
    */
-  strategy?: EvaluationStrategy<any>
+  strategy?: EvaluationStrategy
 
   /**
    * URL to the worker script. Required for Vite compatibility.

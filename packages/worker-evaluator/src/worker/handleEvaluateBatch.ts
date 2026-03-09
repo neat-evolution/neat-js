@@ -35,12 +35,12 @@ export const handleEvaluateBatch: HandleEvaluateBatchFn = async (
   const executors: Executor[] = batchGenomeOptions.map((options) => {
     const genome = createGenome(
       configProvider,
-      stateProvider,
+      stateProvider as never,
       genomeOptions,
       initConfig,
       options
     )
-    const phenotype = createPhenotype(genome)
+    const phenotype = createPhenotype(genome as never)
     return createExecutor(phenotype)
   })
 
@@ -50,15 +50,17 @@ export const handleEvaluateBatch: HandleEvaluateBatchFn = async (
   // Call batch method
   let fitnessScores: number[]
   if (isAsync) {
-    if (environment.evaluateBatchAsync == null) {
+    const evaluateBatchAsync = environment.evaluateBatchAsync
+    if (evaluateBatchAsync == null) {
       throw new Error('evaluateBatchAsync not implemented on environment')
     }
-    fitnessScores = await environment.evaluateBatchAsync(executors, rng)
+    fitnessScores = await evaluateBatchAsync(executors, rng)
   } else {
-    if (environment.evaluateBatch == null) {
+    const evaluateBatch = environment.evaluateBatch
+    if (evaluateBatch == null) {
       throw new Error('evaluateBatch not implemented on environment')
     }
-    fitnessScores = environment.evaluateBatch(executors as SyncExecutor[], rng)
+    fitnessScores = evaluateBatch(executors as SyncExecutor[], rng)
   }
 
   return fitnessScores
