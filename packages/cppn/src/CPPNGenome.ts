@@ -38,11 +38,7 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
     factoryOptions?: CPPNGenomeFactoryOptions
   ) {
     const createNode = createNodeFactory<GO>(options)
-    const createLink = ((
-      factoryOptions,
-      config,
-      state
-    ) => {
+    const createLink = ((factoryOptions, config, state) => {
       return createNEATLink(
         factoryOptions,
         config as never,
@@ -64,7 +60,11 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
   protected override hydrate(factoryOptions: CPPNGenomeFactoryOptions): void {
     const hiddenNodesData = factoryOptions.hiddenNodes
     for (let i = 0; i < hiddenNodesData.length; i++) {
-      const [id, bias, activation] = hiddenNodesData[i]!
+      const hiddenNodeData = hiddenNodesData[i]
+      if (hiddenNodeData == null) {
+        continue
+      }
+      const [id, bias, activation] = hiddenNodeData
       const node = this.createNode(
         { type: NodeType.Hidden, id, bias, activation },
         this.config.node(),
@@ -75,7 +75,11 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
 
     const outputNodesData = factoryOptions.outputs
     for (let i = 0; i < outputNodesData.length; i++) {
-      const [id, bias, activation] = outputNodesData[i]!
+      const outputNodeData = outputNodesData[i]
+      if (outputNodeData == null) {
+        continue
+      }
+      const [id, bias, activation] = outputNodeData
       const node = this.createNode(
         { type: NodeType.Output, id, bias, activation },
         this.config.node(),
@@ -86,7 +90,11 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
 
     const linksData = factoryOptions.links
     for (let i = 0; i < linksData.length; i++) {
-      const [fromKey, toKey, weight, innovation] = linksData[i]!
+      const linkData = linksData[i]
+      if (linkData == null) {
+        continue
+      }
+      const [fromKey, toKey, weight, innovation] = linkData
       const linkFactoryOptions: LinkFactoryOptions = {
         from: fromKey,
         to: toKey,

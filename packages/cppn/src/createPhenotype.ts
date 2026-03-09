@@ -9,13 +9,14 @@ import {
   type PhenotypeFactory,
   toNodeKey,
 } from '@neat-evolution/core'
-
+import type { CPPNContext } from './CPPNContext.js'
 import type { CPPNGenome } from './CPPNGenome.js'
 import type { CPPNGenomeOptions } from './CPPNGenomeOptions.js'
 import type { CPPNNode } from './CPPNNode.js'
 
 export const createPhenotype: PhenotypeFactory<
-  CPPNGenome<CPPNGenomeOptions>
+  CPPNGenome<CPPNGenomeOptions>,
+  CPPNContext<CPPNGenomeOptions>
 > = (genome) => {
   // Sort genome's network topologically
   const order = new Set(genome.connections.sortTopologically())
@@ -48,15 +49,7 @@ export const createPhenotype: PhenotypeFactory<
     }
   } else {
     const outputNodes = Array.from(genome.outputs.values())
-    outputNodes.sort((a, b) => {
-      if (typeof a.id === 'number' && typeof b.id === 'number') {
-        return a.id - b.id
-      } else if (typeof a.id === 'string' && typeof b.id === 'string') {
-        return a.id.localeCompare(b.id)
-      } else {
-        return 0
-      }
-    })
+    outputNodes.sort((a, b) => a.id - b.id)
     for (let i = 0; i < outputNodes.length; i++) {
       const node = outputNodes[i] as CPPNNode
       outputs[i] = i + offset
@@ -65,7 +58,7 @@ export const createPhenotype: PhenotypeFactory<
   }
 
   // Create mapping from NodeRef to array index in Network's node array
-  const nodeMapping = new Map<string, number>()
+  const nodeMapping = new Map<NodeKey, number>()
   let i = 0
   for (const node of nodes) {
     nodeMapping.set(node, i)

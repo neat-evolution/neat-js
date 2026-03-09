@@ -5,7 +5,12 @@ import type {
   LinkFactoryOptions,
   StateData,
 } from '@neat-evolution/core'
-import type { NEATConfig, NEATLink, NEATLinkData, NEATState } from '@neat-evolution/neat'
+import type {
+  NEATConfig,
+  NEATLink,
+  NEATLinkData,
+  NEATState,
+} from '@neat-evolution/neat'
 
 import type { CPPNGenome } from './CPPNGenome.js'
 import type { CPPNGenomeData } from './CPPNGenomeData.js'
