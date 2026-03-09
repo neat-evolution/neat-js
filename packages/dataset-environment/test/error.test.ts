@@ -81,14 +81,15 @@ describe('error', () => {
         [0.9, 0.1, 0.9],
         [0.1, 0.9, 0.1],
       ]
-      let error: any
+      let error: unknown
       try {
         mse(targets, predictions, true)
       } catch (e) {
         error = e
       }
       expect(error).toBeDefined()
-      expect(error?.message).toBe(
+      expect(error).toBeInstanceOf(Error)
+      expect((error as Error).message).toBe(
         'Mismatched lengths between targets and predictions'
       )
     })
@@ -125,14 +126,15 @@ describe('error', () => {
     test('should throw for empty target vector', () => {
       const target: Vector = []
       const prediction = [0.9, 0.1, 0.9]
-      let error: any
+      let error: unknown
       try {
         mseSingle(target, prediction, true)
       } catch (e) {
         error = e
       }
       expect(error).toBeDefined()
-      expect(error?.message).toBe(
+      expect(error).toBeInstanceOf(Error)
+      expect((error as Error).message).toBe(
         'Mismatched lengths between target and prediction vectors.'
       )
     })
@@ -141,14 +143,15 @@ describe('error', () => {
       const target = [1, 0, 1]
       const prediction = [0.9, 0.1]
 
-      let error: any
+      let error: unknown
       try {
         mseSingle(target, prediction, true)
       } catch (e) {
         error = e
       }
       expect(error).toBeDefined()
-      expect(error?.message).toBe(
+      expect(error).toBeInstanceOf(Error)
+      expect((error as Error).message).toBe(
         'Mismatched lengths between target and prediction vectors.'
       )
     })
@@ -202,14 +205,15 @@ describe('error', () => {
     test.skip('should handle mismatched vector lengths', () => {
       const target = [1, 0]
       const prediction = [0.9, 0.05, 0.05]
-      let error: any
+      let error: unknown
       try {
         crossentropySingle(target, prediction, true)
       } catch (e) {
         error = e
       }
       expect(error).toBeDefined()
-      expect(error?.message).toBe(
+      expect(error).toBeInstanceOf(Error)
+      expect((error as Error).message).toBe(
         'Mismatched lengths between target and prediction vectors.'
       )
     })
