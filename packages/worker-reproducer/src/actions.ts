@@ -19,12 +19,12 @@ export enum ActionType {
 
   REQUEST_ELITE_ORGANISM = 'REQUEST_ELITE_ORGANISM',
   REQUEST_BREED_ORGANISM = 'REQUEST_BREED_ORGANISM',
+  REQUEST_REPRODUCE_BATCH = 'REQUEST_REPRODUCE_BATCH',
+  REQUEST_POPULATION_SNAPSHOT = 'REQUEST_POPULATION_SNAPSHOT',
 
   // get father/mother
   REQUEST_POPULATION_TOURNAMENT_SELECT = 'REQUEST_POPULATION_TOURNAMENT_SELECT',
   REQUEST_SPECIES_TOURNAMENT_SELECT = 'REQUEST_SPECIES_TOURNAMENT_SELECT',
-  REQUEST_POPULATION_TOURNAMENT_SELECT_BATCH = 'REQUEST_POPULATION_TOURNAMENT_SELECT_BATCH',
-  REQUEST_SPECIES_TOURNAMENT_SELECT_BATCH = 'REQUEST_SPECIES_TOURNAMENT_SELECT_BATCH',
 
   // custom state
   REQUEST_SET_CPPN_STATE_REDIRECT = 'REQUEST_SET_CPPN_STATE_REDIRECT',
@@ -66,16 +66,24 @@ export interface SpeciesPayload {
   speciesId: number
 }
 
-export interface BatchPayload {
-  count: number
-}
-
-export interface SpeciesBatchPayload extends SpeciesPayload, BatchPayload {}
-
 export interface OrganismBatchPayload<
   GFO extends GenomeFactoryOptions = GenomeFactoryOptions,
 > {
   organisms: Array<OrganismPayload<GFO>>
+}
+
+export interface ReproductionSpeciesPayload<
+  GFO extends GenomeFactoryOptions = GenomeFactoryOptions,
+> {
+  speciesId: number
+  reproductions: number
+  organisms: Array<OrganismPayload<GFO>>
+}
+
+export interface ReproduceBatchPayload<
+  GFO extends GenomeFactoryOptions = GenomeFactoryOptions,
+> {
+  species: Array<ReproductionSpeciesPayload<GFO>>
 }
 
 export interface CPPNStateRedirectPayload {
@@ -98,6 +106,14 @@ export const requestBreedOrganism = createMessage<SpeciesPayload>(
   ActionType.REQUEST_BREED_ORGANISM
 )
 
+export const requestReproduceBatch = createMessage<ReproduceBatchPayload>(
+  ActionType.REQUEST_REPRODUCE_BATCH
+)
+
+export const requestPopulationSnapshot = createMessage<EmptyPayload>(
+  ActionType.REQUEST_POPULATION_SNAPSHOT
+)
+
 export const requestPopulationTournamentSelect = createMessage<EmptyPayload>(
   ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT
 )
@@ -105,16 +121,6 @@ export const requestPopulationTournamentSelect = createMessage<EmptyPayload>(
 export const requestSpeciesTournamentSelect = createMessage<SpeciesPayload>(
   ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT
 )
-
-export const requestPopulationTournamentSelectBatch =
-  createMessage<BatchPayload>(
-    ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT_BATCH
-  )
-
-export const requestSpeciesTournamentSelectBatch =
-  createMessage<SpeciesBatchPayload>(
-    ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT_BATCH
-  )
 
 export const requestSetCPPNStateRedirect =
   createMessage<CPPNStateRedirectPayload>(

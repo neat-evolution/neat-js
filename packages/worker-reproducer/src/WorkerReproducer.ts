@@ -9,18 +9,20 @@ import {
   type WorkerMessage,
 } from '@neat-evolution/worker-actions'
 import { WorkerPool } from '@neat-evolution/worker-pool'
+import QuickLRU from 'quick-lru'
 
 import {
   ActionType,
-  type BatchPayload,
   type CPPNStateRedirectPayload,
   type EmptyPayload,
   initReproducer,
   type OrganismBatchPayload,
   type OrganismPayload,
+  requestReproduceBatch,
+  type ReproduceBatchPayload,
+  type ReproductionSpeciesPayload,
   requestBreedOrganism,
   requestEliteOrganism,
-  type SpeciesBatchPayload,
   type SpeciesPayload,
   terminate as terminateAction,
 } from './actions.js'
@@ -45,6 +47,12 @@ export class WorkerReproducer implements Reproducer {
 
   private readonly pool: WorkerPool
   private readonly dispatcher: Dispatcher
+  private reproductionPayloadCache:
+    | {
+        species: QuickLRU<number, OrganismBatchPayload>
+        population: OrganismBatchPayload | null
+      }
+    | null = null
 
   constructor(population: AnyPopulation, options: WorkerReproducerOptions) {
     this.options = options
@@ -83,12 +91,8 @@ export class WorkerReproducer implements Reproducer {
       this.handleRequestSpeciesTournamentSelect.bind(this)
     )
     this.addTypedMessageHandler(
-      ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT_BATCH,
-      this.handleRequestPopulationTournamentSelectBatch.bind(this)
-    )
-    this.addTypedMessageHandler(
-      ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT_BATCH,
-      this.handleRequestSpeciesTournamentSelectBatch.bind(this)
+      ActionType.REQUEST_POPULATION_SNAPSHOT,
+      this.handleRequestPopulationSnapshot.bind(this)
     )
 
     this.addTypedMessageHandler(
@@ -155,24 +159,6 @@ export class WorkerReproducer implements Reproducer {
     }
   }
 
-  protected handleRequestPopulationTournamentSelectBatch(
-    action: WorkerMessage<BatchPayload>,
-    context: DispatcherContext
-  ) {
-    const responsePayload = this.selectPopulationPayload(action.payload.count)
-    if (action.meta?.callId != null) {
-      const responseAction: WorkerMessage<OrganismBatchPayload> = {
-        type: 'RESPONSE',
-        payload: responsePayload,
-        meta: {
-          callId: action.meta.callId,
-          isResponse: true,
-        },
-      }
-      context.send(responseAction)
-    }
-  }
-
   protected handleRequestSpeciesTournamentSelect(
     action: WorkerMessage<SpeciesPayload>,
     context: DispatcherContext
@@ -195,12 +181,11 @@ export class WorkerReproducer implements Reproducer {
     }
   }
 
-  protected handleRequestSpeciesTournamentSelectBatch(
-    action: WorkerMessage<SpeciesBatchPayload>,
+  protected handleRequestPopulationSnapshot(
+    action: WorkerMessage<EmptyPayload>,
     context: DispatcherContext
   ) {
-    const { speciesId, count } = action.payload
-    const responsePayload = this.selectSpeciesPayload(speciesId, count)
+    const responsePayload = this.getPopulationSnapshotPayload()
     if (action.meta?.callId != null) {
       const responseAction: WorkerMessage<OrganismBatchPayload> = {
         type: 'RESPONSE',
@@ -233,10 +218,7 @@ export class WorkerReproducer implements Reproducer {
     return { organisms }
   }
 
-  private selectSpeciesPayload(
-    speciesId: number,
-    count: number
-  ): OrganismBatchPayload {
+  private selectSpeciesPayload(speciesId: number, count: number): OrganismBatchPayload {
     const species = this.population.species.get(speciesId) as Species
     const organisms: Array<OrganismPayload> = []
     const safeCount = Math.max(1, Math.trunc(count))
@@ -341,12 +323,147 @@ export class WorkerReproducer implements Reproducer {
   async reproduce(speciesIds: number[]): Promise<Array<Organism>> {
     await this.initPromise
 
-    const result = await Promise.all(
-      speciesIds.map(
-        async (speciesId) => await this.reproduceSpecies(speciesId)
+    this.reproductionPayloadCache = {
+      species: new QuickLRU({ maxSize: Math.max(16, speciesIds.length) }),
+      population: null,
+    }
+
+    try {
+      const batches = this.createReproductionBatches(speciesIds)
+      const result = await Promise.all(
+        batches.map(async (batch) => {
+          const data = await this.dispatcher.call<OrganismBatchPayload>(
+            requestReproduceBatch(batch)
+          )
+          return data.organisms.map((payload) => {
+            const genome = this.population.algorithm.createGenome(
+              this.population.configProvider,
+              this.population.stateProvider,
+              this.population.genomeOptions,
+              this.population.initConfig,
+              payload.genome
+            )
+            const organism = new Organism(
+              genome,
+              payload.organismState.generation,
+              payload.organismState
+            )
+            this.population.push(organism, true)
+            return organism
+          })
+        })
       )
+      return result.flat()
+    } finally {
+      this.reproductionPayloadCache = null
+    }
+  }
+
+  private createReproductionBatches(
+    speciesIds: number[]
+  ): Array<ReproduceBatchPayload> {
+    const speciesPayloads: Array<ReproductionSpeciesPayload> = []
+    for (const speciesId of speciesIds) {
+      const species = this.population.species.get(speciesId) as Species
+      const reproductions = Math.floor(species.offsprings)
+      if (reproductions <= 0) continue
+      speciesPayloads.push({
+        speciesId,
+        reproductions,
+        organisms: this.getSpeciesSnapshotPayload(speciesId, species).organisms,
+      })
+    }
+
+    if (speciesPayloads.length === 0) {
+      return []
+    }
+
+    const totalReproductions = speciesPayloads.reduce(
+      (sum, speciesPayload) => sum + speciesPayload.reproductions,
+      0
     )
-    return result.flat()
+    const targetBatchLoad = Math.max(
+      1,
+      Math.ceil(totalReproductions / Math.max(1, this.threadCount))
+    )
+
+    const plannedSpeciesBatches: Array<ReproductionSpeciesPayload> = []
+    for (const speciesPayload of speciesPayloads) {
+      let remainingReproductions = speciesPayload.reproductions
+      while (remainingReproductions > 0) {
+        const reproductions = Math.min(remainingReproductions, targetBatchLoad)
+        plannedSpeciesBatches.push({
+          speciesId: speciesPayload.speciesId,
+          reproductions,
+          organisms: speciesPayload.organisms,
+        })
+        remainingReproductions -= reproductions
+      }
+    }
+
+    const batches: Array<{
+      species: Array<ReproductionSpeciesPayload>
+      load: number
+    }> = []
+
+    for (const plannedSpecies of plannedSpeciesBatches) {
+      const lastBatch = batches[batches.length - 1]
+      if (
+        lastBatch == null ||
+        lastBatch.load + plannedSpecies.reproductions > targetBatchLoad
+      ) {
+        batches.push({
+          species: [plannedSpecies],
+          load: plannedSpecies.reproductions,
+        })
+        continue
+      }
+      lastBatch.species.push(plannedSpecies)
+      lastBatch.load += plannedSpecies.reproductions
+    }
+
+    return batches
+      .filter((batch) => batch.species.length > 0)
+      .map((batch) => ({
+        species: batch.species,
+      }))
+  }
+
+  private getPopulationSnapshotPayload(): OrganismBatchPayload {
+    const cached = this.reproductionPayloadCache?.population
+    if (cached != null) {
+      return cached
+    }
+
+    const payload: OrganismBatchPayload = {
+      organisms: Array.from(this.population.organismValues()).map((organism) => ({
+        genome: organism.genome.toFactoryOptions(),
+        organismState: organism.toFactoryOptions(),
+      })),
+    }
+    if (this.reproductionPayloadCache != null) {
+      this.reproductionPayloadCache.population = payload
+    }
+    return payload
+  }
+
+  private getSpeciesSnapshotPayload(
+    speciesId: number,
+    species: Species
+  ): OrganismBatchPayload {
+    const cached = this.reproductionPayloadCache?.species.get(speciesId)
+    if (cached != null) {
+      return cached
+    }
+
+    const payload: OrganismBatchPayload = {
+      organisms: species.organisms.slice(0, species.size).map((organism) => ({
+        genome: organism.genome.toFactoryOptions(),
+        organismState: organism.toFactoryOptions(),
+      })),
+    }
+    this.reproductionPayloadCache?.species.set(speciesId, payload)
+    return payload
   }
 
   async reproduceSpecies(speciesId: number): Promise<Array<Organism>> {
