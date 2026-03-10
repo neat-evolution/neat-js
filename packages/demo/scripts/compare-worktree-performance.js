@@ -20,6 +20,9 @@ function parseArgs(argv) {
     iterations: 200,
     initialMutations: null,
     secondsLimit: 30,
+    earlyStop: true,
+    earlyStopPatience: null,
+    earlyStopMinThreshold: 0,
     threadCount: 4,
     taskCount: 100,
     memorySampleMs: 250,
@@ -53,6 +56,12 @@ function parseArgs(argv) {
       options.initialMutations = Number(args[++i])
     } else if (arg === '--secondsLimit' && args[i + 1]) {
       options.secondsLimit = Number(args[++i])
+    } else if (arg === '--earlyStop' && args[i + 1]) {
+      options.earlyStop = args[++i] !== 'false'
+    } else if (arg === '--earlyStopPatience' && args[i + 1]) {
+      options.earlyStopPatience = Number(args[++i])
+    } else if (arg === '--earlyStopMinThreshold' && args[i + 1]) {
+      options.earlyStopMinThreshold = Number(args[++i])
     } else if (arg === '--threadCount' && args[i + 1]) {
       options.threadCount = Number(args[++i])
     } else if (arg === '--taskCount' && args[i + 1]) {
@@ -79,6 +88,15 @@ function parseArgs(argv) {
     1,
     Number.isFinite(options.secondsLimit) ? options.secondsLimit : 30
   )
+  options.earlyStopPatience = Math.max(
+    0,
+    Number.isFinite(options.earlyStopPatience)
+      ? Math.floor(options.earlyStopPatience)
+      : options.iterations
+  )
+  options.earlyStopMinThreshold = Number.isFinite(options.earlyStopMinThreshold)
+    ? options.earlyStopMinThreshold
+    : 0
   options.threadCount = Math.max(
     1,
     Number.isFinite(options.threadCount) ? Math.floor(options.threadCount) : 4
@@ -142,6 +160,19 @@ function median(values) {
     : sorted[mid]
 }
 
+function trimmedMean(values, trimFraction = 0.1) {
+  if (values.length === 0) return 0
+  if (values.length < 3) return mean(values)
+  const sorted = [...values].sort((a, b) => a - b)
+  const trimCount = Math.min(
+    Math.floor(sorted.length * trimFraction),
+    Math.floor((sorted.length - 1) / 2)
+  )
+  const trimmed =
+    trimCount > 0 ? sorted.slice(trimCount, sorted.length - trimCount) : sorted
+  return mean(trimmed)
+}
+
 function stdev(values) {
   if (values.length < 2) return 0
   const avg = mean(values)
@@ -173,6 +204,7 @@ function summarizeRuns(results) {
       count: values.length,
       mean: values.length > 0 ? fmt(mean(values)) : null,
       median: values.length > 0 ? fmt(median(values)) : null,
+      trimmedMean: values.length > 0 ? fmt(trimmedMean(values)) : null,
       min: values.length > 0 ? fmt(Math.min(...values)) : null,
       max: values.length > 0 ? fmt(Math.max(...values)) : null,
       stdev: values.length > 0 ? fmt(stdev(values)) : null,
@@ -247,8 +279,64 @@ function renderTableRow(name, current, baseline, delta) {
   return `| ${name} | ${displayValue(current)} | ${displayValue(baseline)} | ${deltaText} |`
 }
 
+function formatDelta(delta) {
+  return delta == null ? 'pending' : `${delta > 0 ? '+' : ''}${delta}%`
+}
+
+function renderDistributionRow(name, currentMetric, baselineMetric, invert = true) {
+  return `| ${name} | ${displayValue(currentMetric.mean)} | ${displayValue(
+    currentMetric.median
+  )} | ${displayValue(currentMetric.trimmedMean)} | ${displayValue(
+    baselineMetric.mean
+  )} | ${displayValue(baselineMetric.median)} | ${displayValue(
+    baselineMetric.trimmedMean
+  )} | ${formatDelta(
+    percentDelta(currentMetric.mean, baselineMetric.mean, invert)
+  )} | ${formatDelta(
+    percentDelta(currentMetric.median, baselineMetric.median, invert)
+  )} | ${formatDelta(
+    percentDelta(
+      currentMetric.trimmedMean,
+      baselineMetric.trimmedMean,
+      invert
+    )
+  )} |`
+}
+
 function renderMarkdownReport(state) {
   const comparison = buildComparison(state.runs.current, state.runs.main)
+  const distributionRows = [
+    renderDistributionRow(
+      'Elapsed ms',
+      comparison.current.elapsedMs,
+      comparison.baseline.elapsedMs,
+      true
+    ),
+    renderDistributionRow(
+      'CPU total ms',
+      comparison.current.cpuTotalMs,
+      comparison.baseline.cpuTotalMs,
+      true
+    ),
+    renderDistributionRow(
+      'Peak RSS MB',
+      comparison.current.peakRssMB,
+      comparison.baseline.peakRssMB,
+      true
+    ),
+    renderDistributionRow(
+      'Peak heap used MB',
+      comparison.current.peakHeapUsedMB,
+      comparison.baseline.peakHeapUsedMB,
+      true
+    ),
+    renderDistributionRow(
+      'Best fitness',
+      comparison.current.bestFitness,
+      comparison.baseline.bestFitness,
+      false
+    ),
+  ]
   const rows = [
     renderTableRow(
       'Elapsed ms',
@@ -322,13 +410,24 @@ function renderMarkdownReport(state) {
     `- method: ${state.config.method}`,
     `- demo iterations: ${state.config.iterations}`,
     `- seconds limit: ${state.config.secondsLimit}`,
+    `- early stop: ${state.config.earlyStop}`,
+    `- early stop patience: ${state.config.earlyStopPatience}`,
+    `- early stop min threshold: ${state.config.earlyStopMinThreshold}`,
     `- thread count: ${state.config.threadCount}`,
     `- task count: ${state.config.taskCount}`,
     `- memory sample ms: ${state.config.memorySampleMs}`,
     '',
+    '## Distribution Summary',
+    '',
+    '| Metric | Current mean | Current median | Current trimmed mean | Baseline mean | Baseline median | Baseline trimmed mean | Mean delta | Median delta | Trimmed delta |',
+    '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |',
+    ...distributionRows,
+    '',
+    'Trimmed mean removes the top and bottom 10% of runs when enough samples exist.',
+    '',
     '## Aggregate',
     '',
-    '| Metric | Current mean | Main mean | Delta |',
+    '| Metric | Current mean | Baseline mean | Delta |',
     '| --- | ---: | ---: | ---: |',
     ...rows,
     '',
@@ -337,7 +436,7 @@ function renderMarkdownReport(state) {
     '',
     '## Per Run',
     '',
-    '| Run | Current elapsed ms | Main elapsed ms | Current peak RSS MB | Main peak RSS MB |',
+    '| Run | Current elapsed ms | Baseline elapsed ms | Current peak RSS MB | Baseline peak RSS MB |',
     '| --- | ---: | ---: | ---: | ---: |',
     ...perRunLines,
     '',
@@ -371,6 +470,9 @@ function buildMethodState(options, method, outputDir) {
       method,
       iterations: options.iterations,
       secondsLimit: options.secondsLimit,
+      earlyStop: options.earlyStop,
+      earlyStopPatience: options.earlyStopPatience,
+      earlyStopMinThreshold: options.earlyStopMinThreshold,
       threadCount: options.threadCount,
       taskCount: options.taskCount,
       memorySampleMs: options.memorySampleMs,
@@ -388,7 +490,7 @@ function buildMethodState(options, method, outputDir) {
 function renderIndexReport(indexState) {
   const rows = indexState.methods.map((methodState) => {
     const comparison = buildComparison(methodState.runs.current, methodState.runs.main)
-    return `| ${methodState.config.method} | ${displayValue(comparison.current.elapsedMs.mean)} | ${displayValue(comparison.baseline.elapsedMs.mean)} | ${comparison.comparisons.elapsedMsPct == null ? 'pending' : `${comparison.comparisons.elapsedMsPct > 0 ? '+' : ''}${comparison.comparisons.elapsedMsPct}%`} | ${displayValue(comparison.current.peakRssMB.mean)} | ${displayValue(comparison.baseline.peakRssMB.mean)} |`
+    return `| ${methodState.config.method} | ${displayValue(comparison.current.elapsedMs.mean)} | ${displayValue(comparison.baseline.elapsedMs.mean)} | ${formatDelta(comparison.comparisons.elapsedMsPct)} | ${formatDelta(percentDelta(comparison.current.elapsedMs.median, comparison.baseline.elapsedMs.median, true))} | ${displayValue(comparison.current.peakRssMB.mean)} | ${displayValue(comparison.baseline.peakRssMB.mean)} |`
   })
 
   return [
@@ -399,11 +501,14 @@ function renderIndexReport(indexState) {
     `Runs per method: ${indexState.config.runs}`,
     `Demo iterations: ${indexState.config.iterations}`,
     `Seconds limit: ${indexState.config.secondsLimit}`,
+    `Early stop: ${indexState.config.earlyStop}`,
+    `Early stop patience: ${indexState.config.earlyStopPatience}`,
+    `Early stop min threshold: ${indexState.config.earlyStopMinThreshold}`,
     `Thread count: ${indexState.config.threadCount}`,
     `Task count: ${indexState.config.taskCount}`,
     '',
-    '| Method | Current elapsed ms | Main elapsed ms | Elapsed delta | Current peak RSS MB | Main peak RSS MB |',
-    '| --- | ---: | ---: | ---: | ---: | ---: |',
+    '| Method | Current elapsed ms | Baseline elapsed ms | Mean delta | Median delta | Current peak RSS MB | Baseline peak RSS MB |',
+    '| --- | ---: | ---: | ---: | ---: | ---: | ---: |',
     ...rows,
     '',
   ].join('\n')
@@ -442,10 +547,18 @@ async function runTarget(repoRootToUse, runLabel, options, outputPath) {
     outputPath,
     '--method',
     options.method,
+    '--seed',
+    options.seed,
     '--iterations',
     String(options.iterations),
     '--secondsLimit',
     String(options.secondsLimit),
+    '--earlyStop',
+    String(options.earlyStop),
+    '--earlyStopPatience',
+    String(options.earlyStopPatience),
+    '--earlyStopMinThreshold',
+    String(options.earlyStopMinThreshold),
     '--threadCount',
     String(options.threadCount),
     '--taskCount',
@@ -476,6 +589,9 @@ async function main() {
       runs: options.runs,
       iterations: options.iterations,
       secondsLimit: options.secondsLimit,
+      earlyStop: options.earlyStop,
+      earlyStopPatience: options.earlyStopPatience,
+      earlyStopMinThreshold: options.earlyStopMinThreshold,
       threadCount: options.threadCount,
       taskCount: options.taskCount,
       memorySampleMs: options.memorySampleMs,
@@ -506,6 +622,7 @@ async function main() {
     const methodOptions = { ...options, method: methodState.config.method }
     for (let index = 0; index < options.runs; index++) {
       const runId = String(index + 1).padStart(3, '0')
+      const runSeed = `current-vs-main-${runId}`
       const currentOutput = resolve(
         methodState.outputDir,
         'runs/current',
@@ -520,7 +637,7 @@ async function main() {
       const currentRun = await runTarget(
         options.currentRepo,
         `${methodState.config.method} current run ${runId}/${String(options.runs).padStart(3, '0')}`,
-        methodOptions,
+        { ...methodOptions, seed: runSeed },
         currentOutput
       )
       methodState.runs.current.push(currentRun)
@@ -532,7 +649,7 @@ async function main() {
       const baselineRun = await runTarget(
         options.baselineRepo,
         `${methodState.config.method} main run ${runId}/${String(options.runs).padStart(3, '0')}`,
-        methodOptions,
+        { ...methodOptions, seed: runSeed },
         baselineOutput
       )
       methodState.runs.main.push(baselineRun)
