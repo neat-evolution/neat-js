@@ -35,7 +35,7 @@ git checkout -b feature/my-feature
 
 ```bash
 yarn format  # Format all files
-yarn check   # Build, test, lint, beachball check, manypkg check
+yarn check:types   # Build, test, lint, beachball check, manypkg check
 ```
 
 Fix any errors before committing.
