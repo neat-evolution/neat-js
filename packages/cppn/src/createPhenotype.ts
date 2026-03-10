@@ -18,77 +18,68 @@ export const createPhenotype: PhenotypeFactory<
   CPPNGenome<CPPNGenomeOptions>,
   CPPNContext<CPPNGenomeOptions>
 > = (genome) => {
-  // Sort genome's network topologically
-  const order = new Set(genome.connections.sortTopologically())
-  const nodes: NodeKey[] = []
+  const order = genome.connections.sortTopologically()
 
-  // Create array of all input node indexes, for insertion of neural network inputs
   const inputLength = genome.inputs.size
   const inputs: number[] = new Array(inputLength)
+  const nodeMapping = new Map<NodeKey, number>()
   for (let i = 0; i < inputLength; i++) {
     inputs[i] = i
-    // Prepend input nodes to extraction of hidden nodes from topological sorting
-    nodes.push(toNodeKey(NodeType.Input, i))
+    nodeMapping.set(toNodeKey(NodeType.Input, i), i)
   }
 
+  let hiddenCount = 0
   for (const action of order) {
-    const nodeType = nodeKeyToType(action[0])
-    if (isActionNode(action) && nodeType === NodeType.Hidden) {
-      nodes.push(action[0])
+    if (isActionNode(action) && nodeKeyToType(action[0]) === NodeType.Hidden) {
+      nodeMapping.set(action[0], inputLength + hiddenCount)
+      hiddenCount++
     }
   }
 
-  // Create vector of all output node indexes, for extraction of neural network execution result
   const outputLength = genome.outputs.size
   const outputs: number[] = new Array(outputLength)
-  const offset = nodes.length
+  const offset = inputLength + hiddenCount
   if (genome.genomeOptions.padMissingOutputs) {
     for (let i = 0; i < outputLength; i++) {
       outputs[i] = i + offset
-      nodes.push(toNodeKey(NodeType.Output, i))
+      nodeMapping.set(toNodeKey(NodeType.Output, i), i + offset)
     }
   } else {
     const outputNodes = Array.from(genome.outputs.values())
     outputNodes.sort((a, b) => a.id - b.id)
-    for (let i = 0; i < outputNodes.length; i++) {
-      const node = outputNodes[i] as CPPNNode
+    let i = 0
+    for (const node of outputNodes) {
       outputs[i] = i + offset
-      nodes.push(toNodeKey(NodeType.Output, node.id))
+      nodeMapping.set(toNodeKey(NodeType.Output, node.id), i + offset)
+      i++
     }
   }
 
-  // Create mapping from NodeRef to array index in Network's node array
-  const nodeMapping = new Map<NodeKey, number>()
-  let i = 0
-  for (const node of nodes) {
-    nodeMapping.set(node, i)
-    i++
-  }
-
-  // Map topologically sorted order to neural network actions
-  const actions: PhenotypeAction[] = []
-  for (const action of order) {
+  const actions: PhenotypeAction[] = new Array(order.length)
+  for (let i = 0; i < order.length; i++) {
+    const action = order[i] as (typeof order)[number]
     if (isActionEdge(action)) {
       const [from, to, weight] = action
-      actions.push([
+      actions[i] = [
         PhenotypeActionType.Link,
         nodeMapping.get(from) as number,
         nodeMapping.get(to) as number,
         weight,
-      ])
+      ]
     } else {
       const [node] = action
-      actions.push([
+      const phenotypeNode = genome.getNodeByKey(node) as CPPNNode
+      actions[i] = [
         PhenotypeActionType.Activation,
         nodeMapping.get(node) as number,
-        genome.getBias(node),
-        genome.getActivation(node),
-      ])
+        phenotypeNode.bias,
+        phenotypeNode.activation,
+      ]
     }
   }
 
   return {
-    length: nodes.length,
+    length: offset + outputLength,
     inputs,
     outputs,
     actions,
