@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "adopt AlgorithmContext-based generics",
+  "packageName": "@neat-evolution/worker-pool",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

@@ -1,0 +1,7 @@
+{
+  "type": "patch",
+  "comment": "improve type safety and update test fixtures",
+  "packageName": "@neat-evolution/dataset-environment",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

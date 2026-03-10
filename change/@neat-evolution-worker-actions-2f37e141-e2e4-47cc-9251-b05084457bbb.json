@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "add MessageCreator type and typed response parameter; improve type safety in Dispatcher and Handler",
+  "packageName": "@neat-evolution/worker-actions",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

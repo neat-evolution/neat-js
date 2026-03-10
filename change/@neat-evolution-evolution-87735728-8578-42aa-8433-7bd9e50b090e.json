@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "add ErasedAlgorithmDefinition and improve generic constraints; adopt AlgorithmContext-based generics; adopt AlgorithmContext-based generics",
+  "packageName": "@neat-evolution/evolution",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}

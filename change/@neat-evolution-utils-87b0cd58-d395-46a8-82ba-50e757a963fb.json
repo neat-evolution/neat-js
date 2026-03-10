@@ -1,0 +1,7 @@
+{
+  "type": "minor",
+  "comment": "add setThreadRNGSeed and resetThreadRNG functions",
+  "packageName": "@neat-evolution/utils",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "patch"
+}
