@@ -9,18 +9,25 @@ export const softmax = (
     return []
   }
 
-  const exponentiatedValues = isAlreadyExponentiated
-    ? values
-    : values.map((x) => Math.exp(x))
+  const probabilities = new Array<number>(values.length)
+  let sumOfExponents = 0
 
-  const sumOfExponents = exponentiatedValues.reduce((sum, val) => sum + val, 0)
+  for (let i = 0; i < values.length; i++) {
+    const exponentiatedValue = isAlreadyExponentiated
+      ? (values[i] ?? 0)
+      : Math.exp(values[i] ?? 0)
+    probabilities[i] = exponentiatedValue
+    sumOfExponents += exponentiatedValue
+  }
 
-  const probabilities = exponentiatedValues.map((exponentiatedValue) => {
-    if (sumOfExponents === 0) {
-      return 0
-    }
-    return exponentiatedValue / sumOfExponents
-  })
+  if (sumOfExponents === 0) {
+    probabilities.fill(0)
+    return probabilities
+  }
+
+  for (let i = 0; i < probabilities.length; i++) {
+    probabilities[i] = (probabilities[i] ?? 0) / sumOfExponents
+  }
 
   return probabilities
 }

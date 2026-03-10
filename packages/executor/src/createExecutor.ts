@@ -12,11 +12,13 @@ import type {
   SyncExecutor,
 } from './Executor.js'
 import type { SyncExecutorFactory } from './ExecutorFactory.js'
-import { softmax } from './softmax.js'
 import {
   type ActivationFunction,
   toActivationFunction,
 } from './toActivationFunction.js'
+
+const LINK_ACTION = 0
+const ACTIVATION_ACTION = 1
 
 export const createExecutor: SyncExecutorFactory = (
   phenotype: Phenotype
@@ -24,36 +26,47 @@ export const createExecutor: SyncExecutorFactory = (
   const values = new Float64Array(phenotype.length)
   const outputsCount = phenotype.outputs.length
   const inputsCount = phenotype.inputs.length
+  const actionCount = phenotype.actions.length
 
-  // Pre-calculate activation functions for each activation action
-  const actionsWithFunctions = phenotype.actions.map((action) => {
-    if (action[0] === PhenotypeActionType.Activation) {
-      return {
-        type: PhenotypeActionType.Activation,
-        node: action[1],
-        bias: action[2],
-        fn: toActivationFunction(action[3]),
-        activation: action[3],
-      } as const
+  const actionTypes = new Uint8Array(actionCount)
+  const actionNodeOrFrom = new Int32Array(actionCount)
+  const actionTo = new Int32Array(actionCount)
+  const actionValue = new Float64Array(actionCount)
+  const activationFns: Array<ActivationFunction | undefined> = new Array(
+    actionCount
+  )
+  const isOutputNode = new Uint8Array(phenotype.length)
+
+  const phenotypeOutputs = phenotype.outputs
+  for (let i = 0; i < outputsCount; i++) {
+    const outputNode = phenotypeOutputs[i]
+    if (outputNode !== undefined) {
+      isOutputNode[outputNode] = 1
     }
-    return {
-      type: PhenotypeActionType.Link,
-      from: action[1],
-      to: action[2],
-      weight: action[3],
-    } as const
-  })
+  }
 
-  // Fast lookup for output activation
   let outputActivation: Activation | undefined
-  const outputSet = new Set(phenotype.outputs)
-  for (const action of phenotype.actions) {
-    if (
-      action[0] === PhenotypeActionType.Activation &&
-      outputSet.has(action[1])
-    ) {
-      outputActivation = action[3]
-      break
+  for (let i = 0; i < actionCount; i++) {
+    const action = phenotype.actions[i]
+    if (action == null) {
+      continue
+    }
+
+    actionTypes[i] =
+      action[0] === PhenotypeActionType.Activation
+        ? ACTIVATION_ACTION
+        : LINK_ACTION
+    actionNodeOrFrom[i] = action[1]
+
+    if (action[0] === PhenotypeActionType.Activation) {
+      actionValue[i] = action[2]
+      activationFns[i] = toActivationFunction(action[3])
+      if (outputActivation === undefined && isOutputNode[action[1]] === 1) {
+        outputActivation = action[3]
+      }
+    } else {
+      actionTo[i] = action[2]
+      actionValue[i] = action[3]
     }
   }
 
@@ -72,30 +85,29 @@ export const createExecutor: SyncExecutorFactory = (
     }
 
     // Do forward pass
-    for (let i = 0; i < actionsWithFunctions.length; i++) {
-      const action = actionsWithFunctions[i]
-      if (action == null) {
-        continue
-      }
-
-      if (action.type === PhenotypeActionType.Link) {
-        const nextValue = values[action.to]
-        const fromValue = values[action.from]
+    for (let i = 0; i < actionCount; i++) {
+      if (actionTypes[i] === LINK_ACTION) {
+        const from = actionNodeOrFrom[i] as number
+        const to = actionTo[i] as number
+        const nextValue = values[to]
+        const fromValue = values[from]
+        const weight = actionValue[i]
         if (nextValue !== undefined && fromValue !== undefined) {
-          values[action.to] = nextValue + fromValue * action.weight
+          values[to] = nextValue + fromValue * (weight ?? 0)
         }
       } else {
-        const fn = action.fn as ActivationFunction
-        const nodeValue = values[action.node]
+        const node = actionNodeOrFrom[i] as number
+        const fn = activationFns[i] as ActivationFunction
+        const nodeValue = values[node]
+        const bias = actionValue[i]
         if (nodeValue !== undefined) {
-          values[action.node] = fn(nodeValue + action.bias)
+          values[node] = fn(nodeValue + (bias ?? 0))
         }
       }
     }
 
     // Collect output
     const output = new Float64Array(outputsCount)
-    const phenotypeOutputs = phenotype.outputs
     for (let i = 0; i < outputsCount; i++) {
       const o = phenotypeOutputs[i]
       if (o !== undefined) {
@@ -105,7 +117,21 @@ export const createExecutor: SyncExecutorFactory = (
     }
 
     if (outputActivation === Activation.Softmax) {
-      return softmax(Array.from(output), true)
+      const probabilities = new Float64Array(outputsCount)
+      let sum = 0
+      for (let i = 0; i < outputsCount; i++) {
+        const value = output[i] ?? 0
+        probabilities[i] = value
+        sum += value
+      }
+      if (sum === 0) {
+        return probabilities
+      }
+      for (let i = 0; i < outputsCount; i++) {
+        const value = probabilities[i]
+        probabilities[i] = (value ?? 0) / sum
+      }
+      return probabilities
     }
     return output
   }
