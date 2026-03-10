@@ -26,6 +26,11 @@ const mix32 = (value: number): number => {
 const CURRENT_DATASET_SIZE = 16_384
 const REPEATED_DATASET_SIZE = 512
 
+const consumeBenchmarkResult = (value: number): void => {
+  // Prevent the accumulator from becoming a write-only local without affecting the benchmark.
+  Number.isNaN(value)
+}
+
 const buildNodeKeys = (count: number) => {
   const sourceKeys: number[] = new Array(count)
   const targetKeys: number[] = new Array(count)
@@ -75,10 +80,16 @@ const cheaperToLinkKeyCandidate = (from: number, to: number): number => {
   const toHigh = (to / LOW32) >>> 0
 
   const laneA = mix32(
-    fromLow ^ Math.imul(toLow ^ 0x9e3779b9, 0x85ebca6b) ^ (fromHigh << 1) ^ toHigh
+    fromLow ^
+      Math.imul(toLow ^ 0x9e3779b9, 0x85ebca6b) ^
+      (fromHigh << 1) ^
+      toHigh
   )
   const laneB = mix32(
-    toLow ^ Math.imul(fromLow ^ 0xc2b2ae35, 0x27d4eb2f) ^ fromHigh ^ (toHigh << 1)
+    toLow ^
+      Math.imul(fromLow ^ 0xc2b2ae35, 0x27d4eb2f) ^
+      fromHigh ^
+      (toHigh << 1)
   )
 
   return (laneA & HIGH53_MASK) * LOW32 + laneB
@@ -125,7 +136,7 @@ describe('Key Hot Path Benchmark', () => {
           currentData.targetKeys[i] as number
         )
       }
-      return acc
+      consumeBenchmarkResult(acc)
     },
     { iterations: 200 }
   )
@@ -140,7 +151,7 @@ describe('Key Hot Path Benchmark', () => {
           currentData.targetKeys[i] as number
         )
       }
-      return acc
+      consumeBenchmarkResult(acc)
     },
     { iterations: 200 }
   )
@@ -155,7 +166,7 @@ describe('Key Hot Path Benchmark', () => {
           currentData.targetKeys[i] as number
         )
       }
-      return acc
+      consumeBenchmarkResult(acc)
     },
     { iterations: 200 }
   )
@@ -169,7 +180,7 @@ describe('Key Hot Path Benchmark', () => {
           acc ^= hashInnovationKey(repeatedInnovationKeys[i] as number)
         }
       }
-      return acc
+      consumeBenchmarkResult(acc)
     },
     { iterations: 200 }
   )
@@ -181,7 +192,7 @@ describe('Key Hot Path Benchmark', () => {
       for (let i = 0; i < currentInnovationKeys.length; i++) {
         acc ^= hashInnovationKey(currentInnovationKeys[i] as number)
       }
-      return acc
+      consumeBenchmarkResult(acc)
     },
     { iterations: 200 }
   )
@@ -193,7 +204,7 @@ describe('Key Hot Path Benchmark', () => {
       for (let i = 0; i < currentInnovationKeys.length; i++) {
         acc ^= hashInnovationKeyNoCache(currentInnovationKeys[i] as number)
       }
-      return acc
+      consumeBenchmarkResult(acc)
     },
     { iterations: 200 }
   )
@@ -209,7 +220,7 @@ describe('Key Hot Path Benchmark', () => {
         )
         acc ^= hashInnovationKey(innovationKey)
       }
-      return acc
+      consumeBenchmarkResult(acc)
     },
     { iterations: 200 }
   )
@@ -224,7 +235,7 @@ describe('Key Hot Path Benchmark', () => {
           currentData.targetKeys[i] as number
         )
       }
-      return acc
+      consumeBenchmarkResult(acc)
     },
     { iterations: 200 }
   )
@@ -239,7 +250,7 @@ describe('Key Hot Path Benchmark', () => {
           currentData.targetKeys[i] as number
         )
       }
-      return acc
+      consumeBenchmarkResult(acc)
     },
     { iterations: 200 }
   )
