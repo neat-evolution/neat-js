@@ -55,7 +55,7 @@
     "@neat-evolution/hyperneat": "workspace:^",
     "@neat-evolution/neat": "workspace:^",
     "@neat-evolution/utils": "workspace:^",
-    "@swc/helpers": "^0.5.17"
+    "@swc/helpers": "^0.5.19"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",

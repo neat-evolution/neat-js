@@ -41,7 +41,7 @@
     "@neat-evolution/executor": "workspace:^",
     "@neat-evolution/worker-actions": "workspace:^",
     "@neat-evolution/worker-threads": "workspace:^",
-    "@swc/helpers": "^0.5.17"
+    "@swc/helpers": "^0.5.19"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
