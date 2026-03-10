@@ -56,6 +56,7 @@
     "profile:baseline:des-hyperneat": "node ./scripts/profile.js --name baseline-des-hyperneat-r10-i200-s60-t4-k100-ms500 --runs 10 --method DES-HyperNEAT --iterations 200 --secondsLimit 60 --threadCount 4 --taskCount 100 --memorySampleMs 500 --quiet-training",
     "profile:compare:des-hyperneat": "node ./scripts/profile.js --runs 10 --baseline baseline-des-hyperneat-r10-i200-s60-t4-k100-ms500 --method DES-HyperNEAT --iterations 200 --secondsLimit 60 --threadCount 4 --taskCount 100 --memorySampleMs 500 --quiet-training",
     "profile:experiment:worker-pipeline": "node ./scripts/worker-pipeline-experiment.js --method DES-HyperNEAT --runs 3 --iterations 200 --secondsLimit 60 --threadCount 8 --taskCount 100 --quiet-training",
+    "profile:compare:worktree": "node ./scripts/compare-worktree-performance.js",
     "check": "tsgo --noEmit"
   },
   "dependencies": {

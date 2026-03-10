@@ -141,5 +141,6 @@ dist
 .turbo
 .gemini/
 .devnotes/
+.worktrees/
 CLAUDE.md
 GEMINI.md
