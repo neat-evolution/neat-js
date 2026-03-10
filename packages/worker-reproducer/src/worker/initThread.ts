@@ -46,6 +46,9 @@ export const initThread = async (
   }
   context.speciesSelectionCache = new QuickLRU({ maxSize: 32 })
   context.populationSelectionCache = []
+  context.localSpeciesOrganisms = undefined
+  context.localPopulationOrganisms = undefined
+  context.allowLazyPopulationSnapshot = false
 
   // Return null to signal success - Handler will automatically send response
   return null

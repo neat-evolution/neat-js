@@ -12,6 +12,7 @@ import type QuickLRU from 'quick-lru'
 import type { OrganismPayload } from '../actions.js'
 import type { WorkerReproducerOptions } from '../WorkerReproducerOptions.js'
 import type { WorkerState } from '../WorkerState.js'
+import type { Organism } from '@neat-evolution/evolution'
 
 export interface PartialAlgorithm {
   createConfig: ConfigFactory
@@ -31,8 +32,11 @@ export interface ThreadInfo<GO extends GenomeOptions = GenomeOptions> {
 export interface ThreadContext {
   rng: RNG
   threadInfo: ThreadInfo | null
-  speciesSelectionCache?: QuickLRU<number, Array<OrganismPayload>>
-  populationSelectionCache?: Array<OrganismPayload>
+  speciesSelectionCache: QuickLRU<number, Array<OrganismPayload>> | undefined
+  populationSelectionCache: Array<OrganismPayload> | undefined
+  localSpeciesOrganisms: Map<number, Array<Organism>> | undefined
+  localPopulationOrganisms: Array<Organism> | undefined
+  allowLazyPopulationSnapshot: boolean
 }
 
 export type ReproducerHandlerContext = ThreadContext & WorkerContext
