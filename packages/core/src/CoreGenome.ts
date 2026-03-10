@@ -16,7 +16,7 @@ import type { GenomeFactory } from './genome/GenomeFactory.js'
 import type { InitConfig } from './genome/InitConfig.js'
 import type { LinkFactory } from './link/LinkFactory.js'
 import type { LinkFactoryOptions } from './link/LinkFactoryOptions.js'
-import { type LinkKey, linkRefToKey, toLinkKey } from './link/linkRefToKey.js'
+import { type LinkKey, toLinkKey } from './link/linkRefToKey.js'
 import type { NodeFactory } from './node/NodeFactory.js'
 import type { NodeRef } from './node/NodeRef.js'
 import { NodeType } from './node/NodeType.js'
@@ -307,7 +307,8 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
   async splitLink(
     from: NodeKey,
     to: NodeKey,
-    newNodeKey: NodeKey
+    newNodeKey: NodeKey,
+    isSafe?: boolean
   ): Promise<void> {
     const linkKey = toLinkKey(from, to)
     const link = this.links.get(linkKey) as LinkTypeOf<Ctx>
@@ -316,9 +317,9 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     }
 
     this.links.delete(linkKey)
-    this.connections.delete(from, to)
+    this.connections.deleteWithKey(from, to, linkKey)
 
-    const isSafe = !this.hiddenNodes.has(newNodeKey)
+    const shouldReuseExistingNode = !this.hiddenNodes.has(newNodeKey)
     const newNode =
       this.hiddenNodes.get(newNodeKey) ??
       this.createNode(
@@ -327,7 +328,10 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
         this.state.node()
       )
 
-    this.hiddenNodes.set(newNodeKey, !isSafe ? newNode.clone() : newNode)
+    this.hiddenNodes.set(
+      newNodeKey,
+      !shouldReuseExistingNode ? newNode.clone() : newNode
+    )
 
     type LinkDetails = [
       from: NodeKey,
@@ -372,17 +376,18 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
       weight: link.weight,
       innovation: link2Details[2],
     })
-    this.insertLink(link1, isSafe)
-    this.insertLink(link2, isSafe)
+    this.insertLink(link1, isSafe ?? shouldReuseExistingNode)
+    this.insertLink(link2, isSafe ?? shouldReuseExistingNode)
   }
 
   insertLink(link: LinkTypeOf<Ctx>, isSafe?: boolean): void {
+    const linkKey = toLinkKey(link.from, link.to)
     const knownNotToCreateCycle =
       isSafe === true || !this.connections.createsCycle(link.from, link.to)
 
     if (knownNotToCreateCycle) {
-      this.links.set(linkRefToKey(link), link)
-      this.connections.add(link.from, link.to, link.weight, true)
+      this.links.set(linkKey, link)
+      this.connections.addWithKey(link.from, link.to, link.weight, linkKey, true)
     }
   }
 
@@ -430,13 +435,13 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
 
       const newNodeKey = await this.state
         .neat()
-        .getSplitInnovation(link.innovation)
+        .getSplitInnovation(link.from, link.to)
 
       const linkFromKey = toLinkKey(link.from, newNodeKey)
       const linkToKey = toLinkKey(newNodeKey, link.to)
 
       if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
-        await this.splitLink(link.from, link.to, newNodeKey)
+        await this.splitLink(link.from, link.to, newNodeKey, true)
         break
       }
     }
@@ -444,7 +449,6 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
 
   async mutationAddLink(): Promise<void> {
     const rng = threadRNG()
-    // Select random source and target nodes for new link
     const numSources = this.inputs.size + this.hiddenNodes.size
     const numTargets = this.hiddenNodes.size + this.outputs.size
 
@@ -481,7 +485,6 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     const sourceKey = nodeRefToKey(source)
 
     const targetNodes: NodeTypeOf<Ctx>[] = []
-
     for (const nodes of [this.hiddenNodes, this.outputs]) {
       for (const [nodeKey, node] of nodes) {
         if (!this.links.has(toLinkKey(sourceKey, nodeKey))) {

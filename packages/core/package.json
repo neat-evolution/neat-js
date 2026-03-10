@@ -47,8 +47,7 @@
   },
   "dependencies": {
     "@neat-evolution/utils": "workspace:^",
-    "@swc/helpers": "^0.5.17",
-    "quick-lru": "^7.3.0"
+    "@swc/helpers": "^0.5.17"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
