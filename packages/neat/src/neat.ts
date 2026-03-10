@@ -15,7 +15,7 @@ import type { NEATGenomeOptions } from './NEATGenomeOptions.js'
 export const neat = async (
   createReproducer: NEATReproducerFactory,
   evaluator: Evaluator,
-  evolutionOptions: EvolutionOptions,
+  evolutionOptions: EvolutionOptions<ReturnType<typeof createPopulation>>,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: NEATGenomeOptions
@@ -28,7 +28,7 @@ export const neat = async (
     genomeOptions
   )
 
-  await evolve(population as never, evolutionOptions as never)
+  await evolve(population, evolutionOptions)
 
   return population.best()
 }

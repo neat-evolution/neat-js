@@ -15,7 +15,7 @@ import {
 export const cppn = async (
   createReproducer: CPPNReproducerFactory,
   evaluator: Evaluator,
-  evolutionOptions: EvolutionOptions,
+  evolutionOptions: EvolutionOptions<ReturnType<typeof createPopulation>>,
   neatConfigOptions: NEATConfigOptions,
   populationOptions: PopulationOptions,
   genomeOptions: CPPNGenomeOptions
@@ -28,7 +28,7 @@ export const cppn = async (
     genomeOptions
   )
 
-  await evolve(population as never, evolutionOptions as never)
+  await evolve(population, evolutionOptions)
 
   return population.best()
 }
