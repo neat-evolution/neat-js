@@ -15,9 +15,7 @@ export const splitLink = async (
   if (existingLink == null) {
     throw new Error('Cannot split non-existing link')
   }
-  const newNodeKey = await genome.state.getSplitInnovation(
-    existingLink.innovation
-  )
+  const newNodeKey = await genome.state.getSplitInnovation(from, to)
 
   await genome.splitLink(from, to, newNodeKey)
 
