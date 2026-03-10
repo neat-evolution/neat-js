@@ -44,27 +44,33 @@ export interface EvaluateBatchPayload {
   seed?: string | undefined
 }
 
-export type InitAction = WorkerMessage<InitPayload>
+export type InitAction = WorkerMessage<InitPayload, null>
 
-export type InitSuccessAction = WorkerMessage<null>
+export type InitSuccessAction = WorkerMessage<null, null>
 
-export type TerminateAction = WorkerMessage<null>
+export type TerminateAction = WorkerMessage<null, null>
 
 // Action creators for worker-evaluator
-export const initEvaluator = createMessage<InitPayload>(
+export const initEvaluator = createMessage<InitPayload, null>(
   ActionType.INIT_EVALUATOR
 )
 
-export const initGenomeFactory = createMessage<InitGenomeFactoryPayload>(
+export const initGenomeFactory = createMessage<InitGenomeFactoryPayload, null>(
   ActionType.INIT_GENOME_FACTORY
 )
 
-export const requestEvaluateGenome = createMessage<EvaluateGenomePayload>(
+export const requestEvaluateGenome = createMessage<EvaluateGenomePayload, number>(
   ActionType.REQUEST_EVALUATE_GENOME
 )
 
-export const requestEvaluateBatch = createMessage<EvaluateBatchPayload>(
+export const requestEvaluateBatch = createMessage<
+  EvaluateBatchPayload,
+  number[]
+>(
   ActionType.REQUEST_EVALUATE_BATCH
 )
 
-export const terminate = createMessage<null>(ActionType.TERMINATE, () => null)
+export const terminate = createMessage<null, null>(
+  ActionType.TERMINATE,
+  () => null
+)
