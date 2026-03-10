@@ -73,7 +73,7 @@ The `worker-actions` package exposes the following key classes and types:
   - `call(message)`: Allows the worker to send a call back to the main thread (if supported).
 
 - **`createMessage(type)` utility**:
-  A helper function to create strongly-typed message creators.
+  A helper function to create strongly-typed message creators, including typed RPC response payloads.
 
 - **`WorkerMessage<P>` interface**:
   Defines the structure of a message:
@@ -85,7 +85,7 @@ The `worker-actions` package exposes the following key classes and types:
 
 ### 1. Define Messages
 
-Use `createMessage` to define your message creators. This ensures type safety for payloads.
+Use `createMessage` to define your message creators. This ensures type safety for payloads and RPC responses.
 
 ```typescript
 // messages.ts
@@ -98,7 +98,7 @@ export interface AddPayload {
 }
 
 // Create message creators
-export const add = createMessage<AddPayload>("ADD");
+export const add = createMessage<AddPayload, number>("ADD");
 export const result = createMessage<number>("RESULT");
 
 // Export message types if needed
@@ -107,18 +107,18 @@ export type AddMessage = ReturnType<typeof add>;
 
 ### 2. Setup Worker (Handler)
 
-Register handlers using the message type string (available via `.toString()` on the message creator).
+Register handlers using the message creator directly, or the raw message type string if needed.
 
 ```typescript
 // worker.ts
-import { Handler, WorkerContext } from "@neat-evolution/worker-actions";
+import { Handler } from "@neat-evolution/worker-actions";
 
 import { add } from "./messages";
 
 const handler = new Handler();
 
 // Register a handler for the 'ADD' action
-handler.register(add.toString(), async (payload: { a: number; b: number }, context: WorkerContext) => {
+handler.register(add, async (payload) => {
   const sum = payload.a + payload.b;
   return sum; // Automatically sent back as a response if it was a call
 });
@@ -146,9 +146,8 @@ async function run() {
   const dispatcher = new Dispatcher(pool);
 
   // Send a call and await the result
-  // TypeScript infers the return type based on what the handler returns (if typed correctly)
-  // or you can specify it explicitly:
-  const sum = await dispatcher.call<number>(add({ a: 5, b: 3 }));
+  // TypeScript infers the response type from the message creator.
+  const sum = await dispatcher.call(add({ a: 5, b: 3 }));
 
   console.log("Result:", sum); // Output: 8
 
