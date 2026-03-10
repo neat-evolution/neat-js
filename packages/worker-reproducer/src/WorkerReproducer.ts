@@ -19,11 +19,11 @@ import {
   initReproducer,
   type OrganismBatchPayload,
   type OrganismPayload,
-  requestReproduceBatch,
   type ReproduceBatchPayload,
   type ReproductionSpeciesPayload,
   requestBreedOrganism,
   requestEliteOrganism,
+  requestReproduceBatch,
   type SpeciesPayload,
   terminate as terminateAction,
 } from './actions.js'
@@ -47,12 +47,10 @@ export class WorkerReproducer implements Reproducer {
 
   private readonly pool: WorkerPool
   private readonly dispatcher: Dispatcher
-  private reproductionPayloadCache:
-    | {
-        species: QuickLRU<number, OrganismBatchPayload>
-        population: OrganismBatchPayload | null
-      }
-    | null = null
+  private reproductionPayloadCache: {
+    species: QuickLRU<number, OrganismBatchPayload>
+    population: OrganismBatchPayload | null
+  } | null = null
 
   constructor(population: Population<any>, options: WorkerReproducerOptions) {
     this.options = options
@@ -218,7 +216,10 @@ export class WorkerReproducer implements Reproducer {
     return { organisms }
   }
 
-  private selectSpeciesPayload(speciesId: number, count: number): OrganismBatchPayload {
+  private selectSpeciesPayload(
+    speciesId: number,
+    count: number
+  ): OrganismBatchPayload {
     const species = this.population.species.get(speciesId) as Species
     const organisms: Array<OrganismPayload> = []
     const safeCount = Math.max(1, Math.trunc(count))
@@ -436,10 +437,12 @@ export class WorkerReproducer implements Reproducer {
     }
 
     const payload: OrganismBatchPayload = {
-      organisms: Array.from(this.population.organismValues()).map((organism) => ({
-        genome: organism.genome.toFactoryOptions(),
-        organismState: organism.toFactoryOptions(),
-      })),
+      organisms: Array.from(this.population.organismValues()).map(
+        (organism) => ({
+          genome: organism.genome.toFactoryOptions(),
+          organismState: organism.toFactoryOptions(),
+        })
+      ),
     }
     if (this.reproductionPayloadCache != null) {
       this.reproductionPayloadCache.population = payload

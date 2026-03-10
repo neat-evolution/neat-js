@@ -1,7 +1,7 @@
+import type QuickLRU from 'quick-lru'
+import type { CachedExecutorEntry } from './createCachedExecutorEntry.js'
 import type { GenomeFactoryConfig } from './GenomeFactoryConfig.js'
 import type { ThreadInfo } from './ThreadInfo.js'
-import type { CachedExecutorEntry } from './createCachedExecutorEntry.js'
-import type QuickLRU from 'quick-lru'
 
 export interface ThreadContext {
   threadInfo?: ThreadInfo

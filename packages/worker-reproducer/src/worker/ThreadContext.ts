@@ -5,14 +5,13 @@ import type {
   GenomeOptions,
   InitConfig,
 } from '@neat-evolution/core'
-import type { PopulationOptions } from '@neat-evolution/evolution'
+import type { Organism, PopulationOptions } from '@neat-evolution/evolution'
 import type { RNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 import type QuickLRU from 'quick-lru'
 import type { OrganismPayload } from '../actions.js'
 import type { WorkerReproducerOptions } from '../WorkerReproducerOptions.js'
 import type { WorkerState } from '../WorkerState.js'
-import type { Organism } from '@neat-evolution/evolution'
 
 export interface PartialAlgorithm {
   createConfig: ConfigFactory

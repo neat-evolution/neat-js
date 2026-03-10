@@ -2,8 +2,8 @@ import { NodeType } from '../index.js'
 import { toLinkKey } from '../link/linkRefToKey.js'
 import { type NodeKey, toNodeKey } from '../node/nodeRefToKey.js'
 import {
-  splitInnovationNodeId,
   type InnovationKey,
+  splitInnovationNodeId,
 } from './hashInnovationKey.js'
 import type { StateData } from './StateData.js'
 import type {

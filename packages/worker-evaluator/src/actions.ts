@@ -59,16 +59,15 @@ export const initGenomeFactory = createMessage<InitGenomeFactoryPayload, null>(
   ActionType.INIT_GENOME_FACTORY
 )
 
-export const requestEvaluateGenome = createMessage<EvaluateGenomePayload, number>(
-  ActionType.REQUEST_EVALUATE_GENOME
-)
+export const requestEvaluateGenome = createMessage<
+  EvaluateGenomePayload,
+  number
+>(ActionType.REQUEST_EVALUATE_GENOME)
 
 export const requestEvaluateBatch = createMessage<
   EvaluateBatchPayload,
   number[]
->(
-  ActionType.REQUEST_EVALUATE_BATCH
-)
+>(ActionType.REQUEST_EVALUATE_BATCH)
 
 export const terminate = createMessage<null, null>(
   ActionType.TERMINATE,

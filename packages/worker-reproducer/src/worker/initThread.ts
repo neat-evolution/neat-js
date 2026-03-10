@@ -1,5 +1,5 @@
-import QuickLRU from 'quick-lru'
 import { createRNG } from '@neat-evolution/utils'
+import QuickLRU from 'quick-lru'
 import { type InitReproducerPayload, StateType } from '../actions.js'
 import { WorkerState } from '../WorkerState.js'
 

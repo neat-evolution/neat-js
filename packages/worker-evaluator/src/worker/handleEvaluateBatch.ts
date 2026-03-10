@@ -34,8 +34,7 @@ export const handleEvaluateBatch: HandleEvaluateBatchFn = async (
   const executors: Executor[] = entries.map((entry) => entry.executor)
 
   // Determine async
-  const isAsync =
-    entries.some((entry) => entry.isAsync) || environment.isAsync
+  const isAsync = entries.some((entry) => entry.isAsync) || environment.isAsync
 
   if (isAsync) {
     if (environment.evaluateBatchAsync == null) {

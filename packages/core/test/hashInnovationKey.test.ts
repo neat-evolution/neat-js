@@ -1,10 +1,9 @@
 import { describe, expect, test } from 'vitest'
-
+import { NodeType, toNodeKey } from '../src/index.js'
 import {
   hashInnovationKey,
   splitInnovationNodeId,
 } from '../src/state/hashInnovationKey.js'
-import { NodeType, toNodeKey } from '../src/index.js'
 
 describe('hashInnovationKey', () => {
   test('should generate consistent hash for the same input', () => {
@@ -36,7 +35,9 @@ describe('splitInnovationNodeId', () => {
     const from = toNodeKey(NodeType.Input, 1)
     const to = toNodeKey(NodeType.Output, 7)
 
-    expect(splitInnovationNodeId(from, to)).toBe(splitInnovationNodeId(from, to))
+    expect(splitInnovationNodeId(from, to)).toBe(
+      splitInnovationNodeId(from, to)
+    )
   })
 
   test('should distinguish different split links', () => {
