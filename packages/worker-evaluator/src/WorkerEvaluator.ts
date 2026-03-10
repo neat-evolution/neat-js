@@ -10,7 +10,7 @@ import {
   IndividualStrategy,
 } from '@neat-evolution/evaluation-strategy'
 import type {
-  AnyAlgorithm,
+  AnyErasedAlgorithm,
   Evaluator,
   FitnessData,
   GenomeEntries,
@@ -29,7 +29,7 @@ import {
 import type { WorkerEvaluatorOptions } from './WorkerEvaluatorOptions.js'
 
 export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
-  public readonly algorithm: AnyAlgorithm
+  public readonly algorithm: AnyErasedAlgorithm
   public readonly algorithmPathname: string
   public readonly enableAsync = true
 
@@ -57,7 +57,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   private readonly strategy: EvaluationStrategy
 
   constructor(
-    algorithm: AnyAlgorithm,
+    algorithm: AnyErasedAlgorithm,
     environment: Environment<EFO>,
     options: WorkerEvaluatorOptions
   ) {
