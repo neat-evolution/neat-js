@@ -14,7 +14,9 @@ import { handleInitGenomeFactory } from './worker/handleInitGenomeFactory.js'
 import type { ThreadContext } from './worker/ThreadContext.js'
 
 const handler = new Handler()
-const threadContext: ThreadContext & Partial<WorkerContext> = {}
+const threadContext: ThreadContext & Partial<WorkerContext> = {
+  executorCache: undefined,
+}
 
 function getThreadContext(): ThreadContext & WorkerContext {
   return threadContext as ThreadContext & WorkerContext

@@ -4,6 +4,7 @@ import type { WorkerContext } from '@neat-evolution/worker-actions'
 
 import type { EvaluateBatchPayload } from '../actions.js'
 
+import { createCachedExecutorEntry } from './createCachedExecutorEntry.js'
 import type { ThreadContext } from './ThreadContext.js'
 
 export type HandleEvaluateBatchFn = (
@@ -24,44 +25,27 @@ export const handleEvaluateBatch: HandleEvaluateBatchFn = async (
   }
 
   const rng = seed != null ? createRNG(seed) : undefined
-
-  const { configProvider, stateProvider, genomeOptions, initConfig } =
-    context.genomeFactoryConfig
-
-  const { createGenome, createPhenotype, createExecutor, environment } =
-    context.threadInfo
+  const { environment } = context.threadInfo
 
   // Hydrate all genomes
-  const executors: Executor[] = batchGenomeOptions.map((options) => {
-    const genome = createGenome(
-      configProvider,
-      stateProvider as never,
-      genomeOptions,
-      initConfig,
-      options
-    )
-    const phenotype = createPhenotype(genome as never)
-    return createExecutor(phenotype)
-  })
+  const entries = batchGenomeOptions.map((genomeFactoryOptions) =>
+    createCachedExecutorEntry(genomeFactoryOptions, context, { cache: true })
+  )
+  const executors: Executor[] = entries.map((entry) => entry.executor)
 
   // Determine async
-  const isAsync = executors.some((e) => e.isAsync) || environment.isAsync
+  const isAsync =
+    entries.some((entry) => entry.isAsync) || environment.isAsync
 
-  // Call batch method
-  let fitnessScores: number[]
   if (isAsync) {
-    const evaluateBatchAsync = environment.evaluateBatchAsync
-    if (evaluateBatchAsync == null) {
+    if (environment.evaluateBatchAsync == null) {
       throw new Error('evaluateBatchAsync not implemented on environment')
     }
-    fitnessScores = await evaluateBatchAsync(executors, rng)
-  } else {
-    const evaluateBatch = environment.evaluateBatch
-    if (evaluateBatch == null) {
-      throw new Error('evaluateBatch not implemented on environment')
-    }
-    fitnessScores = evaluateBatch(executors as SyncExecutor[], rng)
+    return await environment.evaluateBatchAsync(executors, rng)
   }
 
-  return fitnessScores
+  if (environment.evaluateBatch == null) {
+    throw new Error('evaluateBatch not implemented on environment')
+  }
+  return environment.evaluateBatch(executors as SyncExecutor[], rng)
 }

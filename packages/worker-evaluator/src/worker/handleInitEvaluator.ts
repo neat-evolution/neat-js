@@ -15,6 +15,7 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     createEnvironmentPathname,
     createExecutorPathname,
     environmentData,
+    executorCacheMaxSize,
   },
   context
 ) => {
@@ -35,6 +36,7 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     createPhenotype,
     createState,
     environment,
+    ...(executorCacheMaxSize != null ? { executorCacheMaxSize } : {}),
   }
   // FIXME: should this just be handled by returning true?
   if (context.dispatch == null) {

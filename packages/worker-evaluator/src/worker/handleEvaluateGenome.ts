@@ -1,9 +1,10 @@
-import type { Executor } from '@neat-evolution/executor'
+import type { SyncExecutor } from '@neat-evolution/executor'
 import { createRNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
 import type { EvaluateGenomePayload } from '../actions.js'
 
+import { createCachedExecutorEntry } from './createCachedExecutorEntry.js'
 import type { ThreadContext } from './ThreadContext.js'
 
 export type HandleEvaluateGenomeFn = (
@@ -24,35 +25,21 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
   }
 
   const rng = seed != null ? createRNG(seed) : undefined
-
-  // hydrate the genome
-  const { configProvider, stateProvider, genomeOptions, initConfig } =
-    context.genomeFactoryConfig
-
-  const { createGenome, createPhenotype, createExecutor, environment } =
-    context.threadInfo
-
-  const genome = createGenome(
-    configProvider,
-    stateProvider as never,
-    genomeOptions,
-    initConfig,
-    genomeFactoryOptions
+  const { environment } = context.threadInfo
+  const { executor, isAsync } = createCachedExecutorEntry(
+    genomeFactoryOptions,
+    context,
+    { cache: false }
   )
-
-  // create the phenotype and executor
-  const phenotype = createPhenotype(genome as never)
-
-  const executor: Executor = createExecutor(phenotype)
 
   // evaluate the genome
   let fitness: number
 
   // allow for different types of executors and environments
-  if (executor.isAsync || environment.isAsync) {
+  if (isAsync || environment.isAsync) {
     fitness = await environment.evaluateAsync(executor, rng)
   } else {
-    fitness = environment.evaluate(executor, rng)
+    fitness = environment.evaluate(executor as SyncExecutor, rng)
   }
 
   return fitness

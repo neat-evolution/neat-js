@@ -39,6 +39,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   public readonly threadCount: number
   public readonly createEnvironmentPathname: string
   public readonly createExecutorPathname: string
+  public readonly executorCacheMaxSize: number
   public readonly initPromise: Promise<void>
 
   private readonly pool: WorkerPool
@@ -68,6 +69,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     this.threadCount = options.threadCount
     this.createExecutorPathname = options.createExecutorPathname
     this.createEnvironmentPathname = options.createEnvironmentPathname
+    this.executorCacheMaxSize = options.executorCacheMaxSize ?? 0
 
     // Use provided workerScriptUrl or fall back to default (works in Node.js, not Vite)
     const workerScriptUrl =
@@ -131,6 +133,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       createExecutorPathname: this.createExecutorPathname,
       createEnvironmentPathname: this.createEnvironmentPathname,
       environmentData: this.environment.toFactoryOptions(),
+      executorCacheMaxSize: this.executorCacheMaxSize,
     }
     await this.dispatcher.broadcast<null>(initEvaluator(data))
   }
