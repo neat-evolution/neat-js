@@ -64,7 +64,17 @@ export const createRNG = (seed?: string): RNG => {
   }
 }
 
-const globalRNG: RNG = createRNG()
+let globalRNG: RNG = createRNG()
+
+export const setThreadRNGSeed = (seed: string) => {
+  globalRNG = createRNG(seed)
+  return globalRNG
+}
+
+export const resetThreadRNG = () => {
+  globalRNG = createRNG()
+  return globalRNG
+}
 
 /**
  * A crude port of the Rust rand crate's thread_rng function.
