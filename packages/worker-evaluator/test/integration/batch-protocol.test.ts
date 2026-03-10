@@ -41,6 +41,7 @@ describe('handleEvaluateBatch', () => {
         genomeOptions: stubGenomeOptions,
         initConfig: stubInitConfig,
       },
+      executorCache: undefined,
       threadInfo: {
         createGenome: vi.fn().mockReturnValue({}),
         createPhenotype: vi.fn().mockReturnValue({}),
