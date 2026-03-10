@@ -16,7 +16,7 @@ import type { TopologyConfigOptions } from './TopologyConfigOptions.js'
 export const deshyperneat = async (
   createReproducer: DESHyperNEATReproducerFactory,
   evaluator: Evaluator,
-  evolutionOptions: EvolutionOptions,
+  evolutionOptions: EvolutionOptions<ReturnType<typeof createPopulation>>,
   // FIXME: should be TopologyConfigOptions & Partial<NeatConfigOptions>
   topologyConfigOptions: TopologyConfigOptions,
   cppnConfigOptions: NEATConfigOptions,
@@ -32,7 +32,7 @@ export const deshyperneat = async (
     genomeOptions
   )
 
-  await evolve(population as never, evolutionOptions as never)
+  await evolve(population, evolutionOptions)
 
   return population.best()
 }
