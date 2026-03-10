@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/utils
 
-<!-- This log was last generated on Thu, 26 Feb 2026 22:05:36 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 10 Mar 2026 23:01:45 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.6.0
+
+Tue, 10 Mar 2026 23:01:45 GMT
+
+### Minor changes
+
+- add setThreadRNGSeed and resetThreadRNG functions (github@heygrady.net)
 
 ## 0.4.0
 

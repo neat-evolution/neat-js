@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "add early stop options, seed support, and distribution metrics; add worktree performance comparison scripts; overhaul profiling infrastructure and adopt generics; adopt AlgorithmContext-based generics",
-  "packageName": "@neat-evolution/demo",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

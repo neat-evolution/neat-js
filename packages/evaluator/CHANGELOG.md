@@ -1,8 +1,16 @@
 # Change Log - @neat-evolution/evaluator
 
-<!-- This log was last generated on Fri, 27 Feb 2026 09:07:42 GMT and should not be manually modified. -->
+<!-- This log was last generated on Tue, 10 Mar 2026 23:01:45 GMT and should not be manually modified. -->
 
 <!-- Start content -->
+
+## 0.5.8
+
+Tue, 10 Mar 2026 23:01:45 GMT
+
+### Patches
+
+- adopt refined AlgorithmContext-based generics; adopt AlgorithmContext-based generics (github@heygrady.net)
 
 ## 0.5.6
 

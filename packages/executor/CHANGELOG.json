@@ -2,6 +2,21 @@
   "name": "@neat-evolution/executor",
   "entries": [
     {
+      "date": "Tue, 10 Mar 2026 23:01:45 GMT",
+      "version": "0.3.13",
+      "tag": "@neat-evolution/executor_v0.3.13",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/executor",
+            "commit": "86c84fc63b4f926142ee5eb2cd80e2299846504b",
+            "comment": "replace action objects with typed arrays for hot path performance; adopt AlgorithmContext-based generics"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 27 Feb 2026 09:07:42 GMT",
       "version": "0.3.11",
       "tag": "@neat-evolution/executor_v0.3.11",

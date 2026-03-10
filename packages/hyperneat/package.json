@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/hyperneat",
-  "version": "0.6.6",
+  "version": "0.6.8",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",

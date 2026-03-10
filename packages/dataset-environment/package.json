@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/dataset-environment",
-  "version": "0.5.6",
+  "version": "0.5.8",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",

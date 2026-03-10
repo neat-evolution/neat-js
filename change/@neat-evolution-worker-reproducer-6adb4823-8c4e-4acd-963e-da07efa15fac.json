@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "replace AnyPopulation with Population<any>; add randomSeed option for deterministic worker RNG; replace per-organism RPCs with batch reproduce action; adopt refined AlgorithmContext-based generics; adopt AlgorithmContext-based generics",
-  "packageName": "@neat-evolution/worker-reproducer",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

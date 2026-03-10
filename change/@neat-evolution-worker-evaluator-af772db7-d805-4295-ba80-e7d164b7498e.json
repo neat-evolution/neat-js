@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "use AnyErasedAlgorithm and add typed response types; add LRU executor cache for batch evaluation; adopt refined AlgorithmContext-based generics; adopt AlgorithmContext-based generics",
-  "packageName": "@neat-evolution/worker-evaluator",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

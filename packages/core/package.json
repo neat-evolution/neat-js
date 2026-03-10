@@ -1,6 +1,6 @@
 {
   "name": "@neat-evolution/core",
-  "version": "0.3.9",
+  "version": "0.5.0",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",

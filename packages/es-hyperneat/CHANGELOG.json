@@ -2,6 +2,21 @@
   "name": "@neat-evolution/es-hyperneat",
   "entries": [
     {
+      "date": "Tue, 10 Mar 2026 23:01:45 GMT",
+      "version": "0.6.8",
+      "tag": "@neat-evolution/es-hyperneat_v0.6.8",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/es-hyperneat",
+            "commit": "86c84fc63b4f926142ee5eb2cd80e2299846504b",
+            "comment": "adopt refined AlgorithmContext-based generics; adopt AlgorithmContext-based generics"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 27 Feb 2026 09:07:42 GMT",
       "version": "0.6.6",
       "tag": "@neat-evolution/es-hyperneat_v0.6.6",

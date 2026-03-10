@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "pass createGenome factory to CPPNGenome constructor in benchmark; extract mutateNodeSelection helper and optimize createPhenotype; adopt refined AlgorithmContext-based generics; adopt AlgorithmContext-based generics",
-  "packageName": "@neat-evolution/cppn",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

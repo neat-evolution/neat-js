@@ -2,6 +2,21 @@
   "name": "@neat-evolution/worker-actions",
   "entries": [
     {
+      "date": "Tue, 10 Mar 2026 23:01:45 GMT",
+      "version": "0.6.0",
+      "tag": "@neat-evolution/worker-actions_v0.6.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-actions",
+            "commit": "86c84fc63b4f926142ee5eb2cd80e2299846504b",
+            "comment": "add MessageCreator type and typed response parameter; improve type safety in Dispatcher and Handler"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 26 Feb 2026 22:05:36 GMT",
       "version": "0.4.4",
       "tag": "@neat-evolution/worker-actions_v0.4.4",

@@ -1,7 +1,0 @@
-{
-  "type": "minor",
-  "comment": "add AnyErasedAlgorithm and AnyErasedGenome type aliases; replace innovation-key hashing with node-pair-based split innovation; refine AlgorithmContext generics and optimize Connections; introduce AlgorithmContext to replace verbose generic type params",
-  "packageName": "@neat-evolution/core",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

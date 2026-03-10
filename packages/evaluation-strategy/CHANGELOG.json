@@ -2,6 +2,21 @@
   "name": "@neat-evolution/evaluation-strategy",
   "entries": [
     {
+      "date": "Tue, 10 Mar 2026 23:01:45 GMT",
+      "version": "0.3.12",
+      "tag": "@neat-evolution/evaluation-strategy_v0.3.12",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/evaluation-strategy",
+            "commit": "86c84fc63b4f926142ee5eb2cd80e2299846504b",
+            "comment": "adopt refined AlgorithmContext-based generics; adopt AlgorithmContext-based generics"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 27 Feb 2026 09:07:42 GMT",
       "version": "0.3.10",
       "tag": "@neat-evolution/evaluation-strategy_v0.3.10",

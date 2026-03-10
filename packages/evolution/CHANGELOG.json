@@ -2,6 +2,21 @@
   "name": "@neat-evolution/evolution",
   "entries": [
     {
+      "date": "Tue, 10 Mar 2026 23:01:45 GMT",
+      "version": "0.7.0",
+      "tag": "@neat-evolution/evolution_v0.7.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/evolution",
+            "commit": "86c84fc63b4f926142ee5eb2cd80e2299846504b",
+            "comment": "add ErasedAlgorithmDefinition and improve generic constraints; adopt AlgorithmContext-based generics; adopt AlgorithmContext-based generics"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 26 Feb 2026 22:05:36 GMT",
       "version": "0.5.4",
       "tag": "@neat-evolution/evolution_v0.5.4",

@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "adopt refined AlgorithmContext-based generics; adopt AlgorithmContext-based generics",
-  "packageName": "@neat-evolution/es-hyperneat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

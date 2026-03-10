@@ -2,6 +2,21 @@
   "name": "@neat-evolution/core",
   "entries": [
     {
+      "date": "Tue, 10 Mar 2026 23:01:45 GMT",
+      "version": "0.5.0",
+      "tag": "@neat-evolution/core_v0.5.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/core",
+            "commit": "86c84fc63b4f926142ee5eb2cd80e2299846504b",
+            "comment": "add AnyErasedAlgorithm and AnyErasedGenome type aliases; replace innovation-key hashing with node-pair-based split innovation; refine AlgorithmContext generics and optimize Connections; introduce AlgorithmContext to replace verbose generic type params"
+          }
+        ]
+      }
+    },
+    {
       "date": "Fri, 27 Feb 2026 09:07:42 GMT",
       "version": "0.3.9",
       "tag": "@neat-evolution/core_v0.3.9",

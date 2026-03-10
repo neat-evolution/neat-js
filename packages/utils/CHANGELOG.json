@@ -2,6 +2,21 @@
   "name": "@neat-evolution/utils",
   "entries": [
     {
+      "date": "Tue, 10 Mar 2026 23:01:45 GMT",
+      "version": "0.6.0",
+      "tag": "@neat-evolution/utils_v0.6.0",
+      "comments": {
+        "minor": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/utils",
+            "commit": "86c84fc63b4f926142ee5eb2cd80e2299846504b",
+            "comment": "add setThreadRNGSeed and resetThreadRNG functions"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 26 Feb 2026 22:05:36 GMT",
       "version": "0.4.0",
       "tag": "@neat-evolution/utils_v0.4.0",

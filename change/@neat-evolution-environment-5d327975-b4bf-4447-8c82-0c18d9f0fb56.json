@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "adopt AlgorithmContext-based generics",
-  "packageName": "@neat-evolution/environment",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

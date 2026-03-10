@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "replace action objects with typed arrays for hot path performance; adopt AlgorithmContext-based generics",
-  "packageName": "@neat-evolution/executor",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}

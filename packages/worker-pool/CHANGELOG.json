@@ -2,6 +2,21 @@
   "name": "@neat-evolution/worker-pool",
   "entries": [
     {
+      "date": "Tue, 10 Mar 2026 23:01:45 GMT",
+      "version": "0.4.6",
+      "tag": "@neat-evolution/worker-pool_v0.4.6",
+      "comments": {
+        "patch": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/worker-pool",
+            "commit": "86c84fc63b4f926142ee5eb2cd80e2299846504b",
+            "comment": "adopt AlgorithmContext-based generics"
+          }
+        ]
+      }
+    },
+    {
       "date": "Thu, 26 Feb 2026 22:05:36 GMT",
       "version": "0.4.4",
       "tag": "@neat-evolution/worker-pool_v0.4.4",

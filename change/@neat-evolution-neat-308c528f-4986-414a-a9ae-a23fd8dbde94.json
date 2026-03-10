@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "optimize createPhenotype to build nodeMapping directly; adopt refined AlgorithmContext-based generics; adopt AlgorithmContext-based generics",
-  "packageName": "@neat-evolution/neat",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}
