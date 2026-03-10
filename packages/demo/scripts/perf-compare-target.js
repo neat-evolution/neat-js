@@ -7,6 +7,7 @@ import { createExecutor } from '@neat-evolution/executor'
 import { createEvaluator as createWorkerEvaluator } from '@neat-evolution/worker-evaluator'
 import { createReproducerFactory } from '@neat-evolution/worker-reproducer'
 import { hardwareConcurrency } from '@neat-evolution/worker-threads'
+import { resetThreadRNG, setThreadRNGSeed } from '@neat-evolution/utils'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const defaultPackageRoot = resolve(__dirname, '..')
@@ -20,7 +21,11 @@ function parseArgs(argv) {
     method: 'ES-HyperNEAT',
     iterations: 200,
     initialMutations: null,
+    seed: null,
     secondsLimit: 30,
+    earlyStop: true,
+    earlyStopPatience: null,
+    earlyStopMinThreshold: 0,
     threadCount: defaultThreadCount,
     taskCount: 100,
     memorySampleMs: 250,
@@ -41,8 +46,16 @@ function parseArgs(argv) {
       options.iterations = Number(args[++i])
     } else if (arg === '--initialMutations' && args[i + 1]) {
       options.initialMutations = Number(args[++i])
+    } else if (arg === '--seed' && args[i + 1]) {
+      options.seed = args[++i]
     } else if (arg === '--secondsLimit' && args[i + 1]) {
       options.secondsLimit = Number(args[++i])
+    } else if (arg === '--earlyStop' && args[i + 1]) {
+      options.earlyStop = args[++i] !== 'false'
+    } else if (arg === '--earlyStopPatience' && args[i + 1]) {
+      options.earlyStopPatience = Number(args[++i])
+    } else if (arg === '--earlyStopMinThreshold' && args[i + 1]) {
+      options.earlyStopMinThreshold = Number(args[++i])
     } else if (arg === '--threadCount' && args[i + 1]) {
       options.threadCount = Number(args[++i])
     } else if (arg === '--taskCount' && args[i + 1]) {
@@ -70,6 +83,15 @@ function parseArgs(argv) {
     1,
     Number.isFinite(options.secondsLimit) ? options.secondsLimit : 30
   )
+  options.earlyStopPatience = Math.max(
+    0,
+    Number.isFinite(options.earlyStopPatience)
+      ? Math.floor(options.earlyStopPatience)
+      : options.iterations
+  )
+  options.earlyStopMinThreshold = Number.isFinite(options.earlyStopMinThreshold)
+    ? options.earlyStopMinThreshold
+    : 0
   options.threadCount = Math.max(
     1,
     Number.isFinite(options.threadCount)
@@ -94,6 +116,9 @@ function parseArgs(argv) {
   )
   if (!Number.isFinite(options.initialMutations)) {
     options.initialMutations = null
+  }
+  if (typeof options.seed !== 'string' || options.seed.length === 0) {
+    options.seed = null
   }
 
   return options
@@ -189,10 +214,16 @@ async function run() {
   const method = Object.values(Methods).includes(options.method)
     ? options.method
     : Methods.ES_HyperNEAT
+  if (options.seed != null) {
+    setThreadRNGSeed(options.seed)
+  } else {
+    resetThreadRNG()
+  }
   const terminables = new Set()
   const createReproducer = createReproducerFactory(
     {
       threadCount: options.threadCount,
+      randomSeed: options.seed ?? undefined,
       enableCustomState: method === Methods.DES_HyperNEAT,
       verbose: options.verbose,
     },
@@ -236,6 +267,9 @@ async function run() {
         evolutionOptions: {
           iterations: options.iterations,
           secondsLimit: options.secondsLimit,
+          earlyStop: options.earlyStop,
+          earlyStopPatience: options.earlyStopPatience,
+          earlyStopMinThreshold: options.earlyStopMinThreshold,
           ...(Number.isFinite(options.initialMutations)
             ? { initialMutations: options.initialMutations }
             : {}),
@@ -307,8 +341,12 @@ async function run() {
     },
     config: {
       method,
+      ...(options.seed != null ? { seed: options.seed } : {}),
       iterations: options.iterations,
       secondsLimit: options.secondsLimit,
+      earlyStop: options.earlyStop,
+      earlyStopPatience: options.earlyStopPatience,
+      earlyStopMinThreshold: options.earlyStopMinThreshold,
       threadCount: options.threadCount,
       taskCount: options.taskCount,
       memorySampleMs: options.memorySampleMs,
