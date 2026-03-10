@@ -85,13 +85,23 @@ export class Connections<N extends LinkNodeKey, E extends Edge> {
   }
 
   add(from: N, to: N, edge: E, isSafe?: boolean): void {
+    this.addWithKey(from, to, edge, toLinkKey(from, to), isSafe)
+  }
+
+  addWithKey(
+    from: N,
+    to: N,
+    edge: E,
+    linkKey: LinkKey,
+    isSafe?: boolean
+  ): void {
     // Sometimes we already know that the connection is safe
     const knownNotToCreateCycle = isSafe ?? !this.createsCycle(from, to)
     if (!knownNotToCreateCycle) {
       throw new Error('cannot add link that creates cycle')
     }
 
-    if (this.hasConnection(from, to)) {
+    if (this.linkKeyCache.has(linkKey)) {
       throw new Error('cannot add existing connection')
     }
     const info = this.connectionMap.get(from)
@@ -107,7 +117,7 @@ export class Connections<N extends LinkNodeKey, E extends Edge> {
     }
     this.nodeKeyCache.add(from)
     this.nodeKeyCache.add(to)
-    this.linkKeyCache.add(toLinkKey(from, to))
+    this.linkKeyCache.add(linkKey)
   }
 
   extend(other: Connections<N, E>) {
@@ -204,6 +214,10 @@ export class Connections<N extends LinkNodeKey, E extends Edge> {
   }
 
   delete(from: N, to: N): E {
+    return this.deleteWithKey(from, to, toLinkKey(from, to))
+  }
+
+  deleteWithKey(from: N, to: N, linkKey: LinkKey): E {
     const info = this.connectionMap.get(from)
     if (info == null) {
       throw new Error('cannot remove non-existent connection')
@@ -245,8 +259,7 @@ export class Connections<N extends LinkNodeKey, E extends Edge> {
     }
 
     // Incremental cache update
-    this.linkKeyCache.delete(toLinkKey(from, to))
-
+    this.linkKeyCache.delete(linkKey)
     // Check if nodes should be removed from cache
     if (!this.connectionMap.has(from) && !this.hasInbound(from)) {
       this.nodeKeyCache.delete(from)

@@ -10,9 +10,7 @@ export interface State<D> {
 export type ExtendedState<D> = State<D> | null
 
 export interface NEATState extends State<StateData> {
-  getSplitInnovation: (
-    innovationKey: InnovationKey
-  ) => NodeKey | Promise<NodeKey>
+  getSplitInnovation: (from: NodeKey, to: NodeKey) => NodeKey | Promise<NodeKey>
   getConnectInnovation: (
     from: NodeKey,
     to: NodeKey
