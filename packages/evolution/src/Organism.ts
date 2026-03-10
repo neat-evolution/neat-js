@@ -80,3 +80,5 @@ export class Organism<Ctx extends AlgorithmContext = AlgorithmContext> {
     }
   }
 }
+
+export type AnyOrganism = Organism

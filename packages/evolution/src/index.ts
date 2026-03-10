@@ -1,5 +1,7 @@
 export * from './EvolutionOptions.js'
+export * from './ErasedAlgorithmDefinition.js'
 export * from './evolve.js'
+export type { AnyOrganism } from './Organism.js'
 export * from './Organism.js'
 export * from './OrganismData.js'
 export * from './OrganismFactoryOptions.js'
