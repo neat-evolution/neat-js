@@ -4,6 +4,7 @@ import type { Transferable, Worker } from '@neat-evolution/worker-threads'
 import type {
   DispatcherContext,
   DispatcherHandlerFn,
+  MessageCreator,
   WorkerMessage,
 } from './types.js'
 import { isWorkerMessage } from './utils/actions.js'
@@ -14,7 +15,10 @@ export class Dispatcher {
   private readonly callManager: CallManager
 
   // Map messageType -> Set of Handlers
-  private readonly eventListeners = new Map<string, Set<DispatcherHandlerFn>>()
+  private readonly eventListeners = new Map<
+    string,
+    Set<DispatcherHandlerFn<any, any>>
+  >()
   private readonly verbose: boolean
 
   constructor(pool: WorkerPool, options?: { verbose?: boolean }) {
@@ -62,24 +66,24 @@ export class Dispatcher {
     return await this.send(message)
   }
 
-  public async call<T>(
-    message: WorkerMessage,
+  public async call<R = unknown>(
+    message: WorkerMessage<unknown, R>,
     options?: { timeout?: number }
-  ): Promise<T> {
+  ): Promise<R> {
     const worker = await this.pool.acquire()
     try {
-      return await this.callOnWorker<T>(worker, message, options)
+      return await this.callOnWorker(worker, message, options)
     } finally {
       this.pool.release(worker)
     }
   }
 
-  public async callOnWorker<T>(
+  public async callOnWorker<R = unknown>(
     worker: Worker,
-    message: WorkerMessage,
+    message: WorkerMessage<unknown, R>,
     options?: { timeout?: number }
-  ): Promise<T> {
-    const { messageWithId, promise, callId } = this.callManager.createCall<T>(
+  ): Promise<R> {
+    const { messageWithId, promise, callId } = this.callManager.createCall<R>(
       message,
       options
     )
@@ -92,18 +96,20 @@ export class Dispatcher {
   }
 
   /** @deprecated Use call */
-  public async request<T>(
-    message: WorkerMessage,
+  public async request<R = unknown>(
+    message: WorkerMessage<unknown, R>,
     options?: { timeout?: number }
-  ): Promise<T> {
-    return await this.call<T>(message, options)
+  ): Promise<R> {
+    return await this.call(message, options)
   }
 
-  public async broadcast<T>(message: WorkerMessage): Promise<T[]> {
+  public async broadcast<R = unknown>(
+    message: WorkerMessage<unknown, R>
+  ): Promise<R[]> {
     const workers = this.pool.getWorkers()
 
     const promises = workers.map(async (worker: Worker) => {
-      const { messageWithId, promise } = this.callManager.createCall<T>(message)
+      const { messageWithId, promise } = this.callManager.createCall<R>(message)
       this.postMessage(worker, messageWithId)
       return await promise
     })
@@ -188,20 +194,44 @@ export class Dispatcher {
     }
   }
 
-  public addMessageHandler(type: string, handler: DispatcherHandlerFn) {
+  public addMessageHandler<P, R, Args extends unknown[]>(
+    messageCreator: MessageCreator<P, R, Args>,
+    handler: DispatcherHandlerFn<P, R>
+  ): void
+  public addMessageHandler(type: string, handler: DispatcherHandlerFn): void
+  public addMessageHandler<P, R>(
+    typeOrCreator: string | MessageCreator<P, R, unknown[]>,
+    handler: DispatcherHandlerFn<P, R>
+  ) {
+    const type =
+      typeof typeOrCreator === 'string'
+        ? typeOrCreator
+        : typeOrCreator.toString()
     if (!this.eventListeners.has(type)) {
       this.eventListeners.set(type, new Set())
     }
     const listeners = this.eventListeners.get(type)
     if (listeners != null) {
-      listeners.add(handler)
+      listeners.add(handler as DispatcherHandlerFn<any, any>)
     }
   }
 
-  public removeMessageHandler(type: string, handler: DispatcherHandlerFn) {
+  public removeMessageHandler<P, R, Args extends unknown[]>(
+    messageCreator: MessageCreator<P, R, Args>,
+    handler: DispatcherHandlerFn<P, R>
+  ): void
+  public removeMessageHandler(type: string, handler: DispatcherHandlerFn): void
+  public removeMessageHandler<P, R>(
+    typeOrCreator: string | MessageCreator<P, R, unknown[]>,
+    handler: DispatcherHandlerFn<P, R>
+  ) {
+    const type =
+      typeof typeOrCreator === 'string'
+        ? typeOrCreator
+        : typeOrCreator.toString()
     const listeners = this.eventListeners.get(type)
     if (listeners != null) {
-      listeners.delete(handler)
+      listeners.delete(handler as DispatcherHandlerFn<any, any>)
     }
   }
 

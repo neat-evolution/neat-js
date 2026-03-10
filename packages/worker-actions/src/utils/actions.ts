@@ -1,22 +1,25 @@
 import type { Dispatcher } from '../Dispatcher.js'
-import type { WorkerMessage } from '../types.js'
+import type { MessageCreator, WorkerMessage } from '../types.js'
 
 // --- Core Message Creators ---
 const identityPayloadCreator = <P>(payload: P) => payload
 
 export function createMessage<
   P = unknown,
+  R = unknown,
   Args extends unknown[] = [payload: P],
 >(
   type: string,
   payloadCreator: (...args: Args) => P = identityPayloadCreator as unknown as (
     ...args: Args
   ) => P,
-  metaCreator?: (...args: Args) => WorkerMessage<P>['meta']
+  metaCreator?: (...args: Args) => WorkerMessage<P, R>['meta']
 ) {
-  const messageCreator = (...args: Args): WorkerMessage<P> => {
+  const messageCreator: MessageCreator<P, R, Args> = (
+    ...args: Args
+  ): WorkerMessage<P, R> => {
     const payload = payloadCreator(...args)
-    const message: WorkerMessage<P> = { type, payload }
+    const message: WorkerMessage<P, R> = { type, payload }
 
     if (metaCreator != null) {
       const meta = metaCreator(...args)

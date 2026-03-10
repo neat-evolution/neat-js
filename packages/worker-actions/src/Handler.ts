@@ -2,12 +2,17 @@ import { WORKER_READY } from '@neat-evolution/worker-pool'
 import type { Transferable } from '@neat-evolution/worker-threads'
 import { workerContext } from '@neat-evolution/worker-threads'
 
-import type { WorkerContext, WorkerHandlerFn, WorkerMessage } from './types.js'
+import type {
+  MessageCreator,
+  WorkerContext,
+  WorkerHandlerFn,
+  WorkerMessage,
+} from './types.js'
 import { CallManager } from './utils/CallManager.js'
 
 const DEFAULT_READY_TIMEOUT_MS = 20
 export class Handler {
-  private readonly handlers = new Map<string, WorkerHandlerFn>()
+  private readonly handlers = new Map<string, WorkerHandlerFn<any, any>>()
   private readonly scope = workerContext
   private readonly callManager: CallManager
 
@@ -46,8 +51,20 @@ export class Handler {
     this.postMessage({ type: WORKER_READY })
   }
 
-  public register(type: string, handler: WorkerHandlerFn) {
-    this.handlers.set(type, handler)
+  public register<P, Args extends unknown[], R>(
+    messageCreator: MessageCreator<P, R, Args>,
+    handler: WorkerHandlerFn<P, R>
+  ): void
+  public register<P, R>(type: string, handler: WorkerHandlerFn<P, R>): void
+  public register<P, R>(
+    typeOrCreator: string | MessageCreator<P, R, unknown[]>,
+    handler: WorkerHandlerFn<P, R>
+  ) {
+    const type =
+      typeof typeOrCreator === 'string'
+        ? typeOrCreator
+        : typeOrCreator.toString()
+    this.handlers.set(type, handler as WorkerHandlerFn<any, any>)
   }
 
   public async call<T>(
