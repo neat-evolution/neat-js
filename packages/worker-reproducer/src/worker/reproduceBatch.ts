@@ -1,10 +1,9 @@
 import type { Organism } from '@neat-evolution/evolution'
 
 import type { OrganismBatchPayload, ReproduceBatchPayload } from '../actions.js'
-
+import { hydrateOrganismPayload } from './hydrateOrganismPayload.js'
 import { populationTournamentSelect } from './populationTournamentSelect.js'
 import { speciesTournamentSelect } from './speciesTournamentSelect.js'
-import { hydrateOrganismPayload } from './hydrateOrganismPayload.js'
 import type { ReproducerHandlerContext } from './ThreadContext.js'
 
 function toPayload(organism: Organism) {
@@ -48,7 +47,8 @@ export const reproduceBatch = async (
       for (let i = 0; i < speciesEntry.reproductions; i++) {
         const father =
           context.rng.gen() <
-          context.threadInfo.populationOptions.interspeciesReproductionProbability
+          context.threadInfo.populationOptions
+            .interspeciesReproductionProbability
             ? await populationTournamentSelect(context)
             : await speciesTournamentSelect(speciesEntry.speciesId, context)
 

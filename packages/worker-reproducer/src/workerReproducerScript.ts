@@ -47,7 +47,10 @@ handler.register(ActionType.REQUEST_BREED_ORGANISM, async (payload) => {
 })
 
 handler.register(ActionType.REQUEST_REPRODUCE_BATCH, async (payload) => {
-  return await reproduceBatch(payload as ReproduceBatchPayload, getThreadContext())
+  return await reproduceBatch(
+    payload as ReproduceBatchPayload,
+    getThreadContext()
+  )
 })
 
 handler.register(ActionType.TERMINATE, () => null)

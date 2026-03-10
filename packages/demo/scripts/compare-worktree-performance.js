@@ -9,11 +9,20 @@ const repoRoot = resolve(packageRoot, '..', '..')
 
 function parseArgs(argv) {
   const args = argv.filter((arg) => arg !== '--')
-  const allMethods = ['NEAT', 'CPPN', 'HyperNEAT', 'ES-HyperNEAT', 'DES-HyperNEAT']
+  const allMethods = [
+    'NEAT',
+    'CPPN',
+    'HyperNEAT',
+    'ES-HyperNEAT',
+    'DES-HyperNEAT',
+  ]
   const options = {
     currentRepo: repoRoot,
     baselineRepo: resolve(repoRoot, '.worktrees/main'),
-    outputDir: resolve(packageRoot, '.artifacts/performance-comparison/current-vs-main'),
+    outputDir: resolve(
+      packageRoot,
+      '.artifacts/performance-comparison/current-vs-main'
+    ),
     runs: 5,
     method: 'ES-HyperNEAT',
     methods: [],
@@ -79,7 +88,10 @@ function parseArgs(argv) {
     }
   }
 
-  options.runs = Math.max(1, Number.isFinite(options.runs) ? Math.floor(options.runs) : 5)
+  options.runs = Math.max(
+    1,
+    Number.isFinite(options.runs) ? Math.floor(options.runs) : 5
+  )
   options.iterations = Math.max(
     1,
     Number.isFinite(options.iterations) ? Math.floor(options.iterations) : 200
@@ -137,7 +149,9 @@ async function run(command, args, cwd, capture = false) {
       if (result.stdout) process.stdout.write(`${result.stdout}\n`)
       if (result.stderr) process.stderr.write(`${result.stderr}\n`)
     }
-    throw new Error(`Command failed (${result.exitCode ?? 1}): ${command} ${args.join(' ')}`)
+    throw new Error(
+      `Command failed (${result.exitCode ?? 1}): ${command} ${args.join(' ')}`
+    )
   }
   return result
 }
@@ -214,7 +228,11 @@ function summarizeRuns(results) {
 }
 
 function percentDelta(current, baseline, invert = false) {
-  if (!Number.isFinite(current) || !Number.isFinite(baseline) || baseline === 0) {
+  if (
+    !Number.isFinite(current) ||
+    !Number.isFinite(baseline) ||
+    baseline === 0
+  ) {
     return null
   }
   const raw = ((current - baseline) / baseline) * 100
@@ -283,7 +301,12 @@ function formatDelta(delta) {
   return delta == null ? 'pending' : `${delta > 0 ? '+' : ''}${delta}%`
 }
 
-function renderDistributionRow(name, currentMetric, baselineMetric, invert = true) {
+function renderDistributionRow(
+  name,
+  currentMetric,
+  baselineMetric,
+  invert = true
+) {
   return `| ${name} | ${displayValue(currentMetric.mean)} | ${displayValue(
     currentMetric.median
   )} | ${displayValue(currentMetric.trimmedMean)} | ${displayValue(
@@ -295,11 +318,7 @@ function renderDistributionRow(name, currentMetric, baselineMetric, invert = tru
   )} | ${formatDelta(
     percentDelta(currentMetric.median, baselineMetric.median, invert)
   )} | ${formatDelta(
-    percentDelta(
-      currentMetric.trimmedMean,
-      baselineMetric.trimmedMean,
-      invert
-    )
+    percentDelta(currentMetric.trimmedMean, baselineMetric.trimmedMean, invert)
   )} |`
 }
 
@@ -389,7 +408,11 @@ function renderMarkdownReport(state) {
   ]
 
   const perRunLines = []
-  for (let i = 0; i < Math.max(state.runs.current.length, state.runs.main.length); i++) {
+  for (
+    let i = 0;
+    i < Math.max(state.runs.current.length, state.runs.main.length);
+    i++
+  ) {
     const current = state.runs.current[i]
     const baseline = state.runs.main[i]
     perRunLines.push(
@@ -451,8 +474,14 @@ function renderMarkdownReport(state) {
 
 function writeReport(state) {
   mkdirSync(state.outputDir, { recursive: true })
-  writeFileSync(resolve(state.outputDir, 'latest.json'), JSON.stringify(state, null, 2))
-  writeFileSync(resolve(state.outputDir, 'latest.md'), renderMarkdownReport(state))
+  writeFileSync(
+    resolve(state.outputDir, 'latest.json'),
+    JSON.stringify(state, null, 2)
+  )
+  writeFileSync(
+    resolve(state.outputDir, 'latest.md'),
+    renderMarkdownReport(state)
+  )
 }
 
 function slugifyMethod(method) {
@@ -489,7 +518,10 @@ function buildMethodState(options, method, outputDir) {
 
 function renderIndexReport(indexState) {
   const rows = indexState.methods.map((methodState) => {
-    const comparison = buildComparison(methodState.runs.current, methodState.runs.main)
+    const comparison = buildComparison(
+      methodState.runs.current,
+      methodState.runs.main
+    )
     return `| ${methodState.config.method} | ${displayValue(comparison.current.elapsedMs.mean)} | ${displayValue(comparison.baseline.elapsedMs.mean)} | ${formatDelta(comparison.comparisons.elapsedMsPct)} | ${formatDelta(percentDelta(comparison.current.elapsedMs.median, comparison.baseline.elapsedMs.median, true))} | ${displayValue(comparison.current.peakRssMB.mean)} | ${displayValue(comparison.baseline.peakRssMB.mean)} |`
   })
 
@@ -520,17 +552,26 @@ function writeIndexReport(indexState) {
     resolve(indexState.outputDir, 'latest.json'),
     JSON.stringify(indexState, null, 2)
   )
-  writeFileSync(resolve(indexState.outputDir, 'latest.md'), renderIndexReport(indexState))
+  writeFileSync(
+    resolve(indexState.outputDir, 'latest.md'),
+    renderIndexReport(indexState)
+  )
 }
 
 async function ensurePrepared(repoRootToUse, skipBuild) {
   await run('node', ['packages/demo/scripts/iris.js'], repoRootToUse)
   if (!skipBuild) {
-    await run('yarn', ['workspace', '@neat-evolution/demo', 'build'], repoRootToUse)
+    await run(
+      'yarn',
+      ['workspace', '@neat-evolution/demo', 'build'],
+      repoRootToUse
+    )
   } else if (
     !existsSync(resolve(repoRootToUse, 'packages/demo/dist/esm/demo.js'))
   ) {
-    throw new Error(`Build output missing in ${repoRootToUse}; rerun without --skip-build`)
+    throw new Error(
+      `Build output missing in ${repoRootToUse}; rerun without --skip-build`
+    )
   }
 }
 
@@ -615,7 +656,9 @@ async function main() {
   await ensurePrepared(options.baselineRepo, options.skipBuild)
 
   for (const methodState of indexState.methods) {
-    mkdirSync(resolve(methodState.outputDir, 'runs/current'), { recursive: true })
+    mkdirSync(resolve(methodState.outputDir, 'runs/current'), {
+      recursive: true,
+    })
     mkdirSync(resolve(methodState.outputDir, 'runs/main'), { recursive: true })
     writeReport(methodState)
 

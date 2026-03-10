@@ -1,5 +1,4 @@
-import type { AnyErasedAlgorithm } from '@neat-evolution/evaluator'
-import type { Evaluator } from '@neat-evolution/evaluator'
+import type { AnyErasedAlgorithm, Evaluator } from '@neat-evolution/evaluator'
 
 import type { Population } from './Population.js'
 import type { ReproducerFactory } from './reproducer/ReproducerFactory.js'

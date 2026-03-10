@@ -4,10 +4,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
 import { createExecutor } from '@neat-evolution/executor'
+import { resetThreadRNG, setThreadRNGSeed } from '@neat-evolution/utils'
 import { createEvaluator as createWorkerEvaluator } from '@neat-evolution/worker-evaluator'
 import { createReproducerFactory } from '@neat-evolution/worker-reproducer'
 import { hardwareConcurrency } from '@neat-evolution/worker-threads'
-import { resetThreadRNG, setThreadRNGSeed } from '@neat-evolution/utils'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const defaultPackageRoot = resolve(__dirname, '..')
@@ -309,7 +309,7 @@ async function run() {
       cpuSystemMs: Number((cpu.system / 1000).toFixed(3)),
       cpuTotalMs: Number(((cpu.user + cpu.system) / 1000).toFixed(3)),
       cpuToWallRatio: Number(
-        (((cpu.user + cpu.system) / 1000) / Math.max(elapsedMs, 1)).toFixed(3)
+        ((cpu.user + cpu.system) / 1000 / Math.max(elapsedMs, 1)).toFixed(3)
       ),
     },
     memory: {

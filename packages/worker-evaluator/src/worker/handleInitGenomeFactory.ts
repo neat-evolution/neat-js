@@ -28,8 +28,7 @@ export const handleInitGenomeFactory: HandleInitGenomeFn = async (
     initConfig,
   }
   const maxSize = context.threadInfo.executorCacheMaxSize ?? 0
-  context.executorCache =
-    maxSize > 0 ? new QuickLRU({ maxSize }) : undefined
+  context.executorCache = maxSize > 0 ? new QuickLRU({ maxSize }) : undefined
 
   if (context.dispatch == null) {
     throw new Error('dispatch not properly added to context')

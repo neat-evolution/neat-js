@@ -96,51 +96,42 @@ export const initReproducer = createMessage<InitReproducerPayload, null>(
   ActionType.INIT_REPRODUCER
 )
 
-export const terminate = createMessage<null, null>(ActionType.TERMINATE, () => null)
+export const terminate = createMessage<null, null>(
+  ActionType.TERMINATE,
+  () => null
+)
 
 export const requestEliteOrganism = createMessage<
   OrganismPayload,
   OrganismPayload
->(
-  ActionType.REQUEST_ELITE_ORGANISM
-)
+>(ActionType.REQUEST_ELITE_ORGANISM)
 
 export const requestBreedOrganism = createMessage<
   SpeciesPayload,
   OrganismPayload
->(
-  ActionType.REQUEST_BREED_ORGANISM
-)
+>(ActionType.REQUEST_BREED_ORGANISM)
 
 export const requestReproduceBatch = createMessage<
   ReproduceBatchPayload,
   OrganismBatchPayload
->(
-  ActionType.REQUEST_REPRODUCE_BATCH
-)
+>(ActionType.REQUEST_REPRODUCE_BATCH)
 
 export const requestPopulationSnapshot = createMessage<
   EmptyPayload,
   OrganismBatchPayload
->(
-  ActionType.REQUEST_POPULATION_SNAPSHOT
-)
+>(ActionType.REQUEST_POPULATION_SNAPSHOT)
 
 export const requestPopulationTournamentSelect = createMessage<
   EmptyPayload,
   OrganismPayload
->(
-  ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT
-)
+>(ActionType.REQUEST_POPULATION_TOURNAMENT_SELECT)
 
 export const requestSpeciesTournamentSelect = createMessage<
   SpeciesPayload,
   OrganismPayload
->(
-  ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT
-)
+>(ActionType.REQUEST_SPECIES_TOURNAMENT_SELECT)
 
-export const requestSetCPPNStateRedirect =
-  createMessage<CPPNStateRedirectPayload, EmptyPayload>(
-    ActionType.REQUEST_SET_CPPN_STATE_REDIRECT
-  )
+export const requestSetCPPNStateRedirect = createMessage<
+  CPPNStateRedirectPayload,
+  EmptyPayload
+>(ActionType.REQUEST_SET_CPPN_STATE_REDIRECT)

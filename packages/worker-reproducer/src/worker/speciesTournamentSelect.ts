@@ -12,7 +12,7 @@ import type { ReproducerHandlerContext } from './ThreadContext.js'
 export const speciesTournamentSelect = async (
   speciesId: number,
   context: ReproducerHandlerContext
- ) => {
+) => {
   if (context.threadInfo == null) {
     throw new Error('speciesTournamentSelect threadInfo not initialized')
   }

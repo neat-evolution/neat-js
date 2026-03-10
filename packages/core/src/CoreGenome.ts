@@ -387,7 +387,13 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
 
     if (knownNotToCreateCycle) {
       this.links.set(linkKey, link)
-      this.connections.addWithKey(link.from, link.to, link.weight, linkKey, true)
+      this.connections.addWithKey(
+        link.from,
+        link.to,
+        link.weight,
+        linkKey,
+        true
+      )
     }
   }
 

@@ -1,5 +1,5 @@
-export * from './EvolutionOptions.js'
 export * from './ErasedAlgorithmDefinition.js'
+export * from './EvolutionOptions.js'
 export * from './evolve.js'
 export type { AnyOrganism } from './Organism.js'
 export * from './Organism.js'
