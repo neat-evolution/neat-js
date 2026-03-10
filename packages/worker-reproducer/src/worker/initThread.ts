@@ -1,4 +1,5 @@
 import QuickLRU from 'quick-lru'
+import { createRNG } from '@neat-evolution/utils'
 import { type InitReproducerPayload, StateType } from '../actions.js'
 import { WorkerState } from '../WorkerState.js'
 
@@ -17,6 +18,13 @@ export const initThread = async (
   payload: InitReproducerPayload,
   context: ReproducerHandlerContext
 ) => {
+  context.rng =
+    payload.reproducerOptions.randomSeed != null
+      ? createRNG(
+          `${payload.reproducerOptions.randomSeed}:worker:${payload.workerIndex}`
+        )
+      : context.rng
+
   const stateProvider = new WorkerState(
     setCPPNStateRedirect,
     context,
