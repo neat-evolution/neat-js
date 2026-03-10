@@ -22,6 +22,7 @@ export interface InitPayload {
   createExecutorPathname: string
   createEnvironmentPathname: string
   environmentData: unknown
+  executorCacheMaxSize?: number
 }
 
 export interface InitGenomeFactoryPayload<

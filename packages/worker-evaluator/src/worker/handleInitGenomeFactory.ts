@@ -1,4 +1,5 @@
 import type { WorkerContext } from '@neat-evolution/worker-actions'
+import QuickLRU from 'quick-lru'
 
 import type { InitGenomeFactoryPayload } from '../actions.js'
 
@@ -26,6 +27,9 @@ export const handleInitGenomeFactory: HandleInitGenomeFn = async (
     genomeOptions,
     initConfig,
   }
+  const maxSize = context.threadInfo.executorCacheMaxSize ?? 0
+  context.executorCache =
+    maxSize > 0 ? new QuickLRU({ maxSize }) : undefined
 
   if (context.dispatch == null) {
     throw new Error('dispatch not properly added to context')

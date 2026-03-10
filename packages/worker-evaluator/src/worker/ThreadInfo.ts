@@ -18,4 +18,5 @@ export interface ThreadInfo {
   createPhenotype: PhenotypeFactory<Genome<AlgorithmContext>, AlgorithmContext>
   createState: StateFactory<AlgorithmContext>
   environment: Environment
+  executorCacheMaxSize?: number
 }

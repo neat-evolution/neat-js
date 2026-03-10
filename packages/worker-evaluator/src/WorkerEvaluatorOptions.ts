@@ -23,6 +23,13 @@ export interface WorkerEvaluatorOptions {
   strategy?: EvaluationStrategy
 
   /**
+   * Max number of hydrated executors to retain per worker for batch evaluation.
+   * Disabled by default because individual-style evaluation does not usually
+   * reuse executors enough to offset the additional memory cost.
+   */
+  executorCacheMaxSize?: number
+
+  /**
    * URL to the worker script. Required for Vite compatibility.
    * In Vite, use: new URL('./path/to/workerEvaluatorScript.js', import.meta.url)
    * directly at the call site to ensure proper bundling.
