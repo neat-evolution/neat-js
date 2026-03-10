@@ -1,7 +1,0 @@
-{
-  "type": "patch",
-  "comment": "Fix formatting and type-check issues across the workspace.",
-  "packageName": "@neat-evolution/worker-actions",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "patch"
-}
