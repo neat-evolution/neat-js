@@ -1,7 +1,6 @@
 export * from './actions.js'
 export * from './createReproducer.js'
 export * from './createReproducerFactory.js'
-export * from './types.js'
 export * from './WorkerCustomState.js'
 export * from './WorkerReproducer.js'
 export * from './WorkerReproducerOptions.js'

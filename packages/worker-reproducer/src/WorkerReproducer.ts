@@ -1,5 +1,6 @@
 import {
   Organism,
+  type Population,
   type Reproducer,
   type Species,
 } from '@neat-evolution/evolution'
@@ -26,7 +27,6 @@ import {
   type SpeciesPayload,
   terminate as terminateAction,
 } from './actions.js'
-import type { AnyPopulation } from './types.js'
 import type { WorkerReproducerOptions } from './WorkerReproducerOptions.js'
 
 interface CloneableCustomState {
@@ -39,7 +39,7 @@ interface CloneableCustomState {
 }
 
 export class WorkerReproducer implements Reproducer {
-  public readonly population: AnyPopulation
+  public readonly population: Population<any>
   public readonly algorithmPathname: string
   public readonly threadCount: number
   public readonly initPromise: Promise<void>
@@ -54,7 +54,7 @@ export class WorkerReproducer implements Reproducer {
       }
     | null = null
 
-  constructor(population: AnyPopulation, options: WorkerReproducerOptions) {
+  constructor(population: Population<any>, options: WorkerReproducerOptions) {
     this.options = options
     this.population = population
     this.algorithmPathname =
@@ -262,8 +262,8 @@ export class WorkerReproducer implements Reproducer {
   }
 
   private hasCloneableCustomState(
-    state: ReturnType<AnyPopulation['stateProvider']['neat']>
-  ): state is ReturnType<AnyPopulation['stateProvider']['neat']> &
+    state: ReturnType<Population<any>['stateProvider']['neat']>
+  ): state is ReturnType<Population<any>['stateProvider']['neat']> &
     CloneableCustomState {
     return (
       'custom' in state &&
