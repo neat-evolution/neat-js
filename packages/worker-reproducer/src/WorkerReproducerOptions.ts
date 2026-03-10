@@ -5,6 +5,8 @@ export interface WorkerReproducerOptions {
   algorithmPathname?: string
   /** os.cpus() */
   threadCount: number
+  /** Optional deterministic RNG seed for experiment runs */
+  randomSeed?: string
   enableCustomState?: boolean
   /**
    * URL to the worker script. Required for Vite compatibility.
