@@ -3,8 +3,12 @@ import type { Algorithm, AlgorithmContext, Genome } from './index.js'
 export type AnyAlgorithm<Ctx extends AlgorithmContext = AlgorithmContext> =
   Algorithm<Ctx>
 
+export type AnyErasedAlgorithm = Algorithm<any>
+
 export type AnyGenome<Ctx extends AlgorithmContext = AlgorithmContext> =
   Genome<Ctx>
+
+export type AnyErasedGenome = Genome<any>
 
 export type FitnessData = [
   speciesIndex: number,
