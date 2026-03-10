@@ -2,17 +2,20 @@ import type { EvolutionOptions } from './EvolutionOptions.js'
 import type { Organism } from './Organism.js'
 import type { Population } from './Population.js'
 
-export const evolve = async <P extends Population>(
+export const evolve = async <
+  P extends Population<any>,
+  O extends Organism<any> = Organism<any>,
+>(
   population: P,
-  options: EvolutionOptions<P, Organism>
-) => {
+  options: EvolutionOptions<P, O>
+): Promise<O | undefined> => {
   const iterations =
     options.iterations > 0 ? options.iterations : Number.MAX_SAFE_INTEGER
 
   const startTime = Date.now()
   let bestFitness = -Infinity
   let bestIteration = -1
-  let bestOrganism: Organism | undefined
+  let bestOrganism: O | undefined
 
   for (let i = 0; i < iterations; i++) {
     if (i % options.logInterval === 0) {
@@ -61,7 +64,7 @@ export const evolve = async <P extends Population>(
     }
 
     // Post-evaluation record keeping
-    const best = population.best() as Organism
+    const best = population.best() as O
 
     if ((best.fitness ?? 0) > bestFitness) {
       bestFitness = best.fitness ?? (0 as number)

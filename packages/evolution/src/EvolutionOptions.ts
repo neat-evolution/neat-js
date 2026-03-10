@@ -2,8 +2,8 @@ import type { Organism } from './Organism.js'
 import type { Population } from './Population.js'
 
 export interface EvolutionOptions<
-  P extends Population = Population,
-  O extends Organism = Organism,
+  P extends Population<any> = Population<any>,
+  O extends Organism<any> = Organism<any>,
 > {
   threadCount: number
   iterations: number
@@ -22,7 +22,10 @@ export interface EvolutionOptions<
   signal?: AbortSignal
 }
 
-export const defaultEvolutionOptions: EvolutionOptions<Population, Organism> = {
+export const defaultEvolutionOptions: EvolutionOptions<
+  Population<any>,
+  Organism<any>
+> = {
   threadCount: 0,
   iterations: 100,
   initialMutations: 100,
