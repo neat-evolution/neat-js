@@ -48,7 +48,7 @@
   "dependencies": {
     "@neat-evolution/worker-pool": "workspace:^",
     "@neat-evolution/worker-threads": "workspace:^",
-    "@swc/helpers": "^0.5.17",
+    "@swc/helpers": "^0.5.19",
     "p-defer": "^4.0.1"
   },
   "devDependencies": {
