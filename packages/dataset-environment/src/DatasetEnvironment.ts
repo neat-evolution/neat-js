@@ -1,6 +1,9 @@
 import type {
   Environment,
   EnvironmentDescription,
+  LossConfig,
+  SupervisedEnvironment,
+  TrainingData,
 } from '@neat-evolution/environment'
 import type { Executor, SyncExecutor } from '@neat-evolution/executor'
 
@@ -9,7 +12,9 @@ import { datasetToSharedBuffer } from './datasetToSharedBuffer.js'
 import { crossentropy, mse } from './error.js'
 import type { Matrix } from './types.js'
 
-export class DatasetEnvironment implements Environment<SharedArrayBuffer> {
+export class DatasetEnvironment
+  implements Environment<SharedArrayBuffer>, SupervisedEnvironment
+{
   public readonly dataset: Dataset
   public readonly description: EnvironmentDescription
   public readonly isAsync = false
@@ -55,6 +60,36 @@ export class DatasetEnvironment implements Environment<SharedArrayBuffer> {
       async (executor) => await this.evaluateAsync(executor)
     )
     return await Promise.all(promises)
+  }
+
+  getTrainingData(): TrainingData {
+    return {
+      inputs: this.dataset.trainingInputs,
+      targets: this.dataset.trainingTargets,
+      count: this.dataset.trainingCount,
+    }
+  }
+
+  getValidationData(): TrainingData {
+    return {
+      inputs: this.dataset.validationInputs,
+      targets: this.dataset.validationTargets,
+      count: this.dataset.validationCount,
+    }
+  }
+
+  getLossConfig(): LossConfig {
+    return {
+      isClassification: this.dataset.isClassification,
+      oneHotOutput: this.dataset.oneHotOutput,
+    }
+  }
+
+  computeFitness(
+    targets: ReadonlyArray<number[] | Float64Array>,
+    predictions: ReadonlyArray<number[] | Float64Array>
+  ): number {
+    return this.fitness(targets as Matrix, predictions as Matrix)
   }
 
   toFactoryOptions(): SharedArrayBuffer {
