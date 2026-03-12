@@ -950,15 +950,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@neat-evolution/backprop@workspace:^, @neat-evolution/backprop@workspace:packages/backprop":
+"@neat-evolution/backprop-strategy@workspace:^, @neat-evolution/backprop-strategy@workspace:packages/backprop-strategy":
+  version: 0.0.0-use.local
+  resolution: "@neat-evolution/backprop-strategy@workspace:packages/backprop-strategy"
+  dependencies:
+    "@biomejs/biome": "npm:2.4.4"
+    "@heygrady/tsconfig-bases": "npm:^1.0.7"
+    "@neat-evolution/backprop": "workspace:*"
+    "@neat-evolution/core": "workspace:*"
+    "@neat-evolution/environment": "workspace:*"
+    "@neat-evolution/evaluation-strategy": "workspace:*"
+    "@neat-evolution/executor": "workspace:*"
+    "@neat-evolution/worker-actions": "workspace:*"
+    "@neat-evolution/worker-evaluator": "workspace:*"
+    "@swc/cli": "npm:^0.7.9"
+    "@swc/core": "npm:^1.15.3"
+    "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
+    "@vitest/coverage-v8": "npm:^4.0.14"
+    concurrently: "npm:^9.2.1"
+    lint-staged: "npm:^16.2.7"
+    nodemon: "npm:^3.1.11"
+    rimraf: "npm:^6.1.2"
+    typescript: "npm:^5.9.3"
+    vitest: "npm:^4.0.14"
+  languageName: unknown
+  linkType: soft
+
+"@neat-evolution/backprop@workspace:*, @neat-evolution/backprop@workspace:^, @neat-evolution/backprop@workspace:packages/backprop":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/backprop@workspace:packages/backprop"
   dependencies:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
     "@neat-evolution/core": "workspace:*"
-    "@neat-evolution/environment": "workspace:*"
-    "@neat-evolution/evaluation-strategy": "workspace:*"
     "@neat-evolution/executor": "workspace:*"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
@@ -1053,6 +1077,7 @@ __metadata:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
     "@neat-evolution/backprop": "workspace:^"
+    "@neat-evolution/backprop-strategy": "workspace:^"
     "@neat-evolution/core": "workspace:^"
     "@neat-evolution/cppn": "workspace:^"
     "@neat-evolution/dataset-environment": "workspace:^"
@@ -1352,7 +1377,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-actions@workspace:^, @neat-evolution/worker-actions@workspace:packages/worker-actions":
+"@neat-evolution/worker-actions@workspace:*, @neat-evolution/worker-actions@workspace:^, @neat-evolution/worker-actions@workspace:packages/worker-actions":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-actions@workspace:packages/worker-actions"
   dependencies:
@@ -1375,7 +1400,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-evaluator@workspace:^, @neat-evolution/worker-evaluator@workspace:packages/worker-evaluator":
+"@neat-evolution/worker-evaluator@workspace:*, @neat-evolution/worker-evaluator@workspace:^, @neat-evolution/worker-evaluator@workspace:packages/worker-evaluator":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-evaluator@workspace:packages/worker-evaluator"
   dependencies:
