@@ -19,7 +19,8 @@
       "Bash(yarn workspace @neat-evolution/* check*)",
       "Bash(yarn workspace @neat-evolution/* test*)",
       "Bash(yarn workspace @neat-evolution/* format*)",
-      "Bash(yarn workspace @neat-evolution/* lint*)"
+      "Bash(yarn workspace @neat-evolution/* lint*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []
