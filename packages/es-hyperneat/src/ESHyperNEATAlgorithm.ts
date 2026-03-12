@@ -16,4 +16,12 @@ export const ESHyperNEATAlgorithm: Algorithm<ESHyperNEATContext> = {
   createGenome,
   createPhenotype,
   createState: () => createNEATState(),
+
+  writeBackWeights(): void {
+    throw new Error(
+      'writeBackWeights is not yet implemented for ES-HyperNEAT. ' +
+        'Lamarckian writeback requires CPPN distillation for both ' +
+        'substrate weights and biases.'
+    )
+  },
 }

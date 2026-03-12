@@ -14,4 +14,12 @@ export const DESHyperNEATAlgorithm: Algorithm<DESHyperNEATContext> = {
   createGenome,
   createPhenotype,
   createState,
+
+  writeBackWeights(): void {
+    throw new Error(
+      'writeBackWeights is not yet implemented for DES-HyperNEAT. ' +
+        'Lamarckian writeback requires CPPN distillation for both ' +
+        'substrate weights and biases.'
+    )
+  },
 }
