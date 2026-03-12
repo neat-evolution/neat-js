@@ -1219,7 +1219,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/evaluator@workspace:^, @neat-evolution/evaluator@workspace:packages/evaluator":
+"@neat-evolution/evaluator@workspace:*, @neat-evolution/evaluator@workspace:^, @neat-evolution/evaluator@workspace:packages/evaluator":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/evaluator@workspace:packages/evaluator"
   dependencies:
@@ -1244,7 +1244,36 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/evolution@workspace:^, @neat-evolution/evolution@workspace:packages/evolution":
+"@neat-evolution/evolution-manager@workspace:packages/evolution-manager":
+  version: 0.0.0-use.local
+  resolution: "@neat-evolution/evolution-manager@workspace:packages/evolution-manager"
+  dependencies:
+    "@biomejs/biome": "npm:2.4.4"
+    "@heygrady/tsconfig-bases": "npm:^1.0.7"
+    "@neat-evolution/core": "workspace:*"
+    "@neat-evolution/environment": "workspace:*"
+    "@neat-evolution/evaluation-strategy": "workspace:*"
+    "@neat-evolution/evaluator": "workspace:*"
+    "@neat-evolution/evolution": "workspace:*"
+    "@neat-evolution/executor": "workspace:*"
+    "@neat-evolution/worker-evaluator": "workspace:*"
+    "@neat-evolution/worker-reproducer": "workspace:*"
+    "@neat-evolution/worker-threads": "workspace:*"
+    "@swc/cli": "npm:^0.7.9"
+    "@swc/core": "npm:^1.15.3"
+    "@swc/helpers": "npm:^0.5.19"
+    "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
+    "@vitest/coverage-v8": "npm:^4.0.14"
+    concurrently: "npm:^9.2.1"
+    lint-staged: "npm:^16.2.7"
+    nodemon: "npm:^3.1.11"
+    rimraf: "npm:^6.1.2"
+    typescript: "npm:^5.9.3"
+    vitest: "npm:^4.0.14"
+  languageName: unknown
+  linkType: soft
+
+"@neat-evolution/evolution@workspace:*, @neat-evolution/evolution@workspace:^, @neat-evolution/evolution@workspace:packages/evolution":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/evolution@workspace:packages/evolution"
   dependencies:
@@ -1457,7 +1486,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-reproducer@workspace:^, @neat-evolution/worker-reproducer@workspace:packages/worker-reproducer":
+"@neat-evolution/worker-reproducer@workspace:*, @neat-evolution/worker-reproducer@workspace:^, @neat-evolution/worker-reproducer@workspace:packages/worker-reproducer":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-reproducer@workspace:packages/worker-reproducer"
   dependencies:
@@ -1487,7 +1516,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-threads@workspace:^, @neat-evolution/worker-threads@workspace:packages/worker-threads":
+"@neat-evolution/worker-threads@workspace:*, @neat-evolution/worker-threads@workspace:^, @neat-evolution/worker-threads@workspace:packages/worker-threads":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-threads@workspace:packages/worker-threads"
   dependencies:
