@@ -74,6 +74,7 @@
     "@neat-evolution/evaluation-strategy": "workspace:^",
     "@neat-evolution/evaluator": "workspace:^",
     "@neat-evolution/evolution": "workspace:^",
+    "@neat-evolution/evolution-manager": "workspace:^",
     "@neat-evolution/executor": "workspace:^",
     "@neat-evolution/hyperneat": "workspace:^",
     "@neat-evolution/neat": "workspace:^",

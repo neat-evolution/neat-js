@@ -12,7 +12,6 @@
  */
 
 import { BackpropStrategy } from '@neat-evolution/backprop-strategy'
-import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   DatasetEnvironment,
   type DatasetOptions,
@@ -20,20 +19,12 @@ import {
   loadDataset,
 } from '@neat-evolution/dataset-environment'
 import type { AnyAlgorithm } from '@neat-evolution/evaluator'
-import { createEvaluator } from '@neat-evolution/evaluator'
 import {
-  createReproducer,
   defaultEvolutionOptions,
   defaultPopulationOptions,
-  type EvolutionOptions,
 } from '@neat-evolution/evolution'
-import { createExecutor } from '@neat-evolution/executor'
-import {
-  defaultNEATGenomeOptions,
-  NEATAlgorithm,
-  type NEATReproducerFactory,
-  neat,
-} from '@neat-evolution/neat'
+import { EvolutionManager } from '@neat-evolution/evolution-manager'
+import { NEATAlgorithm } from '@neat-evolution/neat'
 
 // --- Argument parsing ---
 
@@ -97,19 +88,7 @@ console.log(
 )
 console.log()
 
-// --- Configure evolution ---
-
-const evolutionOptions: EvolutionOptions = {
-  ...defaultEvolutionOptions,
-  iterations: args.iterations,
-  secondsLimit: args.seconds,
-}
-
-const populationOptions = {
-  ...defaultPopulationOptions,
-}
-
-// --- Create evaluator with BackpropStrategy ---
+// --- Create BackpropStrategy ---
 
 const strategy = new BackpropStrategy(
   NEATAlgorithm as AnyAlgorithm,
@@ -121,11 +100,6 @@ const strategy = new BackpropStrategy(
   }
 )
 
-const evaluator = createEvaluator(NEATAlgorithm as AnyAlgorithm, environment, {
-  createExecutor,
-  strategy,
-})
-
 // --- Run evolution ---
 
 console.log(
@@ -134,14 +108,22 @@ console.log(
 console.log()
 
 try {
-  const best = await neat(
-    createReproducer as NEATReproducerFactory,
-    evaluator,
-    evolutionOptions,
-    defaultNEATConfigOptions,
-    populationOptions,
-    defaultNEATGenomeOptions
-  )
+  const manager = new EvolutionManager({
+    algorithm: NEATAlgorithm,
+    environment,
+    strategy,
+    evolutionOptions: {
+      ...defaultEvolutionOptions,
+      iterations: args.iterations,
+      secondsLimit: args.seconds,
+    },
+    populationOptions: {
+      ...defaultPopulationOptions,
+    },
+  })
+
+  const best = await manager.evolve()
+  await manager.terminate()
 
   console.log()
   console.log('=== Results ===')

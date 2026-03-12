@@ -14,7 +14,6 @@
 
 import { createTrainableExecutor } from '@neat-evolution/backprop'
 import { BackpropStrategy } from '@neat-evolution/backprop-strategy'
-import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   DatasetEnvironment,
   type DatasetOptions,
@@ -23,25 +22,18 @@ import {
   type Matrix,
   oneHotAccuracy,
 } from '@neat-evolution/dataset-environment'
+import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
 import type { AnyAlgorithm } from '@neat-evolution/evaluator'
 import {
-  createEvaluator as createVanillaEvaluator,
-  type Evaluator,
-} from '@neat-evolution/evaluator'
-import {
-  createReproducer,
   defaultEvolutionOptions,
   defaultPopulationOptions,
-  type EvolutionOptions,
 } from '@neat-evolution/evolution'
+import { EvolutionManager } from '@neat-evolution/evolution-manager'
 import { createExecutor } from '@neat-evolution/executor'
 import {
   createPhenotype,
-  defaultNEATGenomeOptions,
   NEATAlgorithm,
   type NEATGenome,
-  type NEATReproducerFactory,
-  neat,
 } from '@neat-evolution/neat'
 
 // --- Argument parsing ---
@@ -104,27 +96,7 @@ console.log(
 )
 console.log()
 
-// Vanilla NEAT uses the standard environment (fitness on training data).
 const environment = new DatasetEnvironment(dataset)
-
-// --- Shared config ---
-
-function makeEvolutionOptions(fitnessLog: number[]): EvolutionOptions {
-  return {
-    ...defaultEvolutionOptions,
-    iterations: args.iterations,
-    secondsLimit: args.seconds,
-    logInterval: Number.MAX_SAFE_INTEGER, // suppress built-in logging
-    afterEvaluate: (population) => {
-      const best = population.best()
-      fitnessLog.push(best?.fitness ?? 0)
-    },
-  }
-}
-
-const populationOptions = {
-  ...defaultPopulationOptions,
-}
 
 // --- Run each variant ---
 
@@ -138,10 +110,28 @@ interface RunResult {
 
 async function runVariant(
   name: string,
-  evaluator: Evaluator
+  strategy?: EvaluationStrategy
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
-  const evolutionOptions = makeEvolutionOptions(fitnessLog)
+
+  const manager = new EvolutionManager({
+    algorithm: NEATAlgorithm,
+    environment,
+    ...(strategy != null ? { strategy } : {}),
+    evolutionOptions: {
+      ...defaultEvolutionOptions,
+      iterations: args.iterations,
+      secondsLimit: args.seconds,
+      logInterval: Number.MAX_SAFE_INTEGER, // suppress built-in logging
+      afterEvaluate: (population) => {
+        const best = population.best()
+        fitnessLog.push(best?.fitness ?? 0)
+      },
+    },
+    populationOptions: {
+      ...defaultPopulationOptions,
+    },
+  })
 
   // Suppress evolve()'s built-in console.log output
   const originalLog = console.log
@@ -149,14 +139,7 @@ async function runVariant(
 
   const start = performance.now()
   try {
-    const best = await neat(
-      createReproducer as NEATReproducerFactory,
-      evaluator,
-      evolutionOptions,
-      defaultNEATConfigOptions,
-      populationOptions,
-      defaultNEATGenomeOptions
-    )
+    const best = await manager.evolve()
     const elapsedMs = performance.now() - start
 
     return {
@@ -168,17 +151,13 @@ async function runVariant(
     }
   } finally {
     console.log = originalLog
+    await manager.terminate()
   }
 }
 
 // Vanilla NEAT — fitness on training data (no learning step)
 console.log('Running: Vanilla NEAT...')
-const vanillaEvaluator = createVanillaEvaluator(
-  NEATAlgorithm as AnyAlgorithm,
-  environment,
-  { createExecutor }
-)
-const vanilla = await runVariant('Vanilla', vanillaEvaluator)
+const vanilla = await runVariant('Vanilla')
 console.log(
   `  Done: ${vanilla.bestFitness.toFixed(6)} in ${(vanilla.elapsedMs / 1000).toFixed(1)}s`
 )
@@ -194,12 +173,7 @@ const baldwinianStrategy = new BackpropStrategy(
     isLamarckian: false,
   }
 )
-const baldwinianEvaluator = createVanillaEvaluator(
-  NEATAlgorithm as AnyAlgorithm,
-  environment,
-  { createExecutor, strategy: baldwinianStrategy }
-)
-const baldwinian = await runVariant('Baldwinian', baldwinianEvaluator)
+const baldwinian = await runVariant('Baldwinian', baldwinianStrategy)
 console.log(
   `  Done: ${baldwinian.bestFitness.toFixed(6)} in ${(baldwinian.elapsedMs / 1000).toFixed(1)}s`
 )
@@ -215,12 +189,7 @@ const lamarckianStrategy = new BackpropStrategy(
     isLamarckian: true,
   }
 )
-const lamarckianEvaluator = createVanillaEvaluator(
-  NEATAlgorithm as AnyAlgorithm,
-  environment,
-  { createExecutor, strategy: lamarckianStrategy }
-)
-const lamarckian = await runVariant('Lamarckian', lamarckianEvaluator)
+const lamarckian = await runVariant('Lamarckian', lamarckianStrategy)
 console.log(
   `  Done: ${lamarckian.bestFitness.toFixed(6)} in ${(lamarckian.elapsedMs / 1000).toFixed(1)}s`
 )

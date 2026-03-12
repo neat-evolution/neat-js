@@ -1,23 +1,7 @@
-import type { Environment } from '@neat-evolution/environment'
-import {
-  type AnyAlgorithm,
-  createEvaluator as createVanillaEvaluator,
-  type EvaluatorFactory,
-} from '@neat-evolution/evaluator'
-import { createReproducer } from '@neat-evolution/evolution'
-import { createExecutor } from '@neat-evolution/executor'
-
 import { demo } from './demo.js'
 
-const createEvaluator: EvaluatorFactory = (
-  algorithm: AnyAlgorithm,
-  environment: Environment
-) => {
-  return createVanillaEvaluator(algorithm, environment, { createExecutor })
-}
-
 try {
-  await demo(createReproducer, createEvaluator, createExecutor)
+  await demo()
 } catch (error) {
   console.error(error)
   throw error

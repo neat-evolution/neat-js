@@ -1087,6 +1087,7 @@ __metadata:
     "@neat-evolution/evaluation-strategy": "workspace:^"
     "@neat-evolution/evaluator": "workspace:^"
     "@neat-evolution/evolution": "workspace:^"
+    "@neat-evolution/evolution-manager": "workspace:^"
     "@neat-evolution/executor": "workspace:^"
     "@neat-evolution/hyperneat": "workspace:^"
     "@neat-evolution/neat": "workspace:^"
@@ -1244,18 +1245,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/evolution-manager@workspace:packages/evolution-manager":
+"@neat-evolution/evolution-manager@workspace:^, @neat-evolution/evolution-manager@workspace:packages/evolution-manager":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/evolution-manager@workspace:packages/evolution-manager"
   dependencies:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
     "@neat-evolution/core": "workspace:*"
+    "@neat-evolution/dataset-environment": "workspace:^"
     "@neat-evolution/environment": "workspace:*"
     "@neat-evolution/evaluation-strategy": "workspace:*"
     "@neat-evolution/evaluator": "workspace:*"
     "@neat-evolution/evolution": "workspace:*"
     "@neat-evolution/executor": "workspace:*"
+    "@neat-evolution/neat": "workspace:^"
     "@neat-evolution/worker-evaluator": "workspace:*"
     "@neat-evolution/worker-reproducer": "workspace:*"
     "@neat-evolution/worker-threads": "workspace:*"
