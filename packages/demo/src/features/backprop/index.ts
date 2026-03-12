@@ -9,7 +9,7 @@
  *   yarn workspace @neat-evolution/demo backprop [--epochs N] [--lr N] [--iterations N] [--seconds N]
  */
 
-import { BackpropStrategy } from '@neat-evolution/backprop'
+import { BackpropStrategy } from '@neat-evolution/backprop-strategy'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   DatasetEnvironment,

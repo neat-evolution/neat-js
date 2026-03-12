@@ -12,10 +12,8 @@
  *   yarn workspace @neat-evolution/demo compare [--epochs N] [--lr N] [--iterations N] [--seconds N]
  */
 
-import {
-  BackpropStrategy,
-  createTrainableExecutor,
-} from '@neat-evolution/backprop'
+import { createTrainableExecutor } from '@neat-evolution/backprop'
+import { BackpropStrategy } from '@neat-evolution/backprop-strategy'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   DatasetEnvironment,

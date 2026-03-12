@@ -64,6 +64,7 @@
   },
   "dependencies": {
     "@neat-evolution/backprop": "workspace:^",
+    "@neat-evolution/backprop-strategy": "workspace:^",
     "@neat-evolution/core": "workspace:^",
     "@neat-evolution/cppn": "workspace:^",
     "@neat-evolution/dataset-environment": "workspace:^",
