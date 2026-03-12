@@ -36,6 +36,13 @@ export interface WorkerEvaluatorOptions {
    */
   workerScriptUrl?: URL | string
 
+  /**
+   * Module paths for strategy plugins to load on worker threads.
+   * Each module must default-export a function matching WorkerPluginInit.
+   * Plugins are loaded after INIT_EVALUATOR, before any evaluation.
+   */
+  pluginPaths?: string[]
+
   /** Enable verbose logging */
   verbose?: boolean
 }

@@ -16,6 +16,7 @@ import type { ThreadContext } from './worker/ThreadContext.js'
 const handler = new Handler()
 const threadContext: ThreadContext & Partial<WorkerContext> = {
   executorCache: undefined,
+  handler,
 }
 
 function getThreadContext(): ThreadContext & WorkerContext {

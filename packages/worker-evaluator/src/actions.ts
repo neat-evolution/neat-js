@@ -23,6 +23,8 @@ export interface InitPayload {
   createEnvironmentPathname: string
   environmentData: unknown
   executorCacheMaxSize?: number
+  /** Module paths for strategy plugins to load on workers. */
+  pluginPaths?: string[]
 }
 
 export interface InitGenomeFactoryPayload<

@@ -25,6 +25,11 @@
       "types": "./dist/types/workerEvaluatorScript.d.ts",
       "import": "./dist/esm/workerEvaluatorScript.js",
       "require": "./dist/cjs/workerEvaluatorScript.js"
+    },
+    "./worker": {
+      "types": "./dist/types/worker/index.d.ts",
+      "import": "./dist/esm/worker/index.js",
+      "require": "./dist/cjs/worker/index.js"
     }
   },
   "files": [

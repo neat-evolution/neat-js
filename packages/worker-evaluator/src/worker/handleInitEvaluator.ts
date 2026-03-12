@@ -16,6 +16,7 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     createExecutorPathname,
     environmentData,
     executorCacheMaxSize,
+    pluginPaths,
   },
   context
 ) => {
@@ -41,5 +42,16 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   // FIXME: should this just be handled by returning true?
   if (context.dispatch == null) {
     throw new Error('dispatch not properly added to context')
+  }
+
+  // Load strategy plugins
+  if (pluginPaths) {
+    for (const pluginPath of pluginPaths) {
+      const pluginModule = await import(/* @vite-ignore */ pluginPath)
+      const pluginInit = pluginModule.default ?? pluginModule.init
+      if (typeof pluginInit === 'function') {
+        await pluginInit(context.handler, context)
+      }
+    }
   }
 }

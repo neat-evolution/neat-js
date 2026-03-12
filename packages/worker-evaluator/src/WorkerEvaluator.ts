@@ -40,6 +40,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   public readonly createEnvironmentPathname: string
   public readonly createExecutorPathname: string
   public readonly executorCacheMaxSize: number
+  public readonly pluginPaths: string[] | undefined
   public readonly initPromise: Promise<void>
 
   private readonly pool: WorkerPool
@@ -70,6 +71,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     this.createExecutorPathname = options.createExecutorPathname
     this.createEnvironmentPathname = options.createEnvironmentPathname
     this.executorCacheMaxSize = options.executorCacheMaxSize ?? 0
+    this.pluginPaths = options.pluginPaths
 
     // Use provided workerScriptUrl or fall back to default (works in Node.js, not Vite)
     const workerScriptUrl =
@@ -97,6 +99,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     this.evaluationContext = {
       evaluateGenomeEntry: this.evaluateGenomeEntry.bind(this),
       evaluateGenomeEntryBatch: this.evaluateGenomeEntryBatch.bind(this),
+      supportsTraining: (options.pluginPaths?.length ?? 0) > 0,
       send: (message) => {
         void this.dispatcher.send(message)
       },
@@ -128,12 +131,13 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     // Wait for workers to be ready before sending init messages
     await this.pool.ready()
 
-    const data = {
+    const data: import('./actions.js').InitPayload = {
       algorithmPathname: this.algorithmPathname,
       createExecutorPathname: this.createExecutorPathname,
       createEnvironmentPathname: this.createEnvironmentPathname,
       environmentData: this.environment.toFactoryOptions(),
       executorCacheMaxSize: this.executorCacheMaxSize,
+      ...(this.pluginPaths ? { pluginPaths: this.pluginPaths } : {}),
     }
     await this.dispatcher.broadcast<null>(initEvaluator(data))
   }
