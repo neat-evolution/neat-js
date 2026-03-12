@@ -8,6 +8,7 @@ import type { CPPNContext } from './CPPNContext.js'
 import { defaultCPPNGenomeOptions } from './CPPNGenomeOptions.js'
 import { createGenome } from './createGenome.js'
 import { createPhenotype } from './createPhenotype.js'
+import { writeBackWeights } from './writeBackWeights.js'
 
 export const CPPNAlgorithm: Algorithm<CPPNContext> = {
   name: 'CPPN',
@@ -17,4 +18,5 @@ export const CPPNAlgorithm: Algorithm<CPPNContext> = {
   createGenome,
   createPhenotype,
   createState: () => createNEATState(),
+  writeBackWeights,
 }
