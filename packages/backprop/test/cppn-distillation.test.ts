@@ -338,7 +338,7 @@ describe('CPPN distillation proof of concept', () => {
       { input: [0, 1], target: 0 },
       { input: [1, 0], target: 0 },
       { input: [1, 1], target: 1 },
-    ] as const
+    ]
 
     // Measure initial substrate performance
     let initialLoss = 0

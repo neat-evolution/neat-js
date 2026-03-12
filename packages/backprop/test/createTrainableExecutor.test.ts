@@ -238,12 +238,12 @@ describe('createTrainableExecutor', () => {
 
       const executor = createTrainableExecutor(phenotype)
       const lr = 0.01
-      const samples = [
+      const samples: Array<[number, number]> = [
         [1.0, 2.0],
         [2.0, 4.0],
         [3.0, 6.0],
         [-1.0, -2.0],
-      ] as const
+      ]
 
       // Train for several epochs
       for (let epoch = 0; epoch < 200; epoch++) {
@@ -286,7 +286,7 @@ describe('createTrainableExecutor', () => {
         { input: [0, 1], target: 1 },
         { input: [1, 0], target: 1 },
         { input: [1, 1], target: 0 },
-      ] as const
+      ]
 
       for (let epoch = 0; epoch < 2000; epoch++) {
         for (const { input, target } of xorData) {
