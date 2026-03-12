@@ -14,6 +14,15 @@ export interface Algorithm<Ctx extends AlgorithmContext> {
   createGenome: GenomeFactory<Ctx>
   createPhenotype: PhenotypeFactory<GenomeTypeOf<Ctx>, Ctx>
   createState: StateFactory<Ctx>
+
+  /** Whether this algorithm uses CPPN activation arrays (vs single activation function).
+   *  NEAT: false. CPPN/HyperNEAT/ES-HyperNEAT/DES-HyperNEAT: true. */
+  usesCPPNActivations: boolean
+
+  /** Whether worker-reproducer needs custom state for this algorithm.
+   *  Only DES-HyperNEAT: true. All others: false. */
+  enableCustomState: boolean
+
   /**
    * Write trained phenotype weights and biases back to the genome
    * (Lamarckian writeback). Called by BackpropStrategy after training
