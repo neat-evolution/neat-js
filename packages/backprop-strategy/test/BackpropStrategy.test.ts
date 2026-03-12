@@ -1,5 +1,6 @@
 import {
   Activation,
+  type AnyGenome,
   type Phenotype,
   PhenotypeActionType,
 } from '@neat-evolution/core'
@@ -30,6 +31,8 @@ function makeMockAlgorithm() {
     name: 'mock',
     pathname: '/mock',
     defaultOptions: {},
+    usesCPPNActivations: false,
+    enableCustomState: false,
     createConfig: vi.fn(),
     createGenome: vi.fn(),
     createPhenotype: vi.fn().mockReturnValue(phenotype),
@@ -90,7 +93,7 @@ async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {
 }
 
 // A trivial genome object — BackpropStrategy treats it opaquely.
-const mockGenome = { nodes: [], links: [] }
+const mockGenome = { nodes: [], links: [] } as unknown as AnyGenome
 
 // ---------------------------------------------------------------------------
 // Tests
