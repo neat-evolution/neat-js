@@ -22,4 +22,10 @@ export interface EvaluationContext<G extends AnyGenome = AnyGenome>
     genomeEntries: Array<GenomeEntry<G>>,
     seed?: string
   ) => Promise<FitnessData[]>
+
+  /**
+   * Whether worker plugins are loaded and available for custom dispatch.
+   * Set by WorkerEvaluator when pluginPaths are configured.
+   */
+  supportsTraining?: boolean
 }
