@@ -3,7 +3,13 @@ import type {
   AlgorithmContext,
   AnyErasedAlgorithm,
   ConfigDataOf,
+  ConfigFactoryOptionsOf,
+  GenomeFactoryOptionsOf,
   GenomeOptionsOf,
+  InitConfig,
+  LinkDataOf,
+  NodeHiddenDataOf,
+  StateDataOf,
 } from '@neat-evolution/core'
 import type {
   Environment,
@@ -14,7 +20,6 @@ import type { Evaluator } from '@neat-evolution/evaluator'
 import { createEvaluator as createLocalEvaluator } from '@neat-evolution/evaluator'
 import type {
   EvolutionOptions,
-  Organism,
   PopulationCreator,
   PopulationOptions,
   Reproducer,
@@ -25,7 +30,11 @@ import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
   evolve,
+  Organism,
+  type OrganismData,
   type Population,
+  type PopulationData,
+  type PopulationFactoryOptions,
 } from '@neat-evolution/evolution'
 import type { SyncExecutor } from '@neat-evolution/executor'
 import { createExecutor } from '@neat-evolution/executor'
@@ -56,6 +65,16 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
   private readonly populationOptions: PopulationOptions
   private readonly configData: ConfigDataOf<Ctx> | undefined
   private readonly genomeOptions: GenomeOptionsOf<Ctx>
+  private readonly populationFactoryOptions:
+    | PopulationFactoryOptions<
+        ConfigDataOf<Ctx>,
+        StateDataOf<Ctx>,
+        NodeHiddenDataOf<Ctx>,
+        LinkDataOf<Ctx>,
+        GenomeFactoryOptionsOf<Ctx>,
+        GenomeOptionsOf<Ctx>
+      >
+    | undefined
   private readonly workerConfig: WorkerConfig | undefined
   private readonly signal: AbortSignal | undefined
 
@@ -87,6 +106,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     this.genomeOptions =
       config.genomeOptions ??
       ({ ...config.algorithm.defaultOptions } as GenomeOptionsOf<Ctx>)
+    this.populationFactoryOptions = config.populationFactoryOptions
     this.workerConfig = config.workerConfig
     this.signal = config.signal
   }
@@ -121,7 +141,8 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       evaluator,
       this.configData as ConfigDataOf<Ctx>,
       this.populationOptions,
-      this.genomeOptions
+      this.genomeOptions,
+      this.populationFactoryOptions
     )
 
     this.initialized = true
@@ -201,6 +222,57 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
   /** Convert an organism to a sync executor for inference. */
   organismToExecutor(organism: Organism<Ctx>): SyncExecutor {
     return createExecutor(this.algorithm.createPhenotype(organism.genome))
+  }
+
+  /** Deserialize an organism from previously saved OrganismData.
+   *  Uses the algorithm's createGenome to reconstruct the genome.
+   *  Works independently of population state — does not require init(). */
+  createOrganism(
+    organismData: OrganismData<
+      ConfigDataOf<Ctx>,
+      StateDataOf<Ctx>,
+      NodeHiddenDataOf<Ctx>,
+      LinkDataOf<Ctx>,
+      GenomeFactoryOptionsOf<Ctx>,
+      GenomeOptionsOf<Ctx>
+    >
+  ): Organism<Ctx> {
+    const configProvider = this.algorithm.createConfig(
+      organismData.genome.config as ConfigFactoryOptionsOf<Ctx>
+    )
+    const stateProvider = this.algorithm.createState(organismData.genome.state)
+    const initConfig: InitConfig = this.environment.description
+    const genome = this.algorithm.createGenome(
+      configProvider,
+      stateProvider,
+      organismData.genome.genomeOptions,
+      initConfig,
+      organismData.genome.factoryOptions
+    )
+    return new Organism<Ctx>(
+      genome,
+      organismData.organismState.generation,
+      organismData.organismState
+    )
+  }
+
+  /** Get the current population's serialized state for persistence.
+   *  Returns PopulationData which can be saved to IndexedDB, file, etc.
+   *  The `factoryOptions` field can be passed back as `populationFactoryOptions`
+   *  in a new EvolutionManagerConfig to restore the population. */
+  getPopulationData(): PopulationData<
+    ConfigDataOf<Ctx>,
+    StateDataOf<Ctx>,
+    NodeHiddenDataOf<Ctx>,
+    LinkDataOf<Ctx>,
+    GenomeFactoryOptionsOf<Ctx>,
+    GenomeOptionsOf<Ctx>
+  > {
+    const population = this.population
+    if (population == null) {
+      throw new Error('Population not initialized')
+    }
+    return population.toJSON()
   }
 
   /** Get the best organism's executor. Throws if no best found. */

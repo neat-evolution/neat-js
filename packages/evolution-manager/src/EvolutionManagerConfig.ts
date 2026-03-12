@@ -2,13 +2,18 @@ import type {
   Algorithm,
   AlgorithmContext,
   ConfigDataOf,
+  GenomeFactoryOptionsOf,
   GenomeOptionsOf,
+  LinkDataOf,
+  NodeHiddenDataOf,
+  StateDataOf,
 } from '@neat-evolution/core'
 import type { EnvironmentConfig } from '@neat-evolution/environment'
 import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
 import type {
   EvolutionOptions,
   PopulationCreator,
+  PopulationFactoryOptions,
   PopulationOptions,
 } from '@neat-evolution/evolution'
 
@@ -75,6 +80,18 @@ export interface EvolutionManagerConfig<
 
   /** Algorithm-specific genome options. Defaults to algorithm.defaultOptions. */
   genomeOptions?: GenomeOptionsOf<Ctx>
+
+  /** Previously saved population state for restoring a population.
+   *  Obtained from `getPopulationData().factoryOptions` or `Population.toFactoryOptions()`.
+   *  When provided, the population is hydrated from this state instead of creating fresh organisms. */
+  populationFactoryOptions?: PopulationFactoryOptions<
+    ConfigDataOf<Ctx>,
+    StateDataOf<Ctx>,
+    NodeHiddenDataOf<Ctx>,
+    LinkDataOf<Ctx>,
+    GenomeFactoryOptionsOf<Ctx>,
+    GenomeOptionsOf<Ctx>
+  >
 
   /** Worker configuration. Required for any practical use case.
    *  Omit only for unit tests or trivial single-threaded experiments. */
