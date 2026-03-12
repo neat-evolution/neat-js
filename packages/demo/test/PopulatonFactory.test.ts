@@ -7,7 +7,7 @@ import {
 import {
   type AnyAlgorithm,
   type FitnessData,
-  TestEvaluator,
+  LocalEvaluator,
 } from '@neat-evolution/evaluator'
 import {
   createReproducer,
@@ -37,7 +37,7 @@ import {
 } from './fixtures/debugOutput.js'
 
 describe('PopulationFactory', () => {
-  let evaluator: TestEvaluator<SharedArrayBuffer>
+  let evaluator: LocalEvaluator<SharedArrayBuffer>
   let algorithm: typeof NEATAlgorithm
   let configProvider: NEATConfig
   let population: NEATPopulation
@@ -57,7 +57,7 @@ describe('PopulationFactory', () => {
 
     const dataset = await loadDataset(datasetOptions)
     const environment = new DatasetEnvironment(dataset)
-    evaluator = new TestEvaluator(algorithm as AnyAlgorithm, environment, {
+    evaluator = new LocalEvaluator(algorithm as AnyAlgorithm, environment, {
       createExecutor,
     })
 
