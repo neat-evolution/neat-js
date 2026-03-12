@@ -7,4 +7,10 @@ if [ "$branch" = "main" ]; then
   exit 1
 fi
 
-# yarn turbo run --concurrency=1 --filter=[HEAD^1] precommit
+export TURBO_NO_UPDATE_NOTIFIER=1
+
+# Format staged files via lint-staged in each changed package
+yarn turbo run precommit --filter='[HEAD]' --concurrency=1
+
+# Type-check changed packages (turbo builds upstream deps as needed)
+yarn turbo run check --filter='[HEAD]'

@@ -3,6 +3,9 @@ name: Continuous Integration
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build-test-lint:
     runs-on: ubuntu-latest
@@ -37,18 +40,20 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-turbo-
 
-    - name: Install dependencies (yarn)
+    - name: Install dependencies
       run: yarn install --immutable --refresh-lockfile
 
-    - name: Build (all)
-      run: yarn build
+    - name: Build
+      run: yarn turbo build
 
-    # TODO: run in parallel to tests
-    - name: Lint (all)
-      run: yarn lint
+    - name: Type-check
+      run: yarn turbo check
 
-    - name: Test (all)
-      run: yarn test
+    - name: Lint
+      run: yarn turbo lint
+
+    - name: Test
+      run: yarn turbo test
 
     - name: Check packages (manypkg)
       run: yarn check:manypkg

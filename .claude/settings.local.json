@@ -4,7 +4,22 @@
       "Skill(neat-publish)",
       "Bash(yarn beachball change:*)",
       "Bash(npm view:*)",
-      "Bash(yarn dlx depcheck:*)"
+      "Bash(yarn dlx depcheck:*)",
+      "Bash(yarn build*)",
+      "Bash(yarn check*)",
+      "Bash(yarn test*)",
+      "Bash(yarn format*)",
+      "Bash(yarn lint*)",
+      "Bash(yarn turbo run build*)",
+      "Bash(yarn turbo run check*)",
+      "Bash(yarn turbo run test*)",
+      "Bash(yarn turbo run format*)",
+      "Bash(yarn turbo run lint*)",
+      "Bash(yarn workspace @neat-evolution/* build*)",
+      "Bash(yarn workspace @neat-evolution/* check*)",
+      "Bash(yarn workspace @neat-evolution/* test*)",
+      "Bash(yarn workspace @neat-evolution/* format*)",
+      "Bash(yarn workspace @neat-evolution/* lint*)"
     ],
     "deny": [],
     "ask": []
