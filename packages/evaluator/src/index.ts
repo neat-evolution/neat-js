@@ -3,6 +3,6 @@ export * from './Evaluator.js'
 export * from './EvaluatorFactory.js'
 export * from './EvaluatorFactoryOptions.js'
 export * from './GenomeEntries.js'
-
-export * from './TestEvaluator.js'
+export * from './LocalDispatcher.js'
+export * from './LocalEvaluator.js'
 export * from './types.js'

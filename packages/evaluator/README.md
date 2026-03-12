@@ -116,15 +116,21 @@ The `evaluator` package exposes the following key types and functions:
 - **`createEvaluator(...)` function**:
 
   A factory function that creates an `Evaluator` instance. It takes an
-  `Algorithm`, an `Environment`, and an `ExecutorFactory` to construct the
-  evaluator. Currently, it uses a `TestEvaluator` as its underlying
-  implementation.
+  `Algorithm`, an `Environment`, and `EvaluatorFactoryOptions` (including an
+  `ExecutorFactory` and an optional `EvaluationStrategy`) to construct the
+  evaluator. Uses `LocalEvaluator` as its underlying implementation.
 
-- **`TestEvaluator` class**:
+- **`LocalEvaluator` class**:
 
-  A basic implementation of the `Evaluator` interface, primarily used for
-  testing and demonstration purposes. It directly uses the provided `Executor`
-  to evaluate genomes.
+  The standard non-worker implementation of the `Evaluator` interface. Supports
+  pluggable `EvaluationStrategy` via `LocalDispatcher` for in-process message
+  dispatch. Counterpart to `WorkerEvaluator` for multi-threaded evaluation.
+
+- **`LocalDispatcher` class**:
+
+  In-process message dispatcher that mirrors the worker `Dispatcher` protocol.
+  Strategies and handlers use the same `DispatcherContext` interface regardless
+  of whether they're running through `LocalDispatcher` or the worker `Dispatcher`.
 
 ## Usage
 
@@ -162,7 +168,7 @@ async function setupEvaluator() {
   const evaluator: Evaluator = createEvaluator(
     NEATAlgorithm, // The algorithm whose genomes will be evaluated
     environment, // The environment to evaluate against
-    createExecutor, // A factory to create executors for running phenotypes
+    { createExecutor }, // Options including executor factory and optional strategy
   );
 
   console.log("Evaluator created:", evaluator);

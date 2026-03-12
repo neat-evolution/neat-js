@@ -1,19 +1,24 @@
+import type { FitnessData } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
+import type { EvaluationContext } from '@neat-evolution/evaluation-strategy'
 import { type ExecutorFactory, isAsyncExecutor } from '@neat-evolution/executor'
 
-import type { Evaluator, FitnessData } from './Evaluator.js'
+import type { Evaluator } from './Evaluator.js'
 import type { EvaluatorFactoryOptions } from './EvaluatorFactoryOptions.js'
 import type { GenomeEntries, GenomeEntry } from './GenomeEntries.js'
+import { LocalDispatcher } from './LocalDispatcher.js'
 import type { AnyAlgorithm } from './types.js'
 
-// FIXME: write tests for correctness
-export class TestEvaluator<EFO> implements Evaluator<EFO> {
+export class LocalEvaluator<EFO> implements Evaluator<EFO> {
   public readonly algorithm: AnyAlgorithm
   public readonly enableAsync = true
 
   public readonly environment: Environment<EFO>
 
   public readonly createExecutor: ExecutorFactory
+
+  private readonly strategy?: EvaluatorFactoryOptions['strategy']
+  private readonly localDispatcher: LocalDispatcher
 
   constructor(
     algorithm: AnyAlgorithm,
@@ -23,6 +28,8 @@ export class TestEvaluator<EFO> implements Evaluator<EFO> {
     this.algorithm = algorithm
     this.environment = environment
     this.createExecutor = options.createExecutor
+    this.strategy = options.strategy
+    this.localDispatcher = new LocalDispatcher()
   }
 
   private async worker(entry: GenomeEntry): Promise<FitnessData> {
@@ -45,6 +52,18 @@ export class TestEvaluator<EFO> implements Evaluator<EFO> {
   }
 
   async *evaluate(genomeEntries: GenomeEntries): AsyncIterable<FitnessData> {
+    if (this.strategy) {
+      const context: EvaluationContext = {
+        evaluateGenomeEntry: (entry) => this.worker(entry),
+        evaluateGenomeEntryBatch: (entries) =>
+          Promise.all(entries.map((e) => this.worker(e))),
+        ...this.localDispatcher.context,
+      }
+      yield* this.strategy.evaluate(context, genomeEntries)
+      return
+    }
+
+    // Existing behavior (no strategy)
     const promises: Array<Promise<FitnessData>> = []
     for (const data of genomeEntries) {
       promises.push(this.worker(data))
