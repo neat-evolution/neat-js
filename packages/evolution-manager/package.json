@@ -60,6 +60,8 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
     "@heygrady/tsconfig-bases": "^1.0.7",
+    "@neat-evolution/dataset-environment": "workspace:^",
+    "@neat-evolution/neat": "workspace:^",
     "@swc/cli": "^0.7.9",
     "@swc/core": "^1.15.3",
     "@typescript/native-preview": "7.0.0-dev.20260220.1",
