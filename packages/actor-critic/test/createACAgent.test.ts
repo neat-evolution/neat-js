@@ -90,7 +90,12 @@ describe('createACAgent', () => {
       agent.act(new Float64Array([0, 1]))
       agent.reward(1.0, false)
 
-      agent.endEpisode({ fitness: 1, totalSteps: 2, terminated: false })
+      agent.endEpisode({
+        fitness: 1,
+        episodeReturn: 1.5,
+        totalSteps: 2,
+        terminated: false,
+      })
       expect(trainable.backwardCalls).toBe(2)
     })
 
@@ -204,7 +209,12 @@ describe('createACAgent', () => {
       }
       expect(trainable.backwardCalls).toBe(0)
 
-      agent.endEpisode({ fitness: 1, totalSteps: 5, terminated: false })
+      agent.endEpisode({
+        fitness: 1,
+        episodeReturn: 0.05,
+        totalSteps: 5,
+        terminated: false,
+      })
       expect(trainable.backwardCalls).toBe(5)
     })
 
@@ -218,7 +228,12 @@ describe('createACAgent', () => {
       )
 
       agent.startEpisode({ episodeIndex: 0 })
-      agent.endEpisode({ fitness: 0, totalSteps: 0, terminated: false })
+      agent.endEpisode({
+        fitness: 0,
+        episodeReturn: 0,
+        totalSteps: 0,
+        terminated: false,
+      })
       expect(trainable.backwardCalls).toBe(0)
     })
   })

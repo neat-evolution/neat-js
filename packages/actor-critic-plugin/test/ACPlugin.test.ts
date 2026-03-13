@@ -330,6 +330,7 @@ describe('ACPlugin', () => {
       expect(() =>
         hooks.episodeEnd?.(mockExecutor, {
           fitness: 1.0,
+          episodeReturn: 1.0,
           totalSteps: 10,
           terminated: false,
         })
@@ -367,6 +368,7 @@ describe('ACPlugin', () => {
 
         hooks.episodeEnd?.(mockExecutor, {
           fitness: 0.8,
+          episodeReturn: 0.8,
           totalSteps: 1,
           terminated: false,
         })
@@ -417,6 +419,7 @@ describe('ACPlugin', () => {
 
         hooks.episodeEnd?.(mockExecutor, {
           fitness: 0.5,
+          episodeReturn: 0.5,
           totalSteps: 0,
           terminated: true,
         })
