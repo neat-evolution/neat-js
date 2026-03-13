@@ -61,11 +61,6 @@ export class Dispatcher {
     }
   }
 
-  /** @deprecated Use send */
-  public async dispatch(message: WorkerMessage): Promise<void> {
-    return await this.send(message)
-  }
-
   public async call<R = unknown>(
     message: WorkerMessage<unknown, R>,
     options?: { timeout?: number }
@@ -93,14 +88,6 @@ export class Dispatcher {
       this.callManager.rejectCall(callId, err)
     }
     return await promise
-  }
-
-  /** @deprecated Use call */
-  public async request<R = unknown>(
-    message: WorkerMessage<unknown, R>,
-    options?: { timeout?: number }
-  ): Promise<R> {
-    return await this.call(message, options)
   }
 
   public async broadcast<R = unknown>(
@@ -171,14 +158,6 @@ export class Dispatcher {
         broadcast: this.broadcast.bind(this),
         addMessageHandler: this.addMessageHandler.bind(this),
         removeMessageHandler: this.removeMessageHandler.bind(this),
-
-        // Deprecated aliases
-        dispatch: (msg: WorkerMessage) => {
-          this.postMessage(worker, msg)
-        },
-        request: this.call.bind(this),
-        addActionHandler: this.addMessageHandler.bind(this),
-        removeActionHandler: this.removeMessageHandler.bind(this),
       }
 
       if (this.verbose) {
@@ -233,15 +212,5 @@ export class Dispatcher {
     if (listeners != null) {
       listeners.delete(handler as DispatcherHandlerFn<any, any>)
     }
-  }
-
-  /** @deprecated Use addMessageHandler */
-  public addActionHandler(type: string, handler: DispatcherHandlerFn) {
-    this.addMessageHandler(type, handler)
-  }
-
-  /** @deprecated Use removeMessageHandler */
-  public removeActionHandler(type: string, handler: DispatcherHandlerFn) {
-    this.removeMessageHandler(type, handler)
   }
 }

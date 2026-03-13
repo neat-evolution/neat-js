@@ -37,18 +37,6 @@ export interface DispatcherContext {
   broadcast: <R = unknown>(message: WorkerMessage<unknown, R>) => Promise<R[]>
   addMessageHandler: (type: string, handler: DispatcherHandlerFn) => void
   removeMessageHandler: (type: string, handler: DispatcherHandlerFn) => void
-
-  /** @deprecated Use send */
-  dispatch: (message: WorkerMessage) => void
-  /** @deprecated Use call */
-  request: <R = unknown>(
-    message: WorkerMessage<unknown, R>,
-    options?: { timeout?: number }
-  ) => Promise<R>
-  /** @deprecated Use addMessageHandler */
-  addActionHandler: (type: string, handler: DispatcherHandlerFn) => void
-  /** @deprecated Use removeMessageHandler */
-  removeActionHandler: (type: string, handler: DispatcherHandlerFn) => void
 }
 
 // Context available to Worker Thread Handlers
@@ -57,16 +45,6 @@ export interface WorkerContext<P = unknown> {
   send: (message: WorkerMessage) => void
   transfer: (transferables: Transferable[]) => void
   call: <R = unknown>(
-    message: WorkerMessage<unknown, R>,
-    options?: { timeout?: number }
-  ) => Promise<R>
-
-  /** @deprecated Use message */
-  action: WorkerMessage<P>
-  /** @deprecated Use send */
-  dispatch: (message: WorkerMessage) => void
-  /** @deprecated Use call */
-  request: <R = unknown>(
     message: WorkerMessage<unknown, R>,
     options?: { timeout?: number }
   ) => Promise<R>

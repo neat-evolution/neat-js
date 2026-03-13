@@ -95,14 +95,6 @@ export class Handler {
     return result
   }
 
-  /** @deprecated Use call */
-  public async request<T>(
-    message: WorkerMessage,
-    options?: { timeout?: number }
-  ): Promise<T> {
-    return await this.call<T>(message, options)
-  }
-
   private async handleMessage(incoming: unknown) {
     // Handle CompatMessageEvent format: {data: message, type: 'message'}
     const message =
@@ -150,18 +142,6 @@ export class Handler {
         },
         transfer: (items: Transferable[]) => transferList.push(...items),
         call: async <T = unknown>(
-          msg: WorkerMessage,
-          options?: { timeout?: number }
-        ) => {
-          return await this.call<T>(msg, options)
-        },
-
-        // Deprecated aliases
-        action: workerMessage,
-        dispatch: (msg: WorkerMessage) => {
-          this.postMessage(msg, msg.meta?.transferList)
-        },
-        request: async <T = unknown>(
           msg: WorkerMessage,
           options?: { timeout?: number }
         ) => {
