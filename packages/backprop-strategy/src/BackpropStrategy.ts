@@ -29,6 +29,10 @@ const defaultBackpropStrategyOptions: BackpropStrategyOptions = {
   isLamarckian: true,
 }
 
+/**
+ * @deprecated Prefer BackpropPlugin via the evaluation plugin pipeline.
+ * BackpropStrategy remains for legacy callers that still configure strategies directly.
+ */
 export class BackpropStrategy<G extends AnyGenome = AnyGenome>
   implements EvaluationStrategy<G>
 {

@@ -42,6 +42,7 @@ const defaultBackpropPluginOptions: Required<BackpropPluginOptions> = {
 export class BackpropPlugin<G extends AnyGenome = AnyGenome>
   implements EvaluationPlugin<G>
 {
+  readonly mode = 'replacement'
   private readonly algorithm: AnyAlgorithm
   private readonly options: Required<BackpropPluginOptions>
   private supervisedEnvironment: SupervisedEnvironment | undefined
