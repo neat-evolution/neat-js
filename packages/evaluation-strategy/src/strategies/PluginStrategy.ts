@@ -29,6 +29,7 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
 {
   private readonly plugins: ReadonlyArray<EvaluationPlugin<G>>
   private readonly pluginContext: PluginContext
+  private readonly replacementPlugin: EvaluationPlugin<G> | undefined
 
   constructor(
     plugins: ReadonlyArray<EvaluationPlugin<G>>,
@@ -36,6 +37,20 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
   ) {
     this.plugins = plugins
     this.pluginContext = pluginContext
+    const replacementPlugins = plugins.filter(
+      (plugin) => (plugin.mode ?? 'augmentation') === 'replacement'
+    )
+    if (replacementPlugins.length > 1) {
+      throw new Error(
+        'Only one replacement evaluation plugin can be registered at a time.'
+      )
+    }
+    if (replacementPlugins.length === 1 && plugins.length > 1) {
+      throw new Error(
+        'Replacement evaluation plugins cannot compose with additional plugins.'
+      )
+    }
+    this.replacementPlugin = replacementPlugins[0]
 
     // Initialize plugins once at registration time
     for (const plugin of plugins) {
@@ -47,7 +62,8 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
     context: EvaluationContext<G>,
     genomeEntries: GenomeEntries<G>
   ): AsyncIterable<FitnessData> {
-    const evaluatePlugin = this.plugins.find((p) => p.evaluateGenome)
+    const evaluatePlugin =
+      this.replacementPlugin ?? this.plugins.find((p) => p.evaluateGenome)
     const evaluated: Array<{ genome: G; fitness: number }> = []
     const promises: Array<Promise<FitnessData>> = []
 

@@ -265,6 +265,39 @@ describe('PluginStrategy', () => {
       expect(afterA).toHaveBeenCalledOnce()
       expect(afterB).toHaveBeenCalledOnce()
     })
+
+    test('throws when multiple replacement plugins are registered', () => {
+      const pluginContext = makeMockPluginContext()
+      const pluginA: EvaluationPlugin = {
+        mode: 'replacement',
+        evaluateGenome: vi.fn(async () => ({ fitness: 0.3 })),
+      }
+      const pluginB: EvaluationPlugin = {
+        mode: 'replacement',
+        evaluateGenome: vi.fn(async () => ({ fitness: 0.4 })),
+      }
+
+      expect(
+        () => new PluginStrategy([pluginA, pluginB], pluginContext)
+      ).toThrow('Only one replacement evaluation plugin can be registered')
+    })
+
+    test('throws when mixing replacement and augmentation plugins', () => {
+      const pluginContext = makeMockPluginContext()
+      const replacement: EvaluationPlugin = {
+        mode: 'replacement',
+        evaluateGenome: vi.fn(async () => ({ fitness: 0.3 })),
+      }
+      const augmentation: EvaluationPlugin = {
+        getContextHooks: () => ({ reward: vi.fn() }),
+      }
+
+      expect(
+        () => new PluginStrategy([replacement, augmentation], pluginContext)
+      ).toThrow(
+        'Replacement evaluation plugins cannot compose with additional plugins.'
+      )
+    })
   })
 
   describe('multiple genomes', () => {

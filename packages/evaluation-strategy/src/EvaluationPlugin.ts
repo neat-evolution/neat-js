@@ -7,6 +7,8 @@ import type { Environment, EpisodicContext } from '@neat-evolution/environment'
 
 import type { EvaluationContext } from './EvaluationContext.js'
 
+export type EvaluationPluginMode = 'augmentation' | 'replacement'
+
 /** Result returned by a plugin's evaluateGenome method. */
 export interface EvaluationResult {
   fitness: number
@@ -31,6 +33,9 @@ export interface PluginContext {
  * - Augmentation: Plugin provides episodic hooks, delegates to defaultEvaluate
  */
 export interface EvaluationPlugin<G extends AnyGenome = AnyGenome> {
+  /** Declares whether the plugin augments or replaces evaluation. */
+  readonly mode?: EvaluationPluginMode
+
   /** Called once when the plugin is registered. Validate environment compatibility. */
   initialize?(context: PluginContext): void
 
