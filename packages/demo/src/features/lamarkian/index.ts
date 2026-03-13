@@ -107,7 +107,10 @@ try {
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    plugins: [plugin],
+    evaluation: {
+      type: 'plugin-replacement',
+      plugin,
+    },
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,

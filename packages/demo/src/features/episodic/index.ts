@@ -11,13 +11,15 @@
  */
 
 import { ACPlugin } from '@neat-evolution/actor-critic-plugin'
-import type { EvaluationPlugin } from '@neat-evolution/evaluation-strategy'
 import type { AnyAlgorithm } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
 } from '@neat-evolution/evolution'
-import { EvolutionManager } from '@neat-evolution/evolution-manager'
+import {
+  type EvaluationConfig,
+  EvolutionManager,
+} from '@neat-evolution/evolution-manager'
 import { NEATAlgorithm, type NEATGenome } from '@neat-evolution/neat'
 import { QLPlugin } from '@neat-evolution/q-learning-plugin'
 
@@ -76,7 +78,7 @@ interface RunResult {
 async function runVariant(
   name: string,
   outputCount: number,
-  plugins?: EvaluationPlugin[]
+  evaluation?: EvaluationConfig
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
   const environment = new BanditEnvironment(outputCount)
@@ -84,7 +86,7 @@ async function runVariant(
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    ...(plugins != null ? { plugins } : {}),
+    ...(evaluation != null ? { evaluation } : {}),
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,
@@ -136,64 +138,73 @@ console.log(
 
 // AC Lamarckian — 4 outputs (3 actor + 1 critic)
 console.log('Running: AC Lamarckian...')
-const acLamarckian = await runVariant('AC-Lamarck', 4, [
-  new ACPlugin(
-    algorithm,
-    {
-      learningRate: lr,
-      isLamarckian: true,
-      rolloutLength: 'episode',
-      rewardThreshold: 0.1,
-      entropyCoefficient: 0.01,
-      actorActivation: 'softmax',
-      discountFactor: 0,
-    },
-    Math.random
-  ),
-])
+const acLamarckian = await runVariant('AC-Lamarck', 4, {
+  type: 'plugin-augmentation',
+  plugins: [
+    new ACPlugin(
+      algorithm,
+      {
+        learningRate: lr,
+        isLamarckian: true,
+        rolloutLength: 'episode',
+        rewardThreshold: 0.1,
+        entropyCoefficient: 0.01,
+        actorActivation: 'softmax',
+        discountFactor: 0,
+      },
+      Math.random
+    ),
+  ],
+})
 console.log(
   `  Done: ${acLamarckian.bestFitness.toFixed(4)} in ${(acLamarckian.elapsedMs / 1000).toFixed(1)}s`
 )
 
 // AC Darwinian — 4 outputs (3 actor + 1 critic)
 console.log('Running: AC Darwinian...')
-const acDarwinian = await runVariant('AC-Darwin', 4, [
-  new ACPlugin(
-    algorithm,
-    {
-      learningRate: lr,
-      isLamarckian: false,
-      rolloutLength: 'episode',
-      rewardThreshold: 0.1,
-      entropyCoefficient: 0.01,
-      actorActivation: 'softmax',
-      discountFactor: 0,
-    },
-    Math.random
-  ),
-])
+const acDarwinian = await runVariant('AC-Darwin', 4, {
+  type: 'plugin-augmentation',
+  plugins: [
+    new ACPlugin(
+      algorithm,
+      {
+        learningRate: lr,
+        isLamarckian: false,
+        rolloutLength: 'episode',
+        rewardThreshold: 0.1,
+        entropyCoefficient: 0.01,
+        actorActivation: 'softmax',
+        discountFactor: 0,
+      },
+      Math.random
+    ),
+  ],
+})
 console.log(
   `  Done: ${acDarwinian.bestFitness.toFixed(4)} in ${(acDarwinian.elapsedMs / 1000).toFixed(1)}s`
 )
 
 // Q-Learning — 3 outputs (3 Q-values)
 console.log('Running: Q-Learning...')
-const qLearning = await runVariant('Q-Learning', 3, [
-  new QLPlugin(
-    algorithm,
-    {
-      learningRate: lr,
-      epsilon: 0.3,
-      epsilonDecay: 0.95,
-      epsilonMin: 0.01,
-      isLamarckian: true,
-      rolloutLength: 'episode',
-      rewardThreshold: 0.1,
-      discountFactor: 0,
-    },
-    Math.random
-  ),
-])
+const qLearning = await runVariant('Q-Learning', 3, {
+  type: 'plugin-augmentation',
+  plugins: [
+    new QLPlugin(
+      algorithm,
+      {
+        learningRate: lr,
+        epsilon: 0.3,
+        epsilonDecay: 0.95,
+        epsilonMin: 0.01,
+        isLamarckian: true,
+        rolloutLength: 'episode',
+        rewardThreshold: 0.1,
+        discountFactor: 0,
+      },
+      Math.random
+    ),
+  ],
+})
 console.log(
   `  Done: ${qLearning.bestFitness.toFixed(4)} in ${(qLearning.elapsedMs / 1000).toFixed(1)}s`
 )

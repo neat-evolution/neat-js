@@ -22,12 +22,12 @@ import {
   type Matrix,
   oneHotAccuracy,
 } from '@neat-evolution/dataset-environment'
-import type { EvaluationPlugin } from '@neat-evolution/evaluation-strategy'
 import type { AnyAlgorithm } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
 } from '@neat-evolution/evolution'
+import type { EvaluationConfig } from '@neat-evolution/evolution-manager'
 import { EvolutionManager } from '@neat-evolution/evolution-manager'
 import { createExecutor } from '@neat-evolution/executor'
 import {
@@ -110,14 +110,14 @@ interface RunResult {
 
 async function runVariant(
   name: string,
-  plugins?: EvaluationPlugin[]
+  evaluation?: EvaluationConfig
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
 
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    ...(plugins != null ? { plugins } : {}),
+    ...(evaluation != null ? { evaluation } : {}),
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,
@@ -169,7 +169,10 @@ const baldwinianPlugin = new BackpropPlugin(NEATAlgorithm as AnyAlgorithm, {
   learningRate: args.learningRate,
   isLamarckian: false,
 })
-const baldwinian = await runVariant('Baldwinian', [baldwinianPlugin])
+const baldwinian = await runVariant('Baldwinian', {
+  type: 'plugin-replacement',
+  plugin: baldwinianPlugin,
+})
 console.log(
   `  Done: ${baldwinian.bestFitness.toFixed(6)} in ${(baldwinian.elapsedMs / 1000).toFixed(1)}s`
 )
@@ -181,7 +184,10 @@ const lamarckianPlugin = new BackpropPlugin(NEATAlgorithm as AnyAlgorithm, {
   learningRate: args.learningRate,
   isLamarckian: true,
 })
-const lamarckian = await runVariant('Lamarckian', [lamarckianPlugin])
+const lamarckian = await runVariant('Lamarckian', {
+  type: 'plugin-replacement',
+  plugin: lamarckianPlugin,
+})
 console.log(
   `  Done: ${lamarckian.bestFitness.toFixed(6)} in ${(lamarckian.elapsedMs / 1000).toFixed(1)}s`
 )
