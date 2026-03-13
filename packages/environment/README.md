@@ -75,24 +75,42 @@ npm install @neat-evolution/environment
 
 The `environment` package exposes the following key types:
 
-- **`Environment<EFO>`**: An interface that defines the contract for
-  any environment. It includes:
-  - `description`: An `InitConfig` object that describes the initial
-    configuration of the neural network (e.g., number of inputs and outputs).
-  - `isAsync`: A boolean indicating whether the environment's evaluation is
-    inherently asynchronous.
-  - `evaluate`: A synchronous method for evaluating a single neural network, taking a
-    `SyncExecutor` and returning a `number` (fitness score).
-  - `evaluateAsync`: An asynchronous method for evaluating a single neural network,
-    taking an `Executor` and returning a `Promise<number>` (fitness score).
-  - `evaluateBatch`: A synchronous method for evaluating multiple neural networks,
-    taking an array of `SyncExecutor`s and returning an array of `number`s (fitness scores).
-  - `evaluateBatchAsync`: An asynchronous method for evaluating multiple neural networks,
-    taking an array of `Executor`s and returning a `Promise<number[]>` (fitness scores).
-  - `toFactoryOptions`: A method to serialize the environment's options.
+### Core Evaluation
 
-- **`EnvironmentFactory<EFO>`**: A function type that defines how an
-  `Environment` instance is created from a set of options (`EFO`).
+- **`Environment<EFO>`**: The contract for any environment. Includes:
+  - `description`: An `InitConfig` describing the neural network shape (inputs, outputs).
+  - `evaluate`: Synchronous evaluation of a single `SyncExecutor`, returning a fitness score.
+  - `evaluateAsync`: Asynchronous single-executor evaluation.
+  - `evaluateBatch` / `evaluateBatchAsync`: Batch evaluation for tournaments or parallel runs.
+  - `toFactoryOptions`: Serialization for worker reconstruction.
+
+- **`EnvironmentFactory<EFO>`**: A function type for creating `Environment` instances from serialized options.
+
+### RL Interfaces
+
+These interfaces extend the base environment contract for reinforcement learning:
+
+- **`EpisodicEnvironment`**: Environments that support episodic RL implement this alongside `Environment`. Provides `getRLConfig()` returning `RLConfig` (action size, discount factor, max steps, suggested rollout length).
+
+- **`AgentEnvironment`**: Environments that support direct agent evaluation. Exposes `evaluateAgent(agent: EpisodicAgent): number` so RL plugins can pass trained agents (AC or QL) directly, bypassing the executor pipeline.
+
+- **`EpisodicAgent`**: The generic RL agent interface. Methods: `act(inputs)`, `reward(reward, done)`, `startEpisode(info)`, `endEpisode(result)`. All RL methods (AC, QL) implement this.
+
+- **`EpisodeInfo`**: Episode start metadata including `episodeIndex`, optional `type` (e.g., `'scenario'`, `'full-game'`), `phase`, and `metadata`.
+
+- **`EpisodeResult`**: Episode completion data including `fitness` (per-episode evolutionary contribution), `episodeReturn` (cumulative reward for RL), `totalSteps`, `terminated`, and optional `metadata`.
+
+- **`EpisodicContext`**: Plugin-provided hooks (`reward`, `episodeStart`, `episodeEnd`, `transitionInfo`) that environments call during evaluation. These are supplemental signals; they do not replace the direct `evaluateAgent()` contract.
+
+- **`TransitionInfo`**: Per-transition metadata (`eventLabel`, `tags`, `isInteresting`, `situationClass`, `metadata`) emitted by the environment for agent capture decisions. Metadata describes transitions but does not carry reward semantics.
+
+### Signal Boundaries
+
+| Signal | Scope | Consumed by |
+| --- | --- | --- |
+| **Reward** | Single transition | RL agent (TD targets, advantages) |
+| **Episode return** (`EpisodeResult.episodeReturn`) | Single episode | RL agent + telemetry |
+| **Fitness** (`EpisodeResult.fitness`, `evaluate()` return) | Full evaluation | Evolution (selection) |
 
 ## Usage
 
