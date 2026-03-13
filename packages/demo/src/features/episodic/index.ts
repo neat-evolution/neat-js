@@ -10,10 +10,12 @@
  *   yarn workspace @neat-evolution/demo episodic \
  *     [--iterations N] [--seconds N] [--lr N] \
  *     [--seed phase4-demo|--no-seed] [--ac-seed custom] [--ql-seed custom] \
- *     [--entropy 0.01] [--epsilon 0.3] [--epsilon-decay 0.95] [--epsilon-min 0.01]
+ *     [--entropy 0.01] [--epsilon 0.3] [--epsilon-decay 0.95] [--epsilon-min 0.01] \
+ *     [--telemetry]
  */
 
 import { ACPlugin } from '@neat-evolution/actor-critic-plugin'
+import type { AnyGenome } from '@neat-evolution/core'
 import type { AnyAlgorithm } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
@@ -26,6 +28,10 @@ import {
 import { NEATAlgorithm, type NEATGenome } from '@neat-evolution/neat'
 import { QLPlugin } from '@neat-evolution/q-learning-plugin'
 import { createRNG, setThreadRNGSeed, threadRNG } from '@neat-evolution/utils'
+import type {
+  ActorCriticWorkerTelemetry,
+  QLearningWorkerTelemetry,
+} from '@neat-evolution/worker-rl'
 
 import { BanditEnvironment } from './BanditEnvironment.js'
 
@@ -38,12 +44,15 @@ interface VariantSummary {
   notes?: string
 }
 
+type VariantTelemetry = ActorCriticWorkerTelemetry | QLearningWorkerTelemetry
+
 interface VariantConfig {
   name: string
   description: string
   outputCount: number
   evaluation: EvaluationConfig
   summary: VariantSummary
+  getTelemetry?: (genome: AnyGenome) => VariantTelemetry | undefined
 }
 
 // --- Argument parsing ---
@@ -60,6 +69,7 @@ function parseArgs(argv: string[]) {
     epsilonInitial: 0.3,
     epsilonDecayPerEpisode: 0.95,
     epsilonMinimum: 0.01,
+    telemetry: false,
   }
 
   for (let i = 0; i < argv.length; i++) {
@@ -97,6 +107,8 @@ function parseArgs(argv: string[]) {
     } else if (arg === '--epsilon-min' && next) {
       args.epsilonMinimum = Number(next)
       i++
+    } else if (arg === '--telemetry') {
+      args.telemetry = true
     }
   }
 
@@ -142,6 +154,18 @@ const qlOptions = {
   discountFactor: 0,
 }
 
+const acLamarckPlugin = new ACPlugin(
+  algorithm,
+  { ...baseAcOptions, isLamarckian: true },
+  acLamarckRng.gen
+)
+const acDarwinPlugin = new ACPlugin(
+  algorithm,
+  { ...baseAcOptions, isLamarckian: false },
+  acDarwinRng.gen
+)
+const qlPlugin = new QLPlugin(algorithm, qlOptions, qLearningRng)
+
 const variants: VariantConfig[] = [
   {
     name: 'Vanilla',
@@ -165,17 +189,9 @@ const variants: VariantConfig[] = [
     outputCount: 4,
     evaluation: {
       type: 'plugin-augmentation',
-      plugins: [
-        new ACPlugin(
-          algorithm,
-          {
-            ...baseAcOptions,
-            isLamarckian: true,
-          },
-          acLamarckRng.gen
-        ),
-      ],
+      plugins: [acLamarckPlugin],
     },
+    getTelemetry: (g) => acLamarckPlugin.getTelemetry(g),
     summary: {
       path: 'evaluateAgent()',
       method: 'actor-critic',
@@ -195,17 +211,9 @@ const variants: VariantConfig[] = [
     outputCount: 4,
     evaluation: {
       type: 'plugin-augmentation',
-      plugins: [
-        new ACPlugin(
-          algorithm,
-          {
-            ...baseAcOptions,
-            isLamarckian: false,
-          },
-          acDarwinRng.gen
-        ),
-      ],
+      plugins: [acDarwinPlugin],
     },
+    getTelemetry: (g) => acDarwinPlugin.getTelemetry(g),
     summary: {
       path: 'evaluateAgent()',
       method: 'actor-critic',
@@ -225,8 +233,9 @@ const variants: VariantConfig[] = [
     outputCount: 3,
     evaluation: {
       type: 'plugin-augmentation',
-      plugins: [new QLPlugin(algorithm, qlOptions, qLearningRng)],
+      plugins: [qlPlugin],
     },
+    getTelemetry: (g) => qlPlugin.getTelemetry(g),
     summary: {
       path: 'evaluateAgent()',
       method: 'q-learning',
@@ -428,3 +437,57 @@ summarizeComparison(
   `${heldConstants}, identical actor-critic config + seeds`,
   'Only Lamarckian writeback differs (Darwinian discards learned weights)'
 )
+
+// --- Telemetry ---
+
+if (args.telemetry) {
+  console.log()
+  console.log('=== RL Telemetry (best genome, final generation) ===')
+
+  for (const variant of variants) {
+    const result = resultByName.get(variant.name)
+    if (!result?.bestGenome || !variant.getTelemetry) continue
+
+    const telemetry = variant.getTelemetry(
+      result.bestGenome as unknown as AnyGenome
+    )
+    if (!telemetry) continue
+
+    console.log()
+    console.log(`--- ${variant.name} ---`)
+    console.log(`  episodes:            ${telemetry.episodes}`)
+    console.log(`  rolloutSegments:     ${telemetry.rolloutSegments}`)
+    console.log(`  transitionsTrained:  ${telemetry.transitionsTrained}`)
+
+    if ('actorActivation' in telemetry) {
+      console.log(`  actorActivation:     ${telemetry.actorActivation}`)
+      console.log(`  entropyCoefficient:  ${telemetry.entropyCoefficient}`)
+      console.log(
+        `  triggerCounts:       reward=${telemetry.triggerCounts.reward}, done=${telemetry.triggerCounts.done}, info=${telemetry.triggerCounts.info}`
+      )
+      if (telemetry.segmentReturn) {
+        console.log(
+          `  segmentReturn:       mean=${telemetry.segmentReturn.mean.toFixed(4)}, min=${telemetry.segmentReturn.min.toFixed(4)}, max=${telemetry.segmentReturn.max.toFixed(4)}`
+        )
+      }
+      if (telemetry.episodeReturn) {
+        console.log(
+          `  episodeReturn:       mean=${telemetry.episodeReturn.mean.toFixed(4)}, min=${telemetry.episodeReturn.min.toFixed(4)}, max=${telemetry.episodeReturn.max.toFixed(4)}`
+        )
+      }
+      if (telemetry.policyEntropy) {
+        console.log(
+          `  policyEntropy:       mean=${telemetry.policyEntropy.mean.toFixed(4)}, min=${telemetry.policyEntropy.min.toFixed(4)}, max=${telemetry.policyEntropy.max.toFixed(4)} (${telemetry.policyEntropy.samples} samples)`
+        )
+      }
+    }
+
+    if ('epsilonInitial' in telemetry) {
+      console.log(`  epsilonInitial:      ${telemetry.epsilonInitial}`)
+      console.log(`  epsilonFinal:        ${telemetry.epsilonFinal}`)
+      console.log(`  epsilonDecay:        ${telemetry.epsilonDecayPerEpisode}`)
+      console.log(`  epsilonMinimum:      ${telemetry.epsilonMinimum}`)
+      console.log(`  multiDiscrete:       ${telemetry.multiDiscrete}`)
+    }
+  }
+}

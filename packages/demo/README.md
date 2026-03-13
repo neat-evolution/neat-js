@@ -21,7 +21,8 @@ Phase 4 adds a public RL surface that mirrors the shipped architecture:
 yarn workspace @neat-evolution/demo episodic \\
   [--iterations N] [--seconds N] [--lr N] \\
   [--seed phase4-demo|--no-seed] [--ac-seed custom] [--ql-seed custom] \\
-  [--entropy 0.01] [--epsilon 0.3] [--epsilon-decay 0.95] [--epsilon-min 0.01]
+  [--entropy 0.01] [--epsilon 0.3] [--epsilon-decay 0.95] [--epsilon-min 0.01] \\
+  [--telemetry]
 ```
 
 Key options:
@@ -31,7 +32,7 @@ Key options:
 - `--entropy <value>`: sets the actor-critic entropy coefficient when running `evaluateAgent()`.
 - `--epsilon`, `--epsilon-decay`, `--epsilon-min`: tune the epsilon-greedy schedule for Q-learning.
 
-The script logs the variant configuration (method, evaluation path, Lamarckian flag, seeds, and key hyperparameters), the generation-by-generation fitness table, and then a comparison summary that states what was held constant and what changed for every pair.
+The script logs the variant configuration (method, evaluation path, Lamarckian flag, seeds, and key hyperparameters), the generation-by-generation fitness table, and then a comparison summary that states what was held constant and what changed for every pair. Pass `--telemetry` to also print per-variant RL diagnostics (episodes, rollout segments, trigger counts, epsilon schedule, etc.) for the best genome of the final generation.
 
 See [`docs/rl-comparisons.md`](docs/rl-comparisons.md) for a detailed walkthrough of the comparison workflow.
 

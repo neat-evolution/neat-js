@@ -41,6 +41,7 @@ Flags:
 | `--ac-seed label` / `--ql-seed label` | Override the derived RNG used by each RL method while keeping the population seed fixed. |
 | `--entropy N` | Actor-Critic entropy coefficient. |
 | `--epsilon N` / `--epsilon-decay N` / `--epsilon-min N` | Q-learning epsilon schedule. |
+| `--telemetry` | Print RL telemetry for each variant's best genome after the comparison summary. |
 
 The CLI prints the parsed configuration (path, method, Lamarckian flag, seeds,
 rollout semantics), the generation-by-generation fitness table, and the
@@ -103,6 +104,62 @@ comparison summary that spells out the constants and deltas for each pairing.
 - **Q-learning:** The epsilon schedule is fully exposed via CLI flags; telemetry
   echoes `epsilonInitial`, `epsilonDecayPerEpisode`, and `epsilonMinimum` so
   logs can be audited later.
+
+## Inspecting RL Telemetry
+
+Pass `--telemetry` to print a per-variant telemetry block after the comparison
+summaries:
+
+```sh
+yarn workspace @neat-evolution/demo episodic --telemetry
+```
+
+The block prints diagnostics for each RL variant's best genome from the final
+generation. Fields vary by method:
+
+**Shared (all RL variants):**
+
+| Field | Meaning |
+| --- | --- |
+| `episodes` | Episodes completed during the best genome's final evaluation. |
+| `rolloutSegments` | Number of rollout segments that triggered training. |
+| `transitionsTrained` | Total transitions included across all trained segments. |
+
+**Actor-Critic fields:**
+
+| Field | Meaning |
+| --- | --- |
+| `actorActivation` | Actor output activation (`softmax` or `sigmoid`). |
+| `entropyCoefficient` | Entropy regularization weight. |
+| `triggerCounts` | How many segments were triggered by `reward`, `done`, or `info` events. |
+| `segmentReturn` | Mean/min/max cumulative reward per rollout segment. |
+| `episodeReturn` | Mean/min/max episode return (when the environment reports it). |
+| `policyEntropy` | Mean/min/max Shannon entropy of the softmax policy (softmax only). |
+
+See the [`actor-critic-plugin` README](../../actor-critic-plugin/README.md) for
+full field definitions.
+
+**Q-Learning fields:**
+
+| Field | Meaning |
+| --- | --- |
+| `epsilonInitial` | Epsilon at the start of evaluation. |
+| `epsilonFinal` | Epsilon after all episodes (after decay). |
+| `epsilonDecay` | Per-episode multiplicative decay factor. |
+| `epsilonMinimum` | Epsilon floor. |
+| `multiDiscrete` | Whether multi-discrete Q-values were used. |
+
+See the [`q-learning-plugin` README](../../q-learning-plugin/README.md) for
+full field definitions.
+
+## Further Reading
+
+- [Environment contract](../../environment/README.md) — `AgentEnvironment`,
+  `EpisodicAgent`, `RLConfig`, `TransitionInfo`, and the signal boundary table.
+- [Actor-Critic plugin](../../actor-critic-plugin/README.md) — plugin lifecycle,
+  telemetry field reference, and worker dispatch.
+- [Q-Learning plugin](../../q-learning-plugin/README.md) — epsilon schedule,
+  multi-discrete mode, and worker dispatch.
 
 With these guardrails you can hand a teammate a single command that recreates a
 specific comparison and know exactly what changed between variants.
