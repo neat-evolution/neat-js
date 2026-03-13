@@ -9,7 +9,10 @@ import type {
   StateDataOf,
 } from '@neat-evolution/core'
 import type { EnvironmentConfig } from '@neat-evolution/environment'
-import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
+import type {
+  EvaluationPlugin,
+  EvaluationStrategy,
+} from '@neat-evolution/evaluation-strategy'
 import type {
   EvolutionOptions,
   PopulationCreator,
@@ -64,6 +67,11 @@ export interface EvolutionManagerConfig<
 
   /** How genomes are evaluated. Default: IndividualStrategy */
   strategy?: EvaluationStrategy
+
+  /** Evaluation plugins that augment or replace per-genome evaluation.
+   *  When provided, a PluginStrategy wraps the evaluation pipeline.
+   *  Plugins are initialized once during init() and receive lifecycle hooks. */
+  plugins?: EvaluationPlugin[]
 
   /** Evolution loop settings (iterations, secondsLimit, callbacks, etc.) */
   evolutionOptions?: Partial<EvolutionOptions>

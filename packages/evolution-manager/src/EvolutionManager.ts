@@ -15,7 +15,11 @@ import type {
   Environment,
   EnvironmentConfig,
 } from '@neat-evolution/environment'
-import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
+import type {
+  EvaluationPlugin,
+  EvaluationStrategy,
+} from '@neat-evolution/evaluation-strategy'
+import { PluginStrategy } from '@neat-evolution/evaluation-strategy'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import { createEvaluator as createLocalEvaluator } from '@neat-evolution/evaluator'
 import type {
@@ -61,6 +65,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
   private readonly algorithm: Algorithm<Ctx> & PopulationCreator<Ctx>
   private readonly environment: EnvironmentConfig
   private readonly strategy: EvaluationStrategy | undefined
+  private readonly plugins: ReadonlyArray<EvaluationPlugin> | undefined
   private readonly evolutionOptions: EvolutionOptions
   private readonly populationOptions: PopulationOptions
   private readonly configData: ConfigDataOf<Ctx> | undefined
@@ -94,6 +99,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     this.algorithm = config.algorithm
     this.environment = config.environment
     this.strategy = config.strategy
+    this.plugins = config.plugins
     this.evolutionOptions = {
       ...defaultEvolutionOptions,
       ...config.evolutionOptions,
@@ -120,8 +126,14 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     let evaluator: Evaluator
     let createReproducer: (population: Population<Ctx>) => Reproducer
 
+    // Resolve effective strategy: plugins wrap into PluginStrategy
+    const effectiveStrategy = this.resolveStrategy()
+
     if (this.workerConfig != null) {
-      const result = this.createWorkerFactories(this.workerConfig)
+      const result = this.createWorkerFactories(
+        this.workerConfig,
+        effectiveStrategy
+      )
       evaluator = result.evaluator
       createReproducer = result.createReproducer
     } else {
@@ -129,7 +141,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       const environment = this.environment as Environment
       evaluator = createLocalEvaluator(algorithm, environment, {
         createExecutor,
-        ...(this.strategy != null ? { strategy: this.strategy } : {}),
+        ...(effectiveStrategy != null ? { strategy: effectiveStrategy } : {}),
       })
       createReproducer = createLocalReproducer as unknown as ReproducerFactory<
         Population<Ctx>
@@ -288,7 +300,29 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     return this.organismToExecutor(best)
   }
 
-  private createWorkerFactories(workerConfig: WorkerConfig) {
+  /** Resolve the effective evaluation strategy.
+   *  If plugins are provided, wraps them in a PluginStrategy.
+   *  Otherwise returns the user-provided strategy (or undefined for default). */
+  private resolveStrategy(): EvaluationStrategy | undefined {
+    if (this.plugins != null && this.plugins.length > 0) {
+      const environment = this.environment as Environment
+      const supportsTraining =
+        this.workerConfig?.pluginPaths != null &&
+        this.workerConfig.pluginPaths.length > 0
+
+      return new PluginStrategy(this.plugins, {
+        algorithm: this.algorithm as unknown as AnyErasedAlgorithm,
+        environment,
+        supportsTraining,
+      })
+    }
+    return this.strategy
+  }
+
+  private createWorkerFactories(
+    workerConfig: WorkerConfig,
+    effectiveStrategy?: EvaluationStrategy
+  ) {
     const algorithmPathname =
       workerConfig.algorithmPathname ?? this.algorithm.pathname
     const createExecutorPathname =
@@ -322,8 +356,8 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       taskCount,
       threadCount,
     }
-    if (this.strategy != null) {
-      evaluatorOptions.strategy = this.strategy
+    if (effectiveStrategy != null) {
+      evaluatorOptions.strategy = effectiveStrategy
     }
     if (workerConfig.evaluatorWorkerScriptUrl != null) {
       evaluatorOptions.workerScriptUrl = workerConfig.evaluatorWorkerScriptUrl
