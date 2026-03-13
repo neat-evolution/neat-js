@@ -1,3 +1,7 @@
 export * from './Environment.js'
 export * from './EnvironmentFactory.js'
+export * from './EpisodicAgent.js'
+export * from './EpisodicContext.js'
+export * from './EpisodicEnvironment.js'
 export * from './SupervisedEnvironment.js'
+export * from './Transition.js'
