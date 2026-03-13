@@ -4,6 +4,7 @@ import type {
   GenomeOptions,
   InitConfig,
 } from '@neat-evolution/core'
+import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
 import {
   createMessage,
   type WorkerMessage,
@@ -46,16 +47,20 @@ export interface EvaluateBatchPayload {
   seed?: string | undefined
 }
 
-export type InitAction = WorkerMessage<InitPayload, null>
+export type InitAction = WorkerMessage<
+  InitPayload,
+  WorkerTrainingCapabilities | undefined
+>
 
 export type InitSuccessAction = WorkerMessage<null, null>
 
 export type TerminateAction = WorkerMessage<null, null>
 
 // Action creators for worker-evaluator
-export const initEvaluator = createMessage<InitPayload, null>(
-  ActionType.INIT_EVALUATOR
-)
+export const initEvaluator = createMessage<
+  InitPayload,
+  WorkerTrainingCapabilities | undefined
+>(ActionType.INIT_EVALUATOR)
 
 export const initGenomeFactory = createMessage<InitGenomeFactoryPayload, null>(
   ActionType.INIT_GENOME_FACTORY

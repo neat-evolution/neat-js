@@ -1,3 +1,4 @@
+import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
 import type { InitPayload } from '../actions.js'
@@ -7,7 +8,7 @@ import type { ThreadContext } from './ThreadContext.js'
 export type HandleInitEvaluatorFn = (
   payload: InitPayload,
   context: ThreadContext & Partial<WorkerContext>
-) => Promise<void>
+) => Promise<WorkerTrainingCapabilities | undefined>
 
 export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   {
@@ -54,4 +55,6 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
       }
     }
   }
+
+  return context.workerCapabilities
 }

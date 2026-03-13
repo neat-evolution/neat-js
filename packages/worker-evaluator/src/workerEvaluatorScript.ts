@@ -28,7 +28,7 @@ handler.register(ActionType.INIT_EVALUATOR, async (payload, context) => {
     // @ts-expect-error - Dynamically copying context properties to threadContext
     threadContext[key] = value
   }
-  await handleInitEvaluator(payload as InitPayload, getThreadContext())
+  return await handleInitEvaluator(payload as InitPayload, getThreadContext())
 })
 
 handler.register(ActionType.INIT_GENOME_FACTORY, async (payload) => {

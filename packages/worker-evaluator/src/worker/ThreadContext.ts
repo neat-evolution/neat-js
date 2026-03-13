@@ -1,3 +1,4 @@
+import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
 import type { Handler } from '@neat-evolution/worker-actions'
 import type QuickLRU from 'quick-lru'
 import type { CachedExecutorEntry } from './createCachedExecutorEntry.js'
@@ -10,4 +11,6 @@ export interface ThreadContext {
   executorCache: QuickLRU<string, CachedExecutorEntry> | undefined
   /** Worker's Handler instance, available for plugin registration. */
   handler?: Handler
+  /** Capabilities registered by worker plugins (reported back to main thread). */
+  workerCapabilities?: WorkerTrainingCapabilities
 }

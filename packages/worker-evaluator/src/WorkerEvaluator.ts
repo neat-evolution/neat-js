@@ -8,6 +8,9 @@ import {
   type EvaluationContext,
   type EvaluationStrategy,
   IndividualStrategy,
+  type RLWorkerMethod,
+  type WorkerRLCapabilities,
+  type WorkerTrainingCapabilities,
 } from '@neat-evolution/evaluation-strategy'
 import type {
   AnyErasedAlgorithm,
@@ -45,6 +48,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
 
   private readonly pool: WorkerPool
   private readonly dispatcher: Dispatcher
+  private workerTrainingCapabilities: WorkerTrainingCapabilities | undefined
 
   /**
    * Evaluation context exposing worker pool functionality to evaluation strategies
@@ -139,7 +143,19 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       executorCacheMaxSize: this.executorCacheMaxSize,
       ...(this.pluginPaths ? { pluginPaths: this.pluginPaths } : {}),
     }
-    await this.dispatcher.broadcast<null>(initEvaluator(data))
+    const workerCapabilities = await this.dispatcher.broadcast<
+      WorkerTrainingCapabilities | undefined
+    >(initEvaluator(data))
+    this.workerTrainingCapabilities = aggregateWorkerCapabilities(
+      workerCapabilities,
+      this.threadCount
+    )
+    if (this.workerTrainingCapabilities !== undefined) {
+      this.evaluationContext.workerTrainingCapabilities =
+        this.workerTrainingCapabilities
+    } else {
+      delete this.evaluationContext.workerTrainingCapabilities
+    }
   }
 
   async initGenomeFactory<CD extends ConfigData>(
@@ -220,4 +236,77 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       return [speciesIndex, organismIndex, fitness]
     })
   }
+}
+
+const RL_METHODS: RLWorkerMethod[] = ['actor-critic', 'q-learning']
+
+const aggregateWorkerCapabilities = (
+  snapshots: Array<WorkerTrainingCapabilities | undefined>,
+  workerCount: number
+): WorkerTrainingCapabilities | undefined => {
+  if (workerCount === 0) {
+    return undefined
+  }
+
+  const rlSnapshots = snapshots
+    .map((cap) => cap?.rl)
+    .filter((rl): rl is WorkerRLCapabilities => rl != null)
+  if (rlSnapshots.length === 0) {
+    return {
+      rl: {
+        supported: false,
+        reason: 'Worker RL plugin not registered on workers',
+        methods: {},
+      },
+    }
+  }
+
+  const rlSupportedEverywhere =
+    rlSnapshots.length === workerCount &&
+    rlSnapshots.every((snapshot) => snapshot.supported)
+
+  const rlCapabilities: WorkerRLCapabilities = {
+    supported: rlSupportedEverywhere,
+    ...(rlSupportedEverywhere
+      ? {}
+      : {
+          reason:
+            rlSnapshots.length < workerCount
+              ? 'Worker RL plugin missing on some workers'
+              : 'Worker RL plugin reported RL disabled',
+        }),
+    methods: {},
+  }
+
+  for (const method of RL_METHODS) {
+    const methodSnapshots = snapshots.map((cap) => cap?.rl?.methods?.[method])
+    const definedCount = methodSnapshots.filter((entry) => entry != null).length
+    if (definedCount === 0) {
+      continue
+    }
+
+    const supportedEverywhere =
+      rlSupportedEverywhere &&
+      methodSnapshots.every((entry) => entry?.supported === true)
+    const supportsLamarckian =
+      supportedEverywhere &&
+      methodSnapshots.every(
+        (entry) => entry?.supportsLamarckianWriteback !== false
+      )
+
+    rlCapabilities.methods[method] = {
+      supported: supportedEverywhere,
+      supportsLamarckianWriteback: supportsLamarckian,
+      ...(supportedEverywhere
+        ? {}
+        : {
+            reason:
+              definedCount < workerCount
+                ? 'Method missing on some workers'
+                : 'Method disabled by worker plugin',
+          }),
+    }
+  }
+
+  return { rl: rlCapabilities }
 }
