@@ -124,7 +124,9 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
 
   /**
    * Merge context hooks from all plugins that provide them.
-   * Returns undefined if no plugins provide hooks.
+   * Hooks are a supplemental signal path (reward, lifecycle, metadata) and
+   * never replace the direct `evaluateAgent()` contract. When no plugin
+   * supplies hooks, evaluation proceeds with the plain agent/environment loop.
    */
   private mergeContextHooks(): EpisodicContext | undefined {
     const hookProviders = this.plugins.filter((p) => p.getContextHooks)
