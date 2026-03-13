@@ -347,7 +347,6 @@ describe('ACPlugin integration', () => {
     plugin.initialize({
       algorithm,
       environment: env,
-      supportsTraining: false,
     })
 
     const mockGenome = {} as AnyGenome
@@ -360,10 +359,6 @@ describe('ACPlugin integration', () => {
       broadcast: vi.fn(),
       addMessageHandler: vi.fn(),
       removeMessageHandler: vi.fn(),
-      dispatch: vi.fn(),
-      request: vi.fn(),
-      addActionHandler: vi.fn(),
-      removeActionHandler: vi.fn(),
     }
 
     const result = await plugin.evaluateGenome(
@@ -381,7 +376,6 @@ describe('ACPlugin integration', () => {
     plugin.afterFitness(mockGenome, result.fitness, {
       algorithm,
       environment: env,
-      supportsTraining: false,
     })
     expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
   })
@@ -439,7 +433,6 @@ describe('QLPlugin integration', () => {
     plugin.initialize({
       algorithm,
       environment: env,
-      supportsTraining: false,
     })
 
     const mockGenome = {} as AnyGenome
@@ -452,10 +445,6 @@ describe('QLPlugin integration', () => {
       broadcast: vi.fn(),
       addMessageHandler: vi.fn(),
       removeMessageHandler: vi.fn(),
-      dispatch: vi.fn(),
-      request: vi.fn(),
-      addActionHandler: vi.fn(),
-      removeActionHandler: vi.fn(),
     }
 
     const result = await plugin.evaluateGenome(
@@ -473,7 +462,6 @@ describe('QLPlugin integration', () => {
     plugin.afterFitness(mockGenome, result.fitness, {
       algorithm,
       environment: env,
-      supportsTraining: false,
     })
     expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
   })
