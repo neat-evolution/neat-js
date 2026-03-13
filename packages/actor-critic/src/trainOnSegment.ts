@@ -1,0 +1,63 @@
+import type { TrainableExecutor } from '@neat-evolution/backprop'
+import type { Transition } from '@neat-evolution/environment'
+import {
+  type ACGradientConfig,
+  computeACGradients,
+} from './computeACGradients.js'
+
+/** Configuration for trainOnSegment, combining gradient config with learning rate. */
+export interface TrainOnSegmentConfig extends ACGradientConfig {
+  /** Learning rate for backward pass. */
+  learningRate: number
+}
+
+/**
+ * Train on a captured rollout segment using n-step returns.
+ *
+ * For a segment of length n, computes returns backward:
+ *   G_t = r_t + gamma * r_{t+1} + ... + gamma^(n-t-1) * r_{n-1} + gamma^(n-t) * V(s_n)
+ *
+ * Where V(s_n) = 0 if the segment ends at a terminal state (done=true),
+ * otherwise V(s_n) is the critic's value estimate at the last transition.
+ *
+ * This is standard A2C/PPO n-step return computation.
+ */
+export function trainOnSegment(
+  trainable: TrainableExecutor,
+  transitions: Transition[],
+  config: TrainOnSegmentConfig
+): void {
+  const n = transitions.length
+  if (n === 0) {
+    return
+  }
+
+  const lastTransition = transitions[n - 1]
+  if (lastTransition === undefined) {
+    throw new Error('Empty transitions array')
+  }
+  const lastCriticValue = lastTransition.criticValue
+  if (lastCriticValue === undefined) {
+    throw new Error(
+      'Last transition missing criticValue for n-step return bootstrap'
+    )
+  }
+  const terminalValue = lastTransition.done ? 0 : lastCriticValue
+
+  // Compute n-step returns backward
+  let G = terminalValue
+  for (let t = n - 1; t >= 0; t--) {
+    const transition = transitions[t]
+    if (transition === undefined) {
+      throw new Error(`Missing transition at index ${t}`)
+    }
+    const criticValue = transition.criticValue
+    if (criticValue === undefined) {
+      throw new Error(`Transition at index ${t} missing criticValue`)
+    }
+    G = transition.reward + config.discountFactor * G
+    const advantage = G - criticValue
+    const errors = computeACGradients(transition, advantage, config)
+    trainable.backward(errors, config.learningRate)
+  }
+}
