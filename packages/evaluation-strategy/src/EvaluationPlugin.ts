@@ -20,8 +20,6 @@ export interface EvaluationResult {
 export interface PluginContext {
   algorithm: AnyAlgorithm
   environment: Environment
-  /** Whether worker threads are available for training dispatch. */
-  supportsTraining: boolean
 }
 
 /**

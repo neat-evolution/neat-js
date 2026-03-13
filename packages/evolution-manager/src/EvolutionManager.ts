@@ -324,14 +324,10 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     plugins: ReadonlyArray<EvaluationPlugin>
   ): EvaluationStrategy {
     const environment = this.environment as Environment
-    const supportsTraining =
-      this.workerConfig?.pluginPaths != null &&
-      this.workerConfig.pluginPaths.length > 0
 
     return new PluginStrategy(plugins, {
       algorithm: this.algorithm as unknown as AnyErasedAlgorithm,
       environment,
-      supportsTraining,
     })
   }
 

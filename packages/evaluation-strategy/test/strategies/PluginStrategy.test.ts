@@ -31,10 +31,6 @@ function makeMockContext(fitnessValue = 1.0): EvaluationContext {
     broadcast: vi.fn(),
     addMessageHandler: vi.fn(),
     removeMessageHandler: vi.fn(),
-    dispatch: vi.fn(),
-    request: vi.fn(),
-    addActionHandler: vi.fn(),
-    removeActionHandler: vi.fn(),
   } as unknown as EvaluationContext
 }
 
@@ -45,7 +41,6 @@ function makeMockPluginContext(): PluginContext {
       writeBackWeights: vi.fn(),
     },
     environment: {},
-    supportsTraining: false,
   } as unknown as PluginContext
 }
 

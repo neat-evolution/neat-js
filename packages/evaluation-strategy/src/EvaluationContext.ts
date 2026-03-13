@@ -26,12 +26,6 @@ export interface EvaluationContext<G extends AnyGenome = AnyGenome>
   ) => Promise<FitnessData[]>
 
   /**
-   * Whether worker plugins are loaded and available for custom dispatch.
-   * Set by WorkerEvaluator when pluginPaths are configured.
-   */
-  supportsTraining?: boolean
-
-  /**
    * Capabilities reported by WorkerEvaluator after worker initialization.
    * Plugins can inspect this before dispatching custom worker actions.
    */
