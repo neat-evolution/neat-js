@@ -1,5 +1,3 @@
-import type { EvaluateRLAgentPayload } from './actions.js'
-
 export type WorkerRLDispatchFailureReason =
   | 'agent-environment-required'
   | 'capability-missing'
@@ -10,12 +8,12 @@ export type WorkerRLDispatchFailureReason =
 
 export class WorkerRLDispatchError extends Error {
   readonly reason: WorkerRLDispatchFailureReason
-  readonly method: EvaluateRLAgentPayload['method']
+  readonly method: 'actor-critic' | 'q-learning'
   readonly details?: Record<string, unknown>
 
   constructor(
     reason: WorkerRLDispatchFailureReason,
-    method: EvaluateRLAgentPayload['method'],
+    method: 'actor-critic' | 'q-learning',
     message: string,
     options?: { cause?: unknown; details?: Record<string, unknown> }
   ) {

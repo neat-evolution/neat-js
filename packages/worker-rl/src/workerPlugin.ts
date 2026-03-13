@@ -1,3 +1,4 @@
+import type { ACAgentConfig } from '@neat-evolution/actor-critic'
 import { createACAgent } from '@neat-evolution/actor-critic'
 import type { TrainableExecutor } from '@neat-evolution/backprop'
 import { createTrainableExecutor } from '@neat-evolution/backprop'
@@ -9,6 +10,7 @@ import type {
   RolloutSegment,
 } from '@neat-evolution/environment'
 import { isAgentEnvironment } from '@neat-evolution/environment'
+import type { QLAgentConfig } from '@neat-evolution/q-learning'
 import { createQLAgent } from '@neat-evolution/q-learning'
 import type { RNG } from '@neat-evolution/utils'
 import { createRNG, threadRNG } from '@neat-evolution/utils'
@@ -18,8 +20,6 @@ import type { ThreadContext } from '@neat-evolution/worker-evaluator/worker'
 
 import type {
   ActorCriticWorkerTelemetry,
-  EvaluateACAgentPayload,
-  EvaluateQLAgentPayload,
   QLearningWorkerTelemetry,
   RLTrainingConfig,
   TriggerCounts,
@@ -29,12 +29,8 @@ interface TelemetryTracker {
   onSegmentTrained: (segment: RolloutSegment) => void
   onEpisodeStart: (info: EpisodeInfo) => void
   onEpisodeEnd: (result: EpisodeResult) => void
-  toActorCriticTelemetry(
-    config: EvaluateACAgentPayload['config']
-  ): ActorCriticWorkerTelemetry
-  toQLearningTelemetry(
-    config: EvaluateQLAgentPayload['config']
-  ): QLearningWorkerTelemetry
+  toActorCriticTelemetry(config: ACAgentConfig): ActorCriticWorkerTelemetry
+  toQLearningTelemetry(config: QLAgentConfig): QLearningWorkerTelemetry
 }
 
 interface TelemetryTrackerOptions {

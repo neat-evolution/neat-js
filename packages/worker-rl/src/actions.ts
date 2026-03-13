@@ -1,37 +1,6 @@
 import type { ACAgentConfig } from '@neat-evolution/actor-critic'
-import type {
-  GenomeFactoryOptions,
-  PhenotypeAction,
-} from '@neat-evolution/core'
 import type { RolloutSegment } from '@neat-evolution/environment'
 import type { QLAgentConfig } from '@neat-evolution/q-learning'
-import { createMessage } from '@neat-evolution/worker-actions'
-
-export enum RLWorkerActionType {
-  REQUEST_EVALUATE_AGENT = 'REQUEST_EVALUATE_AGENT',
-}
-
-type BaseEvaluatePayload = {
-  genomeOptions: GenomeFactoryOptions
-  /** Deterministic RNG seed forwarded to worker-level RNG. */
-  seed?: string
-  /** Whether the worker should return updated weights for Lamarckian writeback. */
-  isLamarckian: boolean
-}
-
-export interface EvaluateACAgentPayload extends BaseEvaluatePayload {
-  method: 'actor-critic'
-  config: ACAgentConfig
-}
-
-export interface EvaluateQLAgentPayload extends BaseEvaluatePayload {
-  method: 'q-learning'
-  config: QLAgentConfig
-}
-
-export type EvaluateRLAgentPayload =
-  | EvaluateACAgentPayload
-  | EvaluateQLAgentPayload
 
 export interface RLWorkerTelemetryBase {
   /** Episodes completed during evaluation. */
@@ -85,25 +54,6 @@ export interface QLearningWorkerTelemetry extends RLWorkerTelemetryBase {
   epsilonMinimum: number
   multiDiscrete: boolean
 }
-
-export type EvaluateRLAgentResult =
-  | {
-      method: 'actor-critic'
-      fitness: number
-      updatedActions?: PhenotypeAction[]
-      telemetry: ActorCriticWorkerTelemetry
-    }
-  | {
-      method: 'q-learning'
-      fitness: number
-      updatedActions?: PhenotypeAction[]
-      telemetry: QLearningWorkerTelemetry
-    }
-
-export const requestEvaluateRLAgent = createMessage<
-  EvaluateRLAgentPayload,
-  EvaluateRLAgentResult
->(RLWorkerActionType.REQUEST_EVALUATE_AGENT)
 
 /** Training config sent once during worker init via pluginData.
  *  Consumed by the worker RL plugin to configure handleEvaluateGenome enhancement. */
