@@ -423,6 +423,16 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       evaluatorOptions.pluginPaths = workerConfig.pluginPaths
     }
 
+    // Collect plugin data from initialized plugins for worker configuration.
+    // Plugins provide training config (RL method, agent config, etc.) that
+    // workers receive once during init instead of per-genome.
+    if (effectiveStrategy instanceof PluginStrategy) {
+      const pluginData = effectiveStrategy.collectWorkerPluginData()
+      if (Object.keys(pluginData).length > 0) {
+        evaluatorOptions.pluginData = pluginData
+      }
+    }
+
     const algorithm = this.algorithm as unknown as AnyErasedAlgorithm
     // WorkerEvaluator only uses toFactoryOptions() from the environment —
     // safe to cast EnvironmentConfig to Environment for the constructor
