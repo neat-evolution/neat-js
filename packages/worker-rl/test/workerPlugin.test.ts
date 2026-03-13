@@ -3,7 +3,6 @@ import type { Handler, WorkerContext } from '@neat-evolution/worker-actions'
 import type { ThreadContext } from '@neat-evolution/worker-evaluator/worker'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { RLWorkerActionType } from '../src/actions.js'
 import workerPlugin from '../src/workerPlugin.js'
 
 const mockUpdatedActions = [[PhenotypeActionType.Link, 0, 1, 0.42] as const]
@@ -75,39 +74,33 @@ vi.mock('@neat-evolution/q-learning', () => ({
   }),
 }))
 
-type RegisteredHandler = (
-  payload: unknown,
-  context: unknown
-) => Promise<unknown> | unknown
+// biome-ignore lint/suspicious/noExplicitAny: test mock
+const makeAgentEnvironment = (): any => ({
+  isAsync: false,
+  evaluate: vi.fn(),
+  evaluateAsync: vi.fn(),
+  // biome-ignore lint/suspicious/noExplicitAny: test mock
+  evaluateAgent: vi.fn((agent: any) => {
+    agent.startEpisode({ episodeIndex: 0 })
+    agent.reward(1, true)
+    agent.endEpisode({
+      fitness: 1,
+      episodeReturn: 1,
+      totalSteps: 1,
+      terminated: true,
+    })
+    return 42
+  }),
+})
 
-const registerPlugin = () => {
-  const handlers = new Map<string, RegisteredHandler>()
-  const handler = {
-    register: vi.fn((type: string, fn: RegisteredHandler) => {
-      handlers.set(type, fn)
-    }),
-  } as unknown as Handler
-
-  const environment = {
-    isAsync: false,
-    evaluate: vi.fn(),
-    evaluateAsync: vi.fn(),
-    evaluateAgent: vi.fn((agent: any) => {
-      agent.startEpisode({ episodeIndex: 0 })
-      agent.reward(1, true)
-      agent.endEpisode({
-        fitness: 1,
-        episodeReturn: 1,
-        totalSteps: 1,
-        terminated: true,
-      })
-      return 42
-    }),
-  }
-
-  const threadContext = {
+const makeThreadContext = (
+  pluginData?: Record<string, unknown>
+): ThreadContext => {
+  const environment = makeAgentEnvironment()
+  return {
     handler: undefined,
     executorCache: undefined,
+    pluginData,
     threadInfo: {
       createConfig: vi.fn(),
       createExecutor: vi.fn(),
@@ -129,27 +122,24 @@ const registerPlugin = () => {
       initConfig: {} as never,
     },
   } as unknown as ThreadContext
-
-  workerPlugin(handler, threadContext as ThreadContext & WorkerContext)
-
-  const registered = handlers.get(RLWorkerActionType.REQUEST_EVALUATE_AGENT)
-  if (!registered) {
-    throw new Error('Handler not registered')
-  }
-  return {
-    invoke: (payload: unknown) => registered(payload, threadContext),
-    threadContext,
-    environment,
-  }
 }
+
+const makeHandler = (): Handler =>
+  ({
+    register: vi.fn(),
+  }) as unknown as Handler
 
 describe('workerPlugin', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('registers RL capabilities for actor-critic and q-learning', () => {
-    const { threadContext } = registerPlugin()
+  it('declares RL capabilities on threadContext', () => {
+    const handler = makeHandler()
+    const threadContext = makeThreadContext()
+
+    workerPlugin(handler, threadContext as ThreadContext & WorkerContext)
+
     const rlCapabilities = threadContext.workerCapabilities?.rl
     expect(rlCapabilities?.supported).toBe(true)
     expect(rlCapabilities?.methods?.['actor-critic']?.supported).toBe(true)
@@ -162,92 +152,145 @@ describe('workerPlugin', () => {
     ).toBe(true)
   })
 
-  it('evaluates actor-critic payloads and returns fitness/writeback/telemetry', async () => {
-    const { invoke, environment } = registerPlugin()
+  it('does not install evaluationEnhancer when no pluginData.rl', () => {
+    const handler = makeHandler()
+    const threadContext = makeThreadContext()
 
-    const payload = {
-      method: 'actor-critic',
-      genomeOptions: { mock: true },
-      isLamarckian: true,
-      seed: 'abc',
-      config: {
-        learningRate: 0.01,
-        actionCount: 2,
-        gradientConfig: {
-          discountFactor: 0.99,
-          entropyCoefficient: 0.01,
-          clipGradients: false,
-          gradientClipValue: 1,
-        },
-        rolloutConfig: {
-          rolloutLength: 4,
-          rewardThreshold: 0.1,
-        },
-        actorActivation: 'softmax' as const,
-      },
-    }
+    workerPlugin(handler, threadContext as ThreadContext & WorkerContext)
 
-    const result = (await invoke(
-      payload
-    )) as import('../src/actions.js').EvaluateRLAgentResult
-
-    expect(environment.evaluateAgent).toHaveBeenCalledOnce()
-    if (result.method !== 'actor-critic') {
-      throw new Error('Expected actor-critic result')
-    }
-
-    expect(result.fitness).toBe(42)
-    expect(result.updatedActions).toEqual(mockUpdatedActions)
-    expect(result.telemetry.episodes).toBe(1)
-    expect(result.telemetry.rolloutSegments).toBe(1)
-    expect(result.telemetry.transitionsTrained).toBe(1)
-    expect(result.telemetry.segmentReturn).toBeDefined()
-    expect(result.telemetry.episodeReturn).toBeDefined()
-    expect(result.telemetry.policyEntropy).toBeDefined()
-    expect(result.telemetry.triggerCounts.reward).toBe(1)
-    expect(result.telemetry.triggerCounts.done).toBe(0)
-    expect(result.telemetry.segmentReturn?.mean).toBeCloseTo(1)
-    expect(result.telemetry.episodeReturn?.mean).toBeCloseTo(1)
-    expect(result.telemetry.policyEntropy?.samples).toBeGreaterThan(0)
+    expect(threadContext.evaluationEnhancer).toBeUndefined()
   })
 
-  it('evaluates Q-learning payloads without writeback when disabled', async () => {
-    const { invoke } = registerPlugin()
-
-    const payload = {
-      method: 'q-learning',
-      genomeOptions: { mock: true },
-      isLamarckian: false,
-      config: {
-        learningRate: 0.02,
-        actionCount: 2,
-        discountFactor: 0.95,
-        rolloutConfig: {
-          rolloutLength: 8,
-          rewardThreshold: 0.1,
+  it('installs evaluationEnhancer when pluginData.rl is present', () => {
+    const handler = makeHandler()
+    const threadContext = makeThreadContext({
+      rl: {
+        method: 'actor-critic',
+        isLamarckian: true,
+        config: {
+          learningRate: 0.01,
+          actionCount: 2,
+          gradientConfig: {
+            discountFactor: 0.99,
+            entropyCoefficient: 0.01,
+            clipGradients: false,
+            gradientClipValue: 1,
+          },
+          rolloutConfig: {
+            rolloutLength: 4,
+            rewardThreshold: 0.1,
+          },
+          actorActivation: 'softmax',
         },
-        epsilonInitial: 0.5,
-        epsilonDecayPerEpisode: 0.9,
-        epsilonMinimum: 0.05,
-        multiDiscrete: true,
       },
+    })
+
+    workerPlugin(handler, threadContext as ThreadContext & WorkerContext)
+
+    expect(threadContext.evaluationEnhancer).toBeTypeOf('function')
+  })
+
+  it('evaluates actor-critic via enhancer and returns fitness/writeback/telemetry', () => {
+    const handler = makeHandler()
+    const threadContext = makeThreadContext({
+      rl: {
+        method: 'actor-critic',
+        isLamarckian: true,
+        config: {
+          learningRate: 0.01,
+          actionCount: 2,
+          gradientConfig: {
+            discountFactor: 0.99,
+            entropyCoefficient: 0.01,
+            clipGradients: false,
+            gradientClipValue: 1,
+          },
+          rolloutConfig: {
+            rolloutLength: 4,
+            rewardThreshold: 0.1,
+          },
+          actorActivation: 'softmax' as const,
+        },
+      },
+    })
+
+    workerPlugin(handler, threadContext as ThreadContext & WorkerContext)
+
+    const enhancer = threadContext.evaluationEnhancer
+    if (enhancer == null) {
+      throw new Error('Expected evaluationEnhancer to be installed')
     }
 
-    const result = (await invoke(
-      payload
-    )) as import('../src/actions.js').EvaluateRLAgentResult
+    const result = enhancer({ mock: true } as never, threadContext, 'abc')
 
-    expect(result.method).toBe('q-learning')
+    expect(result).not.toBeInstanceOf(Promise)
+    const syncResult =
+      result as import('@neat-evolution/worker-evaluator').EvaluateGenomeResult
+    expect(syncResult.fitness).toBe(42)
+    expect(syncResult.updatedActions).toEqual(mockUpdatedActions)
+
+    const telemetry =
+      syncResult.telemetry as import('../src/actions.js').ActorCriticWorkerTelemetry
+    expect(telemetry.episodes).toBe(1)
+    expect(telemetry.rolloutSegments).toBe(1)
+    expect(telemetry.transitionsTrained).toBe(1)
+    expect(telemetry.segmentReturn).toBeDefined()
+    expect(telemetry.episodeReturn).toBeDefined()
+    expect(telemetry.policyEntropy).toBeDefined()
+    expect(telemetry.triggerCounts.reward).toBe(1)
+    expect(telemetry.triggerCounts.done).toBe(0)
+    expect(telemetry.segmentReturn?.mean).toBeCloseTo(1)
+    expect(telemetry.episodeReturn?.mean).toBeCloseTo(1)
+    if (telemetry.policyEntropy != null) {
+      expect(telemetry.policyEntropy.samples).toBeGreaterThan(0)
+    }
+  })
+
+  it('evaluates Q-learning via enhancer without writeback when disabled', () => {
+    const handler = makeHandler()
+    const threadContext = makeThreadContext({
+      rl: {
+        method: 'q-learning',
+        isLamarckian: false,
+        config: {
+          learningRate: 0.02,
+          actionCount: 2,
+          discountFactor: 0.95,
+          rolloutConfig: {
+            rolloutLength: 8,
+            rewardThreshold: 0.1,
+          },
+          epsilonInitial: 0.5,
+          epsilonDecayPerEpisode: 0.9,
+          epsilonMinimum: 0.05,
+          multiDiscrete: true,
+        },
+      },
+    })
+
+    workerPlugin(handler, threadContext as ThreadContext & WorkerContext)
+
+    const enhancer = threadContext.evaluationEnhancer
+    if (enhancer == null) {
+      throw new Error('Expected evaluationEnhancer to be installed')
+    }
+
+    const result = enhancer(
+      { mock: true } as never,
+      threadContext
+    ) as import('@neat-evolution/worker-evaluator').EvaluateGenomeResult
+
     expect(result.fitness).toBe(42)
-    expect(result).not.toHaveProperty('updatedActions')
-    expect(result.telemetry.rolloutSegments).toBe(1)
-    expect(result.telemetry.episodes).toBe(1)
-    if (result.method === 'q-learning') {
-      expect(result.telemetry.epsilonInitial).toBeCloseTo(0.5)
-      expect(result.telemetry.epsilonFinal).toBeCloseTo(0.5)
-      expect(result.telemetry.epsilonDecayPerEpisode).toBeCloseTo(0.9)
-      expect(result.telemetry.epsilonMinimum).toBeCloseTo(0.05)
-      expect(result.telemetry.multiDiscrete).toBe(true)
-    }
+    expect(result.updatedActions).toBeUndefined()
+
+    const telemetry =
+      result.telemetry as import('../src/actions.js').QLearningWorkerTelemetry
+    expect(telemetry.rolloutSegments).toBe(1)
+    expect(telemetry.episodes).toBe(1)
+    expect(telemetry.epsilonInitial).toBeCloseTo(0.5)
+    expect(telemetry.epsilonFinal).toBeCloseTo(0.5)
+    expect(telemetry.epsilonDecayPerEpisode).toBeCloseTo(0.9)
+    expect(telemetry.epsilonMinimum).toBeCloseTo(0.05)
+    expect(telemetry.multiDiscrete).toBe(true)
   })
 })

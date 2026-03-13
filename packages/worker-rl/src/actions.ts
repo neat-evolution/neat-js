@@ -104,3 +104,17 @@ export const requestEvaluateRLAgent = createMessage<
   EvaluateRLAgentPayload,
   EvaluateRLAgentResult
 >(RLWorkerActionType.REQUEST_EVALUATE_AGENT)
+
+/** Training config sent once during worker init via pluginData.
+ *  Consumed by the worker RL plugin to configure handleEvaluateGenome enhancement. */
+export type RLTrainingConfig =
+  | {
+      method: 'actor-critic'
+      isLamarckian: boolean
+      config: ACAgentConfig
+    }
+  | {
+      method: 'q-learning'
+      isLamarckian: boolean
+      config: QLAgentConfig
+    }

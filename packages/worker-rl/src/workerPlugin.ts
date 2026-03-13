@@ -13,17 +13,16 @@ import { createQLAgent } from '@neat-evolution/q-learning'
 import type { RNG } from '@neat-evolution/utils'
 import { createRNG, threadRNG } from '@neat-evolution/utils'
 import type { Handler, WorkerContext } from '@neat-evolution/worker-actions'
+import type { EvaluateGenomeResult } from '@neat-evolution/worker-evaluator'
 import type { ThreadContext } from '@neat-evolution/worker-evaluator/worker'
 
-import {
-  type ActorCriticWorkerTelemetry,
-  type EvaluateACAgentPayload,
-  type EvaluateQLAgentPayload,
-  type EvaluateRLAgentPayload,
-  type EvaluateRLAgentResult,
-  type QLearningWorkerTelemetry,
-  RLWorkerActionType,
-  type TriggerCounts,
+import type {
+  ActorCriticWorkerTelemetry,
+  EvaluateACAgentPayload,
+  EvaluateQLAgentPayload,
+  QLearningWorkerTelemetry,
+  RLTrainingConfig,
+  TriggerCounts,
 } from './actions.js'
 
 interface TelemetryTracker {
@@ -268,19 +267,20 @@ const attachEpisodeTracker = (
 }
 
 const evaluateActorCritic = (
-  payload: EvaluateACAgentPayload,
+  genomeOptions: GenomeFactoryOptions,
+  trainingConfig: RLTrainingConfig & { method: 'actor-critic' },
   context: ThreadContext,
   rng: RNG
-): EvaluateRLAgentResult => {
-  const trainable = hydrateTrainable(payload.genomeOptions, context)
+): EvaluateGenomeResult => {
+  const trainable = hydrateTrainable(genomeOptions, context)
   const trackEntropy =
-    (payload.config.actorActivation ?? 'sigmoid') === 'softmax'
+    (trainingConfig.config.actorActivation ?? 'sigmoid') === 'softmax'
   const tracker = createTelemetryTracker({ trackEntropy })
 
   const agent = createACAgent(
     trainable,
     {
-      ...payload.config,
+      ...trainingConfig.config,
       onSegmentTrained: tracker.onSegmentTrained,
     },
     rng.gen
@@ -290,29 +290,29 @@ const evaluateActorCritic = (
   const env = ensureAgentEnvironment(context)
   const fitness = env.evaluateAgent(agent)
 
-  const result: EvaluateRLAgentResult = {
-    method: 'actor-critic',
+  const result: EvaluateGenomeResult = {
     fitness,
-    telemetry: tracker.toActorCriticTelemetry(payload.config),
+    telemetry: tracker.toActorCriticTelemetry(trainingConfig.config),
   }
-  if (payload.isLamarckian) {
+  if (trainingConfig.isLamarckian) {
     result.updatedActions = trainable.getUpdatedActions()
   }
   return result
 }
 
 const evaluateQLearning = (
-  payload: EvaluateQLAgentPayload,
+  genomeOptions: GenomeFactoryOptions,
+  trainingConfig: RLTrainingConfig & { method: 'q-learning' },
   context: ThreadContext,
   rng: RNG
-): EvaluateRLAgentResult => {
-  const trainable = hydrateTrainable(payload.genomeOptions, context)
+): EvaluateGenomeResult => {
+  const trainable = hydrateTrainable(genomeOptions, context)
   const tracker = createTelemetryTracker()
 
   const agent = createQLAgent(
     trainable,
     {
-      ...payload.config,
+      ...trainingConfig.config,
       onSegmentTrained: tracker.onSegmentTrained,
     },
     rng
@@ -322,15 +322,32 @@ const evaluateQLearning = (
   const env = ensureAgentEnvironment(context)
   const fitness = env.evaluateAgent(agent)
 
-  const result: EvaluateRLAgentResult = {
-    method: 'q-learning',
+  const result: EvaluateGenomeResult = {
     fitness,
-    telemetry: tracker.toQLearningTelemetry(payload.config),
+    telemetry: tracker.toQLearningTelemetry(trainingConfig.config),
   }
-  if (payload.isLamarckian) {
+  if (trainingConfig.isLamarckian) {
     result.updatedActions = trainable.getUpdatedActions()
   }
   return result
+}
+
+/** Parse and validate RL training config from pluginData. */
+const parseRLTrainingConfig = (raw: unknown): RLTrainingConfig | undefined => {
+  if (raw == null || typeof raw !== 'object') {
+    return undefined
+  }
+  const candidate = raw as Record<string, unknown>
+  if (
+    candidate.method !== 'actor-critic' &&
+    candidate.method !== 'q-learning'
+  ) {
+    return undefined
+  }
+  if (candidate.config == null || typeof candidate.config !== 'object') {
+    return undefined
+  }
+  return raw as RLTrainingConfig
 }
 
 const declareWorkerRLCapabilities = (context: ThreadContext): void => {
@@ -355,23 +372,43 @@ const declareWorkerRLCapabilities = (context: ThreadContext): void => {
 }
 
 const workerRLPlugin = (
-  handler: Handler,
+  _handler: Handler,
   threadContext: ThreadContext & WorkerContext
 ): void => {
   declareWorkerRLCapabilities(threadContext)
-  handler.register(
-    RLWorkerActionType.REQUEST_EVALUATE_AGENT,
-    async (payload) => {
-      const rlPayload = payload as EvaluateRLAgentPayload
-      const rng =
-        rlPayload.seed != null ? createRNG(rlPayload.seed) : threadRNG()
 
-      if (rlPayload.method === 'actor-critic') {
-        return evaluateActorCritic(rlPayload, threadContext, rng)
-      }
-      return evaluateQLearning(rlPayload, threadContext, rng)
+  // Parse training config from pluginData (sent once during init)
+  const trainingConfig = parseRLTrainingConfig(threadContext.pluginData?.rl)
+  if (trainingConfig == null) {
+    // No training config — plugin declares capabilities but doesn't enhance evaluation.
+    // This can happen if the main thread hasn't configured training yet.
+    return
+  }
+
+  // Install evaluation enhancer on threadContext.
+  // handleEvaluateGenome will delegate to this when present.
+  threadContext.evaluationEnhancer = (
+    genomeOptions,
+    context,
+    seed
+  ): EvaluateGenomeResult => {
+    const rng = seed != null ? createRNG(seed) : threadRNG()
+
+    if (trainingConfig.method === 'actor-critic') {
+      return evaluateActorCritic(
+        genomeOptions,
+        trainingConfig as RLTrainingConfig & { method: 'actor-critic' },
+        context,
+        rng
+      )
     }
-  )
+    return evaluateQLearning(
+      genomeOptions,
+      trainingConfig as RLTrainingConfig & { method: 'q-learning' },
+      context,
+      rng
+    )
+  }
 }
 
 export default workerRLPlugin
