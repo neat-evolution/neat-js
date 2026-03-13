@@ -7,7 +7,7 @@ import {
 import {
   createEpisodicAgent,
   type EpisodicAgent,
-  isAgentEvaluatable,
+  isAgentEnvironment,
   isEpisodicEnvironment,
 } from '@neat-evolution/environment'
 import type { SyncExecutor } from '@neat-evolution/executor'
@@ -82,9 +82,9 @@ describe('BanditEnvironment', () => {
       expect(isEpisodicEnvironment(env)).toBe(true)
     })
 
-    it('passes isAgentEvaluatable type guard', () => {
+    it('passes isAgentEnvironment type guard', () => {
       const env = new BanditEnvironment()
-      expect(isAgentEvaluatable(env)).toBe(true)
+      expect(isAgentEnvironment(env)).toBe(true)
     })
 
     it('has correct description', () => {

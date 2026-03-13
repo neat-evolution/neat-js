@@ -1,5 +1,5 @@
 import type {
-  AgentEvaluatable,
+  AgentEnvironment,
   Environment,
   EnvironmentDescription,
   EpisodicEnvironment,
@@ -39,7 +39,7 @@ interface BanditEpisode {
  * Optimal fitness = 1.0 (always pulls the best arm).
  */
 export class BanditEnvironment
-  implements Environment<undefined>, EpisodicEnvironment, AgentEvaluatable
+  implements Environment<undefined>, EpisodicEnvironment, AgentEnvironment
 {
   public readonly description: EnvironmentDescription
   public readonly isAsync = false
