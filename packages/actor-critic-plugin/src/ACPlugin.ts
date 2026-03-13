@@ -7,12 +7,16 @@ import type {
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type {
+  EpisodeInfo,
+  EpisodeResult,
   EpisodicContext,
   RolloutBufferConfig,
+  TransitionInfo,
 } from '@neat-evolution/environment'
 import {
+  type AgentEnvironment,
   type EpisodicEnvironment,
-  isAgentEvaluatable,
+  isAgentEnvironment,
   isEpisodicEnvironment,
   type RLConfig,
 } from '@neat-evolution/environment'
@@ -22,6 +26,7 @@ import type {
   EvaluationResult,
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
+import type { Executor } from '@neat-evolution/executor'
 
 export interface ACPluginOptions {
   /** Learning rate for backward pass. */
@@ -52,10 +57,12 @@ export interface ACPluginOptions {
 /**
  * EvaluationPlugin that trains genomes via Actor-Critic during evaluation.
  *
- * When the environment implements AgentEvaluatable, the plugin passes the
- * AC agent directly for local evaluation — the agent's act() handles forward
- * passes, transition recording, and training. Otherwise falls back to
- * defaultEvaluate() (augmentation pattern, no training without act threading).
+ * The primary RL path is direct agent evaluation: when the environment
+ * implements AgentEnvironment, the plugin passes the AC agent directly so
+ * the agent owns action selection, transition recording, and training.
+ *
+ * The context-hook path remains as a partial integration surface for
+ * environments that still evaluate plain executors.
  *
  * Lamarckian writeback is handled via afterFitness(): trained weights are written
  * back to the genome after fitness is assigned.
@@ -66,7 +73,9 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
   private readonly algorithm: AnyAlgorithm
   private readonly options: ACPluginOptions
   private readonly rng: () => number
-  private episodicEnvironment: EpisodicEnvironment | undefined
+  private episodicEnvironment:
+    | (EpisodicEnvironment & Partial<AgentEnvironment>)
+    | undefined
   private rlConfig: RLConfig | undefined
 
   /** Current AC agent for getContextHooks() delegation. */
@@ -142,12 +151,9 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
 
     // 3. Evaluate — prefer local evaluation with agent if supported
     let fitness: number
-    if (isAgentEvaluatable(this.episodicEnvironment)) {
-      // Local evaluation: agent's act() handles forward pass + transition recording
+    if (isAgentEnvironment(this.episodicEnvironment)) {
       fitness = this.episodicEnvironment.evaluateAgent(agent)
     } else {
-      // Fallback: augmentation pattern via defaultEvaluate
-      // Note: without act hook threading, no transitions are recorded
       fitness = await defaultEvaluate(genome)
     }
 
@@ -164,17 +170,17 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
 
   getContextHooks(): Partial<EpisodicContext> {
     return {
-      reward: (_executor, reward, done) => {
+      reward: (_executor: Executor, reward: number, done: boolean): void => {
         this.currentAgent?.reward(reward, done)
       },
-      episodeStart: (_executor, info) => {
+      episodeStart: (_executor: Executor, info: EpisodeInfo): void => {
         this.currentAgent?.startEpisode(info)
       },
-      episodeEnd: (_executor, result) => {
+      episodeEnd: (_executor: Executor, result: EpisodeResult): void => {
         this.currentAgent?.endEpisode(result)
       },
-      annotateFrame: (_executor, annotation) => {
-        this.currentAgent?.annotate(annotation)
+      transitionInfo: (_executor: Executor, info: TransitionInfo): void => {
+        this.currentAgent?.setTransitionInfo(info)
       },
     }
   }

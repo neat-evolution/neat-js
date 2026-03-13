@@ -1,4 +1,3 @@
-import type { TrainableExecutor } from '@neat-evolution/backprop'
 import {
   Activation,
   type AnyGenome,
@@ -9,6 +8,7 @@ import type {
   EvaluationContext,
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
+import type { SyncExecutor } from '@neat-evolution/executor'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ACPlugin } from '../src/ACPlugin.js'
@@ -87,6 +87,14 @@ function makeMockEvaluationContext(): EvaluationContext {
     evaluateGenomeEntry: vi.fn(),
     evaluateGenomeEntryBatch: vi.fn(),
   } as unknown as EvaluationContext
+}
+
+function makeMockExecutor(): SyncExecutor {
+  return {
+    execute: vi.fn(),
+    executeBatch: vi.fn(),
+    isAsync: false as const,
+  }
 }
 
 function deterministicRng(): () => number {
@@ -244,7 +252,7 @@ describe('ACPlugin', () => {
       expect(hooks.reward).toBeTypeOf('function')
       expect(hooks.episodeStart).toBeTypeOf('function')
       expect(hooks.episodeEnd).toBeTypeOf('function')
-      expect(hooks.annotateFrame).toBeTypeOf('function')
+      expect(hooks.transitionInfo).toBeTypeOf('function')
     })
 
     it('hooks are no-ops when no agent is active', () => {
@@ -255,7 +263,7 @@ describe('ACPlugin', () => {
         deterministicRng()
       )
       const hooks = plugin.getContextHooks()
-      const mockExecutor = { execute: vi.fn() }
+      const mockExecutor = makeMockExecutor()
 
       // These should not throw — they use optional chaining on currentAgent
       expect(() => hooks.reward?.(mockExecutor, 1.0, false)).not.toThrow()
@@ -270,7 +278,7 @@ describe('ACPlugin', () => {
         })
       ).not.toThrow()
       expect(() =>
-        hooks.annotateFrame?.(mockExecutor, { isInteresting: true })
+        hooks.transitionInfo?.(mockExecutor, { isInteresting: true })
       ).not.toThrow()
     })
 
@@ -286,7 +294,7 @@ describe('ACPlugin', () => {
       plugin.initialize(pluginContext)
 
       const hooks = plugin.getContextHooks()
-      const mockExecutor = { execute: vi.fn() }
+      const mockExecutor = makeMockExecutor()
 
       // During defaultEvaluate, the agent should be active
       let agentWasActive = false
@@ -333,11 +341,10 @@ describe('ACPlugin', () => {
       plugin.initialize(pluginContext)
 
       const hooks = plugin.getContextHooks()
-      const mockExecutor = { execute: vi.fn() }
+      const mockExecutor = makeMockExecutor()
 
       // Track weight changes via getUpdatedActions
       let preTrainActions: unknown
-      let postTrainActions: unknown
 
       const defaultEvaluate = vi.fn().mockImplementation(async () => {
         hooks.episodeStart?.(mockExecutor, { episodeIndex: 0 })
