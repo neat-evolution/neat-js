@@ -5,12 +5,16 @@ import type {
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type {
+  EpisodeInfo,
+  EpisodeResult,
   EpisodicContext,
   RolloutBufferConfig,
+  TransitionInfo,
 } from '@neat-evolution/environment'
 import {
+  type AgentEnvironment,
   type EpisodicEnvironment,
-  isAgentEvaluatable,
+  isAgentEnvironment,
   isEpisodicEnvironment,
   type RLConfig,
 } from '@neat-evolution/environment'
@@ -20,6 +24,7 @@ import type {
   EvaluationResult,
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
+import type { Executor } from '@neat-evolution/executor'
 import type { QLAgent } from '@neat-evolution/q-learning'
 import { createQLAgent } from '@neat-evolution/q-learning'
 
@@ -36,8 +41,8 @@ export interface QLPluginOptions {
   /** Floor for epsilon decay. Default: 0.01 */
   epsilonMin?: number
 
-  /** Per-button Q-values: 2N outputs (Q_on, Q_off per button). Default: false */
-  perButton?: boolean
+  /** Multi-discrete Q-values: 2N outputs (Q_on, Q_off per factor). Default: false */
+  multiDiscrete?: boolean
 
   /** Rollout length. Default: 32 or environment's suggestedRolloutLength. */
   rolloutLength?: number | 'episode'
@@ -53,10 +58,12 @@ export interface QLPluginOptions {
 /**
  * EvaluationPlugin that trains genomes via Q-learning (DQN-style) during evaluation.
  *
- * When the environment implements AgentEvaluatable, the plugin passes the
- * QL agent directly for local evaluation — the agent's act() handles forward
- * passes, transition recording, and training. Otherwise falls back to
- * defaultEvaluate() (augmentation pattern, no training without act threading).
+ * The primary RL path is direct agent evaluation: when the environment
+ * implements AgentEnvironment, the plugin passes the QL agent directly so
+ * the agent owns action selection, transition recording, and training.
+ *
+ * The context-hook path remains as a partial integration surface for
+ * environments that still evaluate plain executors.
  *
  * Epsilon resets to the configured value at the start of each genome evaluation
  * and decays across episodes within that evaluation (within-evaluation decay).
@@ -70,7 +77,9 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
   private readonly algorithm: AnyAlgorithm
   private readonly options: QLPluginOptions
   private readonly rng: () => number
-  private episodicEnvironment: EpisodicEnvironment | undefined
+  private episodicEnvironment:
+    | (EpisodicEnvironment & Partial<AgentEnvironment>)
+    | undefined
   private rlConfig: RLConfig | undefined
 
   /** Current QL agent for getContextHooks() delegation. */
@@ -138,21 +147,17 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
     if (this.options.epsilonMin !== undefined) {
       agentConfig.epsilonMin = this.options.epsilonMin
     }
-    if (this.options.perButton !== undefined) {
-      agentConfig.perButton = this.options.perButton
+    if (this.options.multiDiscrete !== undefined) {
+      agentConfig.multiDiscrete = this.options.multiDiscrete
     }
-
     const agent = createQLAgent(trainable, agentConfig, this.rng)
     this.currentAgent = agent
 
     // 3. Evaluate — prefer local evaluation with agent if supported
     let fitness: number
-    if (isAgentEvaluatable(this.episodicEnvironment)) {
-      // Local evaluation: agent's act() handles forward pass + transition recording
+    if (isAgentEnvironment(this.episodicEnvironment)) {
       fitness = this.episodicEnvironment.evaluateAgent(agent)
     } else {
-      // Fallback: augmentation pattern via defaultEvaluate
-      // Note: without act hook threading, no transitions are recorded
       fitness = await defaultEvaluate(genome)
     }
 
@@ -169,17 +174,17 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
 
   getContextHooks(): Partial<EpisodicContext> {
     return {
-      reward: (_executor, reward, done) => {
+      reward: (_executor: Executor, reward: number, done: boolean): void => {
         this.currentAgent?.reward(reward, done)
       },
-      episodeStart: (_executor, info) => {
+      episodeStart: (_executor: Executor, info: EpisodeInfo): void => {
         this.currentAgent?.startEpisode(info)
       },
-      episodeEnd: (_executor, result) => {
+      episodeEnd: (_executor: Executor, result: EpisodeResult): void => {
         this.currentAgent?.endEpisode(result)
       },
-      annotateFrame: (_executor, annotation) => {
-        this.currentAgent?.annotate(annotation)
+      transitionInfo: (_executor: Executor, info: TransitionInfo): void => {
+        this.currentAgent?.setTransitionInfo(info)
       },
     }
   }

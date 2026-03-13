@@ -30,7 +30,7 @@ const phenotype: Phenotype = {
 }
 
 // ---------------------------------------------------------------------------
-// Minimal phenotype for per-button mode: 2 inputs → 4 outputs (2 buttons × 2 Q-values)
+// Minimal phenotype for multi-discrete mode: 2 inputs → 4 outputs (2 factors × 2 Q-values)
 // ---------------------------------------------------------------------------
 const perButtonPhenotype: Phenotype = {
   length: 6,
@@ -263,7 +263,7 @@ describe('QLPlugin', () => {
       expect(hooks.reward).toBeTypeOf('function')
       expect(hooks.episodeStart).toBeTypeOf('function')
       expect(hooks.episodeEnd).toBeTypeOf('function')
-      expect(hooks.annotateFrame).toBeTypeOf('function')
+      expect(hooks.transitionInfo).toBeTypeOf('function')
     })
 
     it('hooks are no-ops when no agent is active', () => {
@@ -293,7 +293,7 @@ describe('QLPlugin', () => {
         })
       ).not.toThrow()
       expect(() =>
-        hooks.annotateFrame?.(mockExecutor, { isInteresting: true })
+        hooks.transitionInfo?.(mockExecutor, { isInteresting: true })
       ).not.toThrow()
     })
 
@@ -667,14 +667,14 @@ describe('QLPlugin', () => {
     })
   })
 
-  describe('per-button mode', () => {
-    it('works with 2N outputs for per-button Q-values', async () => {
+  describe('multi-discrete mode', () => {
+    it('works with 2N outputs for multi-discrete Q-values', async () => {
       const algorithm = makeMockAlgorithm(perButtonPhenotype)
       const env = makeMockEpisodicEnvironment()
 
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3, perButton: true },
+        { learningRate: 0.01, epsilon: 0.3, multiDiscrete: true },
         deterministicRng()
       )
 
