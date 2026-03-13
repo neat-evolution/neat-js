@@ -94,7 +94,12 @@ const registerPlugin = () => {
     evaluateAgent: vi.fn((agent: any) => {
       agent.startEpisode({ episodeIndex: 0 })
       agent.reward(1, true)
-      agent.endEpisode({ fitness: 1, totalSteps: 1, terminated: true })
+      agent.endEpisode({
+        fitness: 1,
+        episodeReturn: 1,
+        totalSteps: 1,
+        terminated: true,
+      })
       return 42
     }),
   }
