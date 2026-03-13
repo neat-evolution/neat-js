@@ -62,6 +62,14 @@ function makeMockEpisodicEnvironment() {
   }
 }
 
+function makeMockAgentEnvironment() {
+  const base = makeMockEpisodicEnvironment()
+  return {
+    ...base,
+    evaluateAgent: vi.fn().mockReturnValue(0.9),
+  }
+}
+
 function makeMockPluginContext(
   algorithm: ReturnType<typeof makeMockAlgorithm>,
   environment: unknown
@@ -215,6 +223,55 @@ describe('ACPlugin', () => {
       )
 
       expect(result.fitness).toBe(0.75)
+    })
+
+    it('uses worker evaluation when supportsTraining is true', async () => {
+      const algorithm = makeMockAlgorithm()
+      const env = makeMockAgentEnvironment()
+      const plugin = new ACPlugin(
+        algorithm,
+        { learningRate: 0.01 },
+        deterministicRng()
+      )
+
+      const pluginContext = makeMockPluginContext(algorithm, env)
+      plugin.initialize(pluginContext)
+
+      const evalContext = {
+        ...makeMockEvaluationContext(),
+        supportsTraining: true,
+        call: vi.fn().mockResolvedValue({
+          method: 'actor-critic',
+          fitness: 1.05,
+          updatedActions: [[PhenotypeActionType.Link, 0, 2, 0.5]],
+          telemetry: {
+            episodes: 2,
+            rolloutSegments: 4,
+            transitionsTrained: 64,
+            actorActivation: 'softmax',
+            entropyCoefficient: 0.01,
+          },
+        }),
+      } as unknown as EvaluationContext
+
+      const genomeWithFactory = {
+        ...mockGenome,
+        toFactoryOptions: vi.fn().mockReturnValue({ mock: true }),
+      } as unknown as AnyGenome
+
+      const defaultEvaluate = vi.fn()
+      const result = await plugin.evaluateGenome(
+        genomeWithFactory,
+        defaultEvaluate,
+        evalContext
+      )
+
+      expect(result.fitness).toBeCloseTo(1.05)
+      expect(evalContext.call).toHaveBeenCalledOnce()
+      expect(defaultEvaluate).not.toHaveBeenCalled()
+
+      plugin.afterFitness(genomeWithFactory, result.fitness, pluginContext)
+      expect(algorithm.writeBackWeights).toHaveBeenCalled()
     })
 
     it('calls createPhenotype for each genome', async () => {

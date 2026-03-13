@@ -4,6 +4,7 @@ import { createTrainableExecutor } from '@neat-evolution/backprop'
 import type {
   AnyAlgorithm,
   AnyGenome,
+  GenomeFactoryOptions,
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type {
@@ -27,6 +28,11 @@ import type {
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
 import type { Executor } from '@neat-evolution/executor'
+import {
+  type ActorCriticWorkerTelemetry,
+  type EvaluateRLAgentResult,
+  requestEvaluateRLAgent,
+} from '@neat-evolution/worker-rl'
 
 export interface ACPluginOptions {
   /** Learning rate for backward pass. */
@@ -84,6 +90,11 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
 
   /** Tracks updated actions per genome for writeback in afterFitness. */
   private readonly pendingWritebacks = new Map<G, PhenotypeAction[]>()
+  /** Latest worker telemetry keyed by genome for debugging/metrics. */
+  private readonly telemetryByGenome = new WeakMap<
+    G,
+    ActorCriticWorkerTelemetry
+  >()
 
   constructor(
     algorithm: AnyAlgorithm,
@@ -106,7 +117,7 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
   async evaluateGenome(
     genome: G,
     defaultEvaluate: (genome: G) => Promise<number>,
-    _context: EvaluationContext<G>
+    context: EvaluationContext<G>
   ): Promise<EvaluationResult> {
     if (this.episodicEnvironment === undefined || this.rlConfig === undefined) {
       throw new Error('ACPlugin not initialized — call initialize() first')
@@ -115,42 +126,40 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
     const rlConfig = this.rlConfig
     const isLamarckian = this.options.isLamarckian ?? true
 
-    // 1. Create trainable executor from genome
+    const canUseWorker =
+      context.supportsTraining === true &&
+      isAgentEnvironment(this.episodicEnvironment)
+
+    if (canUseWorker) {
+      return await this.evaluateInWorker(
+        genome,
+        rlConfig,
+        isLamarckian,
+        context
+      )
+    }
+
+    return await this.evaluateLocally(
+      genome,
+      defaultEvaluate,
+      rlConfig,
+      isLamarckian
+    )
+  }
+
+  private async evaluateLocally(
+    genome: G,
+    defaultEvaluate: (genome: G) => Promise<number>,
+    rlConfig: RLConfig,
+    isLamarckian: boolean
+  ): Promise<EvaluationResult> {
     const phenotype = this.algorithm.createPhenotype(genome)
     const trainable = createTrainableExecutor(phenotype)
+    const agentConfig = this.buildAgentConfig(rlConfig)
 
-    // 2. Create AC agent with RolloutBuffer
-    const rolloutLength =
-      this.options.rolloutLength ?? rlConfig.suggestedRolloutLength ?? 32
-
-    const rolloutConfig: RolloutBufferConfig = {
-      rolloutLength,
-      rewardThreshold: this.options.rewardThreshold ?? 0.1,
-    }
-    if (this.options.minRolloutLength !== undefined) {
-      rolloutConfig.minRolloutLength = this.options.minRolloutLength
-    }
-
-    const agent = createACAgent(
-      trainable,
-      {
-        learningRate: this.options.learningRate,
-        actionCount: rlConfig.actionSize,
-        gradientConfig: {
-          discountFactor:
-            this.options.discountFactor ?? rlConfig.discountFactor,
-          entropyCoefficient: this.options.entropyCoefficient ?? 0.01,
-          clipGradients: this.options.clipGradients ?? false,
-          gradientClipValue: this.options.gradientClipValue ?? 1.0,
-        },
-        rolloutConfig,
-        actorActivation: this.options.actorActivation ?? 'softmax',
-      },
-      this.rng
-    )
+    const agent = createACAgent(trainable, agentConfig, this.rng)
     this.currentAgent = agent
 
-    // 3. Evaluate — prefer local evaluation with agent if supported
     let fitness: number
     if (isAgentEnvironment(this.episodicEnvironment)) {
       fitness = this.episodicEnvironment.evaluateAgent(agent)
@@ -158,15 +167,69 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
       fitness = await defaultEvaluate(genome)
     }
 
-    // 4. Store updated weights for potential writeback
     if (isLamarckian) {
       this.pendingWritebacks.set(genome, trainable.getUpdatedActions())
     }
 
-    // 5. Clean up per-evaluation state
     this.currentAgent = null
-
     return { fitness }
+  }
+
+  private async evaluateInWorker(
+    genome: G,
+    rlConfig: RLConfig,
+    isLamarckian: boolean,
+    context: EvaluationContext<G>
+  ): Promise<EvaluationResult> {
+    const genomeOptions = genome.toFactoryOptions()
+    const payload = requestEvaluateRLAgent({
+      method: 'actor-critic',
+      genomeOptions,
+      isLamarckian,
+      seed: computeFactorySeed(genomeOptions),
+      config: this.buildAgentConfig(rlConfig),
+    })
+    const result = (await context.call(payload)) as EvaluateRLAgentResult
+    if (result.method !== 'actor-critic') {
+      throw new Error('Worker returned mismatched RL method result')
+    }
+
+    if (isLamarckian && result.updatedActions) {
+      this.pendingWritebacks.set(genome, result.updatedActions)
+    }
+    this.telemetryByGenome.set(genome, result.telemetry)
+    return { fitness: result.fitness }
+  }
+
+  private buildAgentConfig(
+    rlConfig: RLConfig
+  ): import('@neat-evolution/actor-critic').ACAgentConfig {
+    const rolloutConfig = this.buildRolloutConfig(rlConfig)
+    return {
+      learningRate: this.options.learningRate,
+      actionCount: rlConfig.actionSize,
+      gradientConfig: {
+        discountFactor: this.options.discountFactor ?? rlConfig.discountFactor,
+        entropyCoefficient: this.options.entropyCoefficient ?? 0.01,
+        clipGradients: this.options.clipGradients ?? false,
+        gradientClipValue: this.options.gradientClipValue ?? 1.0,
+      },
+      rolloutConfig,
+      actorActivation: this.options.actorActivation ?? 'softmax',
+    }
+  }
+
+  private buildRolloutConfig(rlConfig: RLConfig): RolloutBufferConfig {
+    const rolloutLength =
+      this.options.rolloutLength ?? rlConfig.suggestedRolloutLength ?? 32
+    const rolloutConfig: RolloutBufferConfig = {
+      rolloutLength,
+      rewardThreshold: this.options.rewardThreshold ?? 0.1,
+    }
+    if (this.options.minRolloutLength !== undefined) {
+      rolloutConfig.minRolloutLength = this.options.minRolloutLength
+    }
+    return rolloutConfig
   }
 
   getContextHooks(): Partial<EpisodicContext> {
@@ -193,4 +256,14 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
       this.pendingWritebacks.delete(genome)
     }
   }
+}
+
+const computeFactorySeed = (options: GenomeFactoryOptions): string => {
+  const serialized = JSON.stringify(options)
+  let hash = 0
+  for (let i = 0; i < serialized.length; i++) {
+    const char = serialized.charCodeAt(i)
+    hash = (hash * 31 + char) >>> 0
+  }
+  return hash.toString(16)
 }
