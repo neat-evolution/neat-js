@@ -11,9 +11,9 @@ export const setCPPNStateRedirect = (
   oldKey: LinkKey,
   context: ReproducerHandlerContext
 ): void => {
-  // Use Handler's request method instead of manual promise tracking
+  // Use Handler's call method instead of manual promise tracking
   // Fire-and-forget pattern - we don't await the response
-  void context.request<EmptyPayload>(
+  void context.call<EmptyPayload>(
     requestSetCPPNStateRedirect({
       key,
       oldKey,

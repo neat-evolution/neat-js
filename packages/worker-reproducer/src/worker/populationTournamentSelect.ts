@@ -36,7 +36,7 @@ export const populationTournamentSelect = async (
   }
 
   if (context.allowLazyPopulationSnapshot) {
-    const snapshot = await context.request<OrganismBatchPayload>(
+    const snapshot = await context.call<OrganismBatchPayload>(
       requestPopulationSnapshot({})
     )
     const hydrated = snapshot.organisms.map((payload) =>
@@ -50,7 +50,7 @@ export const populationTournamentSelect = async (
     )
   }
 
-  const payload = await context.request<OrganismPayload>(
+  const payload = await context.call<OrganismPayload>(
     requestPopulationTournamentSelect({})
   )
   return hydrateOrganismPayload(payload, context)

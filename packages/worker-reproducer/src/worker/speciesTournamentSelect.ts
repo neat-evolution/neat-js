@@ -43,7 +43,7 @@ export const speciesTournamentSelect = async (
     return hydrateOrganismPayload(cached, context)
   }
 
-  const payload = await context.request<OrganismPayload>(
+  const payload = await context.call<OrganismPayload>(
     requestSpeciesTournamentSelect({
       speciesId,
     })
