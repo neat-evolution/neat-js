@@ -22,6 +22,7 @@ try {
     method: selectedMethod,
     workerConfig: {
       createEnvironmentPathname: '@neat-evolution/dataset-environment',
+      pluginPaths: ['@neat-evolution/worker-rl/workerPlugin'],
     },
   })
 } catch (e) {

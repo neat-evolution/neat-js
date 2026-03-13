@@ -84,6 +84,7 @@
     "@neat-evolution/q-learning": "workspace:^",
     "@neat-evolution/q-learning-plugin": "workspace:^",
     "@neat-evolution/worker-evaluator": "workspace:^",
+    "@neat-evolution/worker-rl": "workspace:^",
     "@neat-evolution/worker-reproducer": "workspace:^",
     "@neat-evolution/worker-threads": "workspace:^",
     "@swc/helpers": "^0.5.19",
