@@ -70,6 +70,7 @@ export interface ACPluginOptions {
 export class ACPlugin<G extends AnyGenome = AnyGenome>
   implements EvaluationPlugin<G>
 {
+  readonly mode = 'augmentation'
   private readonly algorithm: AnyAlgorithm
   private readonly options: ACPluginOptions
   private readonly rng: () => number
