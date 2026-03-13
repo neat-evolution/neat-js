@@ -1484,7 +1484,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/utils@workspace:^, @neat-evolution/utils@workspace:packages/utils":
+"@neat-evolution/utils@workspace:*, @neat-evolution/utils@workspace:^, @neat-evolution/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/utils@workspace:packages/utils"
   dependencies:
@@ -1608,6 +1608,33 @@ __metadata:
     lint-staged: "npm:^16.2.7"
     nodemon: "npm:^3.1.11"
     quick-lru: "npm:^7.3.0"
+    rimraf: "npm:^6.1.2"
+    typescript: "npm:^5.9.3"
+    vitest: "npm:^4.0.14"
+  languageName: unknown
+  linkType: soft
+
+"@neat-evolution/worker-rl@workspace:packages/worker-rl":
+  version: 0.0.0-use.local
+  resolution: "@neat-evolution/worker-rl@workspace:packages/worker-rl"
+  dependencies:
+    "@biomejs/biome": "npm:2.4.4"
+    "@heygrady/tsconfig-bases": "npm:^1.0.7"
+    "@neat-evolution/actor-critic": "workspace:*"
+    "@neat-evolution/backprop": "workspace:*"
+    "@neat-evolution/core": "workspace:*"
+    "@neat-evolution/environment": "workspace:*"
+    "@neat-evolution/q-learning": "workspace:*"
+    "@neat-evolution/utils": "workspace:*"
+    "@neat-evolution/worker-actions": "workspace:*"
+    "@neat-evolution/worker-evaluator": "workspace:*"
+    "@swc/cli": "npm:^0.7.9"
+    "@swc/core": "npm:^1.15.3"
+    "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
+    "@vitest/coverage-v8": "npm:^4.0.14"
+    concurrently: "npm:^9.2.1"
+    lint-staged: "npm:^16.2.7"
+    nodemon: "npm:^3.1.11"
     rimraf: "npm:^6.1.2"
     typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.14"
