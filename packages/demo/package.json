@@ -43,6 +43,7 @@
     "backprop": "node ./dist/esm/features/backprop/index.js",
     "lamarkian": "node ./dist/esm/features/lamarkian/index.js",
     "compare": "node ./dist/esm/features/compare/index.js",
+    "episodic": "node ./dist/esm/features/episodic/index.js",
     "start": "caffeinate -s node ./dist/esm/worker.js",
     "format": "biome check --write",
     "lint": "biome lint",
@@ -63,6 +64,8 @@
     "check": "tsgo --noEmit"
   },
   "dependencies": {
+    "@neat-evolution/actor-critic": "workspace:^",
+    "@neat-evolution/actor-critic-plugin": "workspace:^",
     "@neat-evolution/backprop": "workspace:^",
     "@neat-evolution/backprop-strategy": "workspace:^",
     "@neat-evolution/core": "workspace:^",
@@ -78,6 +81,8 @@
     "@neat-evolution/executor": "workspace:^",
     "@neat-evolution/hyperneat": "workspace:^",
     "@neat-evolution/neat": "workspace:^",
+    "@neat-evolution/q-learning": "workspace:^",
+    "@neat-evolution/q-learning-plugin": "workspace:^",
     "@neat-evolution/worker-evaluator": "workspace:^",
     "@neat-evolution/worker-reproducer": "workspace:^",
     "@neat-evolution/worker-threads": "workspace:^",

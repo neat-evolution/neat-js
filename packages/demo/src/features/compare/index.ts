@@ -13,7 +13,7 @@
  */
 
 import { createTrainableExecutor } from '@neat-evolution/backprop'
-import { BackpropStrategy } from '@neat-evolution/backprop-strategy'
+import { BackpropPlugin } from '@neat-evolution/backprop-strategy'
 import {
   DatasetEnvironment,
   type DatasetOptions,
@@ -22,7 +22,7 @@ import {
   type Matrix,
   oneHotAccuracy,
 } from '@neat-evolution/dataset-environment'
-import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
+import type { EvaluationPlugin } from '@neat-evolution/evaluation-strategy'
 import type { AnyAlgorithm } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
@@ -110,14 +110,14 @@ interface RunResult {
 
 async function runVariant(
   name: string,
-  strategy?: EvaluationStrategy
+  plugins?: EvaluationPlugin[]
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
 
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    ...(strategy != null ? { strategy } : {}),
+    ...(plugins != null ? { plugins } : {}),
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,
@@ -164,32 +164,24 @@ console.log(
 
 // Baldwinian (backprop, no writeback) — train on training, fitness on validation
 console.log('Running: Baldwinian (backprop, discard weights)...')
-const baldwinianStrategy = new BackpropStrategy(
-  NEATAlgorithm as AnyAlgorithm,
-  environment,
-  {
-    trainingEpochs: args.trainingEpochs,
-    learningRate: args.learningRate,
-    isLamarckian: false,
-  }
-)
-const baldwinian = await runVariant('Baldwinian', baldwinianStrategy)
+const baldwinianPlugin = new BackpropPlugin(NEATAlgorithm as AnyAlgorithm, {
+  trainingEpochs: args.trainingEpochs,
+  learningRate: args.learningRate,
+  isLamarckian: false,
+})
+const baldwinian = await runVariant('Baldwinian', [baldwinianPlugin])
 console.log(
   `  Done: ${baldwinian.bestFitness.toFixed(6)} in ${(baldwinian.elapsedMs / 1000).toFixed(1)}s`
 )
 
 // Lamarckian (backprop + writeback) — train on training, fitness on validation
 console.log('Running: Lamarckian (backprop + writeback)...')
-const lamarckianStrategy = new BackpropStrategy(
-  NEATAlgorithm as AnyAlgorithm,
-  environment,
-  {
-    trainingEpochs: args.trainingEpochs,
-    learningRate: args.learningRate,
-    isLamarckian: true,
-  }
-)
-const lamarckian = await runVariant('Lamarckian', lamarckianStrategy)
+const lamarckianPlugin = new BackpropPlugin(NEATAlgorithm as AnyAlgorithm, {
+  trainingEpochs: args.trainingEpochs,
+  learningRate: args.learningRate,
+  isLamarckian: true,
+})
+const lamarckian = await runVariant('Lamarckian', [lamarckianPlugin])
 console.log(
   `  Done: ${lamarckian.bestFitness.toFixed(6)} in ${(lamarckian.elapsedMs / 1000).toFixed(1)}s`
 )
