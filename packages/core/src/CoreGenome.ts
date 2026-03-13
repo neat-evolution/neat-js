@@ -405,13 +405,20 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     const neatConfig = this.config.neat()
     const rng = threadRNG()
 
+    const updateLinkWeight = (link: LinkTypeOf<Ctx>, delta: number): void => {
+      link.weight += delta
+      this.connections.setEdge(link.from, link.to, link.weight)
+    }
+
     if (neatConfig.mutateOnlyOneLink) {
       const linkIndex = rng.genRange(0, linkSize)
       let i = 0
       for (const link of this.links.values()) {
         if (i === linkIndex) {
-          link.weight +=
+          updateLinkWeight(
+            link,
             (rng.gen() - 0.5) * 2.0 * neatConfig.mutateLinkWeightSize
+          )
           break
         }
         i++
@@ -419,7 +426,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     } else {
       const weightSize = neatConfig.mutateLinkWeightSize
       for (const link of this.links.values()) {
-        link.weight += (rng.gen() - 0.5) * 2 * weightSize
+        updateLinkWeight(link, (rng.gen() - 0.5) * 2 * weightSize)
       }
     }
   }
