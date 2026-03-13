@@ -1,6 +1,7 @@
 import type { AnyGenome, FitnessData, GenomeEntry } from '@neat-evolution/core'
 import type { EpisodicContext } from '@neat-evolution/environment'
 import type { DispatcherContext } from '@neat-evolution/worker-actions'
+import type { WorkerTrainingCapabilities } from './WorkerTrainingCapabilities.js'
 
 export interface EvaluationContext<G extends AnyGenome = AnyGenome>
   extends DispatcherContext {
@@ -29,6 +30,12 @@ export interface EvaluationContext<G extends AnyGenome = AnyGenome>
    * Set by WorkerEvaluator when pluginPaths are configured.
    */
   supportsTraining?: boolean
+
+  /**
+   * Capabilities reported by WorkerEvaluator after worker initialization.
+   * Plugins can inspect this before dispatching custom worker actions.
+   */
+  workerTrainingCapabilities?: WorkerTrainingCapabilities
 
   /**
    * Episodic context hooks provided by RL plugins.
