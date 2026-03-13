@@ -74,6 +74,7 @@ export interface QLPluginOptions {
 export class QLPlugin<G extends AnyGenome = AnyGenome>
   implements EvaluationPlugin<G>
 {
+  readonly mode = 'augmentation'
   private readonly algorithm: AnyAlgorithm
   private readonly options: QLPluginOptions
   private readonly rng: () => number
