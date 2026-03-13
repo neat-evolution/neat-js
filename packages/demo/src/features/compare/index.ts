@@ -110,14 +110,14 @@ interface RunResult {
 
 async function runVariant(
   name: string,
-  evaluation?: EvaluationConfig
+  evaluation: EvaluationConfig
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
 
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    ...(evaluation != null ? { evaluation } : {}),
+    evaluation,
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,
@@ -157,7 +157,8 @@ async function runVariant(
 
 // Vanilla NEAT — fitness on training data (no learning step)
 console.log('Running: Vanilla NEAT...')
-const vanilla = await runVariant('Vanilla')
+const vanillaEvaluation: EvaluationConfig = { type: 'strategy' }
+const vanilla = await runVariant('Vanilla', vanillaEvaluation)
 console.log(
   `  Done: ${vanilla.bestFitness.toFixed(6)} in ${(vanilla.elapsedMs / 1000).toFixed(1)}s`
 )

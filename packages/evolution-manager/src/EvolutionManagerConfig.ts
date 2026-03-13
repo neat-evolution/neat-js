@@ -83,23 +83,12 @@ export interface EvolutionManagerConfig<
   environment: EnvironmentConfig
 
   /**
-   * Explicit evaluation pipeline selection.
+   * Explicit evaluation pipeline selection (required).
    * - { type: 'strategy' } delegates fully to the provided strategy (or defaults).
    * - { type: 'plugin-augmentation' } installs RL plugins that wrap evaluation.
    * - { type: 'plugin-replacement' } hands evaluation to a single replacement plugin.
    */
-  evaluation?: EvaluationConfig
-
-  /**
-   * @deprecated Use `evaluation: { type: 'strategy', strategy }` instead.
-   * Retained for backward compatibility with pre-Phase 4 callers.
-   */
-  strategy?: EvaluationStrategy
-
-  /** Evaluation plugins that augment or replace per-genome evaluation.
-   *  When provided, a PluginStrategy wraps the evaluation pipeline.
-   *  Plugins are initialized once during init() and receive lifecycle hooks. */
-  plugins?: EvaluationPlugin[]
+  evaluation: EvaluationConfig
 
   /** Evolution loop settings (iterations, secondsLimit, callbacks, etc.) */
   evolutionOptions?: Partial<EvolutionOptions>

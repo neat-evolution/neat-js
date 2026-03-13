@@ -98,7 +98,12 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
 
     this.algorithm = config.algorithm
     this.environment = config.environment
-    this.evaluationConfig = this.normalizeEvaluationConfig(config)
+    if (config.evaluation == null) {
+      throw new Error(
+        'EvolutionManager requires an explicit evaluation configuration.'
+      )
+    }
+    this.evaluationConfig = this.validateEvaluationConfig(config.evaluation)
     this.evolutionOptions = {
       ...defaultEvolutionOptions,
       ...config.evolutionOptions,
@@ -328,28 +333,6 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       environment,
       supportsTraining,
     })
-  }
-
-  private normalizeEvaluationConfig(
-    config: EvolutionManagerConfig<Ctx>
-  ): EvaluationConfig {
-    if (config.evaluation != null) {
-      return this.validateEvaluationConfig(config.evaluation)
-    }
-
-    if (config.plugins != null && config.plugins.length > 0) {
-      throw new Error(
-        'EvolutionManagerConfig.plugins is deprecated. Provide `evaluation: { type: "plugin-augmentation", plugins }` instead.'
-      )
-    }
-
-    if (config.strategy != null) {
-      return {
-        type: 'strategy',
-        strategy: config.strategy,
-      }
-    }
-    return { type: 'strategy' }
   }
 
   private validateEvaluationConfig(config: EvaluationConfig): EvaluationConfig {

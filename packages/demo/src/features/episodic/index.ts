@@ -42,7 +42,7 @@ interface VariantConfig {
   name: string
   description: string
   outputCount: number
-  evaluation?: EvaluationConfig
+  evaluation: EvaluationConfig
   summary: VariantSummary
 }
 
@@ -147,6 +147,7 @@ const variants: VariantConfig[] = [
     name: 'Vanilla',
     description: 'Baseline evolution via evaluate()',
     outputCount: 3,
+    evaluation: { type: 'strategy' },
     summary: {
       path: 'evaluate()',
       method: 'vanilla',
@@ -276,7 +277,7 @@ interface RunResult {
 async function runVariant(
   name: string,
   outputCount: number,
-  evaluation?: EvaluationConfig
+  evaluation: EvaluationConfig
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
   const environment = new BanditEnvironment(outputCount)
@@ -284,7 +285,7 @@ async function runVariant(
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    ...(evaluation != null ? { evaluation } : {}),
+    evaluation,
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,

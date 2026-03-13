@@ -3,6 +3,7 @@ import type { EvaluationPlugin } from '@neat-evolution/evaluation-strategy'
 import type { SyncExecutor } from '@neat-evolution/executor'
 import { NEATAlgorithm } from '@neat-evolution/neat'
 import { describe, expect, test } from 'vitest'
+import type { EvaluationConfig } from '../src/index.js'
 import {
   deserializeOrganism,
   EvolutionManager,
@@ -47,14 +48,20 @@ function createTestEnvironment(): Environment<null> {
 
 describe('EvolutionManager', () => {
   const environment = createTestEnvironment()
+  const baseEvaluation: EvaluationConfig = { type: 'strategy' }
+  const baseConfig = {
+    algorithm: NEATAlgorithm,
+    environment,
+    evaluation: baseEvaluation,
+  } as const
 
   describe('constructor validation', () => {
     test('throws on missing algorithm', () => {
       expect(
         () =>
           new EvolutionManager({
+            ...baseConfig,
             algorithm: undefined as never,
-            environment,
           })
       ).toThrow('EvolutionManager requires an algorithm')
     })
@@ -63,37 +70,34 @@ describe('EvolutionManager', () => {
       expect(
         () =>
           new EvolutionManager({
-            algorithm: NEATAlgorithm,
+            ...baseConfig,
             environment: undefined as never,
           })
       ).toThrow('EvolutionManager requires an environment')
     })
 
-    test('constructs successfully with valid config', () => {
-      const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
-      })
-      expect(manager).toBeDefined()
+    test('throws on missing evaluation config', () => {
+      expect(
+        () =>
+          new EvolutionManager({
+            algorithm: NEATAlgorithm,
+            environment,
+          } as never)
+      ).toThrow(
+        'EvolutionManager requires an explicit evaluation configuration.'
+      )
     })
 
-    test('throws when using deprecated plugins config', () => {
-      const plugin: EvaluationPlugin = {}
-      expect(() => {
-        return new EvolutionManager({
-          algorithm: NEATAlgorithm,
-          environment,
-          plugins: [plugin],
-        })
-      }).toThrow('EvolutionManagerConfig.plugins is deprecated')
+    test('constructs successfully with valid config', () => {
+      const manager = new EvolutionManager({ ...baseConfig })
+      expect(manager).toBeDefined()
     })
 
     test('plugin-augmentation rejects replacement plugins', () => {
       const plugin: EvaluationPlugin = { mode: 'replacement' }
       expect(() => {
         return new EvolutionManager({
-          algorithm: NEATAlgorithm,
-          environment,
+          ...baseConfig,
           evaluation: {
             type: 'plugin-augmentation',
             plugins: [plugin],
@@ -108,8 +112,7 @@ describe('EvolutionManager', () => {
       const plugin: EvaluationPlugin = {}
       expect(() => {
         return new EvolutionManager({
-          algorithm: NEATAlgorithm,
-          environment,
+          ...baseConfig,
           evaluation: {
             type: 'plugin-replacement',
             plugin,
@@ -123,17 +126,13 @@ describe('EvolutionManager', () => {
 
   describe('currentPopulation', () => {
     test('returns undefined before init', () => {
-      const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
-      })
+      const manager = new EvolutionManager({ ...baseConfig })
       expect(manager.currentPopulation).toBeUndefined()
     })
 
     test('returns population after init', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
       })
       await manager.init()
@@ -145,8 +144,7 @@ describe('EvolutionManager', () => {
   describe('init() idempotency', () => {
     test('calling init() twice does not recreate population', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
       })
       await manager.init()
@@ -161,8 +159,7 @@ describe('EvolutionManager', () => {
   describe('local mode (no workerConfig)', () => {
     test('creates population with local evaluator and reproducer', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
       })
       await manager.init()
@@ -180,8 +177,7 @@ describe('EvolutionManager', () => {
   describe('initializePopulation()', () => {
     test('runs initial mutations and first evaluation', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: { initialMutations: 5 },
       })
@@ -199,8 +195,7 @@ describe('EvolutionManager', () => {
 
     test('is idempotent', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: { initialMutations: 3 },
       })
@@ -217,8 +212,7 @@ describe('EvolutionManager', () => {
   describe('evolve()', () => {
     test('auto-inits when called without explicit init()', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 1,
@@ -236,8 +230,7 @@ describe('EvolutionManager', () => {
 
     test('returns best organism after evolution', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 2,
@@ -254,8 +247,7 @@ describe('EvolutionManager', () => {
     test('per-call options override constructor options', async () => {
       let afterEvaluateCount = 0
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 5,
@@ -279,8 +271,7 @@ describe('EvolutionManager', () => {
   describe('initialMutations', () => {
     test('applied during initializePopulation, not during evolve', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 1,
@@ -315,8 +306,7 @@ describe('EvolutionManager', () => {
   describe('terminate() + re-init', () => {
     test('terminate resets state, init() can be called again', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
       })
       await manager.init()
@@ -337,10 +327,7 @@ describe('EvolutionManager', () => {
 
   describe('getBestExecutor()', () => {
     test('throws before population is initialized', () => {
-      const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
-      })
+      const manager = new EvolutionManager({ ...baseConfig })
       expect(() => manager.getBestExecutor()).toThrow(
         'Population not initialized'
       )
@@ -348,8 +335,7 @@ describe('EvolutionManager', () => {
 
     test('returns executor even before evaluation (best picks first organism)', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
       })
       await manager.init()
@@ -361,8 +347,7 @@ describe('EvolutionManager', () => {
 
     test('returns executor after evolution', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 1,
@@ -384,8 +369,7 @@ describe('EvolutionManager', () => {
   describe('organismToExecutor()', () => {
     test('converts organism to a working executor', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 1,
@@ -413,8 +397,7 @@ describe('EvolutionManager', () => {
   describe('getPopulationData()', () => {
     test('throws before population is initialized', () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
       })
       expect(() => manager.getPopulationData()).toThrow(
         'Population not initialized'
@@ -423,8 +406,7 @@ describe('EvolutionManager', () => {
 
     test('returns PopulationData after evolution', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 1,
@@ -445,8 +427,7 @@ describe('EvolutionManager', () => {
   describe('createOrganism()', () => {
     test('round-trips: organism.toJSON() → createOrganism() → working organism', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 1,
@@ -492,8 +473,7 @@ describe('EvolutionManager', () => {
     test('restores population and continues evolving', async () => {
       // First run: evolve and save
       const manager1 = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 2,
@@ -507,8 +487,7 @@ describe('EvolutionManager', () => {
 
       // Second run: restore from saved data and continue
       const manager2 = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         populationFactoryOptions: savedData.factoryOptions,
         evolutionOptions: {
@@ -533,8 +512,7 @@ describe('EvolutionManager', () => {
 
     test('full round-trip: getPopulationData → JSON → restore', async () => {
       const manager1 = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 1,
@@ -550,8 +528,7 @@ describe('EvolutionManager', () => {
       const parsed = JSON.parse(jsonString)
 
       const manager2 = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         populationFactoryOptions: parsed.factoryOptions,
         evolutionOptions: {
@@ -569,8 +546,7 @@ describe('EvolutionManager', () => {
   describe('standalone utilities', () => {
     test('deserializeOrganism() works without a manager', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 1,
@@ -603,8 +579,7 @@ describe('EvolutionManager', () => {
 
     test('serializedToExecutor() converts data directly to executor', async () => {
       const manager = new EvolutionManager({
-        algorithm: NEATAlgorithm,
-        environment,
+        ...baseConfig,
         populationOptions: { populationSize: 10 },
         evolutionOptions: {
           iterations: 1,

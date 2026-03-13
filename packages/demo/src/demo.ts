@@ -13,7 +13,6 @@ import {
   defaultTopologyConfigOptions,
 } from '@neat-evolution/des-hyperneat'
 import { ESHyperNEATAlgorithm } from '@neat-evolution/es-hyperneat'
-import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
 import { IndividualStrategy } from '@neat-evolution/evaluation-strategy'
 import {
   defaultEvolutionOptions,
@@ -23,6 +22,7 @@ import {
   type PopulationOptions,
 } from '@neat-evolution/evolution'
 import {
+  type EvaluationConfig,
   EvolutionManager,
   type EvolutionManagerConfig,
   type WorkerConfig,
@@ -79,7 +79,7 @@ export interface DemoOptions {
   evolutionOptions?: Partial<EvolutionOptions>
   populationOptions?: Partial<PopulationOptions>
   datasetOptions?: Partial<DatasetOptions>
-  strategy?: EvaluationStrategy
+  evaluation?: EvaluationConfig
   workerConfig?: WorkerConfig
 }
 
@@ -102,12 +102,17 @@ export const demo = async (
   const dataset = await loadDataset(datasetOptions)
   const environment = new DatasetEnvironment(dataset)
 
-  const strategy = options.strategy ?? new IndividualStrategy()
+  const evaluationConfig =
+    options.evaluation ??
+    ({
+      type: 'strategy',
+      strategy: new IndividualStrategy(),
+    } satisfies EvaluationConfig)
 
   const manager = new EvolutionManager({
     ...algorithmConfig(selectedMethod),
     environment,
-    strategy,
+    evaluation: evaluationConfig,
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: 2,
