@@ -3,6 +3,7 @@ import type {
   GenomeFactoryOptions,
   GenomeOptions,
   InitConfig,
+  PhenotypeAction,
 } from '@neat-evolution/core'
 import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
 import {
@@ -26,6 +27,8 @@ export interface InitPayload {
   executorCacheMaxSize?: number
   /** Module paths for strategy plugins to load on workers. */
   pluginPaths?: string[]
+  /** Opaque config blob passed to worker plugins during initialization. */
+  pluginData?: Record<string, unknown>
 }
 
 export interface InitGenomeFactoryPayload<
@@ -40,6 +43,17 @@ export interface InitGenomeFactoryPayload<
 export interface EvaluateGenomePayload {
   genomeOptions: GenomeFactoryOptions
   seed?: string | undefined
+}
+
+/** Enriched result from worker genome evaluation.
+ *  Vanilla evaluation returns only `fitness`. When training plugins are active,
+ *  the worker may also return writeback data and telemetry. */
+export interface EvaluateGenomeResult {
+  fitness: number
+  /** Updated network weights for Lamarckian writeback. */
+  updatedActions?: PhenotypeAction[]
+  /** Plugin-specific telemetry from the evaluation. */
+  telemetry?: unknown
 }
 
 export interface EvaluateBatchPayload {
@@ -68,7 +82,7 @@ export const initGenomeFactory = createMessage<InitGenomeFactoryPayload, null>(
 
 export const requestEvaluateGenome = createMessage<
   EvaluateGenomePayload,
-  number
+  EvaluateGenomeResult
 >(ActionType.REQUEST_EVALUATE_GENOME)
 
 export const requestEvaluateBatch = createMessage<

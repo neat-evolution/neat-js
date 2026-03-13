@@ -43,6 +43,13 @@ export interface WorkerEvaluatorOptions {
    */
   pluginPaths?: string[]
 
+  /**
+   * Opaque config blob forwarded to worker plugins during initialization.
+   * Plugins read their configuration from this object (keyed by plugin concern).
+   * For RL: `{ rl: RLTrainingConfig }`.
+   */
+  pluginData?: Record<string, unknown>
+
   /** Enable verbose logging */
   verbose?: boolean
 }

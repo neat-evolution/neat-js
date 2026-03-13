@@ -2,7 +2,7 @@ import type { SyncExecutor } from '@neat-evolution/executor'
 import { createRNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
-import type { EvaluateGenomePayload } from '../actions.js'
+import type { EvaluateGenomePayload, EvaluateGenomeResult } from '../actions.js'
 
 import { createCachedExecutorEntry } from './createCachedExecutorEntry.js'
 import type { ThreadContext } from './ThreadContext.js'
@@ -10,7 +10,7 @@ import type { ThreadContext } from './ThreadContext.js'
 export type HandleEvaluateGenomeFn = (
   options: EvaluateGenomePayload,
   context: ThreadContext & Partial<WorkerContext>
-) => Promise<number>
+) => Promise<EvaluateGenomeResult>
 
 export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
   options,
@@ -22,6 +22,12 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
   }
   if (context.genomeFactoryConfig == null) {
     throw new Error('genomeFactoryConfig not initialized')
+  }
+
+  // If a worker plugin installed an evaluation enhancer (e.g., RL training),
+  // delegate to it instead of the vanilla evaluation path.
+  if (context.evaluationEnhancer != null) {
+    return await context.evaluationEnhancer(genomeFactoryOptions, context, seed)
   }
 
   const rng = seed != null ? createRNG(seed) : undefined
@@ -42,5 +48,5 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
     fitness = environment.evaluate(executor as SyncExecutor, rng)
   }
 
-  return fitness
+  return { fitness }
 }

@@ -18,6 +18,7 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     environmentData,
     executorCacheMaxSize,
     pluginPaths,
+    pluginData,
   },
   context
 ) => {
@@ -40,6 +41,12 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     environment,
     ...(executorCacheMaxSize != null ? { executorCacheMaxSize } : {}),
   }
+
+  // Store plugin data for worker plugins to consume during init
+  if (pluginData != null) {
+    context.pluginData = pluginData
+  }
+
   // FIXME: should this just be handled by returning true?
   if (context.dispatch == null) {
     throw new Error('dispatch not properly added to context')

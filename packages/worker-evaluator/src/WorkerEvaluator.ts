@@ -1,7 +1,9 @@
 import type {
+  AnyGenome,
   ConfigData,
   GenomeOptions,
   InitConfig,
+  PhenotypeAction,
 } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
 import {
@@ -23,6 +25,7 @@ import { Dispatcher } from '@neat-evolution/worker-actions'
 import { WorkerPool } from '@neat-evolution/worker-pool'
 
 import {
+  type EvaluateGenomeResult,
   initEvaluator,
   initGenomeFactory as initGenomeFactoryAction,
   requestEvaluateBatch,
@@ -44,11 +47,17 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   public readonly createExecutorPathname: string
   public readonly executorCacheMaxSize: number
   public readonly pluginPaths: string[] | undefined
+  public readonly pluginData: Record<string, unknown> | undefined
   public readonly initPromise: Promise<void>
 
   private readonly pool: WorkerPool
   private readonly dispatcher: Dispatcher
   private workerTrainingCapabilities: WorkerTrainingCapabilities | undefined
+
+  /** Pending Lamarckian writebacks collected from worker responses. */
+  private readonly pendingWritebacks = new Map<AnyGenome, PhenotypeAction[]>()
+  /** Latest telemetry per genome from worker responses. */
+  private readonly telemetryByGenome = new WeakMap<AnyGenome, unknown>()
 
   /**
    * Evaluation context exposing worker pool functionality to evaluation strategies
@@ -76,6 +85,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     this.createEnvironmentPathname = options.createEnvironmentPathname
     this.executorCacheMaxSize = options.executorCacheMaxSize ?? 0
     this.pluginPaths = options.pluginPaths
+    this.pluginData = options.pluginData
 
     // Use provided workerScriptUrl or fall back to default (works in Node.js, not Vite)
     const workerScriptUrl =
@@ -142,6 +152,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       environmentData: this.environment.toFactoryOptions(),
       executorCacheMaxSize: this.executorCacheMaxSize,
       ...(this.pluginPaths ? { pluginPaths: this.pluginPaths } : {}),
+      ...(this.pluginData ? { pluginData: this.pluginData } : {}),
     }
     const workerCapabilities = await this.dispatcher.broadcast<
       WorkerTrainingCapabilities | undefined
@@ -181,15 +192,23 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
 
   async *evaluate(genomeEntries: GenomeEntries): AsyncIterable<FitnessData> {
     await this.initPromise
+    // Clear pending writebacks from previous generation
+    this.pendingWritebacks.clear()
     // Delegate to strategy, passing the evaluation context
     yield* this.strategy.evaluate(this.evaluationContext, genomeEntries)
+    // After all fitness has been yielded, apply Lamarckian writebacks
+    this.applyWritebacks()
+  }
+
+  /** Retrieve the latest telemetry for a genome (from worker evaluation). */
+  getTelemetry(genome: AnyGenome): unknown {
+    return this.telemetryByGenome.get(genome)
   }
 
   /**
-   * Evaluates a single genome entry using a worker
-   * @param {GenomeEntry<any>} genomeEntry - The genome entry to evaluate
-   * @param seed
-   * @returns {Promise<FitnessData>} Fitness data for the genome
+   * Evaluates a single genome entry using a worker.
+   * Handles enriched responses: extracts writeback data and telemetry,
+   * returns clean FitnessData to the strategy.
    */
   private async evaluateGenomeEntry(
     genomeEntry: GenomeEntry,
@@ -197,21 +216,29 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   ): Promise<FitnessData> {
     await this.initPromise
     const [speciesIndex, organismIndex, genome] = genomeEntry
-    const fitness = await this.dispatcher.call<number>(
+    const result = await this.dispatcher.call<EvaluateGenomeResult>(
       requestEvaluateGenome({
         genomeOptions: genome.toFactoryOptions(),
         seed,
       })
     )
-    return [speciesIndex, organismIndex, fitness]
+
+    // Extract side effects from the enriched response
+    if (result.updatedActions != null) {
+      this.pendingWritebacks.set(genome, result.updatedActions)
+    }
+    if (result.telemetry != null) {
+      this.telemetryByGenome.set(genome, result.telemetry)
+    }
+
+    // Return clean FitnessData — strategies never see writeback or telemetry
+    return [speciesIndex, organismIndex, result.fitness]
   }
 
   /**
-   * Evaluates a batch of genome entries together using a single worker
-   * This is critical for tournament-style evaluation where genomes compete
-   * @param {Array<GenomeEntry<any>>} genomeEntries - Array of genome entries to evaluate together
-   * @param seed
-   * @returns {Promise<FitnessData[]>} Array of fitness data for each genome
+   * Evaluates a batch of genome entries together using a single worker.
+   * This is critical for tournament-style evaluation where genomes compete.
+   * Batch evaluation does not support training enrichment (returns plain fitness).
    */
   private async evaluateGenomeEntryBatch(
     genomeEntries: Array<GenomeEntry>,
@@ -235,6 +262,14 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       }
       return [speciesIndex, organismIndex, fitness]
     })
+  }
+
+  /** Apply all pending Lamarckian writebacks to genomes. */
+  private applyWritebacks(): void {
+    for (const [genome, updatedActions] of this.pendingWritebacks) {
+      this.algorithm.writeBackWeights(genome, updatedActions)
+    }
+    this.pendingWritebacks.clear()
   }
 }
 
