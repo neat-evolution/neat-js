@@ -35,7 +35,7 @@ export interface RolloutSegment {
   /** The transitions in this segment. */
   transitions: Transition[]
   /** What triggered this capture. */
-  trigger: 'reward' | 'done' | 'info' | 'prediction-error'
+  trigger: 'reward' | 'done' | 'info'
   /** Episode index this segment belongs to. */
   episodeIndex: number
 }

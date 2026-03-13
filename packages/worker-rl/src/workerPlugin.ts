@@ -53,7 +53,6 @@ const createTelemetryTracker = (
     reward: 0,
     done: 0,
     info: 0,
-    'prediction-error': 0,
   }
 
   let segmentReturnSum = 0

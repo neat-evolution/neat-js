@@ -116,12 +116,7 @@ describe('RolloutSegment', () => {
       episodeIndex: 0,
     }
 
-    const triggers: RolloutSegment['trigger'][] = [
-      'reward',
-      'done',
-      'info',
-      'prediction-error',
-    ]
+    const triggers: RolloutSegment['trigger'][] = ['reward', 'done', 'info']
 
     for (const trigger of triggers) {
       const segment: RolloutSegment = { ...base, trigger }
