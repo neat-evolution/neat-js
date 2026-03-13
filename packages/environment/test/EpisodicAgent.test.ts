@@ -19,6 +19,7 @@ const episodeInfo: EpisodeInfo = {
 
 const episodeResult: EpisodeResult = {
   fitness: 0.85,
+  episodeReturn: 17.5,
   totalSteps: 100,
   terminated: false,
 }

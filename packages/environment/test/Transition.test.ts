@@ -58,8 +58,11 @@ describe('Transition', () => {
 
   test('accepts transition info', () => {
     const info: TransitionInfo = {
+      eventLabel: 'kill',
+      tags: ['combat', 'close-range'],
       isInteresting: true,
       situationClass: 3,
+      metadata: { danger: 0.8 },
     }
     const transition: Transition = {
       state: new Float64Array([1.0]),
@@ -71,6 +74,9 @@ describe('Transition', () => {
     }
     expect(transition.info?.isInteresting).toBe(true)
     expect(transition.info?.situationClass).toBe(3)
+    expect(transition.info?.eventLabel).toBe('kill')
+    expect(transition.info?.tags).toEqual(['combat', 'close-range'])
+    expect(transition.info?.metadata).toEqual({ danger: 0.8 })
   })
 })
 

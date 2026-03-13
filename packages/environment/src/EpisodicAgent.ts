@@ -5,16 +5,27 @@ import type { EpisodicContext } from './EpisodicContext.js'
 export interface EpisodeInfo {
   /** Episode index within the current evaluation (0-based). */
   episodeIndex: number
-  /** Environment-specific episode type (e.g., 'scenario', 'full-game', 'curriculum'). */
+  /**
+   * Episode bucket or label (e.g., 'scenario', 'full-game', 'curriculum').
+   * Policies that behave differently per episode slot must encode this
+   * signal inside their observation features.
+   */
   type?: string
-  /** Episode-specific metadata (e.g., scenario config, seed). */
+  /** Optional curriculum or gauntlet phase (e.g., 'stage-2', 'final'). */
+  phase?: string
+  /** Episode-specific metadata (seed, scenario config, gauntlet context). */
   metadata?: Record<string, unknown>
 }
 
 /** Episode completion result. */
 export interface EpisodeResult {
-  /** Episode fitness/score. */
+  /** Episode fitness/score (per-episode contribution to final fitness). */
   fitness: number
+  /**
+   * Episode return (cumulative reward emitted by the environment for this
+   * episode). This is the learning signal for the RL agent.
+   */
+  episodeReturn: number
   /** Total steps in this episode. */
   totalSteps: number
   /** Whether the episode ended early (death, timeout). */
@@ -27,11 +38,18 @@ export interface EpisodeResult {
 export interface EpisodicAgent {
   /** Forward pass + record transition in rollout buffer. */
   act(inputs: Float64Array): Float64Array
-  /** Record reward for current transition. May trigger training. */
+  /**
+   * Record reward for the current transition. Reward is per-transition,
+   * not aggregated. Agents integrate rewards internally to compute
+   * returns/advantages.
+   */
   reward(reward: number, done: boolean): void
   /** Reset state for a new episode. */
   startEpisode(info: EpisodeInfo): void
-  /** Flush rollout buffer, train on remaining transitions. */
+  /**
+   * Flush rollout buffer, train on remaining transitions, and optionally use
+   * the reported episode return/fitness for telemetry.
+   */
   endEpisode(result: EpisodeResult): void
 }
 
