@@ -46,25 +46,25 @@ export function computeQLOutputErrors(
 /**
  * Compute Q-learning output errors for backward pass (multi-discrete mode).
  *
- * Each button pair is an independent 2-action DQN. The error for each pair
- * is placed at the chosen output index within that pair.
+ * Each binary factor pair is an independent 2-action DQN. The error for each
+ * pair is placed at the chosen output index within that pair.
  *
- * For button b with action[b] = 1 (on), chosen output index = 2*b + 0 (Q_on).
- * For button b with action[b] = 0 (off), chosen output index = 2*b + 1 (Q_off).
+ * For factor f with action[f] = 1 (on), chosen output index = 2*f + 0 (Q_on).
+ * For factor f with action[f] = 0 (off), chosen output index = 2*f + 1 (Q_off).
  *
  * @param transition - The transition with qValues and action
- * @param tdErrors - Per-button TD errors (length = buttonCount)
- * @param buttonCount - Number of buttons (network has 2*buttonCount outputs)
- * @returns errors array for backward pass (length = 2*buttonCount)
+ * @param tdErrors - Per-factor TD errors (length = factorCount)
+ * @param factorCount - Number of binary factors (network has 2*factorCount outputs)
+ * @returns errors array for backward pass (length = 2*factorCount)
  */
-export function computeQLOutputErrorsPerButton(
+export function computeQLMultiDiscreteOutputErrors(
   transition: Transition,
   tdErrors: Float64Array,
-  buttonCount: number
+  factorCount: number
 ): Float64Array {
-  const errors = new Float64Array(2 * buttonCount)
+  const errors = new Float64Array(2 * factorCount)
 
-  for (let b = 0; b < buttonCount; b++) {
+  for (let b = 0; b < factorCount; b++) {
     const actionVal = transition.action[b] as number
     // action = 1 means "on" (chose index 0 in pair), action = 0 means "off" (chose index 1)
     const chosenIdx = actionVal === 1 ? 0 : 1

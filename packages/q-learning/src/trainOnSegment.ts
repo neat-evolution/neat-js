@@ -2,8 +2,8 @@ import type { TrainableExecutor } from '@neat-evolution/backprop'
 import type { Transition } from '@neat-evolution/environment'
 import type { QLGradientConfig } from './computeQLOutputErrors.js'
 import {
+  computeQLMultiDiscreteOutputErrors,
   computeQLOutputErrors,
-  computeQLOutputErrorsPerButton,
 } from './computeQLOutputErrors.js'
 
 /**
@@ -148,7 +148,7 @@ function trainMultiDiscrete(
       tdErrors[i] = chosenQValue - (G[i] as number)
     }
 
-    const errors = computeQLOutputErrorsPerButton(
+    const errors = computeQLMultiDiscreteOutputErrors(
       transition,
       tdErrors,
       factorCount

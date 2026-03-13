@@ -1,8 +1,8 @@
 import type { Transition } from '@neat-evolution/environment'
 import { describe, expect, it } from 'vitest'
 import {
+  computeQLMultiDiscreteOutputErrors,
   computeQLOutputErrors,
-  computeQLOutputErrorsPerButton,
 } from '../src/computeQLOutputErrors.js'
 
 function makeTransition(overrides: Partial<Transition> = {}): Transition {
@@ -72,51 +72,51 @@ describe('computeQLOutputErrors', () => {
   })
 })
 
-describe('computeQLOutputErrorsPerButton', () => {
-  it('returns array of length 2 * buttonCount', () => {
+describe('computeQLMultiDiscreteOutputErrors', () => {
+  it('returns array of length 2 * factorCount', () => {
     const transition = makeTransition({
       action: new Float64Array([1, 0, 1, 0]),
       qValues: new Float64Array([0.5, 0.3, 0.4, 0.6, 0.7, 0.1, 0.2, 0.8]),
     })
     const tdErrors = new Float64Array([0.1, -0.2, 0.3, -0.4])
-    const errors = computeQLOutputErrorsPerButton(transition, tdErrors, 4)
+    const errors = computeQLMultiDiscreteOutputErrors(transition, tdErrors, 4)
     expect(errors.length).toBe(8)
   })
 
-  it('places error at correct index for each button pair', () => {
-    // 2 buttons: [Q_on_0, Q_off_0, Q_on_1, Q_off_1]
-    // action = [1, 0] -> button 0 = on (idx 0 in pair), button 1 = off (idx 1 in pair)
+  it('places error at correct index for each factor pair', () => {
+    // 2 factors: [Q_on_0, Q_off_0, Q_on_1, Q_off_1]
+    // action = [1, 0] -> factor 0 = on (idx 0 in pair), factor 1 = off (idx 1 in pair)
     const transition = makeTransition({
       action: new Float64Array([1, 0]),
       qValues: new Float64Array([0.5, 0.3, 0.4, 0.6]),
     })
     const tdErrors = new Float64Array([0.2, -0.1])
-    const errors = computeQLOutputErrorsPerButton(transition, tdErrors, 2)
+    const errors = computeQLMultiDiscreteOutputErrors(transition, tdErrors, 2)
 
-    // Button 0: on -> chosen idx = 0 -> errors[0] = 0.2, errors[1] = 0
+    // Factor 0: on -> chosen idx = 0 -> errors[0] = 0.2, errors[1] = 0
     expect(errors[0]).toBe(0.2)
     expect(errors[1]).toBe(0)
-    // Button 1: off -> chosen idx = 1 -> errors[2] = 0, errors[3] = -0.1
+    // Factor 1: off -> chosen idx = 1 -> errors[2] = 0, errors[3] = -0.1
     expect(errors[2]).toBe(0)
     expect(errors[3]).toBe(-0.1)
   })
 
-  it('independent errors per button pair', () => {
-    // Each button pair gets its own TD error, independent of others
+  it('independent errors per factor pair', () => {
+    // Each factor pair gets its own TD error, independent of others
     const transition = makeTransition({
       action: new Float64Array([1, 1, 0]),
       qValues: new Float64Array([0.5, 0.3, 0.4, 0.2, 0.1, 0.6]),
     })
     const tdErrors = new Float64Array([0.1, -0.2, 0.3])
-    const errors = computeQLOutputErrorsPerButton(transition, tdErrors, 3)
+    const errors = computeQLMultiDiscreteOutputErrors(transition, tdErrors, 3)
 
-    // Button 0: on -> errors[0] = 0.1
+    // Factor 0: on -> errors[0] = 0.1
     expect(errors[0]).toBe(0.1)
     expect(errors[1]).toBe(0)
-    // Button 1: on -> errors[2] = -0.2
+    // Factor 1: on -> errors[2] = -0.2
     expect(errors[2]).toBe(-0.2)
     expect(errors[3]).toBe(0)
-    // Button 2: off -> errors[5] = 0.3
+    // Factor 2: off -> errors[5] = 0.3
     expect(errors[4]).toBe(0)
     expect(errors[5]).toBe(0.3)
   })

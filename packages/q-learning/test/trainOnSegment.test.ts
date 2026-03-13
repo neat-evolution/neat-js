@@ -21,7 +21,7 @@ function makeTransition(
   }
 }
 
-function makePerButtonTransition(
+function makeMultiDiscreteTransition(
   reward: number,
   qValues: number[],
   action: number[],
@@ -203,10 +203,10 @@ describe('trainOnSegment (standard mode)', () => {
 describe('trainOnSegment (multi-discrete mode)', () => {
   it('terminal segment: per-factor bootstrap values = 0', () => {
     const trainable = mockTrainable()
-    // 2 buttons, 4 Q-values: [Q_on_0, Q_off_0, Q_on_1, Q_off_1]
-    // action = [1, 0] -> button 0 on (chosen Q_on_0=0.5), button 1 off (chosen Q_off_1=0.6)
+    // 2 binary factors, 4 Q-values: [Q_on_0, Q_off_0, Q_on_1, Q_off_1]
+    // action = [1, 0] -> factor 0 on (chosen Q_on_0=0.5), factor 1 off (chosen Q_off_1=0.6)
     const transitions = [
-      makePerButtonTransition(1.0, [0.5, 0.3, 0.4, 0.6], [1, 0], true),
+      makeMultiDiscreteTransition(1.0, [0.5, 0.3, 0.4, 0.6], [1, 0], true),
     ]
     trainOnSegment(trainable, transitions, defaultConfig, true, 2)
 
@@ -214,12 +214,12 @@ describe('trainOnSegment (multi-discrete mode)', () => {
     const call = trainable.backwardCalls[0]
     if (call === undefined) throw new Error('Expected backward call')
 
-    // Button 0: G = 1.0, chosen Q = 0.5, TD = 0.5 - 1.0 = -0.5
+    // Factor 0: G = 1.0, chosen Q = 0.5, TD = 0.5 - 1.0 = -0.5
     // error at index 0 (Q_on_0) = -0.5
     expect(call.errors[0]).toBeCloseTo(-0.5)
     expect(call.errors[1]).toBe(0)
 
-    // Button 1: G = 1.0, chosen Q = 0.6 (Q_off_1), TD = 0.6 - 1.0 = -0.4
+    // Factor 1: G = 1.0, chosen Q = 0.6 (Q_off_1), TD = 0.6 - 1.0 = -0.4
     // error at index 3 (Q_off_1) = -0.4
     expect(call.errors[2]).toBe(0)
     expect(call.errors[3]).toBeCloseTo(-0.4)
@@ -227,40 +227,40 @@ describe('trainOnSegment (multi-discrete mode)', () => {
 
   it('non-terminal segment: per-factor bootstrap = max(pair)', () => {
     const trainable = mockTrainable()
-    // 2 buttons, action = [1, 0], done=false
+    // 2 binary factors, action = [1, 0], done=false
     // Q: [0.5, 0.3, 0.4, 0.6]
-    // Button 0 max = max(0.5, 0.3) = 0.5
-    // Button 1 max = max(0.4, 0.6) = 0.6
+    // Factor 0 max = max(0.5, 0.3) = 0.5
+    // Factor 1 max = max(0.4, 0.6) = 0.6
     const transitions = [
-      makePerButtonTransition(1.0, [0.5, 0.3, 0.4, 0.6], [1, 0], false),
+      makeMultiDiscreteTransition(1.0, [0.5, 0.3, 0.4, 0.6], [1, 0], false),
     ]
     trainOnSegment(trainable, transitions, defaultConfig, true, 2)
 
     const call = trainable.backwardCalls[0]
     if (call === undefined) throw new Error('Expected backward call')
 
-    // Button 0: G = 1.0 + 0.99 * 0.5 = 1.495, chosen Q = 0.5, TD = 0.5 - 1.495 = -0.995
+    // Factor 0: G = 1.0 + 0.99 * 0.5 = 1.495, chosen Q = 0.5, TD = 0.5 - 1.495 = -0.995
     expect(call.errors[0]).toBeCloseTo(-0.995)
-    // Button 1: G = 1.0 + 0.99 * 0.6 = 1.594, chosen Q = 0.6, TD = 0.6 - 1.594 = -0.994
+    // Factor 1: G = 1.0 + 0.99 * 0.6 = 1.594, chosen Q = 0.6, TD = 0.6 - 1.594 = -0.994
     expect(call.errors[3]).toBeCloseTo(-0.994)
   })
 
-  it('each button pair trained independently per transition', () => {
+  it('each factor pair trained independently per transition', () => {
     const trainable = mockTrainable()
     const transitions = [
-      makePerButtonTransition(0.5, [0.2, 0.4, 0.3, 0.1], [0, 1], true),
+      makeMultiDiscreteTransition(0.5, [0.2, 0.4, 0.3, 0.1], [0, 1], true),
     ]
     trainOnSegment(trainable, transitions, defaultConfig, true, 2)
 
     const call = trainable.backwardCalls[0]
     if (call === undefined) throw new Error('Expected backward call')
 
-    // Button 0: action=0 (off), chosen Q = Q_off_0 = 0.4, G = 0.5, TD = 0.4 - 0.5 = -0.1
+    // Factor 0: action=0 (off), chosen Q = Q_off_0 = 0.4, G = 0.5, TD = 0.4 - 0.5 = -0.1
     // error at index 1 (Q_off_0)
     expect(call.errors[0]).toBe(0)
     expect(call.errors[1]).toBeCloseTo(-0.1)
 
-    // Button 1: action=1 (on), chosen Q = Q_on_1 = 0.3, G = 0.5, TD = 0.3 - 0.5 = -0.2
+    // Factor 1: action=1 (on), chosen Q = Q_on_1 = 0.3, G = 0.5, TD = 0.3 - 0.5 = -0.2
     // error at index 2 (Q_on_1)
     expect(call.errors[2]).toBeCloseTo(-0.2)
     expect(call.errors[3]).toBe(0)
