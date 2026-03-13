@@ -55,6 +55,7 @@ import {
 import { hardwareConcurrency } from '@neat-evolution/worker-threads'
 
 import type {
+  EvaluationConfig,
   EvolutionManagerConfig,
   WorkerConfig,
 } from './EvolutionManagerConfig.js'
@@ -64,8 +65,7 @@ const DEFAULT_EXECUTOR_PATHNAME = '@neat-evolution/executor'
 export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
   private readonly algorithm: Algorithm<Ctx> & PopulationCreator<Ctx>
   private readonly environment: EnvironmentConfig
-  private readonly strategy: EvaluationStrategy | undefined
-  private readonly plugins: ReadonlyArray<EvaluationPlugin> | undefined
+  private readonly evaluationConfig: EvaluationConfig
   private readonly evolutionOptions: EvolutionOptions
   private readonly populationOptions: PopulationOptions
   private readonly configData: ConfigDataOf<Ctx> | undefined
@@ -98,8 +98,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
 
     this.algorithm = config.algorithm
     this.environment = config.environment
-    this.strategy = config.strategy
-    this.plugins = config.plugins
+    this.evaluationConfig = this.normalizeEvaluationConfig(config)
     this.evolutionOptions = {
       ...defaultEvolutionOptions,
       ...config.evolutionOptions,
@@ -304,19 +303,91 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
    *  If plugins are provided, wraps them in a PluginStrategy.
    *  Otherwise returns the user-provided strategy (or undefined for default). */
   private resolveStrategy(): EvaluationStrategy | undefined {
-    if (this.plugins != null && this.plugins.length > 0) {
-      const environment = this.environment as Environment
-      const supportsTraining =
-        this.workerConfig?.pluginPaths != null &&
-        this.workerConfig.pluginPaths.length > 0
+    const evaluation = this.evaluationConfig
 
-      return new PluginStrategy(this.plugins, {
-        algorithm: this.algorithm as unknown as AnyErasedAlgorithm,
-        environment,
-        supportsTraining,
-      })
+    if (evaluation.type === 'plugin-augmentation') {
+      return this.createPluginStrategy(evaluation.plugins)
     }
-    return this.strategy
+    if (evaluation.type === 'plugin-replacement') {
+      return this.createPluginStrategy([evaluation.plugin])
+    }
+
+    return evaluation.strategy
+  }
+
+  private createPluginStrategy(
+    plugins: ReadonlyArray<EvaluationPlugin>
+  ): EvaluationStrategy {
+    const environment = this.environment as Environment
+    const supportsTraining =
+      this.workerConfig?.pluginPaths != null &&
+      this.workerConfig.pluginPaths.length > 0
+
+    return new PluginStrategy(plugins, {
+      algorithm: this.algorithm as unknown as AnyErasedAlgorithm,
+      environment,
+      supportsTraining,
+    })
+  }
+
+  private normalizeEvaluationConfig(
+    config: EvolutionManagerConfig<Ctx>
+  ): EvaluationConfig {
+    if (config.evaluation != null) {
+      return this.validateEvaluationConfig(config.evaluation)
+    }
+
+    if (config.plugins != null && config.plugins.length > 0) {
+      throw new Error(
+        'EvolutionManagerConfig.plugins is deprecated. Provide `evaluation: { type: "plugin-augmentation", plugins }` instead.'
+      )
+    }
+
+    if (config.strategy != null) {
+      return {
+        type: 'strategy',
+        strategy: config.strategy,
+      }
+    }
+    return { type: 'strategy' }
+  }
+
+  private validateEvaluationConfig(config: EvaluationConfig): EvaluationConfig {
+    if (config.type === 'plugin-augmentation') {
+      if (config.plugins.length === 0) {
+        throw new Error(
+          'plugin-augmentation evaluation requires at least one plugin'
+        )
+      }
+      for (const plugin of config.plugins) {
+        if (this.getPluginMode(plugin) === 'replacement') {
+          throw new Error(
+            'Replacement plugins cannot run inside a plugin-augmentation evaluation.'
+          )
+        }
+      }
+      return config
+    }
+
+    if (config.type === 'plugin-replacement') {
+      if (this.getPluginMode(config.plugin) !== 'replacement') {
+        throw new Error(
+          'plugin-replacement evaluation requires a plugin that declares mode "replacement".'
+        )
+      }
+      return config
+    }
+
+    return config
+  }
+
+  private getPluginMode(
+    plugin: EvaluationPlugin
+  ): 'augmentation' | 'replacement' {
+    const pluginWithMode = plugin as {
+      mode?: 'augmentation' | 'replacement'
+    }
+    return pluginWithMode.mode ?? 'augmentation'
   }
 
   private createWorkerFactories(

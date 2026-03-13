@@ -1,4 +1,5 @@
 import type { Environment } from '@neat-evolution/environment'
+import type { EvaluationPlugin } from '@neat-evolution/evaluation-strategy'
 import {
   deserializeOrganism,
   EvolutionManager,
@@ -74,6 +75,49 @@ describe('EvolutionManager', () => {
         environment,
       })
       expect(manager).toBeDefined()
+    })
+
+    test('throws when using deprecated plugins config', () => {
+      const plugin: EvaluationPlugin = {}
+      expect(() => {
+        return new EvolutionManager({
+          algorithm: NEATAlgorithm,
+          environment,
+          plugins: [plugin],
+        })
+      }).toThrow('EvolutionManagerConfig.plugins is deprecated')
+    })
+
+    test('plugin-augmentation rejects replacement plugins', () => {
+      const plugin: EvaluationPlugin = { mode: 'replacement' }
+      expect(() => {
+        return new EvolutionManager({
+          algorithm: NEATAlgorithm,
+          environment,
+          evaluation: {
+            type: 'plugin-augmentation',
+            plugins: [plugin],
+          },
+        })
+      }).toThrow(
+        'Replacement plugins cannot run inside a plugin-augmentation evaluation.'
+      )
+    })
+
+    test('plugin-replacement requires explicit replacement mode', () => {
+      const plugin: EvaluationPlugin = {}
+      expect(() => {
+        return new EvolutionManager({
+          algorithm: NEATAlgorithm,
+          environment,
+          evaluation: {
+            type: 'plugin-replacement',
+            plugin,
+          },
+        })
+      }).toThrow(
+        'plugin-replacement evaluation requires a plugin that declares mode "replacement"'
+      )
     })
   })
 

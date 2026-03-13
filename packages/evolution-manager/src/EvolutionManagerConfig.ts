@@ -53,6 +53,23 @@ export interface WorkerConfig {
   verbose?: boolean
 }
 
+export type EvaluationConfig =
+  | {
+      /** Use a plain evaluation strategy (default). */
+      type: 'strategy'
+      strategy?: EvaluationStrategy
+    }
+  | {
+      /** Compose augmentation plugins (e.g., RL agents) around evaluation. */
+      type: 'plugin-augmentation'
+      plugins: ReadonlyArray<EvaluationPlugin>
+    }
+  | {
+      /** Replace evaluation entirely with a single replacement plugin. */
+      type: 'plugin-replacement'
+      plugin: EvaluationPlugin
+    }
+
 export interface EvolutionManagerConfig<
   Ctx extends AlgorithmContext = AlgorithmContext,
 > {
@@ -65,7 +82,18 @@ export interface EvolutionManagerConfig<
    *  For local evaluation (no workerConfig), pass a full Environment with evaluate methods. */
   environment: EnvironmentConfig
 
-  /** How genomes are evaluated. Default: IndividualStrategy */
+  /**
+   * Explicit evaluation pipeline selection.
+   * - { type: 'strategy' } delegates fully to the provided strategy (or defaults).
+   * - { type: 'plugin-augmentation' } installs RL plugins that wrap evaluation.
+   * - { type: 'plugin-replacement' } hands evaluation to a single replacement plugin.
+   */
+  evaluation?: EvaluationConfig
+
+  /**
+   * @deprecated Use `evaluation: { type: 'strategy', strategy }` instead.
+   * Retained for backward compatibility with pre-Phase 4 callers.
+   */
   strategy?: EvaluationStrategy
 
   /** Evaluation plugins that augment or replace per-genome evaluation.
