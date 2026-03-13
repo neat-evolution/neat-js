@@ -20,9 +20,10 @@ capture, and gradient updates — the plugin handles everything around it:
    events.
 3. **Lamarckian writeback.** After evaluation, trained weights are written back
    to the genome (configurable via `isLamarckian`, default `true`).
-4. **Worker dispatch.** When `context.supportsTraining` is true, the plugin
-   validates worker RL capabilities and dispatches evaluation to a worker thread
-   that runs the same agent contract locally.
+4. **Worker evaluation.** When the worker reports Q-learning capability
+   (`context.workerTrainingCapabilities?.rl?.methods?.['q-learning']?.supported`),
+   the plugin delegates to `defaultEvaluate(genome)` which routes through
+   `evaluateGenomeEntry`. The worker-side enhancer runs the same agent contract.
 
 ## Configuration
 
@@ -112,10 +113,16 @@ collected when the genome is no longer referenced.
 
 ## Worker Evaluation
 
-When `context.supportsTraining` is true, the plugin validates that the worker
-reports Q-learning capability (and Lamarckian support if configured) before
-dispatching. The worker runs the same `evaluateAgent(agent)` contract locally
-and returns fitness plus optional updated weights.
+When workers report Q-learning capability via
+`context.workerTrainingCapabilities?.rl?.methods?.['q-learning']?.supported`,
+the plugin delegates to `defaultEvaluate(genome)` which dispatches through
+`evaluateGenomeEntry`. The worker-side evaluation enhancer (installed by
+`@neat-evolution/worker-rl/workerPlugin`) creates the trainable executor,
+wraps it as a QL agent, runs `evaluateAgent(agent)`, and returns an enriched
+result with fitness, telemetry, and optional Lamarckian writeback payload.
+
+`WorkerEvaluator` handles writeback at the evaluator level — the plugin does
+not manage writeback on the worker path.
 
 ## License
 
