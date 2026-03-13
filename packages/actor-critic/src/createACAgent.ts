@@ -3,9 +3,9 @@ import type {
   EpisodeInfo,
   EpisodeResult,
   EpisodicAgent,
-  FrameAnnotation,
   RolloutBufferConfig,
   Transition,
+  TransitionInfo,
 } from '@neat-evolution/environment'
 import { applyActorActivation } from './activations.js'
 import type { ACGradientConfig } from './computeACGradients.js'
@@ -58,10 +58,10 @@ function continuousAction(activated: Float64Array): Float64Array {
   return activated
 }
 
-/** EpisodicAgent extended with an annotation side channel for plugin use. */
+/** EpisodicAgent extended with transition metadata support for plugin use. */
 export type ACAgent = EpisodicAgent & {
-  /** Set a pending annotation for the current transition (plugin side channel). */
-  annotate(annotation: FrameAnnotation): void
+  /** Set pending transition metadata (`info`) for the current transition. */
+  setTransitionInfo(info: TransitionInfo): void
 }
 
 /**
@@ -84,7 +84,7 @@ export function createACAgent(
   const activation = config.actorActivation ?? 'sigmoid'
   const rewardThreshold = config.rolloutConfig.rewardThreshold
   let currentTransition: Transition | null = null
-  let pendingAnnotation: FrameAnnotation | null = null
+  let pendingInfo: TransitionInfo | null = null
 
   const trainConfig = {
     ...config.gradientConfig,
@@ -102,7 +102,7 @@ export function createACAgent(
     }
   }
 
-  function determineTrigger(): 'reward' | 'done' | 'annotation' | null {
+  function determineTrigger(): 'reward' | 'done' | 'info' | null {
     if (currentTransition === null) {
       return null
     }
@@ -112,8 +112,8 @@ export function createACAgent(
     if (Math.abs(currentTransition.reward) > rewardThreshold) {
       return 'reward'
     }
-    if (pendingAnnotation?.isInteresting) {
-      return 'annotation'
+    if (pendingInfo?.isInteresting) {
+      return 'info'
     }
     return null
   }
@@ -152,7 +152,10 @@ export function createACAgent(
         reward: 0,
         done: false,
       }
-      pendingAnnotation = null
+      if (pendingInfo !== null) {
+        currentTransition.info = pendingInfo
+      }
+      pendingInfo = null
       rolloutBuffer.push(currentTransition)
 
       // 6. Return action (N values - environment never sees the critic)
@@ -172,7 +175,7 @@ export function createACAgent(
     startEpisode(info: EpisodeInfo): void {
       rolloutBuffer.reset(info.episodeIndex)
       currentTransition = null
-      pendingAnnotation = null
+      pendingInfo = null
     },
 
     endEpisode(_result: EpisodeResult): void {
@@ -183,11 +186,14 @@ export function createACAgent(
         }
       }
       currentTransition = null
-      pendingAnnotation = null
+      pendingInfo = null
     },
 
-    annotate(annotation: FrameAnnotation): void {
-      pendingAnnotation = annotation
+    setTransitionInfo(info: TransitionInfo): void {
+      pendingInfo = info
+      if (currentTransition !== null) {
+        currentTransition.info = info
+      }
     },
   }
 }
