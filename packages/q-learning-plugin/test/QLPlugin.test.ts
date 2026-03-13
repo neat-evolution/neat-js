@@ -33,7 +33,7 @@ const phenotype: Phenotype = {
 // ---------------------------------------------------------------------------
 // Minimal phenotype for multi-discrete mode: 2 inputs → 4 outputs (2 factors × 2 Q-values)
 // ---------------------------------------------------------------------------
-const perButtonPhenotype: Phenotype = {
+const multiDiscretePhenotype: Phenotype = {
   length: 6,
   inputs: [0, 1],
   outputs: [2, 3, 4, 5],
@@ -743,7 +743,7 @@ describe('QLPlugin', () => {
 
   describe('multi-discrete mode', () => {
     it('works with 2N outputs for multi-discrete Q-values', async () => {
-      const algorithm = makeMockAlgorithm(perButtonPhenotype)
+      const algorithm = makeMockAlgorithm(multiDiscretePhenotype)
       const env = makeMockEpisodicEnvironment()
 
       const plugin = new QLPlugin(
