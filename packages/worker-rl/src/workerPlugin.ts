@@ -5,7 +5,8 @@ import type { GenomeFactoryOptions, Phenotype } from '@neat-evolution/core'
 import type { EpisodicAgent, RolloutSegment } from '@neat-evolution/environment'
 import { isAgentEnvironment } from '@neat-evolution/environment'
 import { createQLAgent } from '@neat-evolution/q-learning'
-import { createRNG } from '@neat-evolution/utils'
+import type { RNG } from '@neat-evolution/utils'
+import { createRNG, threadRNG } from '@neat-evolution/utils'
 import type { Handler, WorkerContext } from '@neat-evolution/worker-actions'
 import type { ThreadContext } from '@neat-evolution/worker-evaluator/worker'
 
@@ -53,12 +54,13 @@ const createTelemetryTracker = (): TelemetryTracker => {
       }
     },
     toQLearningTelemetry(config) {
-      const epsilonDecay = config.epsilonDecay ?? 1
-      const epsilonMin = config.epsilonMin ?? 0
-      const epsilonInitial = config.epsilon
+      const epsilonDecayPerEpisode = config.epsilonDecayPerEpisode ?? 1
+      const epsilonMinimum = config.epsilonMinimum ?? 0
+      const epsilonInitial = config.epsilonInitial
+      const decaySteps = Math.max(0, episodes - 1)
       const epsilonFinal = Math.max(
-        epsilonMin,
-        epsilonInitial * epsilonDecay ** episodes
+        epsilonMinimum,
+        epsilonInitial * epsilonDecayPerEpisode ** decaySteps
       )
 
       return {
@@ -67,8 +69,8 @@ const createTelemetryTracker = (): TelemetryTracker => {
         transitionsTrained: transitions,
         epsilonInitial,
         epsilonFinal,
-        epsilonDecay,
-        epsilonMin,
+        epsilonDecayPerEpisode,
+        epsilonMinimum,
         multiDiscrete: config.multiDiscrete ?? false,
       }
     },
@@ -126,7 +128,7 @@ const attachEpisodeTracker = (
 const evaluateActorCritic = (
   payload: EvaluateACAgentPayload,
   context: ThreadContext,
-  rng: () => number
+  rng: RNG
 ): EvaluateRLAgentResult => {
   const trainable = hydrateTrainable(payload.genomeOptions, context)
   const tracker = createTelemetryTracker()
@@ -137,7 +139,7 @@ const evaluateActorCritic = (
       ...payload.config,
       onSegmentTrained: tracker.onSegmentTrained,
     },
-    rng
+    rng.gen
   )
   attachEpisodeTracker(agent, tracker)
 
@@ -158,7 +160,7 @@ const evaluateActorCritic = (
 const evaluateQLearning = (
   payload: EvaluateQLAgentPayload,
   context: ThreadContext,
-  rng: () => number
+  rng: RNG
 ): EvaluateRLAgentResult => {
   const trainable = hydrateTrainable(payload.genomeOptions, context)
   const tracker = createTelemetryTracker()
@@ -196,7 +198,7 @@ const workerRLPlugin = (
     async (payload) => {
       const rlPayload = payload as EvaluateRLAgentPayload
       const rng =
-        rlPayload.seed != null ? createRNG(rlPayload.seed).gen : Math.random
+        rlPayload.seed != null ? createRNG(rlPayload.seed) : threadRNG()
 
       if (rlPayload.method === 'actor-critic') {
         return evaluateActorCritic(rlPayload, threadContext, rng)

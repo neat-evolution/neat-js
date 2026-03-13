@@ -200,9 +200,9 @@ describe('workerPlugin', () => {
           rolloutLength: 8,
           rewardThreshold: 0.1,
         },
-        epsilon: 0.5,
-        epsilonDecay: 0.9,
-        epsilonMin: 0.05,
+        epsilonInitial: 0.5,
+        epsilonDecayPerEpisode: 0.9,
+        epsilonMinimum: 0.05,
         multiDiscrete: true,
       },
     }
@@ -218,7 +218,9 @@ describe('workerPlugin', () => {
     expect(result.telemetry.episodes).toBe(1)
     if (result.method === 'q-learning') {
       expect(result.telemetry.epsilonInitial).toBeCloseTo(0.5)
-      expect(result.telemetry.epsilonFinal).toBeCloseTo(0.45)
+      expect(result.telemetry.epsilonFinal).toBeCloseTo(0.5)
+      expect(result.telemetry.epsilonDecayPerEpisode).toBeCloseTo(0.9)
+      expect(result.telemetry.epsilonMinimum).toBeCloseTo(0.05)
       expect(result.telemetry.multiDiscrete).toBe(true)
     }
   })

@@ -49,8 +49,8 @@ export interface ActorCriticWorkerTelemetry extends RLWorkerTelemetryBase {
 export interface QLearningWorkerTelemetry extends RLWorkerTelemetryBase {
   epsilonInitial: number
   epsilonFinal: number
-  epsilonDecay: number
-  epsilonMin: number
+  epsilonDecayPerEpisode: number
+  epsilonMinimum: number
   multiDiscrete: boolean
 }
 
