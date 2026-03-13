@@ -2,6 +2,7 @@ import { createTrainableExecutor } from '@neat-evolution/backprop'
 import type {
   AnyAlgorithm,
   AnyGenome,
+  GenomeFactoryOptions,
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type {
@@ -27,6 +28,11 @@ import type {
 import type { Executor } from '@neat-evolution/executor'
 import type { QLAgent } from '@neat-evolution/q-learning'
 import { createQLAgent } from '@neat-evolution/q-learning'
+import {
+  type EvaluateRLAgentResult,
+  type QLearningWorkerTelemetry,
+  requestEvaluateRLAgent,
+} from '@neat-evolution/worker-rl'
 
 export interface QLPluginOptions {
   /** Learning rate for weight updates. */
@@ -88,6 +94,11 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
 
   /** Tracks updated actions per genome for writeback in afterFitness. */
   private readonly pendingWritebacks = new Map<G, PhenotypeAction[]>()
+  /** Latest worker telemetry keyed by genome. */
+  private readonly telemetryByGenome = new WeakMap<
+    G,
+    QLearningWorkerTelemetry
+  >()
 
   constructor(
     algorithm: AnyAlgorithm,
@@ -110,7 +121,7 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
   async evaluateGenome(
     genome: G,
     defaultEvaluate: (genome: G) => Promise<number>,
-    _context: EvaluationContext<G>
+    context: EvaluationContext<G>
   ): Promise<EvaluationResult> {
     if (this.episodicEnvironment === undefined || this.rlConfig === undefined) {
       throw new Error('QLPlugin not initialized — call initialize() first')
@@ -118,23 +129,84 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
 
     const rlConfig = this.rlConfig
     const isLamarckian = this.options.isLamarckian ?? true
+    const canUseWorker =
+      context.supportsTraining === true &&
+      isAgentEnvironment(this.episodicEnvironment)
 
-    // 1. Create trainable executor from genome
+    if (canUseWorker) {
+      return await this.evaluateInWorker(
+        genome,
+        rlConfig,
+        isLamarckian,
+        context
+      )
+    }
+
+    return await this.evaluateLocally(
+      genome,
+      defaultEvaluate,
+      rlConfig,
+      isLamarckian
+    )
+  }
+
+  private async evaluateLocally(
+    genome: G,
+    defaultEvaluate: (genome: G) => Promise<number>,
+    rlConfig: RLConfig,
+    isLamarckian: boolean
+  ): Promise<EvaluationResult> {
     const phenotype = this.algorithm.createPhenotype(genome)
     const trainable = createTrainableExecutor(phenotype)
+    const agentConfig = this.buildAgentConfig(rlConfig)
+    const agent = createQLAgent(trainable, agentConfig, this.rng)
+    this.currentAgent = agent
 
-    // 2. Create QL agent with RolloutBuffer
-    const rolloutLength =
-      this.options.rolloutLength ?? rlConfig.suggestedRolloutLength ?? 32
-
-    const rolloutConfig: RolloutBufferConfig = {
-      rolloutLength,
-      rewardThreshold: this.options.rewardThreshold ?? 0.1,
-    }
-    if (this.options.minRolloutLength !== undefined) {
-      rolloutConfig.minRolloutLength = this.options.minRolloutLength
+    let fitness: number
+    if (isAgentEnvironment(this.episodicEnvironment)) {
+      fitness = this.episodicEnvironment.evaluateAgent(agent)
+    } else {
+      fitness = await defaultEvaluate(genome)
     }
 
+    if (isLamarckian) {
+      this.pendingWritebacks.set(genome, trainable.getUpdatedActions())
+    }
+
+    this.currentAgent = null
+    return { fitness }
+  }
+
+  private async evaluateInWorker(
+    genome: G,
+    rlConfig: RLConfig,
+    isLamarckian: boolean,
+    context: EvaluationContext<G>
+  ): Promise<EvaluationResult> {
+    const genomeOptions = genome.toFactoryOptions()
+    const payload = requestEvaluateRLAgent({
+      method: 'q-learning',
+      genomeOptions,
+      isLamarckian,
+      seed: computeFactorySeed(genomeOptions),
+      config: this.buildAgentConfig(rlConfig),
+    })
+    const result = (await context.call(payload)) as EvaluateRLAgentResult
+    if (result.method !== 'q-learning') {
+      throw new Error('Worker returned mismatched RL method result')
+    }
+
+    if (isLamarckian && result.updatedActions) {
+      this.pendingWritebacks.set(genome, result.updatedActions)
+    }
+    this.telemetryByGenome.set(genome, result.telemetry)
+    return { fitness: result.fitness }
+  }
+
+  private buildAgentConfig(
+    rlConfig: RLConfig
+  ): import('@neat-evolution/q-learning').QLAgentConfig {
+    const rolloutConfig = this.buildRolloutConfig(rlConfig)
     const agentConfig: import('@neat-evolution/q-learning').QLAgentConfig = {
       learningRate: this.options.learningRate,
       actionCount: rlConfig.actionSize,
@@ -151,26 +223,21 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
     if (this.options.multiDiscrete !== undefined) {
       agentConfig.multiDiscrete = this.options.multiDiscrete
     }
-    const agent = createQLAgent(trainable, agentConfig, this.rng)
-    this.currentAgent = agent
+    return agentConfig
+  }
 
-    // 3. Evaluate — prefer local evaluation with agent if supported
-    let fitness: number
-    if (isAgentEnvironment(this.episodicEnvironment)) {
-      fitness = this.episodicEnvironment.evaluateAgent(agent)
-    } else {
-      fitness = await defaultEvaluate(genome)
+  private buildRolloutConfig(rlConfig: RLConfig): RolloutBufferConfig {
+    const rolloutLength =
+      this.options.rolloutLength ?? rlConfig.suggestedRolloutLength ?? 32
+
+    const rolloutConfig: RolloutBufferConfig = {
+      rolloutLength,
+      rewardThreshold: this.options.rewardThreshold ?? 0.1,
     }
-
-    // 4. Store updated weights for potential writeback
-    if (isLamarckian) {
-      this.pendingWritebacks.set(genome, trainable.getUpdatedActions())
+    if (this.options.minRolloutLength !== undefined) {
+      rolloutConfig.minRolloutLength = this.options.minRolloutLength
     }
-
-    // 5. Clean up per-evaluation state
-    this.currentAgent = null
-
-    return { fitness }
+    return rolloutConfig
   }
 
   getContextHooks(): Partial<EpisodicContext> {
@@ -197,4 +264,13 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
       this.pendingWritebacks.delete(genome)
     }
   }
+}
+
+const computeFactorySeed = (options: GenomeFactoryOptions): string => {
+  const serialized = JSON.stringify(options)
+  let hash = 0
+  for (let i = 0; i < serialized.length; i++) {
+    hash = (hash * 31 + serialized.charCodeAt(i)) >>> 0
+  }
+  return hash.toString(16)
 }

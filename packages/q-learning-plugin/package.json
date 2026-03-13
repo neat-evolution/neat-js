@@ -50,7 +50,8 @@
     "@neat-evolution/core": "workspace:*",
     "@neat-evolution/environment": "workspace:*",
     "@neat-evolution/evaluation-strategy": "workspace:*",
-    "@neat-evolution/q-learning": "workspace:*"
+    "@neat-evolution/q-learning": "workspace:*",
+    "@neat-evolution/worker-rl": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
