@@ -77,7 +77,6 @@ function makeMockPluginContext(
   return {
     algorithm,
     environment,
-    supportsTraining: false,
   } as unknown as PluginContext
 }
 
@@ -88,10 +87,6 @@ function makeMockEvaluationContext(): EvaluationContext {
     broadcast: vi.fn(),
     addMessageHandler: vi.fn(),
     removeMessageHandler: vi.fn(),
-    dispatch: vi.fn(),
-    request: vi.fn(),
-    addActionHandler: vi.fn(),
-    removeActionHandler: vi.fn(),
     evaluateGenomeEntry: vi.fn(),
     evaluateGenomeEntryBatch: vi.fn(),
   } as unknown as EvaluationContext
@@ -321,7 +316,7 @@ describe('BackpropPlugin', () => {
   })
 
   describe('evaluateGenome — worker path', () => {
-    it('dispatches to worker via context.call when supportsTraining', async () => {
+    it('dispatches to worker via context.call when workerTrainingCapabilities present', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockSupervisedEnvironment()
       const plugin = new BackpropPlugin(algorithm, {
@@ -335,7 +330,7 @@ describe('BackpropPlugin', () => {
 
       const evalContext = {
         ...makeMockEvaluationContext(),
-        supportsTraining: true,
+        workerTrainingCapabilities: { rl: { supported: false, methods: {} } },
         call: vi.fn().mockResolvedValue({
           fitness: 0.95,
           updatedActions: [[PhenotypeActionType.Link, 0, 2, 0.7]],

@@ -75,7 +75,7 @@ export class BackpropPlugin<G extends AnyGenome = AnyGenome>
     _defaultEvaluate: (genome: G) => Promise<number>,
     context: EvaluationContext<G>
   ): Promise<EvaluationResult> {
-    if (context.supportsTraining) {
+    if (context.workerTrainingCapabilities != null) {
       return this.evaluateWorker(genome, context)
     }
     return this.evaluateLocal(genome)
