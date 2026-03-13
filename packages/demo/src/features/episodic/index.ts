@@ -24,6 +24,7 @@ import {
 import {
   type EvaluationConfig,
   EvolutionManager,
+  type WorkerConfig,
 } from '@neat-evolution/evolution-manager'
 import { NEATAlgorithm, type NEATGenome } from '@neat-evolution/neat'
 import { QLPlugin } from '@neat-evolution/q-learning-plugin'
@@ -70,6 +71,8 @@ function parseArgs(argv: string[]) {
     epsilonDecayPerEpisode: 0.95,
     epsilonMinimum: 0.01,
     telemetry: false,
+    workers: false,
+    threadCount: undefined as number | undefined,
   }
 
   for (let i = 0; i < argv.length; i++) {
@@ -109,6 +112,12 @@ function parseArgs(argv: string[]) {
       i++
     } else if (arg === '--telemetry') {
       args.telemetry = true
+    } else if (arg === '--workers') {
+      args.workers = true
+    } else if (arg === '--threads' && next) {
+      args.threadCount = Number(next)
+      args.workers = true
+      i++
     }
   }
 
@@ -252,6 +261,14 @@ const variants: VariantConfig[] = [
   },
 ]
 
+const workerConfig: WorkerConfig | undefined = args.workers
+  ? {
+      createEnvironmentPathname: '@neat-evolution/demo/bandit-environment',
+      pluginPaths: ['@neat-evolution/worker-rl/workerPlugin'],
+      ...(args.threadCount != null ? { threadCount: args.threadCount } : {}),
+    }
+  : undefined
+
 console.log('=== Episodic Demo: Vanilla vs AC vs Q-Learning ===')
 console.log(`Environment: Multi-arm bandit (3 episodes × 20 steps)`)
 console.log(`Optimal average reward: 1.00`)
@@ -261,6 +278,9 @@ console.log(
 if (args.seconds > 0) {
   console.log(`Time limit: ${args.seconds}s per run`)
 }
+console.log(
+  `Workers: ${args.workers ? `enabled${args.threadCount != null ? ` (${args.threadCount} threads)` : ''}` : 'disabled (main thread)'}`
+)
 console.log(`Base RNG seed: ${args.seed ?? 'not set (thread RNG)'}`)
 console.log('\nVariant configuration:')
 for (const variant of variants) {
@@ -286,7 +306,8 @@ interface RunResult {
 async function runVariant(
   name: string,
   outputCount: number,
-  evaluation: EvaluationConfig
+  evaluation: EvaluationConfig,
+  variantWorkerConfig?: WorkerConfig
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
   const environment = new BanditEnvironment(outputCount)
@@ -308,6 +329,9 @@ async function runVariant(
     populationOptions: {
       ...defaultPopulationOptions,
     },
+    ...(variantWorkerConfig != null
+      ? { workerConfig: variantWorkerConfig }
+      : {}),
   })
 
   // Suppress evolve()'s built-in logging
@@ -340,7 +364,8 @@ for (const variant of variants) {
   const result = await runVariant(
     variant.name,
     variant.outputCount,
-    variant.evaluation
+    variant.evaluation,
+    workerConfig
   )
   console.log(
     `  Done: ${result.bestFitness.toFixed(4)} in ${(result.elapsedMs / 1000).toFixed(1)}s`

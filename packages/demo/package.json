@@ -20,6 +20,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./bandit-environment": {
+      "types": "./dist/types/features/episodic/createBanditEnvironment.d.ts",
+      "import": "./dist/esm/features/episodic/createBanditEnvironment.js",
+      "require": "./dist/cjs/features/episodic/createBanditEnvironment.js"
     }
   },
   "files": [

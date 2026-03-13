@@ -38,8 +38,15 @@ interface BanditEpisode {
  * Fitness = average reward across all episodes and steps (range [0, 1]).
  * Optimal fitness = 1.0 (always pulls the best arm).
  */
+export interface BanditFactoryOptions {
+  outputCount?: number
+}
+
 export class BanditEnvironment
-  implements Environment<undefined>, EpisodicEnvironment, AgentEnvironment
+  implements
+    Environment<BanditFactoryOptions>,
+    EpisodicEnvironment,
+    AgentEnvironment
 {
   public readonly description: EnvironmentDescription
   public readonly isAsync = false
@@ -60,8 +67,8 @@ export class BanditEnvironment
     }
   }
 
-  toFactoryOptions(): undefined {
-    return undefined
+  toFactoryOptions(): BanditFactoryOptions {
+    return { outputCount: this.description.outputs }
   }
 
   getRLConfig(): RLConfig {
