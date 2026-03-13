@@ -8,8 +8,10 @@ import type {
 import type {
   EpisodeInfo,
   EpisodeResult,
+  EpisodicAgent,
   EpisodicContext,
   RolloutBufferConfig,
+  RolloutSegment,
   TransitionInfo,
 } from '@neat-evolution/environment'
 import {
@@ -26,7 +28,7 @@ import type {
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
 import type { Executor } from '@neat-evolution/executor'
-import type { QLAgent } from '@neat-evolution/q-learning'
+import type { QLAgent, QLAgentConfig } from '@neat-evolution/q-learning'
 import { createQLAgent } from '@neat-evolution/q-learning'
 import type { RNG } from '@neat-evolution/utils'
 import { threadRNG } from '@neat-evolution/utils'
@@ -36,6 +38,70 @@ import {
   requestEvaluateRLAgent,
   WorkerRLDispatchError,
 } from '@neat-evolution/worker-rl'
+
+/**
+ * Create a lightweight telemetry tracker for local QL evaluation.
+ * Mirrors the worker-side tracker so local and worker runs produce
+ * comparable diagnostics in the same `QLearningWorkerTelemetry` shape.
+ */
+function createLocalTelemetryTracker() {
+  let episodes = 0
+  let segments = 0
+  let transitions = 0
+
+  return {
+    onSegmentTrained(segment: RolloutSegment): void {
+      segments += 1
+      transitions += segment.transitions.length
+    },
+    onEpisodeStart(_info: EpisodeInfo): void {
+      episodes += 1
+    },
+    onEpisodeEnd(_result: EpisodeResult): void {
+      // episode count is tracked in onEpisodeStart
+    },
+    toTelemetry(config: QLAgentConfig): QLearningWorkerTelemetry {
+      const epsilonDecayPerEpisode = config.epsilonDecayPerEpisode ?? 1
+      const epsilonMinimum = config.epsilonMinimum ?? 0
+      const epsilonInitial = config.epsilonInitial
+      const decaySteps = Math.max(0, episodes - 1)
+      const epsilonFinal = Math.max(
+        epsilonMinimum,
+        epsilonInitial * epsilonDecayPerEpisode ** decaySteps
+      )
+      return {
+        episodes,
+        rolloutSegments: segments,
+        transitionsTrained: transitions,
+        epsilonInitial,
+        epsilonFinal,
+        epsilonDecayPerEpisode,
+        epsilonMinimum,
+        multiDiscrete: config.multiDiscrete ?? false,
+      }
+    },
+  }
+}
+
+/** Wrap agent episode lifecycle to route events through a tracker. */
+function attachLocalEpisodeTracker(
+  agent: EpisodicAgent,
+  tracker: {
+    onEpisodeStart: (info: EpisodeInfo) => void
+    onEpisodeEnd: (result: EpisodeResult) => void
+  }
+): void {
+  const originalStart = agent.startEpisode.bind(agent)
+  agent.startEpisode = (info) => {
+    tracker.onEpisodeStart(info)
+    originalStart(info)
+  }
+  const originalEnd = agent.endEpisode.bind(agent)
+  agent.endEpisode = (result) => {
+    tracker.onEpisodeEnd(result)
+    originalEnd(result)
+  }
+}
 
 export interface QLPluginOptions {
   /** Learning rate for weight updates. */
@@ -206,7 +272,14 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
     const phenotype = this.algorithm.createPhenotype(genome)
     const trainable = createTrainableExecutor(phenotype)
     const agentConfig = this.buildAgentConfig(rlConfig)
-    const agent = createQLAgent(trainable, agentConfig, this.rng)
+
+    const tracker = createLocalTelemetryTracker()
+    const agent = createQLAgent(
+      trainable,
+      { ...agentConfig, onSegmentTrained: tracker.onSegmentTrained },
+      this.rng
+    )
+    attachLocalEpisodeTracker(agent, tracker)
     this.currentAgent = agent
 
     let fitness: number
@@ -220,6 +293,7 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
       this.pendingWritebacks.set(genome, trainable.getUpdatedActions())
     }
 
+    this.telemetryByGenome.set(genome, tracker.toTelemetry(agentConfig))
     this.currentAgent = null
     return { fitness }
   }
@@ -316,6 +390,11 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
         this.currentAgent?.setTransitionInfo(info)
       },
     }
+  }
+
+  /** Retrieve the latest telemetry for a genome (local or worker). */
+  getTelemetry(genome: G): QLearningWorkerTelemetry | undefined {
+    return this.telemetryByGenome.get(genome)
   }
 
   afterFitness(genome: G, _fitness: number, _context: PluginContext): void {

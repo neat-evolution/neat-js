@@ -87,6 +87,29 @@ and `transitionInfo` to the active agent. This is a partial integration path —
 hooks never call `act()`, so no transitions are recorded through hooks alone.
 Direct `evaluateAgent()` is the complete RL path.
 
+## Telemetry
+
+Both local and worker evaluation paths populate a per-genome
+`QLearningWorkerTelemetry` record. Retrieve it after evaluation:
+
+```ts
+const telemetry = plugin.getTelemetry(genome)
+```
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `episodes` | `number` | Episodes completed during evaluation. |
+| `rolloutSegments` | `number` | Rollout segments that triggered training. |
+| `transitionsTrained` | `number` | Total transitions across all trained segments. |
+| `epsilonInitial` | `number` | Epsilon at the start of evaluation. |
+| `epsilonFinal` | `number` | Epsilon after all episodes (after decay). |
+| `epsilonDecayPerEpisode` | `number` | Per-episode multiplicative decay factor. |
+| `epsilonMinimum` | `number` | Epsilon floor. |
+| `multiDiscrete` | `boolean` | Whether multi-discrete Q-values were used. |
+
+The telemetry is keyed by genome in a `WeakMap` — it is automatically garbage
+collected when the genome is no longer referenced.
+
 ## Worker Evaluation
 
 When `context.supportsTraining` is true, the plugin validates that the worker
