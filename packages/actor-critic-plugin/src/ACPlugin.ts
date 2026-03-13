@@ -286,7 +286,10 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
     // Worker path: training is handled by the worker evaluation enhancer.
     // Just delegate to defaultEvaluate which routes through evaluateGenomeEntry.
     // The evaluator extracts writeback and telemetry from the enriched response.
-    if (context.supportsTraining === true) {
+    if (
+      context.workerTrainingCapabilities?.rl?.methods?.['actor-critic']
+        ?.supported === true
+    ) {
       const fitness = await defaultEvaluate(genome)
       return { fitness }
     }
