@@ -12,8 +12,8 @@ import {
   isEpisodicEnvironment,
 } from '@neat-evolution/environment'
 import type { SyncExecutor } from '@neat-evolution/executor'
+import { threadRNG } from '@neat-evolution/utils'
 import { describe, expect, it, vi } from 'vitest'
-
 import { BanditEnvironment } from '../src/features/episodic/BanditEnvironment.js'
 
 // ---------------------------------------------------------------------------
@@ -419,15 +419,15 @@ describe('QLPlugin integration', () => {
     }
 
     const env = new BanditEnvironment(3)
-    const rng = () => Math.random()
+    const rng = threadRNG()
 
     const plugin = new QLPlugin(
       algorithm,
       {
         learningRate: 0.01,
-        epsilon: 0.3,
-        epsilonDecay: 0.95,
-        epsilonMin: 0.01,
+        epsilonInitial: 0.3,
+        epsilonDecayPerEpisode: 0.95,
+        epsilonMinimum: 0.01,
         isLamarckian: true,
         rolloutLength: 'episode',
         rewardThreshold: 0.1,

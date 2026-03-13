@@ -22,6 +22,7 @@ import {
 } from '@neat-evolution/evolution-manager'
 import { NEATAlgorithm, type NEATGenome } from '@neat-evolution/neat'
 import { QLPlugin } from '@neat-evolution/q-learning-plugin'
+import { threadRNG } from '@neat-evolution/utils'
 
 import { BanditEnvironment } from './BanditEnvironment.js'
 
@@ -193,15 +194,15 @@ const qLearning = await runVariant('Q-Learning', 3, {
       algorithm,
       {
         learningRate: lr,
-        epsilon: 0.3,
-        epsilonDecay: 0.95,
-        epsilonMin: 0.01,
+        epsilonInitial: 0.3,
+        epsilonDecayPerEpisode: 0.95,
+        epsilonMinimum: 0.01,
         isLamarckian: true,
         rolloutLength: 'episode',
         rewardThreshold: 0.1,
         discountFactor: 0,
       },
-      Math.random
+      threadRNG()
     ),
   ],
 })
