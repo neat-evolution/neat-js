@@ -44,7 +44,7 @@ export function computeQLOutputErrors(
 }
 
 /**
- * Compute Q-learning output errors for backward pass (per-button mode).
+ * Compute Q-learning output errors for backward pass (multi-discrete mode).
  *
  * Each button pair is an independent 2-action DQN. The error for each pair
  * is placed at the chosen output index within that pair.

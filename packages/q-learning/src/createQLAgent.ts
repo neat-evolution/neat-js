@@ -4,9 +4,9 @@ import type {
   EpisodeInfo,
   EpisodeResult,
   EpisodicAgent,
-  FrameAnnotation,
   RolloutBufferConfig,
   Transition,
+  TransitionInfo,
 } from '@neat-evolution/environment'
 import type { QLGradientConfig } from './computeQLOutputErrors.js'
 import { trainOnSegment } from './trainOnSegment.js'
@@ -15,7 +15,7 @@ import { trainOnSegment } from './trainOnSegment.js'
 export interface QLAgentConfig {
   /** Learning rate for backward pass. */
   learningRate: number
-  /** Number of actions (standard mode) or buttons (per-button mode). */
+  /** Number of actions (standard mode) or action factors (multi-discrete mode). */
   actionCount: number
   /** Discount factor (gamma). */
   discountFactor: number
@@ -27,14 +27,14 @@ export interface QLAgentConfig {
   epsilonDecay?: number
   /** Minimum epsilon floor. */
   epsilonMin?: number
-  /** Per-button mode: treat outputs as pairs [Q_on, Q_off]. */
-  perButton?: boolean
+  /** Multi-discrete mode: treat outputs as pairs [Q_on, Q_off] per factor. */
+  multiDiscrete?: boolean
 }
 
-/** QL agent: EpisodicAgent with an additional annotate side channel for plugins. */
+/** QL agent with transition metadata support for plugin integration. */
 export type QLAgent = EpisodicAgent & {
-  /** Set a pending annotation for the current transition (plugin side channel). */
-  annotate(annotation: FrameAnnotation): void
+  /** Set pending transition metadata (`info`) for the current transition. */
+  setTransitionInfo(info: TransitionInfo): void
 }
 
 /**
@@ -51,7 +51,7 @@ export type QLAgent = EpisodicAgent & {
  *   - Backward pass per transition with TD error at chosen action
  *
  * Standard mode: actionCount outputs = Q-values for N discrete actions
- * Per-button mode: 2 * actionCount outputs = Q-values for each button's on/off
+ * Multi-discrete mode: 2 * actionCount outputs = Q-values for each factor's on/off
  *
  * No critic output needed -- Q-values ARE the value estimates.
  */
@@ -61,7 +61,7 @@ export function createQLAgent(
   rng: () => number
 ): QLAgent {
   const rolloutBuffer = new RolloutBuffer(config.rolloutConfig)
-  const perButton = config.perButton ?? false
+  const multiDiscrete = config.multiDiscrete ?? false
   const actionCount = config.actionCount
   const rewardThreshold = config.rolloutConfig.rewardThreshold
   const epsilonDecay = config.epsilonDecay ?? 1
@@ -69,7 +69,7 @@ export function createQLAgent(
 
   let epsilon = config.epsilon
   let currentTransition: Transition | null = null
-  let pendingAnnotation: FrameAnnotation | null = null
+  let pendingInfo: TransitionInfo | null = null
 
   const gradientConfig: QLGradientConfig = {
     discountFactor: config.discountFactor,
@@ -87,13 +87,13 @@ export function createQLAgent(
         trainable,
         segment.transitions,
         gradientConfig,
-        perButton,
+        multiDiscrete,
         actionCount
       )
     }
   }
 
-  function determineTrigger(): 'reward' | 'done' | 'annotation' | null {
+  function determineTrigger(): 'reward' | 'done' | 'info' | null {
     if (currentTransition === null) {
       return null
     }
@@ -103,8 +103,8 @@ export function createQLAgent(
     if (Math.abs(currentTransition.reward) > rewardThreshold) {
       return 'reward'
     }
-    if (pendingAnnotation?.isInteresting) {
-      return 'annotation'
+    if (pendingInfo?.isInteresting) {
+      return 'info'
     }
     return null
   }
@@ -141,11 +141,11 @@ export function createQLAgent(
   }
 
   /**
-   * Epsilon-greedy action selection for per-button mode.
-   * Each button pair has independent epsilon-greedy selection.
-   * Returns N-length action array (0 or 1 per button).
+   * Epsilon-greedy action selection for multi-discrete mode.
+   * Each factor pair has independent epsilon-greedy selection.
+   * Returns N-length action array (0 or 1 per factor).
    */
-  function selectActionPerButton(qValues: Float64Array): Float64Array {
+  function selectActionMultiDiscrete(qValues: Float64Array): Float64Array {
     const action = new Float64Array(actionCount)
 
     for (let b = 0; b < actionCount; b++) {
@@ -173,10 +173,10 @@ export function createQLAgent(
       let action: Float64Array
       let chosenActionIndex: number | undefined
 
-      if (perButton) {
-        action = selectActionPerButton(qValues)
-        // In per-button mode, chosenActionIndex is not used on Transition
-        // (we derive per-button choices from the action array during training)
+      if (multiDiscrete) {
+        action = selectActionMultiDiscrete(qValues)
+        // In multi-discrete mode, chosenActionIndex is not stored.
+        // Training derives each chosen factor action from the action array.
       } else {
         const result = selectActionStandard(qValues)
         action = result.action
@@ -199,7 +199,10 @@ export function createQLAgent(
         transition.chosenActionIndex = chosenActionIndex
       }
       currentTransition = transition
-      pendingAnnotation = null
+      if (pendingInfo !== null) {
+        transition.info = pendingInfo
+      }
+      pendingInfo = null
       rolloutBuffer.push(transition)
 
       // 5. Return action (N values for environment)
@@ -219,7 +222,7 @@ export function createQLAgent(
     startEpisode(info: EpisodeInfo): void {
       rolloutBuffer.reset(info.episodeIndex)
       currentTransition = null
-      pendingAnnotation = null
+      pendingInfo = null
 
       // Decay epsilon per episode
       epsilon = Math.max(epsilonMin, epsilon * epsilonDecay)
@@ -233,17 +236,20 @@ export function createQLAgent(
             trainable,
             segment.transitions,
             gradientConfig,
-            perButton,
+            multiDiscrete,
             actionCount
           )
         }
       }
       currentTransition = null
-      pendingAnnotation = null
+      pendingInfo = null
     },
 
-    annotate(annotation: FrameAnnotation): void {
-      pendingAnnotation = annotation
+    setTransitionInfo(info: TransitionInfo): void {
+      pendingInfo = info
+      if (currentTransition !== null) {
+        currentTransition.info = info
+      }
     },
   }
 }

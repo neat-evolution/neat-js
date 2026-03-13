@@ -200,8 +200,8 @@ describe('trainOnSegment (standard mode)', () => {
   })
 })
 
-describe('trainOnSegment (per-button mode)', () => {
-  it('terminal segment: per-button bootstrap values = 0', () => {
+describe('trainOnSegment (multi-discrete mode)', () => {
+  it('terminal segment: per-factor bootstrap values = 0', () => {
     const trainable = mockTrainable()
     // 2 buttons, 4 Q-values: [Q_on_0, Q_off_0, Q_on_1, Q_off_1]
     // action = [1, 0] -> button 0 on (chosen Q_on_0=0.5), button 1 off (chosen Q_off_1=0.6)
@@ -225,7 +225,7 @@ describe('trainOnSegment (per-button mode)', () => {
     expect(call.errors[3]).toBeCloseTo(-0.4)
   })
 
-  it('non-terminal segment: per-button bootstrap = max(pair)', () => {
+  it('non-terminal segment: per-factor bootstrap = max(pair)', () => {
     const trainable = mockTrainable()
     // 2 buttons, action = [1, 0], done=false
     // Q: [0.5, 0.3, 0.4, 0.6]

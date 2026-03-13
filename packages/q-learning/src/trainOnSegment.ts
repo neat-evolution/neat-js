@@ -16,13 +16,13 @@ import {
  * The rollout buffer, trigger logic, and segment capture are identical.
  *
  * Standard mode: error at chosenActionIndex = Q(s, a) - G_t
- * Per-button mode: independent error per button pair
+ * Multi-discrete mode: independent error per factor pair
  */
 export function trainOnSegment(
   trainable: TrainableExecutor,
   transitions: Transition[],
   config: QLGradientConfig,
-  perButton: boolean,
+  multiDiscrete: boolean,
   actionCount: number
 ): void {
   const n = transitions.length
@@ -35,10 +35,10 @@ export function trainOnSegment(
     throw new Error('Empty transitions array')
   }
 
-  const outputCount = perButton ? 2 * actionCount : actionCount
+  const outputCount = multiDiscrete ? 2 * actionCount : actionCount
 
-  if (perButton) {
-    trainPerButton(trainable, transitions, config, actionCount)
+  if (multiDiscrete) {
+    trainMultiDiscrete(trainable, transitions, config, actionCount)
   } else {
     trainStandard(trainable, transitions, config, outputCount)
   }
@@ -94,14 +94,14 @@ function trainStandard(
 }
 
 /**
- * Per-button mode: each button pair is an independent 2-action DQN.
- * Bootstrap value per button = max(Q_on, Q_off) of last transition.
+ * Multi-discrete mode: each factor pair is an independent 2-action DQN.
+ * Bootstrap value per factor = max(Q_on, Q_off) of last transition.
  */
-function trainPerButton(
+function trainMultiDiscrete(
   trainable: TrainableExecutor,
   transitions: Transition[],
   config: QLGradientConfig,
-  buttonCount: number
+  factorCount: number
 ): void {
   const n = transitions.length
   const lastTransition = transitions[n - 1]
@@ -116,17 +116,17 @@ function trainPerButton(
     )
   }
 
-  // Per-button bootstrap values: max of each pair
-  const terminalValues = new Float64Array(buttonCount)
+  // Per-factor bootstrap values: max of each pair
+  const terminalValues = new Float64Array(factorCount)
   if (!lastTransition.done) {
-    for (let b = 0; b < buttonCount; b++) {
-      const qOn = lastQValues[2 * b] as number
-      const qOff = lastQValues[2 * b + 1] as number
-      terminalValues[b] = Math.max(qOn, qOff)
+    for (let i = 0; i < factorCount; i++) {
+      const qOn = lastQValues[2 * i] as number
+      const qOff = lastQValues[2 * i + 1] as number
+      terminalValues[i] = Math.max(qOn, qOff)
     }
   }
 
-  // Per-button n-step returns, computed backward
+  // Per-factor n-step returns, computed backward
   const G = Float64Array.from(terminalValues)
   for (let t = n - 1; t >= 0; t--) {
     const transition = transitions[t]
@@ -138,20 +138,20 @@ function trainPerButton(
       throw new Error(`Transition at index ${t} missing qValues`)
     }
 
-    // Compute per-button TD errors
-    const tdErrors = new Float64Array(buttonCount)
-    for (let b = 0; b < buttonCount; b++) {
-      G[b] = transition.reward + config.discountFactor * (G[b] as number)
-      const actionVal = transition.action[b] as number
+    // Compute per-factor TD errors
+    const tdErrors = new Float64Array(factorCount)
+    for (let i = 0; i < factorCount; i++) {
+      G[i] = transition.reward + config.discountFactor * (G[i] as number)
+      const actionVal = transition.action[i] as number
       const chosenIdx = actionVal === 1 ? 0 : 1
-      const chosenQValue = qValues[2 * b + chosenIdx] as number
-      tdErrors[b] = chosenQValue - (G[b] as number)
+      const chosenQValue = qValues[2 * i + chosenIdx] as number
+      tdErrors[i] = chosenQValue - (G[i] as number)
     }
 
     const errors = computeQLOutputErrorsPerButton(
       transition,
       tdErrors,
-      buttonCount
+      factorCount
     )
     trainable.backward(errors, config.learningRate)
   }

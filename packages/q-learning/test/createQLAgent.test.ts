@@ -112,12 +112,12 @@ describe('createQLAgent', () => {
       expect(sum).toBe(1)
     })
 
-    it('per-button mode: returns N outputs from 2N internal outputs', () => {
+    it('multi-discrete mode: returns N outputs from 2N internal outputs', () => {
       const actionCount = 4
       const trainable = mockTrainable(2 * actionCount)
       const config: QLAgentConfig = {
         ...defaultConfig(actionCount),
-        perButton: true,
+        multiDiscrete: true,
         epsilon: 0,
       }
       const agent = createQLAgent(trainable, config, neverExploreRng())
