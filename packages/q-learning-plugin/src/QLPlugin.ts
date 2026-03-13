@@ -34,6 +34,7 @@ import {
   type EvaluateRLAgentResult,
   type QLearningWorkerTelemetry,
   requestEvaluateRLAgent,
+  WorkerRLDispatchError,
 } from '@neat-evolution/worker-rl'
 
 export interface QLPluginOptions {
@@ -132,11 +133,54 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
 
     const rlConfig = this.rlConfig
     const isLamarckian = this.options.isLamarckian ?? true
-    const canUseWorker =
-      context.supportsTraining === true &&
-      isAgentEnvironment(this.episodicEnvironment)
+    const wantsWorker = context.supportsTraining === true
 
-    if (canUseWorker) {
+    if (wantsWorker) {
+      if (!isAgentEnvironment(this.episodicEnvironment)) {
+        throw new WorkerRLDispatchError(
+          'agent-environment-required',
+          'q-learning',
+          'Q-learning worker evaluation requires an AgentEnvironment implementation.'
+        )
+      }
+      const rlCapabilities = context.workerTrainingCapabilities?.rl
+      if (rlCapabilities == null) {
+        throw new WorkerRLDispatchError(
+          'capability-missing',
+          'q-learning',
+          'Worker RL capabilities were not reported during worker initialization.'
+        )
+      }
+      if (rlCapabilities.supported !== true) {
+        throw new WorkerRLDispatchError(
+          'capability-missing',
+          'q-learning',
+          rlCapabilities.reason ??
+            'Worker RL plugin is not registered on every worker thread.'
+        )
+      }
+      const methodCapability = rlCapabilities.methods?.['q-learning']
+      if (methodCapability == null || methodCapability.supported !== true) {
+        throw new WorkerRLDispatchError(
+          'method-unsupported',
+          'q-learning',
+          methodCapability?.reason ??
+            'Worker RL plugin does not support q-learning evaluation.'
+        )
+      }
+      if (
+        isLamarckian &&
+        methodCapability.supportsLamarckianWriteback === false
+      ) {
+        throw new WorkerRLDispatchError(
+          'lamarckian-unsupported',
+          'q-learning',
+          'Worker RL plugin disabled Lamarckian writeback for q-learning evaluations.'
+        )
+      }
+    }
+
+    if (wantsWorker) {
       return await this.evaluateInWorker(
         genome,
         rlConfig,
@@ -194,9 +238,23 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
       seed: computeFactorySeed(genomeOptions),
       config: this.buildAgentConfig(rlConfig),
     })
-    const result = (await context.call(payload)) as EvaluateRLAgentResult
+    let result: EvaluateRLAgentResult
+    try {
+      result = (await context.call(payload)) as EvaluateRLAgentResult
+    } catch (error) {
+      throw new WorkerRLDispatchError(
+        'worker-call-failed',
+        'q-learning',
+        'Worker RL q-learning evaluation failed.',
+        { cause: error instanceof Error ? error : undefined }
+      )
+    }
     if (result.method !== 'q-learning') {
-      throw new Error('Worker returned mismatched RL method result')
+      throw new WorkerRLDispatchError(
+        'result-mismatch',
+        'q-learning',
+        `Worker returned mismatched RL method result: ${result.method}`
+      )
     }
 
     if (isLamarckian && result.updatedActions) {
