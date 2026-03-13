@@ -335,7 +335,12 @@ describe('createQLAgent', () => {
       }
       expect(trainable.backwardCalls).toBe(0)
 
-      agent.endEpisode({ fitness: 1, totalSteps: 5, terminated: false })
+      agent.endEpisode({
+        fitness: 1,
+        episodeReturn: 0.05,
+        totalSteps: 5,
+        terminated: false,
+      })
       expect(trainable.backwardCalls).toBe(5)
     })
 
@@ -347,7 +352,12 @@ describe('createQLAgent', () => {
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       agent.startEpisode({ episodeIndex: 0 })
-      agent.endEpisode({ fitness: 0, totalSteps: 0, terminated: false })
+      agent.endEpisode({
+        fitness: 0,
+        episodeReturn: 0,
+        totalSteps: 0,
+        terminated: false,
+      })
       expect(trainable.backwardCalls).toBe(0)
     })
   })
@@ -476,7 +486,12 @@ describe('createQLAgent', () => {
         const chosenAction = action[0] === 1 ? 0 : 1
         const reward = chosenAction === 0 ? 1 : 0
         agent.reward(reward, true)
-        agent.endEpisode({ fitness: reward, totalSteps: 1, terminated: true })
+        agent.endEpisode({
+          fitness: reward,
+          episodeReturn: reward,
+          totalSteps: 1,
+          terminated: true,
+        })
       }
 
       // After training, Q(action 0) should be higher than Q(action 1)
