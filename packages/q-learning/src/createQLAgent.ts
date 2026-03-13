@@ -5,6 +5,7 @@ import type {
   EpisodeResult,
   EpisodicAgent,
   RolloutBufferConfig,
+  RolloutSegment,
   Transition,
   TransitionInfo,
 } from '@neat-evolution/environment'
@@ -29,6 +30,8 @@ export interface QLAgentConfig {
   epsilonMin?: number
   /** Multi-discrete mode: treat outputs as pairs [Q_on, Q_off] per factor. */
   multiDiscrete?: boolean
+  /** Optional callback invoked whenever a rollout segment trains (telemetry). */
+  onSegmentTrained?: (segment: RolloutSegment) => void
 }
 
 /** QL agent with transition metadata support for plugin integration. */
@@ -90,6 +93,7 @@ export function createQLAgent(
         multiDiscrete,
         actionCount
       )
+      config.onSegmentTrained?.(segment)
     }
   }
 
@@ -239,6 +243,7 @@ export function createQLAgent(
             multiDiscrete,
             actionCount
           )
+          config.onSegmentTrained?.(segment)
         }
       }
       currentTransition = null

@@ -1,5 +1,5 @@
 import type { TrainableExecutor } from '@neat-evolution/backprop'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { QLAgentConfig } from '../src/createQLAgent.js'
 import { createQLAgent } from '../src/createQLAgent.js'
 
@@ -487,6 +487,29 @@ describe('createQLAgent', () => {
         throw new Error('Expected weights')
       }
       expect(q0).toBeGreaterThan(q1)
+    })
+  })
+
+  describe('telemetry hooks', () => {
+    it('calls onSegmentTrained whenever training is triggered', () => {
+      const actionCount = 2
+      const trainable = mockTrainable(actionCount)
+      const onSegmentTrained = vi.fn()
+      const agent = createQLAgent(
+        trainable,
+        {
+          ...defaultConfig(actionCount),
+          rolloutConfig: { rolloutLength: 2, rewardThreshold: 0.1 },
+          onSegmentTrained,
+        },
+        deterministicRng()
+      )
+
+      agent.startEpisode({ episodeIndex: 0 })
+      agent.act(new Float64Array([1, 0]))
+      agent.reward(1, false)
+
+      expect(onSegmentTrained).toHaveBeenCalledTimes(1)
     })
   })
 })
