@@ -334,10 +334,32 @@ const evaluateQLearning = (
   return result
 }
 
+const declareWorkerRLCapabilities = (context: ThreadContext): void => {
+  if (context.workerCapabilities == null) {
+    context.workerCapabilities = {}
+  }
+  if (context.workerCapabilities.rl == null) {
+    context.workerCapabilities.rl = {
+      supported: true,
+      methods: {},
+    }
+  }
+  context.workerCapabilities.rl.supported = true
+  context.workerCapabilities.rl.methods['actor-critic'] = {
+    supported: true,
+    supportsLamarckianWriteback: true,
+  }
+  context.workerCapabilities.rl.methods['q-learning'] = {
+    supported: true,
+    supportsLamarckianWriteback: true,
+  }
+}
+
 const workerRLPlugin = (
   handler: Handler,
   threadContext: ThreadContext & WorkerContext
 ): void => {
+  declareWorkerRLCapabilities(threadContext)
   handler.register(
     RLWorkerActionType.REQUEST_EVALUATE_AGENT,
     async (payload) => {

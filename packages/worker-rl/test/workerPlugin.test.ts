@@ -148,6 +148,20 @@ describe('workerPlugin', () => {
     vi.clearAllMocks()
   })
 
+  it('registers RL capabilities for actor-critic and q-learning', () => {
+    const { threadContext } = registerPlugin()
+    const rlCapabilities = threadContext.workerCapabilities?.rl
+    expect(rlCapabilities?.supported).toBe(true)
+    expect(rlCapabilities?.methods?.['actor-critic']?.supported).toBe(true)
+    expect(
+      rlCapabilities?.methods?.['actor-critic']?.supportsLamarckianWriteback
+    ).toBe(true)
+    expect(rlCapabilities?.methods?.['q-learning']?.supported).toBe(true)
+    expect(
+      rlCapabilities?.methods?.['q-learning']?.supportsLamarckianWriteback
+    ).toBe(true)
+  })
+
   it('evaluates actor-critic payloads and returns fitness/writeback/telemetry', async () => {
     const { invoke, environment } = registerPlugin()
 
