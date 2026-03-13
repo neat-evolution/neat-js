@@ -9,7 +9,6 @@ import type {
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
 import type { SyncExecutor } from '@neat-evolution/executor'
-import { WorkerRLDispatchError } from '@neat-evolution/worker-rl'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ACPlugin } from '../src/ACPlugin.js'
@@ -226,7 +225,7 @@ describe('ACPlugin', () => {
       expect(result.fitness).toBe(0.75)
     })
 
-    it('uses worker evaluation when supportsTraining is true', async () => {
+    it('delegates to defaultEvaluate when supportsTraining is true (worker path)', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockAgentEnvironment()
       const plugin = new ACPlugin(
@@ -241,49 +240,20 @@ describe('ACPlugin', () => {
       const evalContext = {
         ...makeMockEvaluationContext(),
         supportsTraining: true,
-        workerTrainingCapabilities: {
-          rl: {
-            supported: true,
-            methods: {
-              'actor-critic': {
-                supported: true,
-                supportsLamarckianWriteback: true,
-              },
-            },
-          },
-        },
-        call: vi.fn().mockResolvedValue({
-          method: 'actor-critic',
-          fitness: 1.05,
-          updatedActions: [[PhenotypeActionType.Link, 0, 2, 0.5]],
-          telemetry: {
-            episodes: 2,
-            rolloutSegments: 4,
-            transitionsTrained: 64,
-            actorActivation: 'softmax',
-            entropyCoefficient: 0.01,
-          },
-        }),
       } as unknown as EvaluationContext
 
-      const genomeWithFactory = {
-        ...mockGenome,
-        toFactoryOptions: vi.fn().mockReturnValue({ mock: true }),
-      } as unknown as AnyGenome
-
-      const defaultEvaluate = vi.fn()
+      const defaultEvaluate = vi.fn().mockResolvedValue(1.05)
       const result = await plugin.evaluateGenome(
-        genomeWithFactory,
+        mockGenome,
         defaultEvaluate,
         evalContext
       )
 
-      expect(result.fitness).toBeCloseTo(1.05)
-      expect(evalContext.call).toHaveBeenCalledOnce()
-      expect(defaultEvaluate).not.toHaveBeenCalled()
-
-      plugin.afterFitness(genomeWithFactory, result.fitness, pluginContext)
-      expect(algorithm.writeBackWeights).toHaveBeenCalled()
+      // Worker path: plugin delegates to defaultEvaluate (which goes through evaluateGenomeEntry)
+      expect(result.fitness).toBe(1.05)
+      expect(defaultEvaluate).toHaveBeenCalledOnce()
+      // No direct context.call — worker handles training internally
+      expect(evalContext.call).not.toHaveBeenCalled()
     })
 
     it('calls createPhenotype for each genome', async () => {
@@ -307,74 +277,37 @@ describe('ACPlugin', () => {
     })
   })
 
-  it('throws a WorkerRLDispatchError when worker RL lacks AgentEnvironment', async () => {
-    const algorithm = makeMockAlgorithm()
-    const env = makeMockEpisodicEnvironment()
-    const plugin = new ACPlugin(
-      algorithm,
-      { learningRate: 0.01 },
-      deterministicRng()
-    )
-
-    const pluginContext = makeMockPluginContext(algorithm, env)
-    plugin.initialize(pluginContext)
-
-    const evalContext = {
-      ...makeMockEvaluationContext(),
-      supportsTraining: true,
-      workerTrainingCapabilities: {
-        rl: {
-          supported: true,
-          methods: {
-            'actor-critic': {
-              supported: true,
-              supportsLamarckianWriteback: true,
-            },
-          },
-        },
-      },
-    } as unknown as EvaluationContext
-
-    await expect(
-      plugin.evaluateGenome(
-        mockGenome,
-        vi.fn().mockResolvedValue(0.5),
-        evalContext
+  describe('getWorkerPluginData', () => {
+    it('returns empty object before initialization', () => {
+      const algorithm = makeMockAlgorithm()
+      const plugin = new ACPlugin(
+        algorithm,
+        { learningRate: 0.01 },
+        deterministicRng()
       )
-    ).rejects.toBeInstanceOf(WorkerRLDispatchError)
-  })
 
-  it('throws a WorkerRLDispatchError when worker RL plugin is unavailable', async () => {
-    const algorithm = makeMockAlgorithm()
-    const env = makeMockAgentEnvironment()
-    const plugin = new ACPlugin(
-      algorithm,
-      { learningRate: 0.01 },
-      deterministicRng()
-    )
+      expect(plugin.getWorkerPluginData()).toEqual({})
+    })
 
-    const pluginContext = makeMockPluginContext(algorithm, env)
-    plugin.initialize(pluginContext)
-
-    const evalContext = {
-      ...makeMockEvaluationContext(),
-      supportsTraining: true,
-      workerTrainingCapabilities: {
-        rl: {
-          supported: false,
-          reason: 'Worker RL plugin not registered on workers',
-          methods: {},
-        },
-      },
-    } as unknown as EvaluationContext
-
-    await expect(
-      plugin.evaluateGenome(
-        mockGenome,
-        vi.fn().mockResolvedValue(0.5),
-        evalContext
+    it('returns RL training config after initialization', () => {
+      const algorithm = makeMockAlgorithm()
+      const env = makeMockEpisodicEnvironment()
+      const plugin = new ACPlugin(
+        algorithm,
+        { learningRate: 0.01, actorActivation: 'softmax' },
+        deterministicRng()
       )
-    ).rejects.toBeInstanceOf(WorkerRLDispatchError)
+
+      const pluginContext = makeMockPluginContext(algorithm, env)
+      plugin.initialize(pluginContext)
+
+      const data = plugin.getWorkerPluginData()
+      expect(data.rl).toBeDefined()
+      const rl = data.rl as Record<string, unknown>
+      expect(rl.method).toBe('actor-critic')
+      expect(rl.isLamarckian).toBe(true)
+      expect(rl.config).toBeDefined()
+    })
   })
 
   describe('getContextHooks', () => {
@@ -489,12 +422,6 @@ describe('ACPlugin', () => {
 
       const defaultEvaluate = vi.fn().mockImplementation(async () => {
         hooks.episodeStart?.(mockExecutor, { episodeIndex: 0 })
-
-        // Need actual forward passes through the agent to create transitions.
-        // Since hooks.reward() calls agent.reward(), we need the agent to have
-        // transitions recorded. The agent records transitions in act().
-        // We can't call act() through hooks — the environment does that.
-        // So let's test the end-to-end flow by verifying weight changes.
 
         // Store pre-training actions
         preTrainActions = algorithm.createPhenotype(mockGenome)

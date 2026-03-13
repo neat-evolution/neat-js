@@ -4,7 +4,6 @@ import { createTrainableExecutor } from '@neat-evolution/backprop'
 import type {
   AnyAlgorithm,
   AnyGenome,
-  GenomeFactoryOptions,
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type {
@@ -30,12 +29,9 @@ import type {
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
 import type { Executor } from '@neat-evolution/executor'
-import {
-  type ActorCriticWorkerTelemetry,
-  type EvaluateRLAgentResult,
-  requestEvaluateRLAgent,
-  type TriggerCounts,
-  WorkerRLDispatchError,
+import type {
+  ActorCriticWorkerTelemetry,
+  TriggerCounts,
 } from '@neat-evolution/worker-rl'
 
 /**
@@ -213,15 +209,16 @@ export interface ACPluginOptions {
 /**
  * EvaluationPlugin that trains genomes via Actor-Critic during evaluation.
  *
- * The primary RL path is direct agent evaluation: when the environment
- * implements AgentEnvironment, the plugin passes the AC agent directly so
- * the agent owns action selection, transition recording, and training.
+ * Worker path: The plugin provides training config via getWorkerPluginData().
+ * The worker RL plugin enhances handleEvaluateGenome to create trainable
+ * executors and AC agents internally. The evaluator handles writeback.
+ * The plugin just delegates to defaultEvaluate().
  *
- * The context-hook path remains as a partial integration surface for
- * environments that still evaluate plain executors.
+ * Local path: The plugin creates the AC agent and evaluates directly.
+ * Lamarckian writeback is handled via afterFitness().
  *
- * Lamarckian writeback is handled via afterFitness(): trained weights are written
- * back to the genome after fitness is assigned.
+ * Context hooks remain as a partial integration surface for environments
+ * that evaluate plain executors (local path only).
  */
 export class ACPlugin<G extends AnyGenome = AnyGenome>
   implements EvaluationPlugin<G>
@@ -238,10 +235,10 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
   /** Current AC agent for getContextHooks() delegation. */
   private currentAgent: ACAgent | null = null
 
-  /** Tracks updated actions per genome for writeback in afterFitness. */
+  /** Tracks updated actions per genome for local writeback in afterFitness. */
   private readonly pendingWritebacks = new Map<G, PhenotypeAction[]>()
-  /** Latest worker telemetry keyed by genome for debugging/metrics. */
-  private readonly telemetryByGenome = new WeakMap<
+  /** Latest telemetry keyed by genome (local evaluation only). */
+  private readonly localTelemetryByGenome = new WeakMap<
     G,
     ActorCriticWorkerTelemetry
   >()
@@ -264,6 +261,19 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
     this.rlConfig = context.environment.getRLConfig()
   }
 
+  getWorkerPluginData(): Record<string, unknown> {
+    if (this.rlConfig == null) {
+      return {}
+    }
+    return {
+      rl: {
+        method: 'actor-critic' as const,
+        isLamarckian: this.options.isLamarckian ?? true,
+        config: this.buildAgentConfig(this.rlConfig),
+      },
+    }
+  }
+
   async evaluateGenome(
     genome: G,
     defaultEvaluate: (genome: G) => Promise<number>,
@@ -273,72 +283,20 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
       throw new Error('ACPlugin not initialized — call initialize() first')
     }
 
-    const rlConfig = this.rlConfig
-    const isLamarckian = this.options.isLamarckian ?? true
-
-    const wantsWorker = context.supportsTraining === true
-
-    if (wantsWorker) {
-      if (!isAgentEnvironment(this.episodicEnvironment)) {
-        throw new WorkerRLDispatchError(
-          'agent-environment-required',
-          'actor-critic',
-          'Actor-Critic worker evaluation requires an AgentEnvironment so the agent can run inside the worker.'
-        )
-      }
-      const rlCapabilities = context.workerTrainingCapabilities?.rl
-      if (rlCapabilities == null) {
-        throw new WorkerRLDispatchError(
-          'capability-missing',
-          'actor-critic',
-          'Worker RL capabilities were not reported during worker initialization.'
-        )
-      }
-      if (rlCapabilities.supported !== true) {
-        throw new WorkerRLDispatchError(
-          'capability-missing',
-          'actor-critic',
-          rlCapabilities.reason ??
-            'Worker RL plugin is not registered on every worker thread.'
-        )
-      }
-      const methodCapability = rlCapabilities.methods?.['actor-critic']
-      if (methodCapability == null || methodCapability.supported !== true) {
-        throw new WorkerRLDispatchError(
-          'method-unsupported',
-          'actor-critic',
-          methodCapability?.reason ??
-            'Worker RL plugin does not support actor-critic evaluation.'
-        )
-      }
-      if (
-        isLamarckian &&
-        methodCapability.supportsLamarckianWriteback === false
-      ) {
-        throw new WorkerRLDispatchError(
-          'lamarckian-unsupported',
-          'actor-critic',
-          'Worker RL plugin disabled Lamarckian writeback for actor-critic evaluations.'
-        )
-      }
+    // Worker path: training is handled by the worker evaluation enhancer.
+    // Just delegate to defaultEvaluate which routes through evaluateGenomeEntry.
+    // The evaluator extracts writeback and telemetry from the enriched response.
+    if (context.supportsTraining === true) {
+      const fitness = await defaultEvaluate(genome)
+      return { fitness }
     }
 
-    const canUseWorker = wantsWorker
-
-    if (canUseWorker) {
-      return await this.evaluateInWorker(
-        genome,
-        rlConfig,
-        isLamarckian,
-        context
-      )
-    }
-
+    // Local path: create agent and evaluate directly
     return await this.evaluateLocally(
       genome,
       defaultEvaluate,
-      rlConfig,
-      isLamarckian
+      this.rlConfig,
+      this.options.isLamarckian ?? true
     )
   }
 
@@ -375,49 +333,9 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
       this.pendingWritebacks.set(genome, trainable.getUpdatedActions())
     }
 
-    this.telemetryByGenome.set(genome, tracker.toTelemetry(agentConfig))
+    this.localTelemetryByGenome.set(genome, tracker.toTelemetry(agentConfig))
     this.currentAgent = null
     return { fitness }
-  }
-
-  private async evaluateInWorker(
-    genome: G,
-    rlConfig: RLConfig,
-    isLamarckian: boolean,
-    context: EvaluationContext<G>
-  ): Promise<EvaluationResult> {
-    const genomeOptions = genome.toFactoryOptions()
-    const payload = requestEvaluateRLAgent({
-      method: 'actor-critic',
-      genomeOptions,
-      isLamarckian,
-      seed: computeFactorySeed(genomeOptions),
-      config: this.buildAgentConfig(rlConfig),
-    })
-    let result: EvaluateRLAgentResult
-    try {
-      result = (await context.call(payload)) as EvaluateRLAgentResult
-    } catch (error) {
-      throw new WorkerRLDispatchError(
-        'worker-call-failed',
-        'actor-critic',
-        'Worker RL actor-critic evaluation failed.',
-        { cause: error instanceof Error ? error : undefined }
-      )
-    }
-    if (result.method !== 'actor-critic') {
-      throw new WorkerRLDispatchError(
-        'result-mismatch',
-        'actor-critic',
-        `Worker returned mismatched RL method result: ${result.method}`
-      )
-    }
-
-    if (isLamarckian && result.updatedActions) {
-      this.pendingWritebacks.set(genome, result.updatedActions)
-    }
-    this.telemetryByGenome.set(genome, result.telemetry)
-    return { fitness: result.fitness }
   }
 
   private buildAgentConfig(
@@ -468,11 +386,14 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
     }
   }
 
-  /** Retrieve the latest telemetry for a genome (local or worker). */
+  /** Retrieve the latest telemetry for a genome (local evaluation only).
+   *  For worker evaluation, telemetry is available via WorkerEvaluator.getTelemetry(). */
   getTelemetry(genome: G): ActorCriticWorkerTelemetry | undefined {
-    return this.telemetryByGenome.get(genome)
+    return this.localTelemetryByGenome.get(genome)
   }
 
+  /** Apply Lamarckian writeback for local evaluation path only.
+   *  Worker path writebacks are handled by WorkerEvaluator. */
   afterFitness(genome: G, _fitness: number, _context: PluginContext): void {
     const updatedActions = this.pendingWritebacks.get(genome)
     if (updatedActions) {
@@ -480,14 +401,4 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
       this.pendingWritebacks.delete(genome)
     }
   }
-}
-
-const computeFactorySeed = (options: GenomeFactoryOptions): string => {
-  const serialized = JSON.stringify(options)
-  let hash = 0
-  for (let i = 0; i < serialized.length; i++) {
-    const char = serialized.charCodeAt(i)
-    hash = (hash * 31 + char) >>> 0
-  }
-  return hash.toString(16)
 }
