@@ -1,3 +1,5 @@
 export * from './EvaluationContext.js'
+export * from './EvaluationPlugin.js'
 export * from './EvaluationStrategy.js'
 export * from './strategies/IndividualStrategy.js'
+export * from './strategies/PluginStrategy.js'

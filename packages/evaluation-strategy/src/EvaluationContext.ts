@@ -1,4 +1,5 @@
 import type { AnyGenome, FitnessData, GenomeEntry } from '@neat-evolution/core'
+import type { EpisodicContext } from '@neat-evolution/environment'
 import type { DispatcherContext } from '@neat-evolution/worker-actions'
 
 export interface EvaluationContext<G extends AnyGenome = AnyGenome>
@@ -28,4 +29,11 @@ export interface EvaluationContext<G extends AnyGenome = AnyGenome>
    * Set by WorkerEvaluator when pluginPaths are configured.
    */
   supportsTraining?: boolean
+
+  /**
+   * Episodic context hooks provided by RL plugins.
+   * Set per-genome by PluginStrategy before calling defaultEvaluate.
+   * The evaluator threads these to environment.evaluate(executor, context).
+   */
+  episodicContext?: EpisodicContext
 }
