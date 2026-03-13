@@ -9,6 +9,7 @@ import type {
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
 import type { SyncExecutor } from '@neat-evolution/executor'
+import { WorkerRLDispatchError } from '@neat-evolution/worker-rl'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ACPlugin } from '../src/ACPlugin.js'
@@ -240,6 +241,17 @@ describe('ACPlugin', () => {
       const evalContext = {
         ...makeMockEvaluationContext(),
         supportsTraining: true,
+        workerTrainingCapabilities: {
+          rl: {
+            supported: true,
+            methods: {
+              'actor-critic': {
+                supported: true,
+                supportsLamarckianWriteback: true,
+              },
+            },
+          },
+        },
         call: vi.fn().mockResolvedValue({
           method: 'actor-critic',
           fitness: 1.05,
@@ -293,6 +305,76 @@ describe('ACPlugin', () => {
       expect(algorithm.createPhenotype).toHaveBeenCalledOnce()
       expect(algorithm.createPhenotype).toHaveBeenCalledWith(mockGenome)
     })
+  })
+
+  it('throws a WorkerRLDispatchError when worker RL lacks AgentEnvironment', async () => {
+    const algorithm = makeMockAlgorithm()
+    const env = makeMockEpisodicEnvironment()
+    const plugin = new ACPlugin(
+      algorithm,
+      { learningRate: 0.01 },
+      deterministicRng()
+    )
+
+    const pluginContext = makeMockPluginContext(algorithm, env)
+    plugin.initialize(pluginContext)
+
+    const evalContext = {
+      ...makeMockEvaluationContext(),
+      supportsTraining: true,
+      workerTrainingCapabilities: {
+        rl: {
+          supported: true,
+          methods: {
+            'actor-critic': {
+              supported: true,
+              supportsLamarckianWriteback: true,
+            },
+          },
+        },
+      },
+    } as unknown as EvaluationContext
+
+    await expect(
+      plugin.evaluateGenome(
+        mockGenome,
+        vi.fn().mockResolvedValue(0.5),
+        evalContext
+      )
+    ).rejects.toBeInstanceOf(WorkerRLDispatchError)
+  })
+
+  it('throws a WorkerRLDispatchError when worker RL plugin is unavailable', async () => {
+    const algorithm = makeMockAlgorithm()
+    const env = makeMockAgentEnvironment()
+    const plugin = new ACPlugin(
+      algorithm,
+      { learningRate: 0.01 },
+      deterministicRng()
+    )
+
+    const pluginContext = makeMockPluginContext(algorithm, env)
+    plugin.initialize(pluginContext)
+
+    const evalContext = {
+      ...makeMockEvaluationContext(),
+      supportsTraining: true,
+      workerTrainingCapabilities: {
+        rl: {
+          supported: false,
+          reason: 'Worker RL plugin not registered on workers',
+          methods: {},
+        },
+      },
+    } as unknown as EvaluationContext
+
+    await expect(
+      plugin.evaluateGenome(
+        mockGenome,
+        vi.fn().mockResolvedValue(0.5),
+        evalContext
+      )
+    ).rejects.toBeInstanceOf(WorkerRLDispatchError)
   })
 
   describe('getContextHooks', () => {

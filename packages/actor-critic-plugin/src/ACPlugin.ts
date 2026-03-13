@@ -32,6 +32,7 @@ import {
   type ActorCriticWorkerTelemetry,
   type EvaluateRLAgentResult,
   requestEvaluateRLAgent,
+  WorkerRLDispatchError,
 } from '@neat-evolution/worker-rl'
 
 export interface ACPluginOptions {
@@ -126,9 +127,54 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
     const rlConfig = this.rlConfig
     const isLamarckian = this.options.isLamarckian ?? true
 
-    const canUseWorker =
-      context.supportsTraining === true &&
-      isAgentEnvironment(this.episodicEnvironment)
+    const wantsWorker = context.supportsTraining === true
+
+    if (wantsWorker) {
+      if (!isAgentEnvironment(this.episodicEnvironment)) {
+        throw new WorkerRLDispatchError(
+          'agent-environment-required',
+          'actor-critic',
+          'Actor-Critic worker evaluation requires an AgentEnvironment so the agent can run inside the worker.'
+        )
+      }
+      const rlCapabilities = context.workerTrainingCapabilities?.rl
+      if (rlCapabilities == null) {
+        throw new WorkerRLDispatchError(
+          'capability-missing',
+          'actor-critic',
+          'Worker RL capabilities were not reported during worker initialization.'
+        )
+      }
+      if (rlCapabilities.supported !== true) {
+        throw new WorkerRLDispatchError(
+          'capability-missing',
+          'actor-critic',
+          rlCapabilities.reason ??
+            'Worker RL plugin is not registered on every worker thread.'
+        )
+      }
+      const methodCapability = rlCapabilities.methods?.['actor-critic']
+      if (methodCapability == null || methodCapability.supported !== true) {
+        throw new WorkerRLDispatchError(
+          'method-unsupported',
+          'actor-critic',
+          methodCapability?.reason ??
+            'Worker RL plugin does not support actor-critic evaluation.'
+        )
+      }
+      if (
+        isLamarckian &&
+        methodCapability.supportsLamarckianWriteback === false
+      ) {
+        throw new WorkerRLDispatchError(
+          'lamarckian-unsupported',
+          'actor-critic',
+          'Worker RL plugin disabled Lamarckian writeback for actor-critic evaluations.'
+        )
+      }
+    }
+
+    const canUseWorker = wantsWorker
 
     if (canUseWorker) {
       return await this.evaluateInWorker(
@@ -189,9 +235,23 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
       seed: computeFactorySeed(genomeOptions),
       config: this.buildAgentConfig(rlConfig),
     })
-    const result = (await context.call(payload)) as EvaluateRLAgentResult
+    let result: EvaluateRLAgentResult
+    try {
+      result = (await context.call(payload)) as EvaluateRLAgentResult
+    } catch (error) {
+      throw new WorkerRLDispatchError(
+        'worker-call-failed',
+        'actor-critic',
+        'Worker RL actor-critic evaluation failed.',
+        { cause: error instanceof Error ? error : undefined }
+      )
+    }
     if (result.method !== 'actor-critic') {
-      throw new Error('Worker returned mismatched RL method result')
+      throw new WorkerRLDispatchError(
+        'result-mismatch',
+        'actor-critic',
+        `Worker returned mismatched RL method result: ${result.method}`
+      )
     }
 
     if (isLamarckian && result.updatedActions) {
