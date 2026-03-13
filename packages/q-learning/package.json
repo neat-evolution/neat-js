@@ -48,7 +48,8 @@
   "dependencies": {
     "@neat-evolution/actor-critic": "workspace:*",
     "@neat-evolution/backprop": "workspace:*",
-    "@neat-evolution/environment": "workspace:*"
+    "@neat-evolution/environment": "workspace:*",
+    "@neat-evolution/utils": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",

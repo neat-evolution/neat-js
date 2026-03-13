@@ -9,6 +9,7 @@ import type {
   Transition,
   TransitionInfo,
 } from '@neat-evolution/environment'
+import type { RNG } from '@neat-evolution/utils'
 import type { QLGradientConfig } from './computeQLOutputErrors.js'
 import { trainOnSegment } from './trainOnSegment.js'
 
@@ -22,12 +23,12 @@ export interface QLAgentConfig {
   discountFactor: number
   /** Rollout buffer configuration (shared with AC). */
   rolloutConfig: RolloutBufferConfig
-  /** Epsilon for exploration (probability of random action). */
-  epsilon: number
-  /** Epsilon decay multiplier per episode. */
-  epsilonDecay?: number
+  /** Initial epsilon at the start of a genome evaluation. */
+  epsilonInitial: number
+  /** Multiplicative decay applied after each episode finishes. */
+  epsilonDecayPerEpisode?: number
   /** Minimum epsilon floor. */
-  epsilonMin?: number
+  epsilonMinimum?: number
   /** Multi-discrete mode: treat outputs as pairs [Q_on, Q_off] per factor. */
   multiDiscrete?: boolean
   /** Optional callback invoked whenever a rollout segment trains (telemetry). */
@@ -61,16 +62,17 @@ export type QLAgent = EpisodicAgent & {
 export function createQLAgent(
   trainable: TrainableExecutor,
   config: QLAgentConfig,
-  rng: () => number
+  rng: RNG
 ): QLAgent {
   const rolloutBuffer = new RolloutBuffer(config.rolloutConfig)
   const multiDiscrete = config.multiDiscrete ?? false
   const actionCount = config.actionCount
   const rewardThreshold = config.rolloutConfig.rewardThreshold
-  const epsilonDecay = config.epsilonDecay ?? 1
-  const epsilonMin = config.epsilonMin ?? 0
+  const epsilonDecayPerEpisode = config.epsilonDecayPerEpisode ?? 1
+  const epsilonMinimum = config.epsilonMinimum ?? 0
 
-  let epsilon = config.epsilon
+  let epsilon = config.epsilonInitial
+  let episodesStarted = 0
   let currentTransition: Transition | null = null
   let pendingInfo: TransitionInfo | null = null
 
@@ -124,9 +126,9 @@ export function createQLAgent(
     const action = new Float64Array(actionCount)
     let chosenActionIndex: number
 
-    if (rng() < epsilon) {
+    if (rng.gen() < epsilon) {
       // Random exploration
-      chosenActionIndex = Math.floor(rng() * actionCount)
+      chosenActionIndex = rng.genRange(0, actionCount)
     } else {
       // Greedy: argmax of Q-values
       chosenActionIndex = 0
@@ -153,9 +155,9 @@ export function createQLAgent(
     const action = new Float64Array(actionCount)
 
     for (let b = 0; b < actionCount; b++) {
-      if (rng() < epsilon) {
+      if (rng.gen() < epsilon) {
         // Random: pick on or off
-        action[b] = rng() < 0.5 ? 1 : 0
+        action[b] = rng.genBool() ? 1 : 0
       } else {
         // Greedy: pick the action with higher Q-value in the pair
         const qOn = qValues[2 * b] as number
@@ -228,8 +230,12 @@ export function createQLAgent(
       currentTransition = null
       pendingInfo = null
 
-      // Decay epsilon per episode
-      epsilon = Math.max(epsilonMin, epsilon * epsilonDecay)
+      if (episodesStarted === 0) {
+        epsilon = config.epsilonInitial
+      } else {
+        epsilon = Math.max(epsilonMinimum, epsilon * epsilonDecayPerEpisode)
+      }
+      episodesStarted += 1
     },
 
     endEpisode(_result: EpisodeResult): void {

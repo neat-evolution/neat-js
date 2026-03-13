@@ -1,4 +1,5 @@
 import type { TrainableExecutor } from '@neat-evolution/backprop'
+import type { RNG } from '@neat-evolution/utils'
 import { describe, expect, it, vi } from 'vitest'
 import type { QLAgentConfig } from '../src/createQLAgent.js'
 import { createQLAgent } from '../src/createQLAgent.js'
@@ -25,6 +26,29 @@ function mockTrainable(
     },
   }
   return mock
+}
+
+const rngFrom = (fn: () => number): RNG => ({
+  gen: () => fn(),
+  genRange: (min: number, max: number) => {
+    if (max <= min) {
+      throw new Error('max must be greater than min')
+    }
+    return min + Math.floor(fn() * (max - min))
+  },
+  genBool: () => fn() < 0.5,
+})
+
+const createSequenceRng = (values: number[]): RNG => {
+  let idx = 0
+  return rngFrom(() => {
+    const value = values[idx % values.length]
+    idx++
+    if (value === undefined) {
+      throw new Error('RNG value undefined')
+    }
+    return value
+  })
 }
 
 /**
@@ -58,27 +82,19 @@ function defaultConfig(actionCount: number): QLAgentConfig {
       rolloutLength: 'episode',
       rewardThreshold: 0.1,
     },
-    epsilon: 0.1,
-    epsilonDecay: 1,
-    epsilonMin: 0,
+    epsilonInitial: 0.1,
+    epsilonDecayPerEpisode: 1,
+    epsilonMinimum: 0,
   }
 }
 
-let rngCounter = 0
-function deterministicRng(): () => number {
-  rngCounter = 0
-  return () => {
-    const values = [0.5, 0.3, 0.8, 0.2, 0.6, 0.9, 0.05, 0.1]
-    const val = values[rngCounter % values.length]
-    rngCounter++
-    if (val === undefined) throw new Error('RNG value undefined')
-    return val
-  }
+function deterministicRng(): RNG {
+  return createSequenceRng([0.5, 0.3, 0.8, 0.2, 0.6, 0.9, 0.05, 0.1])
 }
 
-function neverExploreRng(): () => number {
+function neverExploreRng(): RNG {
   // Always returns values >= epsilon for greedy decisions
-  return () => 0.99
+  return rngFrom(() => 0.99)
 }
 
 describe('createQLAgent', () => {
@@ -101,7 +117,7 @@ describe('createQLAgent', () => {
     it('returns one-hot action in standard mode', () => {
       const actionCount = 3
       const trainable = mockTrainable(actionCount)
-      const config = { ...defaultConfig(actionCount), epsilon: 0 }
+      const config = { ...defaultConfig(actionCount), epsilonInitial: 0 }
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       agent.startEpisode({ episodeIndex: 0 })
@@ -118,7 +134,7 @@ describe('createQLAgent', () => {
       const config: QLAgentConfig = {
         ...defaultConfig(actionCount),
         multiDiscrete: true,
-        epsilon: 0,
+        epsilonInitial: 0,
       }
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
@@ -138,11 +154,11 @@ describe('createQLAgent', () => {
       const actionCount = 3
       // Q-values: [0.1, 0.9, 0.5] -> greedy would always pick index 1
       const trainable = mockTrainableWithQValues([0.1, 0.9, 0.5])
-      const config = { ...defaultConfig(actionCount), epsilon: 1.0 }
+      const config = { ...defaultConfig(actionCount), epsilonInitial: 1.0 }
 
       const chosenIndices = new Set<number>()
       let counter = 0
-      const rng = () => {
+      const rng = rngFrom(() => {
         // First call in each act(): exploration check (always < 1.0 -> explore)
         // Second call: random action selection
         counter++
@@ -153,7 +169,7 @@ describe('createQLAgent', () => {
         const v = values[idx]
         if (v === undefined) throw new Error('RNG value undefined')
         return v
-      }
+      })
 
       const agent = createQLAgent(trainable, config, rng)
       for (let ep = 0; ep < 3; ep++) {
@@ -172,7 +188,7 @@ describe('createQLAgent', () => {
       const actionCount = 3
       // Q-values: [0.1, 0.9, 0.5] -> greedy always picks index 1
       const trainable = mockTrainableWithQValues([0.1, 0.9, 0.5])
-      const config = { ...defaultConfig(actionCount), epsilon: 0 }
+      const config = { ...defaultConfig(actionCount), epsilonInitial: 0 }
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       agent.startEpisode({ episodeIndex: 0 })
@@ -192,15 +208,12 @@ describe('createQLAgent', () => {
       const trainable = mockTrainableWithQValues([0.1, 0.9, 0.5])
       const config: QLAgentConfig = {
         ...defaultConfig(actionCount),
-        epsilon: 1.0,
-        epsilonDecay: 0.5,
-        epsilonMin: 0.01,
+        epsilonInitial: 1.0,
+        epsilonDecayPerEpisode: 0.5,
+        epsilonMinimum: 0.01,
       }
 
-      const rng = () => {
-        // Return 0.3: this will explore when epsilon > 0.3
-        return 0.3
-      }
+      const rng = rngFrom(() => 0.3)
 
       const agent = createQLAgent(trainable, config, rng)
 
@@ -212,7 +225,7 @@ describe('createQLAgent', () => {
       agent.startEpisode({ episodeIndex: 1 })
       // epsilon decays to max(0.01, 0.5 * 0.5) = 0.25
 
-      // Episode 2: epsilon = 0.25 -> rng() = 0.3 >= 0.25 -> greedy
+      // Episode 2: epsilon = 0.25 -> rng.gen() = 0.3 >= 0.25 -> greedy
       agent.startEpisode({ episodeIndex: 2 })
       // epsilon = max(0.01, 0.25 * 0.5) = 0.125
       const action = agent.act(new Float64Array([1, 0]))
@@ -220,14 +233,14 @@ describe('createQLAgent', () => {
       expect(action[1]).toBe(1)
     })
 
-    it('epsilon floors at epsilonMin', () => {
+    it('epsilon floors at epsilonMinimum', () => {
       const actionCount = 2
       const trainable = mockTrainableWithQValues([0.1, 0.9])
       const config: QLAgentConfig = {
         ...defaultConfig(actionCount),
-        epsilon: 1.0,
-        epsilonDecay: 0.1,
-        epsilonMin: 0.05,
+        epsilonInitial: 1.0,
+        epsilonDecayPerEpisode: 0.1,
+        epsilonMinimum: 0.05,
       }
 
       const agent = createQLAgent(trainable, config, neverExploreRng())
@@ -250,7 +263,7 @@ describe('createQLAgent', () => {
       const trainable = mockTrainable(actionCount)
       const config = defaultConfig(actionCount)
       config.rolloutConfig.rolloutLength = 32
-      config.epsilon = 0
+      config.epsilonInitial = 0
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       agent.startEpisode({ episodeIndex: 0 })
@@ -272,7 +285,7 @@ describe('createQLAgent', () => {
       const trainable = mockTrainable(actionCount)
       const config = defaultConfig(actionCount)
       config.rolloutConfig.rolloutLength = 32
-      config.epsilon = 0
+      config.epsilonInitial = 0
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       agent.startEpisode({ episodeIndex: 0 })
@@ -288,7 +301,7 @@ describe('createQLAgent', () => {
       const trainable = mockTrainable(actionCount)
       const config = defaultConfig(actionCount)
       config.rolloutConfig.rolloutLength = 32
-      config.epsilon = 0
+      config.epsilonInitial = 0
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       agent.startEpisode({ episodeIndex: 0 })
@@ -305,7 +318,7 @@ describe('createQLAgent', () => {
       const actionCount = 2
       const trainable = mockTrainable(actionCount)
       const config = defaultConfig(actionCount)
-      config.epsilon = 0
+      config.epsilonInitial = 0
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       agent.startEpisode({ episodeIndex: 0 })
@@ -325,7 +338,7 @@ describe('createQLAgent', () => {
       const actionCount = 2
       const trainable = mockTrainable(actionCount)
       const config = defaultConfig(actionCount)
-      config.epsilon = 0
+      config.epsilonInitial = 0
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       agent.startEpisode({ episodeIndex: 0 })
@@ -348,7 +361,7 @@ describe('createQLAgent', () => {
       const actionCount = 2
       const trainable = mockTrainable(actionCount)
       const config = defaultConfig(actionCount)
-      config.epsilon = 0
+      config.epsilonInitial = 0
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       agent.startEpisode({ episodeIndex: 0 })
@@ -368,7 +381,7 @@ describe('createQLAgent', () => {
       const trainable = mockTrainable(actionCount)
       const config: QLAgentConfig = {
         ...defaultConfig(actionCount),
-        epsilon: 0,
+        epsilonInitial: 0,
         rolloutConfig: {
           rolloutLength: 32,
           rewardThreshold: 0.1,
@@ -400,7 +413,7 @@ describe('createQLAgent', () => {
       const actionCount = 3
       const trainable = mockTrainable(actionCount)
       const config = defaultConfig(actionCount)
-      config.epsilon = 0
+      config.epsilonInitial = 0
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       // Same lifecycle: startEpisode -> act/reward loop -> endEpisode
@@ -414,7 +427,7 @@ describe('createQLAgent', () => {
       const actionCount = 4
       const trainable = mockTrainable(actionCount)
       const config = defaultConfig(actionCount)
-      config.epsilon = 0
+      config.epsilonInitial = 0
       const agent = createQLAgent(trainable, config, neverExploreRng())
 
       agent.startEpisode({ episodeIndex: 0 })
@@ -464,17 +477,17 @@ describe('createQLAgent', () => {
           rolloutLength: 'episode',
           rewardThreshold: 0.0,
         },
-        epsilon: 0.5,
-        epsilonDecay: 1,
-        epsilonMin: 0.5,
+        epsilonInitial: 0.5,
+        epsilonDecayPerEpisode: 1,
+        epsilonMinimum: 0.5,
       }
 
       let rngIdx = 0
-      const rng = () => {
+      const rng = rngFrom(() => {
         // Alternate between exploring and greedy to ensure both actions are tried
         rngIdx++
         return (rngIdx % 7) / 7
-      }
+      })
 
       const agent = createQLAgent(trainable, config, rng)
 
