@@ -23,9 +23,10 @@ capture, and gradient updates — the plugin handles everything around it:
    entropy (softmax only). Retrieve via `plugin.getTelemetry(genome)`.
 4. **Lamarckian writeback.** After evaluation, trained weights are written back
    to the genome (configurable via `isLamarckian`, default `true`).
-5. **Worker dispatch.** When `context.supportsTraining` is true, the plugin
-   validates worker RL capabilities and dispatches evaluation to a worker thread
-   that runs the same agent contract locally.
+5. **Worker evaluation.** When the worker reports actor-critic capability
+   (`context.workerTrainingCapabilities?.rl?.methods?.['actor-critic']?.supported`),
+   the plugin delegates to `defaultEvaluate(genome)` which routes through
+   `evaluateGenomeEntry`. The worker-side enhancer runs the same agent contract.
 
 ## Configuration
 
@@ -95,18 +96,16 @@ Direct `evaluateAgent()` is the complete RL path.
 
 ## Worker Evaluation
 
-When `context.supportsTraining` is true, the plugin validates that the worker
-reports actor-critic capability (and Lamarckian support if configured) before
-dispatching. The worker runs the same `evaluateAgent(agent)` contract locally
-and returns fitness, telemetry, and optional updated weights.
+When workers report actor-critic capability via
+`context.workerTrainingCapabilities?.rl?.methods?.['actor-critic']?.supported`,
+the plugin delegates to `defaultEvaluate(genome)` which dispatches through
+`evaluateGenomeEntry`. The worker-side evaluation enhancer (installed by
+`@neat-evolution/worker-rl/workerPlugin`) creates the trainable executor,
+wraps it as an AC agent, runs `evaluateAgent(agent)`, and returns an enriched
+result with fitness, telemetry, and optional Lamarckian writeback payload.
 
-Capability validation checks (in order):
-- `AgentEnvironment` is available
-- Worker RL capabilities are reported
-- Actor-critic method is supported
-- Lamarckian writeback is supported (if `isLamarckian: true`)
-
-Validation failures throw `WorkerRLDispatchError` with descriptive reason codes.
+`WorkerEvaluator` handles writeback at the evaluator level — the plugin does
+not manage writeback on the worker path.
 
 ## License
 
