@@ -2,7 +2,6 @@ import { createTrainableExecutor } from '@neat-evolution/backprop'
 import type {
   AnyAlgorithm,
   AnyGenome,
-  GenomeFactoryOptions,
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type {
@@ -32,12 +31,7 @@ import type { QLAgent, QLAgentConfig } from '@neat-evolution/q-learning'
 import { createQLAgent } from '@neat-evolution/q-learning'
 import type { RNG } from '@neat-evolution/utils'
 import { threadRNG } from '@neat-evolution/utils'
-import {
-  type EvaluateRLAgentResult,
-  type QLearningWorkerTelemetry,
-  requestEvaluateRLAgent,
-  WorkerRLDispatchError,
-} from '@neat-evolution/worker-rl'
+import type { QLearningWorkerTelemetry } from '@neat-evolution/worker-rl'
 
 /**
  * Create a lightweight telemetry tracker for local QL evaluation.
@@ -133,19 +127,16 @@ export interface QLPluginOptions {
 /**
  * EvaluationPlugin that trains genomes via Q-learning (DQN-style) during evaluation.
  *
- * The primary RL path is direct agent evaluation: when the environment
- * implements AgentEnvironment, the plugin passes the QL agent directly so
- * the agent owns action selection, transition recording, and training.
+ * Worker path: The plugin provides training config via getWorkerPluginData().
+ * The worker RL plugin enhances handleEvaluateGenome to create trainable
+ * executors and QL agents internally. The evaluator handles writeback.
+ * The plugin just delegates to defaultEvaluate().
  *
- * The context-hook path remains as a partial integration surface for
- * environments that still evaluate plain executors.
+ * Local path: The plugin creates the QL agent and evaluates directly.
+ * Lamarckian writeback is handled via afterFitness().
  *
- * `epsilonInitial` is applied at the start of each genome evaluation and the
- * optional `epsilonDecayPerEpisode` multiplier is applied after every episode
- * while clamping at `epsilonMinimum`.
- *
- * Lamarckian writeback is handled via afterFitness(): trained weights are written
- * back to the genome after fitness is assigned.
+ * Context hooks remain as a partial integration surface for environments
+ * that evaluate plain executors (local path only).
  */
 export class QLPlugin<G extends AnyGenome = AnyGenome>
   implements EvaluationPlugin<G>
@@ -162,10 +153,10 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
   /** Current QL agent for getContextHooks() delegation. */
   private currentAgent: QLAgent | null = null
 
-  /** Tracks updated actions per genome for writeback in afterFitness. */
+  /** Tracks updated actions per genome for local writeback in afterFitness. */
   private readonly pendingWritebacks = new Map<G, PhenotypeAction[]>()
-  /** Latest worker telemetry keyed by genome. */
-  private readonly telemetryByGenome = new WeakMap<
+  /** Latest telemetry keyed by genome (local evaluation only). */
+  private readonly localTelemetryByGenome = new WeakMap<
     G,
     QLearningWorkerTelemetry
   >()
@@ -188,6 +179,19 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
     this.rlConfig = context.environment.getRLConfig()
   }
 
+  getWorkerPluginData(): Record<string, unknown> {
+    if (this.rlConfig == null) {
+      return {}
+    }
+    return {
+      rl: {
+        method: 'q-learning' as const,
+        isLamarckian: this.options.isLamarckian ?? true,
+        config: this.buildAgentConfig(this.rlConfig),
+      },
+    }
+  }
+
   async evaluateGenome(
     genome: G,
     defaultEvaluate: (genome: G) => Promise<number>,
@@ -197,69 +201,20 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
       throw new Error('QLPlugin not initialized — call initialize() first')
     }
 
-    const rlConfig = this.rlConfig
-    const isLamarckian = this.options.isLamarckian ?? true
-    const wantsWorker = context.supportsTraining === true
-
-    if (wantsWorker) {
-      if (!isAgentEnvironment(this.episodicEnvironment)) {
-        throw new WorkerRLDispatchError(
-          'agent-environment-required',
-          'q-learning',
-          'Q-learning worker evaluation requires an AgentEnvironment implementation.'
-        )
-      }
-      const rlCapabilities = context.workerTrainingCapabilities?.rl
-      if (rlCapabilities == null) {
-        throw new WorkerRLDispatchError(
-          'capability-missing',
-          'q-learning',
-          'Worker RL capabilities were not reported during worker initialization.'
-        )
-      }
-      if (rlCapabilities.supported !== true) {
-        throw new WorkerRLDispatchError(
-          'capability-missing',
-          'q-learning',
-          rlCapabilities.reason ??
-            'Worker RL plugin is not registered on every worker thread.'
-        )
-      }
-      const methodCapability = rlCapabilities.methods?.['q-learning']
-      if (methodCapability == null || methodCapability.supported !== true) {
-        throw new WorkerRLDispatchError(
-          'method-unsupported',
-          'q-learning',
-          methodCapability?.reason ??
-            'Worker RL plugin does not support q-learning evaluation.'
-        )
-      }
-      if (
-        isLamarckian &&
-        methodCapability.supportsLamarckianWriteback === false
-      ) {
-        throw new WorkerRLDispatchError(
-          'lamarckian-unsupported',
-          'q-learning',
-          'Worker RL plugin disabled Lamarckian writeback for q-learning evaluations.'
-        )
-      }
+    // Worker path: training is handled by the worker evaluation enhancer.
+    // Just delegate to defaultEvaluate which routes through evaluateGenomeEntry.
+    // The evaluator extracts writeback and telemetry from the enriched response.
+    if (context.supportsTraining === true) {
+      const fitness = await defaultEvaluate(genome)
+      return { fitness }
     }
 
-    if (wantsWorker) {
-      return await this.evaluateInWorker(
-        genome,
-        rlConfig,
-        isLamarckian,
-        context
-      )
-    }
-
+    // Local path: create agent and evaluate directly
     return await this.evaluateLocally(
       genome,
       defaultEvaluate,
-      rlConfig,
-      isLamarckian
+      this.rlConfig,
+      this.options.isLamarckian ?? true
     )
   }
 
@@ -293,49 +248,9 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
       this.pendingWritebacks.set(genome, trainable.getUpdatedActions())
     }
 
-    this.telemetryByGenome.set(genome, tracker.toTelemetry(agentConfig))
+    this.localTelemetryByGenome.set(genome, tracker.toTelemetry(agentConfig))
     this.currentAgent = null
     return { fitness }
-  }
-
-  private async evaluateInWorker(
-    genome: G,
-    rlConfig: RLConfig,
-    isLamarckian: boolean,
-    context: EvaluationContext<G>
-  ): Promise<EvaluationResult> {
-    const genomeOptions = genome.toFactoryOptions()
-    const payload = requestEvaluateRLAgent({
-      method: 'q-learning',
-      genomeOptions,
-      isLamarckian,
-      seed: computeFactorySeed(genomeOptions),
-      config: this.buildAgentConfig(rlConfig),
-    })
-    let result: EvaluateRLAgentResult
-    try {
-      result = (await context.call(payload)) as EvaluateRLAgentResult
-    } catch (error) {
-      throw new WorkerRLDispatchError(
-        'worker-call-failed',
-        'q-learning',
-        'Worker RL q-learning evaluation failed.',
-        { cause: error instanceof Error ? error : undefined }
-      )
-    }
-    if (result.method !== 'q-learning') {
-      throw new WorkerRLDispatchError(
-        'result-mismatch',
-        'q-learning',
-        `Worker returned mismatched RL method result: ${result.method}`
-      )
-    }
-
-    if (isLamarckian && result.updatedActions) {
-      this.pendingWritebacks.set(genome, result.updatedActions)
-    }
-    this.telemetryByGenome.set(genome, result.telemetry)
-    return { fitness: result.fitness }
   }
 
   private buildAgentConfig(
@@ -392,11 +307,14 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
     }
   }
 
-  /** Retrieve the latest telemetry for a genome (local or worker). */
+  /** Retrieve the latest telemetry for a genome (local evaluation only).
+   *  For worker evaluation, telemetry is available via WorkerEvaluator.getTelemetry(). */
   getTelemetry(genome: G): QLearningWorkerTelemetry | undefined {
-    return this.telemetryByGenome.get(genome)
+    return this.localTelemetryByGenome.get(genome)
   }
 
+  /** Apply Lamarckian writeback for local evaluation path only.
+   *  Worker path writebacks are handled by WorkerEvaluator. */
   afterFitness(genome: G, _fitness: number, _context: PluginContext): void {
     const updatedActions = this.pendingWritebacks.get(genome)
     if (updatedActions) {
@@ -404,13 +322,4 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
       this.pendingWritebacks.delete(genome)
     }
   }
-}
-
-const computeFactorySeed = (options: GenomeFactoryOptions): string => {
-  const serialized = JSON.stringify(options)
-  let hash = 0
-  for (let i = 0; i < serialized.length; i++) {
-    hash = (hash * 31 + serialized.charCodeAt(i)) >>> 0
-  }
-  return hash.toString(16)
 }

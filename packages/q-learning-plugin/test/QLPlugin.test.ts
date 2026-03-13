@@ -9,7 +9,6 @@ import type {
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
 import type { RNG } from '@neat-evolution/utils'
-import { WorkerRLDispatchError } from '@neat-evolution/worker-rl'
 import { describe, expect, it, vi } from 'vitest'
 
 import { QLPlugin } from '../src/QLPlugin.js'
@@ -248,7 +247,7 @@ describe('QLPlugin', () => {
       expect(result.fitness).toBe(0.75)
     })
 
-    it('uses worker evaluation when supportsTraining is true', async () => {
+    it('delegates to defaultEvaluate when supportsTraining is true (worker path)', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockAgentEnvironment()
       const plugin = new QLPlugin(
@@ -263,52 +262,20 @@ describe('QLPlugin', () => {
       const evalContext = {
         ...makeMockEvaluationContext(),
         supportsTraining: true,
-        workerTrainingCapabilities: {
-          rl: {
-            supported: true,
-            methods: {
-              'q-learning': {
-                supported: true,
-                supportsLamarckianWriteback: true,
-              },
-            },
-          },
-        },
-        call: vi.fn().mockResolvedValue({
-          method: 'q-learning',
-          fitness: 1.12,
-          updatedActions: [[PhenotypeActionType.Link, 0, 2, 0.4]],
-          telemetry: {
-            episodes: 3,
-            rolloutSegments: 5,
-            transitionsTrained: 80,
-            epsilonInitial: 0.3,
-            epsilonFinal: 0.2,
-            epsilonDecayPerEpisode: 0.9,
-            epsilonMinimum: 0.1,
-            multiDiscrete: false,
-          },
-        }),
       } as unknown as EvaluationContext
 
-      const genomeWithFactory = {
-        ...mockGenome,
-        toFactoryOptions: vi.fn().mockReturnValue({ mock: true }),
-      } as unknown as AnyGenome
-
-      const defaultEvaluate = vi.fn()
+      const defaultEvaluate = vi.fn().mockResolvedValue(1.12)
       const result = await plugin.evaluateGenome(
-        genomeWithFactory,
+        mockGenome,
         defaultEvaluate,
         evalContext
       )
 
-      expect(result.fitness).toBeCloseTo(1.12)
-      expect(evalContext.call).toHaveBeenCalledOnce()
-      expect(defaultEvaluate).not.toHaveBeenCalled()
-
-      plugin.afterFitness(genomeWithFactory, result.fitness, pluginContext)
-      expect(algorithm.writeBackWeights).toHaveBeenCalled()
+      // Worker path: plugin delegates to defaultEvaluate (which goes through evaluateGenomeEntry)
+      expect(result.fitness).toBe(1.12)
+      expect(defaultEvaluate).toHaveBeenCalledOnce()
+      // No direct context.call — worker handles training internally
+      expect(evalContext.call).not.toHaveBeenCalled()
     })
 
     it('calls createPhenotype for each genome', async () => {
@@ -332,80 +299,37 @@ describe('QLPlugin', () => {
     })
   })
 
-  it('throws a WorkerRLDispatchError when worker RL lacks AgentEnvironment', async () => {
-    const algorithm = makeMockAlgorithm()
-    const env = makeMockEpisodicEnvironment()
-    const plugin = new QLPlugin(
-      algorithm,
-      {
-        learningRate: 0.1,
-        epsilonInitial: 0.5,
-      },
-      deterministicRng()
-    )
-
-    const pluginContext = makeMockPluginContext(algorithm, env)
-    plugin.initialize(pluginContext)
-
-    const evalContext = {
-      ...makeMockEvaluationContext(),
-      supportsTraining: true,
-      workerTrainingCapabilities: {
-        rl: {
-          supported: true,
-          methods: {
-            'q-learning': {
-              supported: true,
-              supportsLamarckianWriteback: true,
-            },
-          },
-        },
-      },
-    } as unknown as EvaluationContext
-
-    await expect(
-      plugin.evaluateGenome(
-        mockGenome,
-        vi.fn().mockResolvedValue(0.5),
-        evalContext
+  describe('getWorkerPluginData', () => {
+    it('returns empty object before initialization', () => {
+      const algorithm = makeMockAlgorithm()
+      const plugin = new QLPlugin(
+        algorithm,
+        { learningRate: 0.01, epsilonInitial: 0.3 },
+        deterministicRng()
       )
-    ).rejects.toBeInstanceOf(WorkerRLDispatchError)
-  })
 
-  it('throws a WorkerRLDispatchError when worker RL plugin is unavailable', async () => {
-    const algorithm = makeMockAlgorithm()
-    const env = makeMockAgentEnvironment()
-    const plugin = new QLPlugin(
-      algorithm,
-      {
-        learningRate: 0.1,
-        epsilonInitial: 0.5,
-      },
-      deterministicRng()
-    )
+      expect(plugin.getWorkerPluginData()).toEqual({})
+    })
 
-    const pluginContext = makeMockPluginContext(algorithm, env)
-    plugin.initialize(pluginContext)
-
-    const evalContext = {
-      ...makeMockEvaluationContext(),
-      supportsTraining: true,
-      workerTrainingCapabilities: {
-        rl: {
-          supported: false,
-          reason: 'Worker RL plugin not registered on workers',
-          methods: {},
-        },
-      },
-    } as unknown as EvaluationContext
-
-    await expect(
-      plugin.evaluateGenome(
-        mockGenome,
-        vi.fn().mockResolvedValue(0.5),
-        evalContext
+    it('returns RL training config after initialization', () => {
+      const algorithm = makeMockAlgorithm()
+      const env = makeMockEpisodicEnvironment()
+      const plugin = new QLPlugin(
+        algorithm,
+        { learningRate: 0.01, epsilonInitial: 0.3 },
+        deterministicRng()
       )
-    ).rejects.toBeInstanceOf(WorkerRLDispatchError)
+
+      const pluginContext = makeMockPluginContext(algorithm, env)
+      plugin.initialize(pluginContext)
+
+      const data = plugin.getWorkerPluginData()
+      expect(data.rl).toBeDefined()
+      const rl = data.rl as Record<string, unknown>
+      expect(rl.method).toBe('q-learning')
+      expect(rl.isLamarckian).toBe(true)
+      expect(rl.config).toBeDefined()
+    })
   })
 
   describe('getContextHooks', () => {
