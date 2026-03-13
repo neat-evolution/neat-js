@@ -97,7 +97,6 @@ function makeMockPluginContext(
   return {
     algorithm,
     environment,
-    supportsTraining: false,
   } as unknown as PluginContext
 }
 
@@ -108,10 +107,6 @@ function makeMockEvaluationContext(): EvaluationContext {
     broadcast: vi.fn(),
     addMessageHandler: vi.fn(),
     removeMessageHandler: vi.fn(),
-    dispatch: vi.fn(),
-    request: vi.fn(),
-    addActionHandler: vi.fn(),
-    removeActionHandler: vi.fn(),
     evaluateGenomeEntry: vi.fn(),
     evaluateGenomeEntryBatch: vi.fn(),
   } as unknown as EvaluationContext
@@ -247,7 +242,7 @@ describe('QLPlugin', () => {
       expect(result.fitness).toBe(0.75)
     })
 
-    it('delegates to defaultEvaluate when supportsTraining is true (worker path)', async () => {
+    it('delegates to defaultEvaluate when worker training capabilities are present (worker path)', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockAgentEnvironment()
       const plugin = new QLPlugin(
@@ -261,7 +256,17 @@ describe('QLPlugin', () => {
 
       const evalContext = {
         ...makeMockEvaluationContext(),
-        supportsTraining: true,
+        workerTrainingCapabilities: {
+          rl: {
+            supported: true,
+            methods: {
+              'q-learning': {
+                supported: true,
+                supportsLamarckianWriteback: true,
+              },
+            },
+          },
+        },
       } as unknown as EvaluationContext
 
       const defaultEvaluate = vi.fn().mockResolvedValue(1.12)
