@@ -109,6 +109,27 @@ Use early returns, `continue`, or throws — whichever fits the context.
 
 **Fix warnings, don't add them** — biome warns on unused variables, unused imports, missing `const`, missing `import type`, and other issues. Run `yarn workspace <pkg> format` to autofix what it can. New code must not introduce new warnings.
 
+## Hexagonoids Worktree
+
+The hexagonoids project (the primary real-world consumer of this library) is checked out as a git worktree at `.worktrees/hexagonoids-lamarkian/`. It is a separate repo (`heygrady/hexagonoids`) on its `feat/lamarkian` branch, included here so we can keep it in sync with neat-js changes.
+
+To run commands in the hexagonoids worktree, `cd` into it first. It is its own monorepo with its own `yarn`, `turbo`, and workspace setup:
+
+```sh
+cd .worktrees/hexagonoids-lamarkian
+yarn build                            # build all hexagonoids packages
+yarn workspace @heygrady/hexagonoids-demo test   # test one package
+yarn check                            # type-check everything
+```
+
+Files under `.worktrees/hexagonoids-lamarkian/` belong to the hexagonoids repo, not neat-js. Commits there go to the hexagonoids branch. See `.worktrees/CLAUDE.md` for more on working with worktrees.
+
+Key hexagonoids packages:
+- `hexagonoids-demo` — CLI training runner (the main integration point)
+- `hexagonoids-environment` — game simulation + evaluation environment
+- `tictactoe-demo` / `tictactoe-environment` — tournament-style evaluation
+- `tournament-strategy` — GlickoStrategy (the clean reference for evaluation strategies)
+
 ## Project Architecture
 
 This is a neuroevolution library implementing NEAT and its variants (HyperNEAT, ES-HyperNEAT, DES-HyperNEAT).
