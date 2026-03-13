@@ -1,14 +1,14 @@
 import type { Environment } from '@neat-evolution/environment'
 import type { EvaluationPlugin } from '@neat-evolution/evaluation-strategy'
+import type { SyncExecutor } from '@neat-evolution/executor'
+import { NEATAlgorithm } from '@neat-evolution/neat'
+import { describe, expect, test } from 'vitest'
 import {
   deserializeOrganism,
   EvolutionManager,
   organismToExecutor,
   serializedToExecutor,
-} from '@neat-evolution/evolution-manager'
-import type { SyncExecutor } from '@neat-evolution/executor'
-import { NEATAlgorithm } from '@neat-evolution/neat'
-import { describe, expect, test } from 'vitest'
+} from '../src/index.js'
 
 /**
  * Minimal environment for testing: 2 inputs, 1 output.
