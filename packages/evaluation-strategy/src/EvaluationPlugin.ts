@@ -64,4 +64,11 @@ export interface EvaluationPlugin<G extends AnyGenome = AnyGenome> {
    * For BackpropPlugin: not used (BackpropPlugin replaces evaluation)
    */
   getContextHooks?(): Partial<EpisodicContext>
+
+  /**
+   * Return plugin-specific config to be sent to workers during initialization.
+   * Called after initialize() so the plugin can build config from environment data.
+   * The returned object is merged into the pluginData sent to workers.
+   */
+  getWorkerPluginData?(): Record<string, unknown>
 }

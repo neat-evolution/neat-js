@@ -58,6 +58,21 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
     }
   }
 
+  /**
+   * Collect worker plugin data from all plugins.
+   * Called after initialization so plugins can build config from environment data.
+   * Returns merged data to be sent to workers via pluginData.
+   */
+  collectWorkerPluginData(): Record<string, unknown> {
+    const merged: Record<string, unknown> = {}
+    for (const plugin of this.plugins) {
+      if (plugin.getWorkerPluginData != null) {
+        Object.assign(merged, plugin.getWorkerPluginData())
+      }
+    }
+    return merged
+  }
+
   async *evaluate(
     context: EvaluationContext<G>,
     genomeEntries: GenomeEntries<G>
