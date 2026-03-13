@@ -230,7 +230,7 @@ describe('workerPlugin', () => {
     expect(syncResult.updatedActions).toEqual(mockUpdatedActions)
 
     const telemetry =
-      syncResult.telemetry as import('../src/actions.js').ActorCriticWorkerTelemetry
+      syncResult.telemetry as import('../src/actions.js').ActorCriticTelemetry
     expect(telemetry.episodes).toBe(1)
     expect(telemetry.rolloutSegments).toBe(1)
     expect(telemetry.transitionsTrained).toBe(1)
@@ -284,7 +284,7 @@ describe('workerPlugin', () => {
     expect(result.updatedActions).toBeUndefined()
 
     const telemetry =
-      result.telemetry as import('../src/actions.js').QLearningWorkerTelemetry
+      result.telemetry as import('../src/actions.js').QLearningTelemetry
     expect(telemetry.rolloutSegments).toBe(1)
     expect(telemetry.episodes).toBe(1)
     expect(telemetry.epsilonInitial).toBeCloseTo(0.5)

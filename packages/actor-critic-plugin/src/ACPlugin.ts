@@ -30,14 +30,14 @@ import type {
 } from '@neat-evolution/evaluation-strategy'
 import type { Executor } from '@neat-evolution/executor'
 import type {
-  ActorCriticWorkerTelemetry,
+  ActorCriticTelemetry,
   TriggerCounts,
 } from '@neat-evolution/worker-rl'
 
 /**
  * Create a lightweight telemetry tracker for local AC evaluation.
  * Mirrors the worker-side tracker so local and worker runs produce
- * comparable diagnostics in the same `ActorCriticWorkerTelemetry` shape.
+ * comparable diagnostics in the same `ActorCriticTelemetry` shape.
  */
 function createLocalTelemetryTracker(trackEntropy: boolean) {
   let episodes = 0
@@ -119,7 +119,7 @@ function createLocalTelemetryTracker(trackEntropy: boolean) {
         }
       }
     },
-    toTelemetry(config: ACAgentConfig): ActorCriticWorkerTelemetry {
+    toTelemetry(config: ACAgentConfig): ActorCriticTelemetry {
       const segmentReturn =
         segments > 0
           ? {
@@ -240,7 +240,7 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
   /** Latest telemetry keyed by genome (local evaluation only). */
   private readonly localTelemetryByGenome = new WeakMap<
     G,
-    ActorCriticWorkerTelemetry
+    ActorCriticTelemetry
   >()
 
   constructor(
@@ -391,7 +391,7 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
 
   /** Retrieve the latest telemetry for a genome (local evaluation only).
    *  For worker evaluation, telemetry is available via WorkerEvaluator.getTelemetry(). */
-  getTelemetry(genome: G): ActorCriticWorkerTelemetry | undefined {
+  getTelemetry(genome: G): ActorCriticTelemetry | undefined {
     return this.localTelemetryByGenome.get(genome)
   }
 

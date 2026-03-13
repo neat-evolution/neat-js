@@ -2,7 +2,7 @@ import type { ACAgentConfig } from '@neat-evolution/actor-critic'
 import type { RolloutSegment } from '@neat-evolution/environment'
 import type { QLAgentConfig } from '@neat-evolution/q-learning'
 
-export interface RLWorkerTelemetryBase {
+export interface RLTelemetryBase {
   /** Episodes completed during evaluation. */
   episodes: number
   /** Number of rollout segments trained this evaluation. */
@@ -15,7 +15,7 @@ export type RolloutTrigger = RolloutSegment['trigger']
 
 export type TriggerCounts = Record<RolloutTrigger, number>
 
-export interface ActorCriticWorkerTelemetry extends RLWorkerTelemetryBase {
+export interface ActorCriticTelemetry extends RLTelemetryBase {
   actorActivation: NonNullable<ACAgentConfig['actorActivation']>
   entropyCoefficient: number
   triggerCounts: TriggerCounts
@@ -47,7 +47,7 @@ export interface ActorCriticWorkerTelemetry extends RLWorkerTelemetryBase {
   }
 }
 
-export interface QLearningWorkerTelemetry extends RLWorkerTelemetryBase {
+export interface QLearningTelemetry extends RLTelemetryBase {
   epsilonInitial: number
   epsilonFinal: number
   epsilonDecayPerEpisode: number

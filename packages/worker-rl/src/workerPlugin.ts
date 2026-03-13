@@ -19,8 +19,8 @@ import type { EvaluateGenomeResult } from '@neat-evolution/worker-evaluator'
 import type { ThreadContext } from '@neat-evolution/worker-evaluator/worker'
 
 import type {
-  ActorCriticWorkerTelemetry,
-  QLearningWorkerTelemetry,
+  ActorCriticTelemetry,
+  QLearningTelemetry,
   RLTrainingConfig,
   TriggerCounts,
 } from './actions.js'
@@ -29,8 +29,8 @@ interface TelemetryTracker {
   onSegmentTrained: (segment: RolloutSegment) => void
   onEpisodeStart: (info: EpisodeInfo) => void
   onEpisodeEnd: (result: EpisodeResult) => void
-  toActorCriticTelemetry(config: ACAgentConfig): ActorCriticWorkerTelemetry
-  toQLearningTelemetry(config: QLAgentConfig): QLearningWorkerTelemetry
+  toActorCriticTelemetry(config: ACAgentConfig): ActorCriticTelemetry
+  toQLearningTelemetry(config: QLAgentConfig): QLearningTelemetry
 }
 
 interface TelemetryTrackerOptions {

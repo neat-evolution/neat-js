@@ -31,12 +31,12 @@ import type { QLAgent, QLAgentConfig } from '@neat-evolution/q-learning'
 import { createQLAgent } from '@neat-evolution/q-learning'
 import type { RNG } from '@neat-evolution/utils'
 import { threadRNG } from '@neat-evolution/utils'
-import type { QLearningWorkerTelemetry } from '@neat-evolution/worker-rl'
+import type { QLearningTelemetry } from '@neat-evolution/worker-rl'
 
 /**
  * Create a lightweight telemetry tracker for local QL evaluation.
  * Mirrors the worker-side tracker so local and worker runs produce
- * comparable diagnostics in the same `QLearningWorkerTelemetry` shape.
+ * comparable diagnostics in the same `QLearningTelemetry` shape.
  */
 function createLocalTelemetryTracker() {
   let episodes = 0
@@ -54,7 +54,7 @@ function createLocalTelemetryTracker() {
     onEpisodeEnd(_result: EpisodeResult): void {
       // episode count is tracked in onEpisodeStart
     },
-    toTelemetry(config: QLAgentConfig): QLearningWorkerTelemetry {
+    toTelemetry(config: QLAgentConfig): QLearningTelemetry {
       const epsilonDecayPerEpisode = config.epsilonDecayPerEpisode ?? 1
       const epsilonMinimum = config.epsilonMinimum ?? 0
       const epsilonInitial = config.epsilonInitial
@@ -156,10 +156,7 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
   /** Tracks updated actions per genome for local writeback in afterFitness. */
   private readonly pendingWritebacks = new Map<G, PhenotypeAction[]>()
   /** Latest telemetry keyed by genome (local evaluation only). */
-  private readonly localTelemetryByGenome = new WeakMap<
-    G,
-    QLearningWorkerTelemetry
-  >()
+  private readonly localTelemetryByGenome = new WeakMap<G, QLearningTelemetry>()
 
   constructor(
     algorithm: AnyAlgorithm,
@@ -312,7 +309,7 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
 
   /** Retrieve the latest telemetry for a genome (local evaluation only).
    *  For worker evaluation, telemetry is available via WorkerEvaluator.getTelemetry(). */
-  getTelemetry(genome: G): QLearningWorkerTelemetry | undefined {
+  getTelemetry(genome: G): QLearningTelemetry | undefined {
     return this.localTelemetryByGenome.get(genome)
   }
 

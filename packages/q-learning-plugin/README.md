@@ -90,7 +90,7 @@ Direct `evaluateAgent()` is the complete RL path.
 ## Telemetry
 
 Both local and worker evaluation paths populate a per-genome
-`QLearningWorkerTelemetry` record. Retrieve it after evaluation:
+`QLearningTelemetry` record. Retrieve it after evaluation:
 
 ```ts
 const telemetry = plugin.getTelemetry(genome)

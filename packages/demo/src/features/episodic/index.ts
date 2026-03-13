@@ -30,8 +30,8 @@ import { NEATAlgorithm, type NEATGenome } from '@neat-evolution/neat'
 import { QLPlugin } from '@neat-evolution/q-learning-plugin'
 import { createRNG, setThreadRNGSeed, threadRNG } from '@neat-evolution/utils'
 import type {
-  ActorCriticWorkerTelemetry,
-  QLearningWorkerTelemetry,
+  ActorCriticTelemetry,
+  QLearningTelemetry,
 } from '@neat-evolution/worker-rl'
 
 import { BanditEnvironment } from './BanditEnvironment.js'
@@ -45,7 +45,7 @@ interface VariantSummary {
   notes?: string
 }
 
-type VariantTelemetry = ActorCriticWorkerTelemetry | QLearningWorkerTelemetry
+type VariantTelemetry = ActorCriticTelemetry | QLearningTelemetry
 
 interface VariantConfig {
   name: string

@@ -69,7 +69,7 @@ for softmax policies and is omitted from telemetry for other activations.
 
 ## Telemetry
 
-Both local and worker evaluation paths produce `ActorCriticWorkerTelemetry`:
+Both local and worker evaluation paths produce `ActorCriticTelemetry`:
 
 | Field | Type | Description |
 | --- | --- | --- |
