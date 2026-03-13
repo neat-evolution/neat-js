@@ -1,4 +1,4 @@
-import type { ACAgent } from '@neat-evolution/actor-critic'
+import type { ACAgent, ACAgentConfig } from '@neat-evolution/actor-critic'
 import { createACAgent } from '@neat-evolution/actor-critic'
 import { createTrainableExecutor } from '@neat-evolution/backprop'
 import type {
@@ -10,8 +10,10 @@ import type {
 import type {
   EpisodeInfo,
   EpisodeResult,
+  EpisodicAgent,
   EpisodicContext,
   RolloutBufferConfig,
+  RolloutSegment,
   TransitionInfo,
 } from '@neat-evolution/environment'
 import {
@@ -32,8 +34,155 @@ import {
   type ActorCriticWorkerTelemetry,
   type EvaluateRLAgentResult,
   requestEvaluateRLAgent,
+  type TriggerCounts,
   WorkerRLDispatchError,
 } from '@neat-evolution/worker-rl'
+
+/**
+ * Create a lightweight telemetry tracker for local AC evaluation.
+ * Mirrors the worker-side tracker so local and worker runs produce
+ * comparable diagnostics in the same `ActorCriticWorkerTelemetry` shape.
+ */
+function createLocalTelemetryTracker(trackEntropy: boolean) {
+  let episodes = 0
+  let segments = 0
+  let transitions = 0
+
+  const triggerCounts: TriggerCounts = { reward: 0, done: 0, info: 0 }
+
+  let segmentReturnSum = 0
+  let segmentReturnMin = Number.POSITIVE_INFINITY
+  let segmentReturnMax = Number.NEGATIVE_INFINITY
+
+  let episodeReturnSum = 0
+  let episodeReturnCount = 0
+  let episodeReturnMin = Number.POSITIVE_INFINITY
+  let episodeReturnMax = Number.NEGATIVE_INFINITY
+
+  let entropySum = 0
+  let entropySamples = 0
+  let entropyMin = Number.POSITIVE_INFINITY
+  let entropyMax = Number.NEGATIVE_INFINITY
+
+  const recordEntropy = (probabilities?: Float64Array): void => {
+    if (!trackEntropy || probabilities == null || probabilities.length === 0) {
+      return
+    }
+    let entropy = 0
+    for (let i = 0; i < probabilities.length; i++) {
+      const prob = probabilities[i] as number
+      if (prob <= 0) {
+        continue
+      }
+      entropy -= prob * Math.log(prob)
+    }
+    if (!Number.isFinite(entropy)) {
+      return
+    }
+    entropySum += entropy
+    entropySamples += 1
+    if (entropy < entropyMin) {
+      entropyMin = entropy
+    }
+    if (entropy > entropyMax) {
+      entropyMax = entropy
+    }
+  }
+
+  return {
+    onSegmentTrained(segment: RolloutSegment): void {
+      segments += 1
+      transitions += segment.transitions.length
+      triggerCounts[segment.trigger] += 1
+
+      let segmentReturn = 0
+      for (const transition of segment.transitions) {
+        segmentReturn += transition.reward
+        recordEntropy(transition.actionProbabilities)
+      }
+      segmentReturnSum += segmentReturn
+      if (segmentReturn < segmentReturnMin) {
+        segmentReturnMin = segmentReturn
+      }
+      if (segmentReturn > segmentReturnMax) {
+        segmentReturnMax = segmentReturn
+      }
+    },
+    onEpisodeStart(_info: EpisodeInfo): void {
+      episodes += 1
+    },
+    onEpisodeEnd(result: EpisodeResult): void {
+      if (typeof result.episodeReturn === 'number') {
+        episodeReturnSum += result.episodeReturn
+        episodeReturnCount += 1
+        if (result.episodeReturn < episodeReturnMin) {
+          episodeReturnMin = result.episodeReturn
+        }
+        if (result.episodeReturn > episodeReturnMax) {
+          episodeReturnMax = result.episodeReturn
+        }
+      }
+    },
+    toTelemetry(config: ACAgentConfig): ActorCriticWorkerTelemetry {
+      const segmentReturn =
+        segments > 0
+          ? {
+              mean: segmentReturnSum / segments,
+              min: segmentReturnMin,
+              max: segmentReturnMax,
+            }
+          : undefined
+      const episodeReturn =
+        episodeReturnCount > 0
+          ? {
+              mean: episodeReturnSum / episodeReturnCount,
+              min: episodeReturnMin,
+              max: episodeReturnMax,
+            }
+          : undefined
+      const policyEntropy =
+        trackEntropy && entropySamples > 0
+          ? {
+              mean: entropySum / entropySamples,
+              min: entropyMin,
+              max: entropyMax,
+              samples: entropySamples,
+            }
+          : undefined
+      return {
+        episodes,
+        rolloutSegments: segments,
+        transitionsTrained: transitions,
+        actorActivation: config.actorActivation ?? 'sigmoid',
+        entropyCoefficient: config.gradientConfig.entropyCoefficient,
+        triggerCounts: { ...triggerCounts },
+        ...(segmentReturn != null ? { segmentReturn } : {}),
+        ...(episodeReturn != null ? { episodeReturn } : {}),
+        ...(policyEntropy != null ? { policyEntropy } : {}),
+      }
+    },
+  }
+}
+
+/** Wrap agent episode lifecycle to route events through a tracker. */
+function attachLocalEpisodeTracker(
+  agent: EpisodicAgent,
+  tracker: {
+    onEpisodeStart: (info: EpisodeInfo) => void
+    onEpisodeEnd: (result: EpisodeResult) => void
+  }
+): void {
+  const originalStart = agent.startEpisode.bind(agent)
+  agent.startEpisode = (info) => {
+    tracker.onEpisodeStart(info)
+    originalStart(info)
+  }
+  const originalEnd = agent.endEpisode.bind(agent)
+  agent.endEpisode = (result) => {
+    tracker.onEpisodeEnd(result)
+    originalEnd(result)
+  }
+}
 
 export interface ACPluginOptions {
   /** Learning rate for backward pass. */
@@ -203,7 +352,16 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
     const trainable = createTrainableExecutor(phenotype)
     const agentConfig = this.buildAgentConfig(rlConfig)
 
-    const agent = createACAgent(trainable, agentConfig, this.rng)
+    const trackEntropy =
+      (agentConfig.actorActivation ?? 'sigmoid') === 'softmax'
+    const tracker = createLocalTelemetryTracker(trackEntropy)
+
+    const agent = createACAgent(
+      trainable,
+      { ...agentConfig, onSegmentTrained: tracker.onSegmentTrained },
+      this.rng
+    )
+    attachLocalEpisodeTracker(agent, tracker)
     this.currentAgent = agent
 
     let fitness: number
@@ -217,6 +375,7 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
       this.pendingWritebacks.set(genome, trainable.getUpdatedActions())
     }
 
+    this.telemetryByGenome.set(genome, tracker.toTelemetry(agentConfig))
     this.currentAgent = null
     return { fitness }
   }
@@ -307,6 +466,11 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
         this.currentAgent?.setTransitionInfo(info)
       },
     }
+  }
+
+  /** Retrieve the latest telemetry for a genome (local or worker). */
+  getTelemetry(genome: G): ActorCriticWorkerTelemetry | undefined {
+    return this.telemetryByGenome.get(genome)
   }
 
   afterFitness(genome: G, _fitness: number, _context: PluginContext): void {
