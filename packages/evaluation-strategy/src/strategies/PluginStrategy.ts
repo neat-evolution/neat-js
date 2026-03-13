@@ -3,7 +3,13 @@ import type {
   FitnessData,
   GenomeEntries,
 } from '@neat-evolution/core'
-import type { EpisodicContext } from '@neat-evolution/environment'
+import type {
+  EpisodeInfo,
+  EpisodeResult,
+  EpisodicContext,
+  TransitionInfo,
+} from '@neat-evolution/environment'
+import type { Executor } from '@neat-evolution/executor'
 
 import type { EvaluationContext } from '../EvaluationContext.js'
 import type { EvaluationPlugin, PluginContext } from '../EvaluationPlugin.js'
@@ -120,7 +126,7 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
         const prev = merged.reward
         const curr = hooks.reward
         merged.reward = prev
-          ? (executor, reward, done) => {
+          ? (executor: Executor, reward: number, done: boolean) => {
               prev(executor, reward, done)
               curr(executor, reward, done)
             }
@@ -130,7 +136,7 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
         const prev = merged.episodeStart
         const curr = hooks.episodeStart
         merged.episodeStart = prev
-          ? (executor, info) => {
+          ? (executor: Executor, info: EpisodeInfo) => {
               prev(executor, info)
               curr(executor, info)
             }
@@ -140,19 +146,19 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
         const prev = merged.episodeEnd
         const curr = hooks.episodeEnd
         merged.episodeEnd = prev
-          ? (executor, result) => {
+          ? (executor: Executor, result: EpisodeResult) => {
               prev(executor, result)
               curr(executor, result)
             }
           : curr
       }
-      if (hooks.annotateFrame) {
-        const prev = merged.annotateFrame
-        const curr = hooks.annotateFrame
-        merged.annotateFrame = prev
-          ? (executor, annotation) => {
-              prev(executor, annotation)
-              curr(executor, annotation)
+      if (hooks.transitionInfo) {
+        const prev = merged.transitionInfo
+        const curr = hooks.transitionInfo
+        merged.transitionInfo = prev
+          ? (executor: Executor, info: TransitionInfo) => {
+              prev(executor, info)
+              curr(executor, info)
             }
           : curr
       }

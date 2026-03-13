@@ -1,5 +1,5 @@
-import type { FitnessData, GenomeEntry } from '@neat-evolution/evaluator'
 import type { EpisodicContext } from '@neat-evolution/environment'
+import type { FitnessData, GenomeEntry } from '@neat-evolution/evaluator'
 import { describe, expect, test, vi } from 'vitest'
 
 import type { EvaluationContext } from '../../src/EvaluationContext.js'
@@ -321,18 +321,16 @@ describe('PluginStrategy', () => {
       const episodeStartHook = vi.fn()
 
       const plugin: EvaluationPlugin = {
-        evaluateGenome: vi.fn(
-          async (_genome, _defaultEvaluate, ctx) => {
-            // Verify episodicContext was injected into the context
-            const evalCtx = ctx as EvaluationContext & {
-              episodicContext?: EpisodicContext
-            }
-            expect(evalCtx.episodicContext).toBeDefined()
-            expect(evalCtx.episodicContext?.reward).toBeTypeOf('function')
-            expect(evalCtx.episodicContext?.episodeStart).toBeTypeOf('function')
-            return { fitness: 0.6 }
+        evaluateGenome: vi.fn(async (_genome, _defaultEvaluate, ctx) => {
+          // Verify episodicContext was injected into the context
+          const evalCtx = ctx as EvaluationContext & {
+            episodicContext?: EpisodicContext
           }
-        ),
+          expect(evalCtx.episodicContext).toBeDefined()
+          expect(evalCtx.episodicContext?.reward).toBeTypeOf('function')
+          expect(evalCtx.episodicContext?.episodeStart).toBeTypeOf('function')
+          return { fitness: 0.6 }
+        }),
         getContextHooks: vi.fn(
           (): Partial<EpisodicContext> => ({
             reward: rewardHook,
@@ -353,13 +351,11 @@ describe('PluginStrategy', () => {
       const context = makeMockContext(0.5)
 
       const plugin: EvaluationPlugin = {
-        evaluateGenome: vi.fn(
-          async (_genome, _defaultEvaluate, ctx) => {
-            // Without getContextHooks, the context should be the original
-            expect(ctx).toBe(context)
-            return { fitness: 0.6 }
-          }
-        ),
+        evaluateGenome: vi.fn(async (_genome, _defaultEvaluate, ctx) => {
+          // Without getContextHooks, the context should be the original
+          expect(ctx).toBe(context)
+          return { fitness: 0.6 }
+        }),
       }
 
       const strategy = new PluginStrategy([plugin], pluginContext)
@@ -373,19 +369,18 @@ describe('PluginStrategy', () => {
 
       const rewardA = vi.fn()
       const rewardB = vi.fn()
-      const mockExecutor = {} as unknown as import('@neat-evolution/executor').Executor
+      const mockExecutor =
+        {} as unknown as import('@neat-evolution/executor').Executor
 
       const pluginA: EvaluationPlugin = {
-        evaluateGenome: vi.fn(
-          async (_genome, _defaultEvaluate, ctx) => {
-            const evalCtx = ctx as EvaluationContext & {
-              episodicContext?: EpisodicContext
-            }
-            // Call the merged reward hook — both plugins should fire
-            evalCtx.episodicContext?.reward?.(mockExecutor, 1.0, false)
-            return { fitness: 0.5 }
+        evaluateGenome: vi.fn(async (_genome, _defaultEvaluate, ctx) => {
+          const evalCtx = ctx as EvaluationContext & {
+            episodicContext?: EpisodicContext
           }
-        ),
+          // Call the merged reward hook — both plugins should fire
+          evalCtx.episodicContext?.reward?.(mockExecutor, 1.0, false)
+          return { fitness: 0.5 }
+        }),
         getContextHooks: () => ({ reward: rewardA }),
       }
 

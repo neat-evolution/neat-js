@@ -33,7 +33,8 @@ export interface EvaluationContext<G extends AnyGenome = AnyGenome>
   /**
    * Episodic context hooks provided by RL plugins.
    * Set per-genome by PluginStrategy before calling defaultEvaluate.
-   * The evaluator threads these to environment.evaluate(executor, context).
+   * This is a partial integration surface; direct agent evaluation is the
+   * primary RL path when the environment supports it.
    */
   episodicContext?: EpisodicContext
 }

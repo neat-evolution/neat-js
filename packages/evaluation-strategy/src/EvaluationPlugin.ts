@@ -28,7 +28,7 @@ export interface PluginContext {
  *
  * Two usage patterns:
  * - Replacement: Plugin handles evaluation entirely (BackpropPlugin)
- * - Augmentation: Plugin provides context hooks, delegates to defaultEvaluate (RL plugins)
+ * - Augmentation: Plugin provides episodic hooks, delegates to defaultEvaluate
  */
 export interface EvaluationPlugin<G extends AnyGenome = AnyGenome> {
   /** Called once when the plugin is registered. Validate environment compatibility. */
@@ -55,7 +55,7 @@ export interface EvaluationPlugin<G extends AnyGenome = AnyGenome> {
 
   /**
    * Provide typed context hooks for the environment.
-   * For RL plugins: returns Partial<EpisodicContext> (reward, episodeStart, episodeEnd, annotateFrame)
+   * For RL plugins: returns Partial<EpisodicContext> (reward, episodeStart, episodeEnd, transitionInfo)
    * For BackpropPlugin: not used (BackpropPlugin replaces evaluation)
    */
   getContextHooks?(): Partial<EpisodicContext>
