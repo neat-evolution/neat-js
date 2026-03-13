@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import type { FrameAnnotation } from '../src/EpisodicContext.js'
+import type { TransitionInfo } from '../src/EpisodicContext.js'
 import type {
   RolloutBufferConfig,
   RolloutSegment,
@@ -56,8 +56,8 @@ describe('Transition', () => {
     ])
   })
 
-  test('accepts annotation', () => {
-    const annotation: FrameAnnotation = {
+  test('accepts transition info', () => {
+    const info: TransitionInfo = {
       isInteresting: true,
       situationClass: 3,
     }
@@ -67,10 +67,10 @@ describe('Transition', () => {
       action: new Float64Array([0.5]),
       reward: 0.0,
       done: false,
-      annotation,
+      info,
     }
-    expect(transition.annotation?.isInteresting).toBe(true)
-    expect(transition.annotation?.situationClass).toBe(3)
+    expect(transition.info?.isInteresting).toBe(true)
+    expect(transition.info?.situationClass).toBe(3)
   })
 })
 
@@ -113,7 +113,7 @@ describe('RolloutSegment', () => {
     const triggers: RolloutSegment['trigger'][] = [
       'reward',
       'done',
-      'annotation',
+      'info',
       'prediction-error',
     ]
 

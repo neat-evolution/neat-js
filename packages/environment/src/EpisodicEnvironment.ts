@@ -31,15 +31,15 @@ export function isEpisodicEnvironment(
  * The standard evaluation pipeline can't thread the agent through
  * (Environment.evaluate only receives a SyncExecutor, not an EpisodicAgent).
  *
- * Environments that implement AgentEvaluatable expose evaluateAgent() so
+ * Environments that implement AgentEnvironment expose evaluateAgent() so
  * plugins can pass the RL agent directly, bypassing the executor pipeline.
  */
-export interface AgentEvaluatable {
+export interface AgentEnvironment {
   evaluateAgent(agent: import('./EpisodicAgent.js').EpisodicAgent): number
 }
 
-/** Runtime type guard for AgentEvaluatable environments. */
-export function isAgentEvaluatable(env: unknown): env is AgentEvaluatable {
+/** Runtime type guard for direct agent evaluation environments. */
+export function isAgentEnvironment(env: unknown): env is AgentEnvironment {
   return (
     typeof env === 'object' &&
     env !== null &&

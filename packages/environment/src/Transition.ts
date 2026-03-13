@@ -1,4 +1,4 @@
-import type { FrameAnnotation } from './EpisodicContext.js'
+import type { TransitionInfo } from './EpisodicContext.js'
 
 /** A single (s, a, r, s', done) record, extended with value estimates and metadata. */
 export interface Transition {
@@ -26,8 +26,8 @@ export interface Transition {
   chosenActionIndex?: number
 
   // -- Shared optional fields --
-  /** Environment-provided annotation. */
-  annotation?: FrameAnnotation
+  /** Environment-provided transition metadata (`info` in RL terms). */
+  info?: TransitionInfo
 }
 
 /** A contiguous slice of transitions captured for training. */
@@ -35,7 +35,7 @@ export interface RolloutSegment {
   /** The transitions in this segment. */
   transitions: Transition[]
   /** What triggered this capture. */
-  trigger: 'reward' | 'done' | 'annotation' | 'prediction-error'
+  trigger: 'reward' | 'done' | 'info' | 'prediction-error'
   /** Episode index this segment belongs to. */
   episodeIndex: number
 }
