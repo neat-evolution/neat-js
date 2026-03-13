@@ -28,6 +28,8 @@ import type {
 import type { Executor } from '@neat-evolution/executor'
 import type { QLAgent } from '@neat-evolution/q-learning'
 import { createQLAgent } from '@neat-evolution/q-learning'
+import type { RNG } from '@neat-evolution/utils'
+import { threadRNG } from '@neat-evolution/utils'
 import {
   type EvaluateRLAgentResult,
   type QLearningWorkerTelemetry,
@@ -40,12 +42,12 @@ export interface QLPluginOptions {
   /** Discount factor (overrides environment's RLConfig if set). */
   discountFactor?: number
 
-  /** Initial epsilon for epsilon-greedy action selection. */
-  epsilon: number
-  /** Per-episode multiplicative decay applied to epsilon. Default: 1.0 (no decay) */
-  epsilonDecay?: number
+  /** Initial epsilon for epsilon-greedy action selection per genome evaluation. */
+  epsilonInitial: number
+  /** Multiplicative decay applied after each episode. Default: 1.0 (no decay) */
+  epsilonDecayPerEpisode?: number
   /** Floor for epsilon decay. Default: 0.01 */
-  epsilonMin?: number
+  epsilonMinimum?: number
 
   /** Multi-discrete Q-values: 2N outputs (Q_on, Q_off per factor). Default: false */
   multiDiscrete?: boolean
@@ -71,8 +73,9 @@ export interface QLPluginOptions {
  * The context-hook path remains as a partial integration surface for
  * environments that still evaluate plain executors.
  *
- * Epsilon resets to the configured value at the start of each genome evaluation
- * and decays across episodes within that evaluation (within-evaluation decay).
+ * `epsilonInitial` is applied at the start of each genome evaluation and the
+ * optional `epsilonDecayPerEpisode` multiplier is applied after every episode
+ * while clamping at `epsilonMinimum`.
  *
  * Lamarckian writeback is handled via afterFitness(): trained weights are written
  * back to the genome after fitness is assigned.
@@ -83,7 +86,7 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
   readonly mode = 'augmentation'
   private readonly algorithm: AnyAlgorithm
   private readonly options: QLPluginOptions
-  private readonly rng: () => number
+  private readonly rng: RNG
   private episodicEnvironment:
     | (EpisodicEnvironment & Partial<AgentEnvironment>)
     | undefined
@@ -103,7 +106,7 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
   constructor(
     algorithm: AnyAlgorithm,
     options: QLPluginOptions,
-    rng: () => number
+    rng: RNG = threadRNG()
   ) {
     this.algorithm = algorithm
     this.options = options
@@ -212,13 +215,13 @@ export class QLPlugin<G extends AnyGenome = AnyGenome>
       actionCount: rlConfig.actionSize,
       discountFactor: this.options.discountFactor ?? rlConfig.discountFactor,
       rolloutConfig,
-      epsilon: this.options.epsilon,
+      epsilonInitial: this.options.epsilonInitial,
     }
-    if (this.options.epsilonDecay !== undefined) {
-      agentConfig.epsilonDecay = this.options.epsilonDecay
+    if (this.options.epsilonDecayPerEpisode !== undefined) {
+      agentConfig.epsilonDecayPerEpisode = this.options.epsilonDecayPerEpisode
     }
-    if (this.options.epsilonMin !== undefined) {
-      agentConfig.epsilonMin = this.options.epsilonMin
+    if (this.options.epsilonMinimum !== undefined) {
+      agentConfig.epsilonMinimum = this.options.epsilonMinimum
     }
     if (this.options.multiDiscrete !== undefined) {
       agentConfig.multiDiscrete = this.options.multiDiscrete

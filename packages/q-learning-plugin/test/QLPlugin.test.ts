@@ -8,6 +8,7 @@ import type {
   EvaluationContext,
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
+import type { RNG } from '@neat-evolution/utils'
 import { describe, expect, it, vi } from 'vitest'
 
 import { QLPlugin } from '../src/QLPlugin.js'
@@ -116,14 +117,24 @@ function makeMockEvaluationContext(): EvaluationContext {
   } as unknown as EvaluationContext
 }
 
-function deterministicRng(): () => number {
+function deterministicRng(): RNG {
   let counter = 0
-  return () => {
+  const generator = () => {
     const values = [0.1, 0.4, 0.8, 0.2, 0.6, 0.9, 0.05, 0.5]
     const val = values[counter % values.length]
     counter++
     if (val === undefined) throw new Error('RNG value undefined')
     return val
+  }
+  return {
+    gen: generator,
+    genRange: (min: number, max: number) => {
+      if (max <= min) {
+        throw new Error('max must be greater than min')
+      }
+      return min + Math.floor(generator() * (max - min))
+    },
+    genBool: () => generator() < 0.5,
   }
 }
 
@@ -139,7 +150,7 @@ describe('QLPlugin', () => {
       const algorithm = makeMockAlgorithm()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
       const badContext = makeMockPluginContext(algorithm, { evaluate: vi.fn() })
@@ -153,7 +164,7 @@ describe('QLPlugin', () => {
       const algorithm = makeMockAlgorithm()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
       const badContext = makeMockPluginContext(algorithm, null)
@@ -168,7 +179,7 @@ describe('QLPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
       const context = makeMockPluginContext(algorithm, env)
@@ -182,7 +193,7 @@ describe('QLPlugin', () => {
       const algorithm = makeMockAlgorithm()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
       const evalContext = makeMockEvaluationContext()
@@ -198,7 +209,7 @@ describe('QLPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
 
@@ -218,7 +229,7 @@ describe('QLPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
 
@@ -241,7 +252,7 @@ describe('QLPlugin', () => {
       const env = makeMockAgentEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
 
@@ -261,8 +272,8 @@ describe('QLPlugin', () => {
             transitionsTrained: 80,
             epsilonInitial: 0.3,
             epsilonFinal: 0.2,
-            epsilonDecay: 0.9,
-            epsilonMin: 0.1,
+            epsilonDecayPerEpisode: 0.9,
+            epsilonMinimum: 0.1,
             multiDiscrete: false,
           },
         }),
@@ -293,7 +304,7 @@ describe('QLPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
 
@@ -314,7 +325,7 @@ describe('QLPlugin', () => {
       const algorithm = makeMockAlgorithm()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
 
@@ -330,7 +341,7 @@ describe('QLPlugin', () => {
       const algorithm = makeMockAlgorithm()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
       const hooks = plugin.getContextHooks()
@@ -363,7 +374,7 @@ describe('QLPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
       const pluginContext = makeMockPluginContext(algorithm, env)
@@ -407,7 +418,7 @@ describe('QLPlugin', () => {
         algorithm,
         {
           learningRate: 0.01,
-          epsilon: 0.3,
+          epsilonInitial: 0.3,
           rewardThreshold: 0.1,
         },
         deterministicRng()
@@ -451,7 +462,7 @@ describe('QLPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3, isLamarckian: true },
+        { learningRate: 0.01, epsilonInitial: 0.3, isLamarckian: true },
         deterministicRng()
       )
 
@@ -481,7 +492,7 @@ describe('QLPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3, isLamarckian: false },
+        { learningRate: 0.01, epsilonInitial: 0.3, isLamarckian: false },
         deterministicRng()
       )
 
@@ -506,7 +517,7 @@ describe('QLPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
 
@@ -531,7 +542,7 @@ describe('QLPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3, isLamarckian: true },
+        { learningRate: 0.01, epsilonInitial: 0.3, isLamarckian: true },
         deterministicRng()
       )
 
@@ -566,7 +577,7 @@ describe('QLPlugin', () => {
 
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
 
@@ -595,7 +606,7 @@ describe('QLPlugin', () => {
 
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3, discountFactor: 0.5 },
+        { learningRate: 0.01, epsilonInitial: 0.3, discountFactor: 0.5 },
         deterministicRng()
       )
 
@@ -624,7 +635,7 @@ describe('QLPlugin', () => {
 
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
 
@@ -653,7 +664,7 @@ describe('QLPlugin', () => {
 
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3, rolloutLength: 16 },
+        { learningRate: 0.01, epsilonInitial: 0.3, rolloutLength: 16 },
         deterministicRng()
       )
 
@@ -678,7 +689,7 @@ describe('QLPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3 },
+        { learningRate: 0.01, epsilonInitial: 0.3 },
         deterministicRng()
       )
 
@@ -704,9 +715,9 @@ describe('QLPlugin', () => {
         algorithm,
         {
           learningRate: 0.01,
-          epsilon: 0.5,
-          epsilonDecay: 0.9,
-          epsilonMin: 0.01,
+          epsilonInitial: 0.5,
+          epsilonDecayPerEpisode: 0.9,
+          epsilonMinimum: 0.01,
         },
         deterministicRng()
       )
@@ -737,7 +748,7 @@ describe('QLPlugin', () => {
 
       const plugin = new QLPlugin(
         algorithm,
-        { learningRate: 0.01, epsilon: 0.3, multiDiscrete: true },
+        { learningRate: 0.01, epsilonInitial: 0.3, multiDiscrete: true },
         deterministicRng()
       )
 
