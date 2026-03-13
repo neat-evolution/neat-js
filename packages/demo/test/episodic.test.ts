@@ -6,6 +6,7 @@ import {
 } from '@neat-evolution/core'
 import {
   createEpisodicAgent,
+  type EpisodeResult,
   type EpisodicAgent,
   isAgentEnvironment,
   isEpisodicEnvironment,
@@ -40,6 +41,7 @@ function makeMockAgent(
     endEpisode: number
     act: number
     reward: Array<{ reward: number; done: boolean }>
+    episodeResults: EpisodeResult[]
   }
 } {
   const calls = {
@@ -47,6 +49,7 @@ function makeMockAgent(
     endEpisode: 0,
     act: 0,
     reward: [] as Array<{ reward: number; done: boolean }>,
+    episodeResults: [] as EpisodeResult[],
   }
 
   const action = new Float64Array(armCount)
@@ -63,8 +66,9 @@ function makeMockAgent(
     startEpisode(_info): void {
       calls.startEpisode++
     },
-    endEpisode(_result): void {
+    endEpisode(result): void {
       calls.endEpisode++
+      calls.episodeResults.push(result)
     },
   }
 
@@ -224,6 +228,50 @@ describe('BanditEnvironment', () => {
       for (const r of episode1Rewards) {
         expect(r.reward).toBe(0)
       }
+    })
+
+    it('encodes episode index inside observations so policies can branch per episode', () => {
+      const env = new BanditEnvironment()
+      let activeEpisode = -1
+      const agent: EpisodicAgent = {
+        act(inputs: Float64Array): Float64Array {
+          const expected = [0, 0, 0]
+          if (activeEpisode >= 0) {
+            expected[activeEpisode] = 1
+          }
+          expect(Array.from(inputs)).toEqual(expected)
+          const action = new Float64Array(3)
+          action[0] = 1
+          return action
+        },
+        reward(): void {},
+        startEpisode(info): void {
+          activeEpisode = info.episodeIndex
+        },
+        endEpisode(): void {},
+      }
+
+      env.evaluateAgent(agent)
+    })
+
+    it('reports episodeReturn separately from per-episode fitness', () => {
+      const env = new BanditEnvironment()
+      const { agent, calls } = makeMockAgent(0)
+      env.evaluateAgent(agent)
+
+      expect(calls.episodeResults).toHaveLength(3)
+      expect(calls.episodeResults[0]).toMatchObject({
+        episodeReturn: 20,
+        fitness: 1,
+      })
+      expect(calls.episodeResults[1]).toMatchObject({
+        episodeReturn: 0,
+        fitness: 0,
+      })
+      expect(calls.episodeResults[2]).toMatchObject({
+        episodeReturn: 0,
+        fitness: 0,
+      })
     })
   })
 

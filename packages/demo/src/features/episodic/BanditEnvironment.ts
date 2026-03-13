@@ -97,7 +97,10 @@ export class BanditEnvironment
       agent.startEpisode({
         episodeIndex: episode.index,
         type: 'bandit',
+        phase: `arm-${episode.bestArm}`,
+        metadata: { bestArm: episode.bestArm },
       })
+      let episodeReward = 0
 
       for (let step = 0; step < this.stepsPerEpisode; step++) {
         const observation = this.getObservation(episode.index)
@@ -108,18 +111,26 @@ export class BanditEnvironment
 
         agent.reward(reward, done)
         totalReward += reward
+        episodeReward += reward
       }
 
       agent.endEpisode({
-        fitness: 0,
+        fitness: episodeReward / this.stepsPerEpisode,
+        episodeReturn: episodeReward,
         totalSteps: this.stepsPerEpisode,
         terminated: false,
+        metadata: { bestArm: episode.bestArm },
       })
     }
 
     return totalReward / (this.episodes.length * this.stepsPerEpisode)
   }
 
+  /**
+   * Episode-conditioned observation encoding.
+   * Each episode index maps to a dedicated one-hot feature so the
+   * policy can specialize per episode within a single evaluation lifetime.
+   */
   private getObservation(episodeIndex: number): Float64Array {
     const obs = new Float64Array(3)
     obs[episodeIndex] = 1
