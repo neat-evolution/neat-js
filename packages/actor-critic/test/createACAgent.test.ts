@@ -1,5 +1,5 @@
 import type { TrainableExecutor } from '@neat-evolution/backprop'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { ACAgentConfig } from '../src/createACAgent.js'
 import { createACAgent } from '../src/createACAgent.js'
 
@@ -287,6 +287,29 @@ describe('createACAgent', () => {
         expect(action[i]).toBeGreaterThan(0)
         expect(action[i]).toBeLessThan(1)
       }
+    })
+  })
+
+  describe('telemetry hooks', () => {
+    it('calls onSegmentTrained whenever training runs', () => {
+      const actionCount = 2
+      const trainable = mockTrainable(actionCount)
+      const onSegmentTrained = vi.fn()
+      const agent = createACAgent(
+        trainable,
+        {
+          ...defaultConfig(actionCount),
+          rolloutConfig: { rolloutLength: 2, rewardThreshold: 0.1 },
+          onSegmentTrained,
+        },
+        deterministicRng()
+      )
+
+      agent.startEpisode({ episodeIndex: 0 })
+      agent.act(new Float64Array([1, 0]))
+      agent.reward(1, false)
+
+      expect(onSegmentTrained).toHaveBeenCalledTimes(1)
     })
   })
 })

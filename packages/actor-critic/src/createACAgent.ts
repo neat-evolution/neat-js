@@ -4,6 +4,7 @@ import type {
   EpisodeResult,
   EpisodicAgent,
   RolloutBufferConfig,
+  RolloutSegment,
   Transition,
   TransitionInfo,
 } from '@neat-evolution/environment'
@@ -24,6 +25,8 @@ export interface ACAgentConfig {
   rolloutConfig: RolloutBufferConfig
   /** Output activation for actor outputs (default: sigmoid). */
   actorActivation?: 'sigmoid' | 'softmax' | 'tanh'
+  /** Optional callback invoked whenever a rollout segment trains (telemetry). */
+  onSegmentTrained?: (segment: RolloutSegment) => void
 }
 
 /**
@@ -99,6 +102,7 @@ export function createACAgent(
     const segment = rolloutBuffer.capture(trigger)
     if (segment !== null) {
       trainOnSegment(trainable, segment.transitions, trainConfig)
+      config.onSegmentTrained?.(segment)
     }
   }
 
@@ -183,6 +187,7 @@ export function createACAgent(
         const segment = rolloutBuffer.capture('done')
         if (segment !== null) {
           trainOnSegment(trainable, segment.transitions, trainConfig)
+          config.onSegmentTrained?.(segment)
         }
       }
       currentTransition = null
