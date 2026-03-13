@@ -25,7 +25,7 @@ export interface Algorithm<Ctx extends AlgorithmContext> {
 
   /**
    * Write trained phenotype weights and biases back to the genome
-   * (Lamarckian writeback). Called by BackpropStrategy after training
+   * (Lamarckian writeback). Called by BackpropPlugin after training
    * to update the genome in-place.
    *
    * updatedActions contains both Link actions (trained weights) and

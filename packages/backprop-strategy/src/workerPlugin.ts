@@ -6,7 +6,7 @@ import { ActionType, type TrainGenomePayload } from './actions.js'
 import { trainGenome } from './trainGenome.js'
 
 /**
- * Worker plugin for BackpropStrategy.
+ * Worker plugin for BackpropPlugin.
  * Registers the REQUEST_TRAIN_GENOME handler on the worker.
  */
 const backpropWorkerPlugin = (
