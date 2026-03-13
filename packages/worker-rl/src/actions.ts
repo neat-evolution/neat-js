@@ -3,6 +3,7 @@ import type {
   GenomeFactoryOptions,
   PhenotypeAction,
 } from '@neat-evolution/core'
+import type { RolloutSegment } from '@neat-evolution/environment'
 import type { QLAgentConfig } from '@neat-evolution/q-learning'
 import { createMessage } from '@neat-evolution/worker-actions'
 
@@ -41,9 +42,40 @@ export interface RLWorkerTelemetryBase {
   transitionsTrained: number
 }
 
+export type RolloutTrigger = RolloutSegment['trigger']
+
+export type TriggerCounts = Record<RolloutTrigger, number>
+
 export interface ActorCriticWorkerTelemetry extends RLWorkerTelemetryBase {
   actorActivation: NonNullable<ACAgentConfig['actorActivation']>
   entropyCoefficient: number
+  triggerCounts: TriggerCounts
+  /**
+   * Aggregated rollout-segment returns. Undefined if no rollout segments trained.
+   */
+  segmentReturn?: {
+    mean: number
+    min: number
+    max: number
+  }
+  /**
+   * Aggregated per-episode returns (EpisodeResult.episodeReturn).
+   * Undefined when the environment never reported an episode return.
+   */
+  episodeReturn?: {
+    mean: number
+    min: number
+    max: number
+  }
+  /**
+   * Policy entropy summary (softmax activations only). Undefined otherwise.
+   */
+  policyEntropy?: {
+    mean: number
+    min: number
+    max: number
+    samples: number
+  }
 }
 
 export interface QLearningWorkerTelemetry extends RLWorkerTelemetryBase {

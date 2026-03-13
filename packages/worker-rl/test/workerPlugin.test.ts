@@ -19,10 +19,11 @@ const mockSegment =
     transitions: [
       {
         state: new Float64Array([0]),
-        rawOutput: new Float64Array([0]),
-        action: new Float64Array([1]),
+        rawOutput: new Float64Array([0, 0, 0]),
+        action: new Float64Array([1, 0]),
         reward: 1,
         done: true,
+        actionProbabilities: new Float64Array([0.25, 0.75]),
       },
     ],
     trigger: 'reward',
@@ -177,12 +178,23 @@ describe('workerPlugin', () => {
     )) as import('../src/actions.js').EvaluateRLAgentResult
 
     expect(environment.evaluateAgent).toHaveBeenCalledOnce()
-    expect(result.method).toBe('actor-critic')
+    if (result.method !== 'actor-critic') {
+      throw new Error('Expected actor-critic result')
+    }
+
     expect(result.fitness).toBe(42)
     expect(result.updatedActions).toEqual(mockUpdatedActions)
     expect(result.telemetry.episodes).toBe(1)
     expect(result.telemetry.rolloutSegments).toBe(1)
     expect(result.telemetry.transitionsTrained).toBe(1)
+    expect(result.telemetry.segmentReturn).toBeDefined()
+    expect(result.telemetry.episodeReturn).toBeDefined()
+    expect(result.telemetry.policyEntropy).toBeDefined()
+    expect(result.telemetry.triggerCounts.reward).toBe(1)
+    expect(result.telemetry.triggerCounts.done).toBe(0)
+    expect(result.telemetry.segmentReturn?.mean).toBeCloseTo(1)
+    expect(result.telemetry.episodeReturn?.mean).toBeCloseTo(1)
+    expect(result.telemetry.policyEntropy?.samples).toBeGreaterThan(0)
   })
 
   it('evaluates Q-learning payloads without writeback when disabled', async () => {

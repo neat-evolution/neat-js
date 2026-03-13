@@ -2,7 +2,12 @@ import { createACAgent } from '@neat-evolution/actor-critic'
 import type { TrainableExecutor } from '@neat-evolution/backprop'
 import { createTrainableExecutor } from '@neat-evolution/backprop'
 import type { GenomeFactoryOptions, Phenotype } from '@neat-evolution/core'
-import type { EpisodicAgent, RolloutSegment } from '@neat-evolution/environment'
+import type {
+  EpisodeInfo,
+  EpisodeResult,
+  EpisodicAgent,
+  RolloutSegment,
+} from '@neat-evolution/environment'
 import { isAgentEnvironment } from '@neat-evolution/environment'
 import { createQLAgent } from '@neat-evolution/q-learning'
 import type { RNG } from '@neat-evolution/utils'
@@ -18,11 +23,13 @@ import {
   type EvaluateRLAgentResult,
   type QLearningWorkerTelemetry,
   RLWorkerActionType,
+  type TriggerCounts,
 } from './actions.js'
 
 interface TelemetryTracker {
   onSegmentTrained: (segment: RolloutSegment) => void
-  onEpisodeStart: () => void
+  onEpisodeStart: (info: EpisodeInfo) => void
+  onEpisodeEnd: (result: EpisodeResult) => void
   toActorCriticTelemetry(
     config: EvaluateACAgentPayload['config']
   ): ActorCriticWorkerTelemetry
@@ -31,26 +38,156 @@ interface TelemetryTracker {
   ): QLearningWorkerTelemetry
 }
 
-const createTelemetryTracker = (): TelemetryTracker => {
+interface TelemetryTrackerOptions {
+  trackEntropy?: boolean
+}
+
+const createTelemetryTracker = (
+  options?: TelemetryTrackerOptions
+): TelemetryTracker => {
   let episodes = 0
   let segments = 0
   let transitions = 0
+
+  const triggerCounts: TriggerCounts = {
+    reward: 0,
+    done: 0,
+    info: 0,
+    'prediction-error': 0,
+  }
+
+  let segmentReturnSum = 0
+  let segmentReturnMin = Number.POSITIVE_INFINITY
+  let segmentReturnMax = Number.NEGATIVE_INFINITY
+
+  let episodeReturnSum = 0
+  let episodeReturnCount = 0
+  let episodeReturnMin = Number.POSITIVE_INFINITY
+  let episodeReturnMax = Number.NEGATIVE_INFINITY
+
+  let entropySum = 0
+  let entropySamples = 0
+  let entropyMin = Number.POSITIVE_INFINITY
+  let entropyMax = Number.NEGATIVE_INFINITY
+
+  const trackEntropy = options?.trackEntropy === true
+
+  const recordEntropy = (probabilities?: Float64Array): void => {
+    if (!trackEntropy || probabilities == null || probabilities.length === 0) {
+      return
+    }
+    let entropy = 0
+    for (let i = 0; i < probabilities.length; i++) {
+      const prob = probabilities[i] as number
+      if (prob <= 0) {
+        continue
+      }
+      entropy -= prob * Math.log(prob)
+    }
+    if (!Number.isFinite(entropy)) {
+      return
+    }
+    entropySum += entropy
+    entropySamples += 1
+    if (entropy < entropyMin) {
+      entropyMin = entropy
+    }
+    if (entropy > entropyMax) {
+      entropyMax = entropy
+    }
+  }
+
+  const finalizeRange = (
+    count: number,
+    sum: number,
+    min: number,
+    max: number
+  ):
+    | {
+        mean: number
+        min: number
+        max: number
+      }
+    | undefined => {
+    if (count === 0) {
+      return undefined
+    }
+    return {
+      mean: sum / count,
+      min,
+      max,
+    }
+  }
 
   return {
     onSegmentTrained(segment: RolloutSegment) {
       segments += 1
       transitions += segment.transitions.length
+      triggerCounts[segment.trigger] = (triggerCounts[segment.trigger] ?? 0) + 1
+
+      let segmentReturn = 0
+      for (const transition of segment.transitions) {
+        segmentReturn += transition.reward
+        recordEntropy(transition.actionProbabilities)
+      }
+      segmentReturnSum += segmentReturn
+      if (segmentReturn < segmentReturnMin) {
+        segmentReturnMin = segmentReturn
+      }
+      if (segmentReturn > segmentReturnMax) {
+        segmentReturnMax = segmentReturn
+      }
     },
-    onEpisodeStart() {
+    onEpisodeStart(_info: EpisodeInfo) {
       episodes += 1
     },
+    onEpisodeEnd(result: EpisodeResult) {
+      if (typeof result.episodeReturn === 'number') {
+        episodeReturnSum += result.episodeReturn
+        episodeReturnCount += 1
+        if (result.episodeReturn < episodeReturnMin) {
+          episodeReturnMin = result.episodeReturn
+        }
+        if (result.episodeReturn > episodeReturnMax) {
+          episodeReturnMax = result.episodeReturn
+        }
+      }
+    },
     toActorCriticTelemetry(config) {
+      const segmentReturn = finalizeRange(
+        segments,
+        segmentReturnSum,
+        segmentReturnMin,
+        segmentReturnMax
+      )
+      const episodeReturn = finalizeRange(
+        episodeReturnCount,
+        episodeReturnSum,
+        episodeReturnMin,
+        episodeReturnMax
+      )
+      const policyEntropySummary =
+        trackEntropy && entropySamples > 0
+          ? {
+              mean: entropySum / entropySamples,
+              min: entropyMin,
+              max: entropyMax,
+              samples: entropySamples,
+            }
+          : undefined
+
       return {
         episodes,
         rolloutSegments: segments,
         transitionsTrained: transitions,
         actorActivation: config.actorActivation ?? 'sigmoid',
         entropyCoefficient: config.gradientConfig.entropyCoefficient,
+        triggerCounts: { ...triggerCounts },
+        ...(segmentReturn != null ? { segmentReturn } : {}),
+        ...(episodeReturn != null ? { episodeReturn } : {}),
+        ...(policyEntropySummary != null
+          ? { policyEntropy: policyEntropySummary }
+          : {}),
       }
     },
     toQLearningTelemetry(config) {
@@ -120,8 +257,14 @@ const attachEpisodeTracker = (
 ): void => {
   const originalStart = agent.startEpisode.bind(agent)
   agent.startEpisode = (info) => {
-    tracker.onEpisodeStart()
+    tracker.onEpisodeStart(info)
     originalStart(info)
+  }
+
+  const originalEnd = agent.endEpisode.bind(agent)
+  agent.endEpisode = (result) => {
+    tracker.onEpisodeEnd(result)
+    originalEnd(result)
   }
 }
 
@@ -131,7 +274,9 @@ const evaluateActorCritic = (
   rng: RNG
 ): EvaluateRLAgentResult => {
   const trainable = hydrateTrainable(payload.genomeOptions, context)
-  const tracker = createTelemetryTracker()
+  const trackEntropy =
+    (payload.config.actorActivation ?? 'sigmoid') === 'softmax'
+  const tracker = createTelemetryTracker({ trackEntropy })
 
   const agent = createACAgent(
     trainable,
