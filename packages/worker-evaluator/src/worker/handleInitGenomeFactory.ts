@@ -30,8 +30,8 @@ export const handleInitGenomeFactory: HandleInitGenomeFn = async (
   const maxSize = context.threadInfo.executorCacheMaxSize ?? 0
   context.executorCache = maxSize > 0 ? new QuickLRU({ maxSize }) : undefined
 
-  if (context.dispatch == null) {
-    throw new Error('dispatch not properly added to context')
+  if (context.send == null) {
+    throw new Error('send not properly added to context')
   }
   // FIXME: should this just be handled by returning true?
 }

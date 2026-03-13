@@ -20,18 +20,15 @@ export class LocalDispatcher {
     broadcast: this.broadcast.bind(this),
     addMessageHandler: this.addMessageHandler.bind(this),
     removeMessageHandler: this.removeMessageHandler.bind(this),
-    // Deprecated aliases
-    dispatch: this.send.bind(this),
-    request: this.call.bind(this),
-    addActionHandler: this.addMessageHandler.bind(this),
-    removeActionHandler: this.removeMessageHandler.bind(this),
   }
 
   addMessageHandler(type: string, handler: DispatcherHandlerFn): void {
-    if (!this.handlers.has(type)) {
-      this.handlers.set(type, new Set())
+    let listeners = this.handlers.get(type)
+    if (listeners == null) {
+      listeners = new Set()
+      this.handlers.set(type, listeners)
     }
-    this.handlers.get(type)!.add(handler)
+    listeners.add(handler)
   }
 
   removeMessageHandler(type: string, handler: DispatcherHandlerFn): void {
@@ -80,9 +77,6 @@ export class LocalDispatcher {
           // Non-response messages dispatch normally
           this.send(msg)
         }
-      },
-      dispatch: (msg: WorkerMessage) => {
-        callContext.send(msg)
       },
     }
 

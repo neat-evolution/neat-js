@@ -113,7 +113,6 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     this.evaluationContext = {
       evaluateGenomeEntry: this.evaluateGenomeEntry.bind(this),
       evaluateGenomeEntryBatch: this.evaluateGenomeEntryBatch.bind(this),
-      supportsTraining: (options.pluginPaths?.length ?? 0) > 0,
       send: (message) => {
         void this.dispatcher.send(message)
       },
@@ -123,16 +122,6 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
         this.dispatcher
       ),
       removeMessageHandler: this.dispatcher.removeMessageHandler.bind(
-        this.dispatcher
-      ),
-
-      // Deprecated aliases
-      dispatch: (message) => {
-        void this.dispatcher.send(message)
-      },
-      request: this.dispatcher.call.bind(this.dispatcher),
-      addActionHandler: this.dispatcher.addMessageHandler.bind(this.dispatcher),
-      removeActionHandler: this.dispatcher.removeMessageHandler.bind(
         this.dispatcher
       ),
     }

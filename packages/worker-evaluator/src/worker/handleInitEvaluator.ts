@@ -48,8 +48,8 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   }
 
   // FIXME: should this just be handled by returning true?
-  if (context.dispatch == null) {
-    throw new Error('dispatch not properly added to context')
+  if (context.send == null) {
+    throw new Error('send not properly added to context')
   }
 
   // Load strategy plugins
