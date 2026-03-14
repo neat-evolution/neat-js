@@ -8,7 +8,6 @@ import type {
   Transition,
   TransitionInfo,
 } from '@neat-evolution/environment'
-import { applyActorActivation } from './activations.js'
 import type { ACGradientConfig } from './computeACGradients.js'
 import { RolloutBuffer } from './RolloutBuffer.js'
 import { trainOnSegment } from './trainOnSegment.js'
@@ -23,8 +22,6 @@ export interface ACAgentConfig {
   gradientConfig: ACGradientConfig
   /** Rollout buffer configuration. */
   rolloutConfig: RolloutBufferConfig
-  /** Output activation for actor outputs (default: sigmoid). */
-  actorActivation?: 'sigmoid' | 'softmax' | 'tanh'
   /** Optional callback invoked whenever a rollout segment trains (telemetry). */
   onSegmentTrained?: (segment: RolloutSegment) => void
 }
@@ -52,15 +49,6 @@ function sampleAction(
   return action
 }
 
-/**
- * For non-softmax activations (sigmoid, tanh), treat outputs as independent
- * probabilities. Return the activated values directly as the action and
- * use them as action probabilities.
- */
-function continuousAction(activated: Float64Array): Float64Array {
-  return activated
-}
-
 /** EpisodicAgent extended with transition metadata support for plugin use. */
 export type ACAgent = EpisodicAgent & {
   /** Set pending transition metadata (`info`) for the current transition. */
@@ -71,7 +59,10 @@ export type ACAgent = EpisodicAgent & {
  * Create an Actor-Critic EpisodicAgent (A2C pattern).
  *
  * The agent wraps a TrainableExecutor with N+1 outputs (N actor + 1 critic).
- * - act(): forward pass -> separate critic -> apply activation -> sample action -> record Transition
+ * The executor handles output activation directly (per-group Softmax for actor,
+ * Linear for critic). The agent reads probabilities from the executor output.
+ *
+ * - act(): forward pass -> separate critic -> sample action -> record Transition
  * - reward(): record reward on current Transition, check trigger conditions
  * - startEpisode(): reset RolloutBuffer
  * - endEpisode(): flush buffer, train on remaining Transitions
@@ -84,7 +75,6 @@ export function createACAgent(
   rng: () => number
 ): ACAgent {
   const rolloutBuffer = new RolloutBuffer(config.rolloutConfig)
-  const activation = config.actorActivation ?? 'sigmoid'
   const rewardThreshold = config.rolloutConfig.rewardThreshold
   let currentTransition: Transition | null = null
   let pendingInfo: TransitionInfo | null = null
@@ -124,32 +114,27 @@ export function createACAgent(
 
   return {
     act(inputs: Float64Array): Float64Array {
-      // 1. Forward pass -> rawOutput (N+1 values, all linear)
-      const rawOutput = trainable.forward(inputs)
+      // 1. Forward pass -> output (N+1 values, executor handles activations)
+      const output = trainable.forward(inputs)
 
       // 2. Pop last output as criticValue
       const actionCount = config.actionCount
-      const criticValue = rawOutput[actionCount] as number
+      const criticValue = output[actionCount] as number
 
-      // 3. Copy actor raw outputs and apply activation
-      const actorRaw = new Float64Array(actionCount)
+      // 3. Read actor outputs directly as action probabilities
+      //    (executor already applied per-group Softmax normalization)
+      const actionProbabilities = new Float64Array(actionCount)
       for (let i = 0; i < actionCount; i++) {
-        actorRaw[i] = rawOutput[i] as number
+        actionProbabilities[i] = output[i] as number
       }
-      const actionProbabilities = applyActorActivation(actorRaw, activation)
 
-      // 4. Sample action from probabilities (stochastic) or use continuous
-      let action: Float64Array
-      if (activation === 'softmax') {
-        action = sampleAction(actionProbabilities, rng)
-      } else {
-        action = continuousAction(actionProbabilities)
-      }
+      // 4. Sample action from probabilities (stochastic)
+      const action = sampleAction(actionProbabilities, rng)
 
       // 5. Record Transition into RolloutBuffer
       currentTransition = {
         state: Float64Array.from(inputs),
-        rawOutput: Float64Array.from(rawOutput),
+        rawOutput: Float64Array.from(output),
         action,
         actionProbabilities,
         criticValue,

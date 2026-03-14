@@ -58,6 +58,8 @@ export function trainOnSegment(
     G = transition.reward + config.discountFactor * G
     const advantage = G - criticValue
     const errors = computeACGradients(transition, advantage, config)
+    // Re-establish forward state so backward() uses correct activations
+    trainable.forward(transition.state)
     trainable.backward(errors, config.learningRate)
   }
 }

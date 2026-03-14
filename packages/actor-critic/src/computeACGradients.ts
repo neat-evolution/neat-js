@@ -51,32 +51,24 @@ export function computeACGradients(
   const actionCount = actionProbs.length
   const errors = new Float64Array(actionCount + 1)
 
-  // Policy gradient errors for actor outputs
-  // For softmax policy: d(log(pi_a))/d(output_i) = (1{i=a} - pi_i)
-  // error_i = -advantage * (action_i - pi_i)
+  // Policy gradient errors for actor outputs (dL/d_probability)
+  // Loss = -advantage * log(p_a), so dL/dp_i = -advantage * action_i / p_i
+  // Only the selected action (action_i = 1) has a non-zero gradient
   for (let i = 0; i < actionCount; i++) {
     const prob = actionProbs[i] as number
     const actionVal = transition.action[i] as number
-    errors[i] = -advantage * (actionVal - prob)
+    const clampedProb = Math.max(prob, 1e-10)
+    errors[i] = -advantage * actionVal / clampedProb
   }
 
   // Entropy bonus: encourages exploration by penalizing confident distributions
+  // Entropy = -sum(p_i * log(p_i)), we minimize -H so dL/dp_i = log(p_i) + 1
+  // The backward Jacobian in createTrainableExecutor converts dL/dp → dL/dz
   if (config.entropyCoefficient !== 0) {
-    // Compute weighted mean of (log(pi) + 1) for softmax entropy gradient
-    let meanEntropyGrad = 0
     for (let i = 0; i < actionCount; i++) {
       const prob = actionProbs[i] as number
       const clampedProb = Math.max(prob, 1e-10)
-      meanEntropyGrad += prob * (Math.log(clampedProb) + 1)
-    }
-
-    for (let i = 0; i < actionCount; i++) {
-      const prob = actionProbs[i] as number
-      const clampedProb = Math.max(prob, 1e-10)
-      // Entropy gradient w.r.t. softmax logit i:
-      // d(-H)/d(z_i) = pi_i * ((log(pi_i) + 1) - sum_j(pi_j * (log(pi_j) + 1)))
-      // We add +c * this to encourage entropy (exploration)
-      const entropyGrad = prob * (Math.log(clampedProb) + 1 - meanEntropyGrad)
+      const entropyGrad = Math.log(clampedProb) + 1
       errors[i] =
         (errors[i] as number) + config.entropyCoefficient * entropyGrad
     }

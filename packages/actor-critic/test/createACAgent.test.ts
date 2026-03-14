@@ -42,7 +42,6 @@ function defaultConfig(actionCount: number): ACAgentConfig {
       rolloutLength: 'episode',
       rewardThreshold: 0.1,
     },
-    actorActivation: 'softmax',
   }
 }
 
@@ -287,21 +286,22 @@ describe('createACAgent', () => {
       expect(trainable.backwardCalls).toBe(20)
     })
 
-    it('continuous activation (sigmoid) returns N values directly', () => {
+    it('samples action stochastically from executor output probabilities', () => {
       const actionCount = 3
       const trainable = mockTrainable(actionCount)
       const config = defaultConfig(actionCount)
-      config.actorActivation = 'sigmoid'
       const agent = createACAgent(trainable, config, deterministicRng())
 
       agent.startEpisode({ episodeIndex: 0 })
       const action = agent.act(new Float64Array([1, 0]))
 
+      // Action should be one-hot (sampled from probabilities)
       expect(action.length).toBe(actionCount)
+      let oneHotSum = 0
       for (let i = 0; i < action.length; i++) {
-        expect(action[i]).toBeGreaterThan(0)
-        expect(action[i]).toBeLessThan(1)
+        oneHotSum += action[i] as number
       }
+      expect(oneHotSum).toBe(1)
     })
   })
 

@@ -39,7 +39,7 @@ describe('computeACGradients', () => {
       })
       const errors = computeACGradients(transition, 1.0, defaultConfig)
       // For the chosen action (index 0):
-      // error = -advantage * (action_i - pi_i) = -1 * (1 - 0.5) = -0.5
+      // error = -advantage * action_i / pi_i = -1 * 1 / 0.5 = -2.0
       // Negative error in gradient descent moves the output up -> increases probability
       expect(errors[0]).toBeLessThan(0)
     })
@@ -50,7 +50,7 @@ describe('computeACGradients', () => {
         actionProbabilities: new Float64Array([0.5, 0.5]),
       })
       const errors = computeACGradients(transition, -1.0, defaultConfig)
-      // error = -(-1) * (1 - 0.5) = 0.5
+      // error = -(-1) * 1 / 0.5 = 2.0
       // Positive error moves output down -> decreases probability
       expect(errors[0]).toBeGreaterThan(0)
     })
@@ -97,7 +97,7 @@ describe('computeACGradients', () => {
       expect(diff0 + diff1).toBeGreaterThan(0)
     })
 
-    it('produces zero entropy gradient when probabilities are uniform', () => {
+    it('produces equal entropy gradient for all actions when probabilities are uniform', () => {
       const transition = makeTransition({
         action: new Float64Array([1, 0]),
         actionProbabilities: new Float64Array([0.5, 0.5]),
@@ -109,15 +109,14 @@ describe('computeACGradients', () => {
       const errorsWithEntropy = computeACGradients(transition, 0.5, config)
       const errorsWithout = computeACGradients(transition, 0.5, defaultConfig)
 
-      // Uniform distribution has max entropy -> gradient of entropy w.r.t. logits is 0
-      expect(errorsWithEntropy[0] as number).toBeCloseTo(
-        errorsWithout[0] as number,
-        10
-      )
-      expect(errorsWithEntropy[1] as number).toBeCloseTo(
-        errorsWithout[1] as number,
-        10
-      )
+      // With dL/dp formulas, uniform entropy gradient is log(0.5) + 1 ≈ 0.307 for all actions.
+      // This is non-zero in probability space — the backward Jacobian will convert
+      // uniform dL/dp to zero dL/dz (the Jacobian subtracts the weighted mean).
+      const entropyDiff0 =
+        (errorsWithEntropy[0] as number) - (errorsWithout[0] as number)
+      const entropyDiff1 =
+        (errorsWithEntropy[1] as number) - (errorsWithout[1] as number)
+      expect(entropyDiff0).toBeCloseTo(entropyDiff1)
     })
   })
 
