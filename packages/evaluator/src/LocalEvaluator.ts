@@ -2,6 +2,7 @@ import type { AnyGenome, FitnessData, PhenotypeAction } from '@neat-evolution/co
 import type { Environment } from '@neat-evolution/environment'
 import type { EvaluationContext } from '@neat-evolution/evaluation-strategy'
 import { type ExecutorFactory, isAsyncExecutor } from '@neat-evolution/executor'
+import type { StatsRecorder } from '@neat-evolution/stats'
 
 import type { Evaluator } from './Evaluator.js'
 import type { EvaluatorFactoryOptions } from './EvaluatorFactoryOptions.js'
@@ -18,6 +19,7 @@ export class LocalEvaluator<EFO> implements Evaluator<EFO> {
   public readonly createExecutor: ExecutorFactory
 
   private readonly strategy?: EvaluatorFactoryOptions['strategy']
+  private readonly stats?: StatsRecorder
   private readonly localDispatcher: LocalDispatcher
 
   /** Pending Lamarckian writebacks collected from plugin results. */
@@ -34,6 +36,9 @@ export class LocalEvaluator<EFO> implements Evaluator<EFO> {
     this.environment = environment
     this.createExecutor = options.createExecutor
     this.strategy = options.strategy
+    if (options.stats != null) {
+      this.stats = options.stats
+    }
     this.localDispatcher = new LocalDispatcher()
   }
 
@@ -79,6 +84,7 @@ export class LocalEvaluator<EFO> implements Evaluator<EFO> {
         getTelemetry: (genome) => {
           return this.telemetryByGenome.get(genome)
         },
+        ...(this.stats != null ? { stats: this.stats } : {}),
       }
       yield* this.strategy.evaluate(context, genomeEntries)
       // After all fitness has been yielded, apply Lamarckian writebacks

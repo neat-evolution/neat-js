@@ -50,6 +50,7 @@
     "@neat-evolution/environment": "workspace:^",
     "@neat-evolution/evaluation-strategy": "workspace:^",
     "@neat-evolution/executor": "workspace:^",
+    "@neat-evolution/stats": "workspace:^",
     "@neat-evolution/worker-actions": "workspace:^",
     "@swc/helpers": "^0.5.19"
   },
