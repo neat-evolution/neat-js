@@ -35,17 +35,20 @@ export const createExecutor: SyncExecutorFactory = (
   const activationFns: Array<ActivationFunction | undefined> = new Array(
     actionCount
   )
-  const isOutputNode = new Uint8Array(phenotype.length)
 
+  // Build output node → output index mapping
   const phenotypeOutputs = phenotype.outputs
+  const outputIndexByNode = new Map<number, number>()
   for (let i = 0; i < outputsCount; i++) {
     const outputNode = phenotypeOutputs[i]
     if (outputNode !== undefined) {
-      isOutputNode[outputNode] = 1
+      outputIndexByNode.set(outputNode, i)
     }
   }
 
-  let outputActivation: Activation | undefined
+  // Scan output activations per output index to build softmax groups
+  const outputActivations = new Array<Activation>(outputsCount)
+
   for (let i = 0; i < actionCount; i++) {
     const action = phenotype.actions[i]
     if (action == null) {
@@ -61,13 +64,33 @@ export const createExecutor: SyncExecutorFactory = (
     if (action[0] === PhenotypeActionType.Activation) {
       actionValue[i] = action[2]
       activationFns[i] = toActivationFunction(action[3])
-      if (outputActivation === undefined && isOutputNode[action[1]] === 1) {
-        outputActivation = action[3]
+      const outputIdx = outputIndexByNode.get(action[1])
+      if (outputIdx !== undefined) {
+        outputActivations[outputIdx] = action[3]
       }
     } else {
       actionTo[i] = action[2]
       actionValue[i] = action[3]
     }
+  }
+
+  // Build softmax groups: contiguous ranges of outputs with Softmax activation
+  const softmaxGroups: Array<{ start: number; end: number }> = []
+  let groupStart = -1
+  for (let i = 0; i < outputsCount; i++) {
+    if (outputActivations[i] === Activation.Softmax) {
+      if (groupStart === -1) {
+        groupStart = i
+      }
+    } else {
+      if (groupStart !== -1) {
+        softmaxGroups.push({ start: groupStart, end: i })
+        groupStart = -1
+      }
+    }
+  }
+  if (groupStart !== -1) {
+    softmaxGroups.push({ start: groupStart, end: outputsCount })
   }
 
   const execute = (inputs: Inputs): Outputs => {
@@ -116,23 +139,20 @@ export const createExecutor: SyncExecutorFactory = (
       }
     }
 
-    if (outputActivation === Activation.Softmax) {
-      const probabilities = new Float64Array(outputsCount)
+    // Normalize each softmax group independently
+    for (const group of softmaxGroups) {
       let sum = 0
-      for (let i = 0; i < outputsCount; i++) {
-        const value = output[i] ?? 0
-        probabilities[i] = value
-        sum += value
+      for (let i = group.start; i < group.end; i++) {
+        sum += output[i] as number
       }
       if (sum === 0) {
-        return probabilities
+        continue
       }
-      for (let i = 0; i < outputsCount; i++) {
-        const value = probabilities[i]
-        probabilities[i] = (value ?? 0) / sum
+      for (let i = group.start; i < group.end; i++) {
+        output[i] = (output[i] as number) / sum
       }
-      return probabilities
     }
+
     return output
   }
 

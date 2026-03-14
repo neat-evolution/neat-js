@@ -3,6 +3,7 @@ import {
   type PhenotypeAction,
   PhenotypeActionType,
   type PhenotypeFactory,
+  resolveOutputActivation,
 } from '@neat-evolution/core'
 import {
   type CPPNContext,
@@ -51,11 +52,20 @@ export const createPhenotype: PhenotypeFactory<
         weight: number,
         bias: number,
       ]
-      const activation = substrate.inputs.includes(node)
-        ? Activation.None
-        : substrate.outputs.includes(node)
-          ? genome.genomeOptions.outputActivation
-          : genome.genomeOptions.hiddenActivation
+      let activation: Activation
+      if (substrate.inputs.includes(node)) {
+        activation = Activation.None
+      } else {
+        const outputIndex = substrate.outputs.indexOf(node)
+        if (outputIndex >= 0) {
+          activation = resolveOutputActivation(
+            genome.genomeOptions.outputActivation,
+            outputIndex
+          )
+        } else {
+          activation = genome.genomeOptions.hiddenActivation
+        }
+      }
       actions.push([PhenotypeActionType.Activation, node, bias, activation])
     }
   }

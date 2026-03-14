@@ -3,6 +3,7 @@ import {
   defaultGenomeOptions,
   type GenomeOptions,
   type InitConfig,
+  type OutputActivationSpec,
 } from '@neat-evolution/core'
 import {
   type CPPNGenomeOptions,
@@ -18,7 +19,7 @@ export interface HyperNEATGenomeOptions
     CPPNGenomeOptions {
   weightThreshold: number
   hiddenActivation: Activation
-  outputActivation: Activation
+  outputActivation: OutputActivationSpec
   initConfig?: InitConfig
   inputConfig: IOConfig
   outputConfig: IOConfig

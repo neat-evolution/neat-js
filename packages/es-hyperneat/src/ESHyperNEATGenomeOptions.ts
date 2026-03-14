@@ -3,6 +3,7 @@ import {
   defaultGenomeOptions,
   type GenomeOptions,
   type InitConfig,
+  type OutputActivationSpec,
 } from '@neat-evolution/core'
 import type { CPPNGenomeOptions } from '@neat-evolution/cppn'
 import { defaultCPPNGenomeOptions } from '@neat-evolution/cppn'
@@ -24,7 +25,7 @@ export interface ESHyperNEATGenomeOptions
   maxDiscoveries: number
   maxOutgoing: number
   hiddenActivation: Activation
-  outputActivation: Activation
+  outputActivation: OutputActivationSpec
   maxVariance: boolean
   relativeVariance: boolean
   medianVariance: boolean

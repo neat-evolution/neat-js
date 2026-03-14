@@ -4,6 +4,7 @@ import {
   type PhenotypeAction,
   PhenotypeActionType,
   type PhenotypeFactory,
+  resolveOutputActivation,
 } from '@neat-evolution/core'
 import type {
   CPPNContext,
@@ -163,7 +164,10 @@ export const createPhenotype: PhenotypeFactory<
         bias,
         nodeIndex < firstOutputId
           ? genome.genomeOptions.hiddenActivation
-          : genome.genomeOptions.outputActivation,
+          : resolveOutputActivation(
+              genome.genomeOptions.outputActivation,
+              nodeIndex - firstOutputId
+            ),
       ])
     }
   }

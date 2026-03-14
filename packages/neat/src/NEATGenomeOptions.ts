@@ -2,11 +2,12 @@ import {
   Activation,
   defaultGenomeOptions,
   type GenomeOptions,
+  type OutputActivationSpec,
 } from '@neat-evolution/core'
 
 export interface NEATGenomeOptions extends GenomeOptions {
   hiddenActivation: Activation
-  outputActivation: Activation
+  outputActivation: OutputActivationSpec
 }
 
 export const defaultNEATGenomeOptions: NEATGenomeOptions = {

@@ -10,6 +10,7 @@ import {
   type PhenotypeAction,
   PhenotypeActionType,
   type PhenotypeFactory,
+  resolveOutputActivation,
   toLinkKey,
   toNodeKey,
 } from '@neat-evolution/core'
@@ -420,7 +421,10 @@ export const createPhenotype: PhenotypeFactory<
         0.0,
         index < firstOutputId
           ? genome.genomeOptions.hiddenActivation
-          : genome.genomeOptions.outputActivation,
+          : resolveOutputActivation(
+              genome.genomeOptions.outputActivation,
+              index - firstOutputId
+            ),
       ])
     }
   }
