@@ -180,7 +180,6 @@ describe('workerPlugin', () => {
             rolloutLength: 4,
             rewardThreshold: 0.1,
           },
-          actorActivation: 'softmax',
         },
       },
     })
@@ -209,7 +208,6 @@ describe('workerPlugin', () => {
             rolloutLength: 4,
             rewardThreshold: 0.1,
           },
-          actorActivation: 'softmax' as const,
         },
       },
     })

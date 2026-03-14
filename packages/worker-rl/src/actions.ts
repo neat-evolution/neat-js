@@ -16,7 +16,6 @@ export type RolloutTrigger = RolloutSegment['trigger']
 export type TriggerCounts = Record<RolloutTrigger, number>
 
 export interface ActorCriticTelemetry extends RLTelemetryBase {
-  actorActivation: NonNullable<ACAgentConfig['actorActivation']>
   entropyCoefficient: number
   triggerCounts: TriggerCounts
   /**

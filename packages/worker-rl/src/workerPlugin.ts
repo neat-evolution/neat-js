@@ -174,7 +174,6 @@ const createTelemetryTracker = (
         episodes,
         rolloutSegments: segments,
         transitionsTrained: transitions,
-        actorActivation: config.actorActivation ?? 'sigmoid',
         entropyCoefficient: config.gradientConfig.entropyCoefficient,
         triggerCounts: { ...triggerCounts },
         ...(segmentReturn != null ? { segmentReturn } : {}),
@@ -269,9 +268,7 @@ const evaluateActorCritic = (
   rng: RNG
 ): EvaluateGenomeResult => {
   const trainable = hydrateTrainable(genomeOptions, context)
-  const trackEntropy =
-    (trainingConfig.config.actorActivation ?? 'sigmoid') === 'softmax'
-  const tracker = createTelemetryTracker({ trackEntropy })
+  const tracker = createTelemetryTracker({ trackEntropy: true })
 
   const agent = createACAgent(
     trainable,
