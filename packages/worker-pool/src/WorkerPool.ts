@@ -1,6 +1,7 @@
 import { Worker, type WorkerOptions } from '@neat-evolution/worker-threads'
 import { Sema } from 'async-sema'
 
+import { logger } from './logger.js'
 import type { WorkerPoolOptions } from './WorkerPoolOptions.js'
 
 export const WORKER_READY = '__WORKER_READY__'
@@ -14,14 +15,12 @@ export class WorkerPool {
   private readonly workers: Worker[] = []
   private readonly semaphore: Sema
   private readonly readyPromise: Promise<void>
-  private readonly verbose: boolean
 
   constructor(options: WorkerPoolOptions) {
     this.threadCount = options.threadCount
     this.taskCount = options.taskCount
     this.workerScriptUrl = options.workerScriptUrl
     this.workerOptions = options.workerOptions
-    this.verbose = options.verbose ?? false
 
     this.semaphore = new Sema(this.threadCount, {
       capacity: this.taskCount,
@@ -38,14 +37,10 @@ export class WorkerPool {
       this.workers.push(worker)
 
       // Wait for WORKER_READY message from each worker
-      if (this.verbose) {
-        console.log(`[WorkerPool] Waiting for worker ${i} to be ready...`)
-      }
+      logger.debug(`[WorkerPool] Waiting for worker ${i} to be ready...`)
       const readyPromise = new Promise<void>((resolve) => {
         const handler = (event: { data?: unknown }) => {
-          if (this.verbose) {
-            console.log(`[WorkerPool] Worker ${i} sent a message`, event)
-          }
+          logger.debug(`[WorkerPool] Worker ${i} sent a message`, event)
           const message = event.data ?? event
           if (
             message != null &&
@@ -54,9 +49,7 @@ export class WorkerPool {
             message.type === WORKER_READY
           ) {
             worker.removeEventListener('message', handler)
-            if (this.verbose) {
-              console.log(`[WorkerPool] Worker ${i} is ready`)
-            }
+            logger.debug(`[WorkerPool] Worker ${i} is ready`)
             resolve()
           }
         }

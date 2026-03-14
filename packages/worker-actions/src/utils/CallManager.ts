@@ -1,5 +1,6 @@
 import pDefer, { type DeferredPromise } from 'p-defer'
 
+import { verboseLogger as logger } from '../logger.js'
 import type { WorkerMessage } from '../types.js'
 
 export interface CallOptions {
@@ -14,11 +15,6 @@ interface PendingCall {
 export class CallManager {
   private callCounter = 0
   private readonly pendingCalls = new Map<string, PendingCall>()
-  private readonly verbose: boolean
-
-  constructor(options?: { verbose?: boolean }) {
-    this.verbose = options?.verbose ?? false
-  }
 
   public createCall<T>(
     message: WorkerMessage,
@@ -31,14 +27,12 @@ export class CallManager {
     // 1. Generate Correlation ID (Base36 for compactness)
     const callId = (this.callCounter++).toString(36)
 
-    if (this.verbose) {
-      console.log(
-        '[CallManager] createCall: generated callId:',
-        callId,
-        'for message:',
-        message.type
-      )
-    }
+    logger.debug(
+      '[CallManager] createCall: generated callId:',
+      callId,
+      'for message:',
+      message.type
+    )
 
     // 2. Prepare Envelope
     const meta = { ...message.meta, callId }
@@ -78,9 +72,7 @@ export class CallManager {
   public resolveCall(callId: string, payload: unknown) {
     const call = this.pendingCalls.get(callId)
     if (call != null) {
-      if (this.verbose) {
-        console.log('[CallManager] resolveCall: resolving callId:', callId)
-      }
+      logger.debug('[CallManager] resolveCall: resolving callId:', callId)
       this.pendingCalls.delete(callId)
       if (call.timeoutId != null) {
         clearTimeout(call.timeoutId)
@@ -94,9 +86,7 @@ export class CallManager {
   public rejectCall(callId: string, error: unknown) {
     const call = this.pendingCalls.get(callId)
     if (call != null) {
-      if (this.verbose) {
-        console.log('[CallManager] rejectCall: rejecting callId:', callId)
-      }
+      logger.debug('[CallManager] rejectCall: rejecting callId:', callId)
       this.pendingCalls.delete(callId)
       if (call.timeoutId != null) {
         clearTimeout(call.timeoutId)
@@ -121,25 +111,23 @@ export class CallManager {
     ) {
       const { callId } = message.meta
 
-      if (this.verbose) {
-        console.log(
-          '[CallManager] handleResponse: received response for callId:',
-          callId
-        )
-      }
+      logger.debug(
+        '[CallManager] handleResponse: received response for callId:',
+        callId
+      )
 
       if (message.error === true) {
         const handled = this.rejectCall(callId, message.payload)
-        if (!handled && this.verbose) {
-          console.log(
+        if (!handled) {
+          logger.debug(
             '[CallManager] handleResponse: no pending call found for callId:',
             callId
           )
         }
       } else {
         const handled = this.resolveCall(callId, message.payload)
-        if (!handled && this.verbose) {
-          console.log(
+        if (!handled) {
+          logger.debug(
             '[CallManager] handleResponse: no pending call found for callId:',
             callId
           )

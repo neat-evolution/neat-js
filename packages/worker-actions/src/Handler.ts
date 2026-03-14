@@ -2,6 +2,7 @@ import { WORKER_READY } from '@neat-evolution/worker-pool'
 import type { Transferable } from '@neat-evolution/worker-threads'
 import { workerContext } from '@neat-evolution/worker-threads'
 
+import { createWorkerLogger, verboseLogger } from './logger.js'
 import type {
   MessageCreator,
   WorkerContext,
@@ -10,18 +11,18 @@ import type {
 } from './types.js'
 import { CallManager } from './utils/CallManager.js'
 
+const logger = createWorkerLogger('handler')
+
 const DEFAULT_READY_TIMEOUT_MS = 20
 export class Handler {
   private readonly handlers = new Map<string, WorkerHandlerFn<any, any>>()
   private readonly scope = workerContext
   private readonly callManager: CallManager
 
-  private readonly verbose: boolean
   private readyTimeoutId: ReturnType<typeof setTimeout> | null = null
 
-  constructor(options?: { verbose?: boolean; readyTimeoutMs?: number }) {
-    this.verbose = options?.verbose ?? false
-    this.callManager = new CallManager({ verbose: this.verbose })
+  constructor(options?: { readyTimeoutMs?: number }) {
+    this.callManager = new CallManager()
 
     this.scope.addEventListener('message', (event: unknown) => {
       void this.handleMessage(event)
@@ -31,7 +32,7 @@ export class Handler {
     // This prevents workers from hanging if the developer forgets to call ready()
     this.readyTimeoutId = setTimeout(() => {
       if (!this.isReady) {
-        console.warn(
+        logger.warn(
           '[Handler] Warning: handler.ready() was not called manually. Sending WORKER_READY signal automatically.'
         )
         this.ready()
@@ -78,20 +79,16 @@ export class Handler {
 
     this.postMessage(messageWithId, messageWithId.meta?.transferList)
 
-    if (this.verbose) {
-      console.log(
-        '[Handler] call: waiting for response to callId:',
-        messageWithId.meta?.callId
-      )
-    }
+    verboseLogger.debug(
+      '[Handler] call: waiting for response to callId:',
+      messageWithId.meta?.callId
+    )
     const result = await promise
-    if (this.verbose) {
-      console.log(
-        '[Handler] call: received response for callId:',
-        messageWithId.meta?.callId,
-        result
-      )
-    }
+    verboseLogger.debug(
+      '[Handler] call: received response for callId:',
+      messageWithId.meta?.callId,
+      result
+    )
     return result
   }
 
@@ -115,13 +112,11 @@ export class Handler {
     }
     const workerMessage = message as WorkerMessage
 
-    if (this.verbose) {
-      console.log(
-        '[Handler] handleMessage received:',
-        workerMessage.type,
-        workerMessage.meta
-      )
-    }
+    verboseLogger.debug(
+      '[Handler] handleMessage received:',
+      workerMessage.type,
+      workerMessage.meta
+    )
 
     // 1. Handle RPC Responses (Call/Response)
     if (this.callManager.handleResponse(workerMessage)) {
@@ -160,7 +155,7 @@ export class Handler {
       if (workerMessage.meta?.callId != null) {
         this.replyError(workerMessage.meta.callId, error)
       } else {
-        console.error(`[Worker] Error handling ${workerMessage.type}: `, error)
+        logger.error(`[Worker] Error handling ${workerMessage.type}: `, error)
       }
     }
   }

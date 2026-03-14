@@ -1,6 +1,6 @@
 {
-  "name": "@neat-evolution/worker-actions",
-  "version": "0.6.0",
+  "name": "@neat-evolution/logger",
+  "version": "0.1.0",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -44,13 +44,6 @@
     "test": "vitest --passWithNoTests --run",
     "benchmark": "vitest bench --run --passWithNoTests",
     "check": "tsgo --noEmit"
-  },
-  "dependencies": {
-    "@neat-evolution/logger": "workspace:^",
-    "@neat-evolution/worker-pool": "workspace:^",
-    "@neat-evolution/worker-threads": "workspace:^",
-    "@swc/helpers": "^0.5.19",
-    "p-defer": "^4.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",

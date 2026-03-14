@@ -1,6 +1,7 @@
 import type { WorkerPool } from '@neat-evolution/worker-pool'
 import type { Transferable, Worker } from '@neat-evolution/worker-threads'
 
+import { verboseLogger } from './logger.js'
 import type {
   DispatcherContext,
   DispatcherHandlerFn,
@@ -9,6 +10,8 @@ import type {
 } from './types.js'
 import { isWorkerMessage } from './utils/actions.js'
 import { CallManager } from './utils/CallManager.js'
+
+const logger = verboseLogger
 
 export class Dispatcher {
   private readonly pool: WorkerPool
@@ -19,16 +22,12 @@ export class Dispatcher {
     string,
     Set<DispatcherHandlerFn<any, any>>
   >()
-  private readonly verbose: boolean
 
-  constructor(pool: WorkerPool, options?: { verbose?: boolean }) {
+  constructor(pool: WorkerPool) {
     this.pool = pool
-    this.verbose = options?.verbose ?? false
-    this.callManager = new CallManager({ verbose: this.verbose })
+    this.callManager = new CallManager()
 
-    if (this.verbose) {
-      console.log('[Dispatcher] Constructor called, binding listeners')
-    }
+    logger.debug('[Dispatcher] Constructor called, binding listeners')
     this.bindWorkerListeners()
   }
 
@@ -36,17 +35,13 @@ export class Dispatcher {
     // Direct binding: We attach a permanent listener to every worker in the pool.
     // This works because the pool created workers in its constructor.
     const workers = this.pool.getWorkers()
-    if (this.verbose) {
-      console.log(`[Dispatcher] Binding listeners to ${workers.length} workers`)
-    }
+    logger.debug(`[Dispatcher] Binding listeners to ${workers.length} workers`)
 
     for (const worker of workers) {
       // We use the standard EventTarget interface on the Worker abstraction
       worker.addEventListener('message', (event: { data: unknown }) => {
         // event.data contains the serialized message
-        if (this.verbose) {
-          console.log('[Dispatcher] Raw message received', event.data)
-        }
+        logger.debug('[Dispatcher] Raw message received', event.data)
         this._onMessage(event.data, worker)
       })
     }
@@ -110,48 +105,38 @@ export class Dispatcher {
   }
 
   private _onMessage(incoming: unknown, worker: Worker) {
-    if (this.verbose) {
-      console.log('[Dispatcher] _onMessage received:', incoming)
-    }
+    logger.debug('[Dispatcher] _onMessage received:', incoming)
     if (!isWorkerMessage(incoming)) return
     const message = incoming as WorkerMessage
 
-    if (this.verbose) {
-      console.log(
-        '[Dispatcher] _onMessage message type:',
-        message.type,
-        'meta:',
-        message.meta
-      )
-    }
+    logger.debug(
+      '[Dispatcher] _onMessage message type:',
+      message.type,
+      'meta:',
+      message.meta
+    )
 
     // 1. Handle RPC Responses (Call/Response)
     if (this.callManager.handleResponse(message)) {
       return
     }
 
-    if (this.verbose) {
-      console.log(
-        '[Dispatcher] _onMessage: Checking for message handlers for:',
-        message.type
-      )
-    }
+    logger.debug(
+      '[Dispatcher] _onMessage: Checking for message handlers for:',
+      message.type
+    )
     // 2. Handle Spontaneous Events (Worker -> Main)
     // This allows workers to "send" messages back to the main thread
     const listeners = this.eventListeners.get(message.type)
-    if (this.verbose) {
-      console.log(
-        '[Dispatcher] _onMessage: Found listeners:',
-        listeners?.size ?? 0
-      )
-    }
+    logger.debug(
+      '[Dispatcher] _onMessage: Found listeners:',
+      listeners?.size ?? 0
+    )
     if (listeners != null) {
       const context: DispatcherContext = {
         // Targeted send (reply to specific worker)
         send: (msg: WorkerMessage) => {
-          if (this.verbose) {
-            console.log('[Dispatcher] context.send called with:', msg.type)
-          }
+          logger.debug('[Dispatcher] context.send called with:', msg.type)
           this.postMessage(worker, msg)
         },
         call: this.call.bind(this),
@@ -160,13 +145,11 @@ export class Dispatcher {
         removeMessageHandler: this.removeMessageHandler.bind(this),
       }
 
-      if (this.verbose) {
-        console.log(
-          '[Dispatcher] _onMessage: Calling',
-          listeners.size,
-          'listener(s)'
-        )
-      }
+      logger.debug(
+        '[Dispatcher] _onMessage: Calling',
+        listeners.size,
+        'listener(s)'
+      )
       for (const listener of listeners) {
         listener(message, context)
       }

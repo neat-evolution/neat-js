@@ -5,5 +5,4 @@ export interface WorkerPoolOptions {
   taskCount: number
   workerScriptUrl: URL | string
   workerOptions?: WorkerOptions
-  verbose?: boolean
 }

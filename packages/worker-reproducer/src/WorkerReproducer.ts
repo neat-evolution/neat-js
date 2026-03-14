@@ -74,9 +74,7 @@ export class WorkerReproducer implements Reproducer {
       },
     })
 
-    this.dispatcher = new Dispatcher(this.pool, {
-      verbose: options.verbose ?? false,
-    })
+    this.dispatcher = new Dispatcher(this.pool)
 
     // Add handlers for requests from workers
     this.addTypedMessageHandler(
