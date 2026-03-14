@@ -6,6 +6,7 @@ import type {
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
+import type { StatsRecorder } from '@neat-evolution/stats'
 import {
   type EvaluationContext,
   type EvaluationStrategy,
@@ -26,8 +27,10 @@ import { WorkerPool } from '@neat-evolution/worker-pool'
 
 import {
   type EvaluateGenomeResult,
+  type RecordStatsPayload,
   initEvaluator,
   initGenomeFactory as initGenomeFactoryAction,
+  recordStats,
   requestEvaluateBatch,
   requestEvaluateGenome,
   terminate as terminateAction,
@@ -58,6 +61,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   private readonly pendingWritebacks = new Map<AnyGenome, PhenotypeAction[]>()
   /** Latest telemetry per genome from worker responses. */
   private readonly telemetryByGenome = new WeakMap<AnyGenome, unknown>()
+  private readonly stats: StatsRecorder | undefined
 
   /**
    * Evaluation context exposing worker pool functionality to evaluation strategies
@@ -86,6 +90,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     this.executorCacheMaxSize = options.executorCacheMaxSize ?? 0
     this.pluginPaths = options.pluginPaths
     this.pluginData = options.pluginData
+    this.stats = options.stats
 
     // Use provided workerScriptUrl or fall back to default (works in Node.js, not Vite)
     const workerScriptUrl =
@@ -100,12 +105,9 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
         name: 'WorkerEvaluator',
         type: 'module',
       },
-      verbose: options.verbose ?? false,
     })
 
-    this.dispatcher = new Dispatcher(this.pool, {
-      verbose: options.verbose ?? false,
-    })
+    this.dispatcher = new Dispatcher(this.pool)
 
     this.initPromise = this.initWorkers()
 
@@ -133,6 +135,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       getTelemetry: (genome) => {
         return this.telemetryByGenome.get(genome)
       },
+      ...(this.stats != null ? { stats: this.stats } : {}),
     }
 
     // Initialize strategy with default if not provided
@@ -152,6 +155,23 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       ...(this.pluginPaths ? { pluginPaths: this.pluginPaths } : {}),
       ...(this.pluginData ? { pluginData: this.pluginData } : {}),
     }
+
+    // Serialize stats config and register handler for worker stats messages
+    if (this.stats != null) {
+      const statsConfig = this.stats.toJSON()
+      if (statsConfig.wantedMetrics.length > 0) {
+        data.statsConfig = statsConfig
+        const stats = this.stats
+        this.dispatcher.addMessageHandler(
+          recordStats,
+          (message) => {
+            const payload = message.payload as RecordStatsPayload
+            stats.record(payload.metric, payload.value)
+          }
+        )
+      }
+    }
+
     const workerCapabilities = await this.dispatcher.broadcast<
       WorkerTrainingCapabilities | undefined
     >(initEvaluator(data))

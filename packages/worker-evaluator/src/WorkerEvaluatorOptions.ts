@@ -1,4 +1,5 @@
 import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
+import type { StatsRecorder } from '@neat-evolution/stats'
 
 export interface WorkerEvaluatorOptions {
   /** path to module that exports algorithm; Required on web for vite compatibility */
@@ -49,6 +50,11 @@ export interface WorkerEvaluatorOptions {
    * For RL: `{ rl: RLTrainingConfig }`.
    */
   pluginData?: Record<string, unknown>
+
+  /** Optional stats recorder for evaluation-level metrics.
+   *  When provided, workers receive the recorder's `toJSON()` config
+   *  and create a WorkerStatsRecorder that bridges records back. */
+  stats?: StatsRecorder
 
   /** Enable verbose logging */
   verbose?: boolean

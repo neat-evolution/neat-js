@@ -1,5 +1,6 @@
 import type { PhenotypeAction } from '@neat-evolution/core'
 import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
+import type { StatsRecorder } from '@neat-evolution/stats'
 import type { Handler } from '@neat-evolution/worker-actions'
 import type QuickLRU from 'quick-lru'
 
@@ -34,4 +35,6 @@ export interface ThreadContext {
   /** Evaluation enhancer installed by a worker plugin (e.g., RL training shim).
    *  When set, handleEvaluateGenome delegates evaluation to this callback. */
   evaluationEnhancer?: EvaluationEnhancer
+  /** Stats recorder bridged to the main thread via fire-and-forget messages. */
+  stats?: StatsRecorder
 }

@@ -61,6 +61,7 @@
     "@neat-evolution/evaluation-strategy": "workspace:^",
     "@neat-evolution/evaluator": "workspace:^",
     "@neat-evolution/executor": "workspace:^",
+    "@neat-evolution/stats": "workspace:^",
     "@neat-evolution/utils": "workspace:^",
     "@neat-evolution/worker-actions": "workspace:^",
     "@neat-evolution/worker-pool": "workspace:^",

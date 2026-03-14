@@ -6,6 +6,7 @@ import type {
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
+import type { StatsRecorderConfig } from '@neat-evolution/stats'
 import {
   createMessage,
   type WorkerMessage,
@@ -16,6 +17,7 @@ export enum ActionType {
   INIT_GENOME_FACTORY = 'INIT_GENOME_FACTORY',
   REQUEST_EVALUATE_GENOME = 'REQUEST_EVALUATE_GENOME',
   REQUEST_EVALUATE_BATCH = 'REQUEST_EVALUATE_BATCH',
+  RECORD_STATS = 'RECORD_STATS',
   TERMINATE = 'TERMINATE',
 }
 
@@ -29,6 +31,10 @@ export interface InitPayload {
   pluginPaths?: string[]
   /** Opaque config blob passed to worker plugins during initialization. */
   pluginData?: Record<string, unknown>
+  /** Serialized stats recorder config from the main-thread recorder's `toJSON()`.
+   *  When provided, workers create a WorkerStatsRecorder that sends
+   *  records back to the main thread via fire-and-forget messages. */
+  statsConfig?: StatsRecorderConfig
 }
 
 export interface InitGenomeFactoryPayload<
@@ -89,6 +95,15 @@ export const requestEvaluateBatch = createMessage<
   EvaluateBatchPayload,
   number[]
 >(ActionType.REQUEST_EVALUATE_BATCH)
+
+export interface RecordStatsPayload {
+  metric: string
+  value: unknown
+}
+
+export const recordStats = createMessage<RecordStatsPayload, void>(
+  ActionType.RECORD_STATS
+)
 
 export const terminate = createMessage<null, null>(
   ActionType.TERMINATE,

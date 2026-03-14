@@ -1,6 +1,8 @@
 import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
+import { createWorkerStatsRecorder } from '@neat-evolution/stats'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
+import { recordStats } from '../actions.js'
 import type { InitPayload } from '../actions.js'
 
 import type { ThreadContext } from './ThreadContext.js'
@@ -19,6 +21,7 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     executorCacheMaxSize,
     pluginPaths,
     pluginData,
+    statsConfig,
   },
   context
 ) => {
@@ -50,6 +53,17 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   // FIXME: should this just be handled by returning true?
   if (context.send == null) {
     throw new Error('send not properly added to context')
+  }
+
+  // Create worker-side stats recorder that bridges to main thread
+  if (statsConfig != null) {
+    const send = context.send
+    context.stats = createWorkerStatsRecorder(
+      statsConfig,
+      (metric, value) => {
+        send(recordStats({ metric, value }))
+      }
+    )
   }
 
   // Load strategy plugins
