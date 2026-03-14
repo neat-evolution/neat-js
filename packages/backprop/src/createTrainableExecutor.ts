@@ -37,17 +37,19 @@ export function createTrainableExecutor(
     actionCount
   )
 
-  // Track output activation for softmax post-processing
-  const isOutputNode = new Uint8Array(nodeCount)
+  // Build output node → output index mapping
   const phenotypeOutputs = phenotype.outputs
+  const outputIndexByNode = new Map<number, number>()
   for (let i = 0; i < outputsCount; i++) {
     const outputNode = phenotypeOutputs[i]
     if (outputNode !== undefined) {
-      isOutputNode[outputNode] = 1
+      outputIndexByNode.set(outputNode, i)
     }
   }
 
-  let outputActivation: Activation | undefined
+  // Scan output activations per output index to build softmax groups
+  const outputActivations = new Array<Activation>(outputsCount)
+
   for (let i = 0; i < actionCount; i++) {
     const action = phenotype.actions[i]
     if (action == null) {
@@ -64,8 +66,9 @@ export function createTrainableExecutor(
       actionBiases[i] = action[2]
       activationFns[i] = toActivationFunction(action[3])
       derivativeFns[i] = toActivationDerivative(action[3])
-      if (outputActivation === undefined && isOutputNode[action[1]] === 1) {
-        outputActivation = action[3]
+      const outputIdx = outputIndexByNode.get(action[1])
+      if (outputIdx !== undefined) {
+        outputActivations[outputIdx] = action[3]
       }
     } else {
       actionTo[i] = action[2]
@@ -73,17 +76,30 @@ export function createTrainableExecutor(
     }
   }
 
-  if (outputActivation === Activation.Softmax) {
-    throw new Error(
-      'Softmax output activation is not supported by the trainable executor. ' +
-        'Use Sigmoid or Linear output activation instead.'
-    )
+  // Build softmax groups: contiguous ranges of outputs with Softmax activation
+  const softmaxGroups: Array<{ start: number; end: number }> = []
+  let groupStart = -1
+  for (let i = 0; i < outputsCount; i++) {
+    if (outputActivations[i] === Activation.Softmax) {
+      if (groupStart === -1) {
+        groupStart = i
+      }
+    } else {
+      if (groupStart !== -1) {
+        softmaxGroups.push({ start: groupStart, end: i })
+        groupStart = -1
+      }
+    }
+  }
+  if (groupStart !== -1) {
+    softmaxGroups.push({ start: groupStart, end: outputsCount })
   }
 
   // Per-node state for forward/backward passes
   const preActivation = new Float64Array(nodeCount)
   const postActivation = new Float64Array(nodeCount)
   const errors = new Float64Array(nodeCount)
+  const softmaxProbs = new Float64Array(outputsCount)
 
   const forward = (inputs: number[] | Float64Array): Float64Array => {
     // Clear state
@@ -131,6 +147,28 @@ export function createTrainableExecutor(
         output[i] = value !== undefined && Number.isFinite(value) ? value : 0
       }
     }
+
+    // Normalize each softmax group independently
+    for (const group of softmaxGroups) {
+      let sum = 0
+      for (let i = group.start; i < group.end; i++) {
+        sum += output[i] as number
+      }
+      if (sum === 0) {
+        continue
+      }
+      for (let i = group.start; i < group.end; i++) {
+        output[i] = (output[i] as number) / sum
+      }
+    }
+
+    // Store softmax probabilities for backward Jacobian
+    for (const group of softmaxGroups) {
+      for (let i = group.start; i < group.end; i++) {
+        softmaxProbs[i] = output[i] as number
+      }
+    }
+
     return output
   }
 
@@ -143,6 +181,26 @@ export function createTrainableExecutor(
       const o = phenotypeOutputs[i]
       if (o !== undefined) {
         errors[o] = outputErrors[i] as number
+      }
+    }
+
+    // Apply Softmax Jacobian per group: convert dL/dp → dL/dz
+    for (const group of softmaxGroups) {
+      // dot = sum_j(dL/dp_j * p_j)
+      let dot = 0
+      for (let i = group.start; i < group.end; i++) {
+        const o = phenotypeOutputs[i]
+        if (o !== undefined) {
+          dot += (errors[o] as number) * (softmaxProbs[i] as number)
+        }
+      }
+      // dL/dz_i = p_i * (dL/dp_i - dot)
+      for (let i = group.start; i < group.end; i++) {
+        const o = phenotypeOutputs[i]
+        if (o !== undefined) {
+          errors[o] =
+            (softmaxProbs[i] as number) * ((errors[o] as number) - dot)
+        }
       }
     }
 

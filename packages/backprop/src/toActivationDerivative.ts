@@ -32,12 +32,7 @@ const derivatives: Record<string, ActivationDerivative> = {
   },
   [Activation.Tanh]: (_z, a) => 1 - a * a,
   [Activation.HardTanh]: (z) => (z < -1 || z > 1 ? 0 : 1),
-  [Activation.Softmax]: () => {
-    throw new Error(
-      'Softmax derivative requires special handling (Jacobian matrix). ' +
-        'Use combined softmax + cross-entropy gradient instead.'
-    )
-  },
+  [Activation.Softmax]: () => 1,
   [Activation.Gaussian]: (z) => -5 * z * Math.exp(-2.5 * z * z),
   [Activation.OffsetGaussian]: (z) => -10 * z * Math.exp(-2.5 * z * z),
   [Activation.GELU]: (z) => {

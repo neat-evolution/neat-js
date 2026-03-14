@@ -40,6 +40,7 @@ export * from './node/NodeType.js'
 export * from './node/nodeKeyToRef.js'
 export * from './node/nodeRefToKey.js'
 export * from './node/toNodeRef.js'
+export * from './OutputActivation.js'
 // src/phenotype/
 export * from './phenotype/Phenotype.js'
 export * from './phenotype/PhenotypeAction.js'

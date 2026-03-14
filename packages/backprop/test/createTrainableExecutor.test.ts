@@ -369,17 +369,154 @@ describe('createTrainableExecutor', () => {
     })
   })
 
-  describe('error handling', () => {
-    it('should throw for Softmax output activation', () => {
+  describe('softmax backward', () => {
+    it('should verify softmax gradient numerically (finite differences)', () => {
+      // 2 inputs → 2 outputs (Softmax)
+      // Cross-entropy loss: L = -sum(target_i * log(output_i))
+      const makeNet = (w: number[]) =>
+        makePhenotype({
+          inputs: 2,
+          hiddenCount: 0,
+          outputs: 2,
+          links: [
+            [0, 2, w[0] as number],
+            [1, 2, w[1] as number],
+            [0, 3, w[2] as number],
+            [1, 3, w[3] as number],
+          ],
+          outputActivation: Activation.Softmax,
+        })
+
+      const input = [0.8, -0.3]
+      const target = [1, 0] // one-hot: class 0
+      const weights = [0.4, -0.2, 0.1, 0.6]
+      const epsilon = 1e-5
+
+      // Compute analytical gradient via backprop
+      // dL/dp_i = -target_i / p_i (cross-entropy gradient w.r.t. probabilities)
+      const executor = createTrainableExecutor(makeNet(weights))
+      const output = executor.forward(input)
+      const outputErrors = new Float64Array(2)
+      for (let i = 0; i < 2; i++) {
+        const p = output[i] as number
+        const t = target[i] as number
+        outputErrors[i] = -t / Math.max(p, 1e-10)
+      }
+      // Use lr=1 so updated = original - gradient
+      const executor2 = createTrainableExecutor(makeNet(weights))
+      executor2.forward(input)
+      executor2.backward(outputErrors, 1.0)
+      const updatedActions = executor2.getUpdatedActions()
+
+      // Extract analytical gradients
+      const analyticalGrads: number[] = []
+      let linkIdx = 0
+      for (const action of updatedActions) {
+        if (action[0] === PhenotypeActionType.Link) {
+          analyticalGrads.push(
+            (weights[linkIdx] as number) - (action[3] as number)
+          )
+          linkIdx++
+        }
+      }
+
+      // Compute numerical gradients via finite differences
+      const crossEntropyLoss = (w: number[]) => {
+        const e = createTrainableExecutor(makeNet(w))
+        const o = e.forward(input)
+        let loss = 0
+        for (let i = 0; i < 2; i++) {
+          const p = o[i] as number
+          const t = target[i] as number
+          loss += -t * Math.log(Math.max(p, 1e-10))
+        }
+        return loss
+      }
+
+      for (let i = 0; i < weights.length; i++) {
+        const wPlus = [...weights]
+        const wMinus = [...weights]
+        wPlus[i] = (wPlus[i] as number) + epsilon
+        wMinus[i] = (wMinus[i] as number) - epsilon
+        const numericalGrad =
+          (crossEntropyLoss(wPlus) - crossEntropyLoss(wMinus)) / (2 * epsilon)
+        expect(analyticalGrads[i]).toBeCloseTo(numericalGrad, 4)
+      }
+    })
+
+    it('should train a softmax classification network', () => {
+      // 2 inputs → 2 outputs (Softmax), trained with cross-entropy
       const phenotype = makePhenotype({
-        inputs: 1,
+        inputs: 2,
         hiddenCount: 0,
-        outputs: 1,
-        links: [[0, 1, 1.0]],
+        outputs: 2,
+        links: [
+          [0, 2, 0.1],
+          [1, 2, 0.1],
+          [0, 3, -0.1],
+          [1, 3, -0.1],
+        ],
         outputActivation: Activation.Softmax,
       })
 
-      expect(() => createTrainableExecutor(phenotype)).toThrow(/Softmax/)
+      const executor = createTrainableExecutor(phenotype)
+      const lr = 0.1
+      // Class 0: positive first input, class 1: positive second input
+      const samples = [
+        { input: [1.0, 0.0], target: [1, 0] },
+        { input: [0.0, 1.0], target: [0, 1] },
+        { input: [0.8, 0.2], target: [1, 0] },
+        { input: [0.2, 0.8], target: [0, 1] },
+      ]
+
+      for (let epoch = 0; epoch < 200; epoch++) {
+        for (const { input, target } of samples) {
+          const output = executor.forward(input)
+          const errors = new Float64Array(2)
+          for (let i = 0; i < 2; i++) {
+            const p = output[i] as number
+            const t = target[i] as number
+            // Cross-entropy gradient: dL/dp_i = -t_i / p_i
+            errors[i] = -t / Math.max(p, 1e-10)
+          }
+          executor.backward(errors, lr)
+        }
+      }
+
+      // Verify classification: class 0 samples should have output[0] > output[1]
+      for (const { input, target } of samples) {
+        const output = executor.forward(input)
+        if (target[0] === 1) {
+          expect(output[0]).toBeGreaterThan(output[1] as number)
+        } else {
+          expect(output[1]).toBeGreaterThan(output[0] as number)
+        }
+      }
+    })
+  })
+
+  describe('error handling', () => {
+    it('should support Softmax output activation with forward normalization', () => {
+      // 2 inputs → 2 outputs (Softmax), weights set so outputs differ
+      const phenotype = makePhenotype({
+        inputs: 2,
+        hiddenCount: 0,
+        outputs: 2,
+        links: [
+          [0, 2, 1.0],
+          [1, 3, 2.0],
+        ],
+        outputActivation: Activation.Softmax,
+      })
+
+      const executor = createTrainableExecutor(phenotype)
+      const output = executor.forward([1.0, 1.0])
+
+      // Softmax applies exp then normalizes — outputs should sum to 1
+      const sum = (output[0] as number) + (output[1] as number)
+      expect(sum).toBeCloseTo(1.0)
+      // output[1] should be larger since weight is larger
+      expect(output[1]).toBeGreaterThan(output[0] as number)
     })
 
     it('should throw for Step hidden activation during backward pass', () => {
