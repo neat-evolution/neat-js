@@ -297,7 +297,7 @@ describe('BanditEnvironment', () => {
 
 describe('ACPlugin integration', () => {
   it('creates and evaluates with ACPlugin locally', async () => {
-    // Minimal phenotype: 3 inputs → 4 outputs (3 actor + 1 critic)
+    // Minimal phenotype: 3 inputs → 4 outputs (3 actor Softmax + 1 critic Linear)
     const phenotype: Phenotype = {
       length: 7,
       inputs: [0, 1, 2],
@@ -307,10 +307,10 @@ describe('ACPlugin integration', () => {
         [PhenotypeActionType.Link, 1, 4, 0.5],
         [PhenotypeActionType.Link, 2, 5, 0.5],
         [PhenotypeActionType.Link, 0, 6, 0.1],
-        [PhenotypeActionType.Activation, 3, 0, Activation.Sigmoid],
-        [PhenotypeActionType.Activation, 4, 0, Activation.Sigmoid],
-        [PhenotypeActionType.Activation, 5, 0, Activation.Sigmoid],
-        [PhenotypeActionType.Activation, 6, 0, Activation.Sigmoid],
+        [PhenotypeActionType.Activation, 3, 0, Activation.Softmax],
+        [PhenotypeActionType.Activation, 4, 0, Activation.Softmax],
+        [PhenotypeActionType.Activation, 5, 0, Activation.Softmax],
+        [PhenotypeActionType.Activation, 6, 0, Activation.Linear],
       ],
     }
 
@@ -338,7 +338,6 @@ describe('ACPlugin integration', () => {
         isLamarckian: true,
         rolloutLength: 'episode',
         rewardThreshold: 0.1,
-        actorActivation: 'softmax',
         discountFactor: 0,
       },
       rng
@@ -372,12 +371,9 @@ describe('ACPlugin integration', () => {
     expect(result.fitness).toBeGreaterThanOrEqual(0)
     expect(result.fitness).toBeLessThanOrEqual(1)
 
-    // Lamarckian writeback should be pending
-    plugin.afterFitness(mockGenome, result.fitness, {
-      algorithm,
-      environment: env,
-    })
-    expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
+    // Lamarckian writeback should be in the result
+    expect(result.updatedActions).toBeDefined()
+    expect(result.updatedActions).toEqual(expect.any(Array))
   })
 })
 
@@ -458,11 +454,8 @@ describe('QLPlugin integration', () => {
     expect(result.fitness).toBeGreaterThanOrEqual(0)
     expect(result.fitness).toBeLessThanOrEqual(1)
 
-    // Lamarckian writeback should be pending
-    plugin.afterFitness(mockGenome, result.fitness, {
-      algorithm,
-      environment: env,
-    })
-    expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
+    // Lamarckian writeback should be in the result
+    expect(result.updatedActions).toBeDefined()
+    expect(result.updatedActions).toEqual(expect.any(Array))
   })
 })

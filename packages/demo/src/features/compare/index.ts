@@ -22,12 +22,15 @@ import {
   type Matrix,
   oneHotAccuracy,
 } from '@neat-evolution/dataset-environment'
+import {
+  type EvaluationStrategy,
+  PluginStrategy,
+} from '@neat-evolution/evaluation-strategy'
 import type { AnyAlgorithm } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
 } from '@neat-evolution/evolution'
-import type { EvaluationConfig } from '@neat-evolution/evolution-manager'
 import { EvolutionManager } from '@neat-evolution/evolution-manager'
 import { createExecutor } from '@neat-evolution/executor'
 import {
@@ -110,14 +113,14 @@ interface RunResult {
 
 async function runVariant(
   name: string,
-  evaluation: EvaluationConfig
+  strategy?: EvaluationStrategy
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
 
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    evaluation,
+    ...(strategy != null ? { strategy } : {}),
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,
@@ -157,8 +160,7 @@ async function runVariant(
 
 // Vanilla NEAT — fitness on training data (no learning step)
 console.log('Running: Vanilla NEAT...')
-const vanillaEvaluation: EvaluationConfig = { type: 'strategy' }
-const vanilla = await runVariant('Vanilla', vanillaEvaluation)
+const vanilla = await runVariant('Vanilla')
 console.log(
   `  Done: ${vanilla.bestFitness.toFixed(6)} in ${(vanilla.elapsedMs / 1000).toFixed(1)}s`
 )
@@ -170,10 +172,13 @@ const baldwinianPlugin = new BackpropPlugin(NEATAlgorithm as AnyAlgorithm, {
   learningRate: args.learningRate,
   isLamarckian: false,
 })
-const baldwinian = await runVariant('Baldwinian', {
-  type: 'plugin-replacement',
-  plugin: baldwinianPlugin,
-})
+const baldwinian = await runVariant(
+  'Baldwinian',
+  new PluginStrategy([baldwinianPlugin], {
+    algorithm: NEATAlgorithm as AnyAlgorithm,
+    environment,
+  })
+)
 console.log(
   `  Done: ${baldwinian.bestFitness.toFixed(6)} in ${(baldwinian.elapsedMs / 1000).toFixed(1)}s`
 )
@@ -185,10 +190,13 @@ const lamarckianPlugin = new BackpropPlugin(NEATAlgorithm as AnyAlgorithm, {
   learningRate: args.learningRate,
   isLamarckian: true,
 })
-const lamarckian = await runVariant('Lamarckian', {
-  type: 'plugin-replacement',
-  plugin: lamarckianPlugin,
-})
+const lamarckian = await runVariant(
+  'Lamarckian',
+  new PluginStrategy([lamarckianPlugin], {
+    algorithm: NEATAlgorithm as AnyAlgorithm,
+    environment,
+  })
+)
 console.log(
   `  Done: ${lamarckian.bestFitness.toFixed(6)} in ${(lamarckian.elapsedMs / 1000).toFixed(1)}s`
 )

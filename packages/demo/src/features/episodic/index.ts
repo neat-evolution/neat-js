@@ -15,18 +15,24 @@
  */
 
 import { ACPlugin } from '@neat-evolution/actor-critic-plugin'
-import type { AnyGenome } from '@neat-evolution/core'
+import { Activation, type AnyGenome } from '@neat-evolution/core'
+import type { EvaluationPlugin } from '@neat-evolution/evaluation-strategy'
+import { PluginStrategy } from '@neat-evolution/evaluation-strategy'
 import type { AnyAlgorithm } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
 } from '@neat-evolution/evolution'
 import {
-  type EvaluationConfig,
   EvolutionManager,
   type WorkerConfig,
 } from '@neat-evolution/evolution-manager'
-import { NEATAlgorithm, type NEATGenome } from '@neat-evolution/neat'
+import {
+  defaultNEATGenomeOptions,
+  NEATAlgorithm,
+  type NEATGenome,
+  type NEATGenomeOptions,
+} from '@neat-evolution/neat'
 import { QLPlugin } from '@neat-evolution/q-learning-plugin'
 import { createRNG, setThreadRNGSeed, threadRNG } from '@neat-evolution/utils'
 import type {
@@ -51,7 +57,8 @@ interface VariantConfig {
   name: string
   description: string
   outputCount: number
-  evaluation: EvaluationConfig
+  plugins?: ReadonlyArray<EvaluationPlugin>
+  genomeOptions?: Partial<NEATGenomeOptions>
   summary: VariantSummary
   getTelemetry?: (genome: AnyGenome) => VariantTelemetry | undefined
 }
@@ -60,7 +67,7 @@ interface VariantConfig {
 
 function parseArgs(argv: string[]) {
   const args = {
-    learningRate: 0.01,
+    learningRate: 0.1,
     iterations: 100,
     seconds: 0, // no time limit by default
     seed: 'phase4-demo' as string | undefined,
@@ -68,7 +75,7 @@ function parseArgs(argv: string[]) {
     qlSeed: undefined as string | undefined,
     entropyCoefficient: 0.01,
     epsilonInitial: 0.3,
-    epsilonDecayPerEpisode: 0.95,
+    epsilonDecayPerEpisode: 0.1,
     epsilonMinimum: 0.01,
     telemetry: false,
     workers: false,
@@ -148,9 +155,17 @@ const baseAcOptions = {
   rolloutLength: 'episode' as const,
   rewardThreshold: 0.1,
   entropyCoefficient: args.entropyCoefficient,
-  actorActivation: 'softmax' as const,
   discountFactor: 0,
 }
+
+/** Per-group output activation: 3 actor outputs (Softmax) + 1 critic output (Linear) */
+const acOutputActivation: readonly [
+  readonly [number, Activation],
+  readonly [number, Activation],
+] = [
+  [3, Activation.Softmax],
+  [1, Activation.Linear],
+]
 
 const qlOptions = {
   learningRate: args.learningRate,
@@ -180,7 +195,6 @@ const variants: VariantConfig[] = [
     name: 'Vanilla',
     description: 'Baseline evolution via evaluate()',
     outputCount: 3,
-    evaluation: { type: 'strategy' },
     summary: {
       path: 'evaluate()',
       method: 'vanilla',
@@ -196,10 +210,8 @@ const variants: VariantConfig[] = [
     name: 'AC-Lamarck',
     description: 'Actor-Critic with Lamarckian writeback',
     outputCount: 4,
-    evaluation: {
-      type: 'plugin-augmentation',
-      plugins: [acLamarckPlugin],
-    },
+    plugins: [acLamarckPlugin],
+    genomeOptions: { outputActivation: acOutputActivation },
     getTelemetry: (g) => acLamarckPlugin.getTelemetry(g),
     summary: {
       path: 'evaluateAgent()',
@@ -218,10 +230,8 @@ const variants: VariantConfig[] = [
     name: 'AC-Darwin',
     description: 'Actor-Critic without Lamarckian writeback',
     outputCount: 4,
-    evaluation: {
-      type: 'plugin-augmentation',
-      plugins: [acDarwinPlugin],
-    },
+    plugins: [acDarwinPlugin],
+    genomeOptions: { outputActivation: acOutputActivation },
     getTelemetry: (g) => acDarwinPlugin.getTelemetry(g),
     summary: {
       path: 'evaluateAgent()',
@@ -240,10 +250,8 @@ const variants: VariantConfig[] = [
     name: 'Q-Learning',
     description: 'DQN-style epsilon-greedy training with Lamarckian writeback',
     outputCount: 3,
-    evaluation: {
-      type: 'plugin-augmentation',
-      plugins: [qlPlugin],
-    },
+    plugins: [qlPlugin],
+    genomeOptions: { outputActivation: Activation.Linear },
     getTelemetry: (g) => qlPlugin.getTelemetry(g),
     summary: {
       path: 'evaluateAgent()',
@@ -306,16 +314,24 @@ interface RunResult {
 async function runVariant(
   name: string,
   outputCount: number,
-  evaluation: EvaluationConfig,
-  variantWorkerConfig?: WorkerConfig
+  plugins: ReadonlyArray<EvaluationPlugin> | undefined,
+  variantWorkerConfig?: WorkerConfig,
+  genomeOptions?: Partial<NEATGenomeOptions>
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
   const environment = new BanditEnvironment(outputCount)
 
+  const strategy = plugins
+    ? new PluginStrategy(plugins, { algorithm, environment })
+    : undefined
+
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    evaluation,
+    ...(strategy != null ? { strategy } : {}),
+    ...(genomeOptions != null
+      ? { genomeOptions: { ...defaultNEATGenomeOptions, ...genomeOptions } }
+      : {}),
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,
@@ -364,8 +380,9 @@ for (const variant of variants) {
   const result = await runVariant(
     variant.name,
     variant.outputCount,
-    variant.evaluation,
-    workerConfig
+    variant.plugins,
+    workerConfig,
+    variant.genomeOptions
   )
   console.log(
     `  Done: ${result.bestFitness.toFixed(4)} in ${(result.elapsedMs / 1000).toFixed(1)}s`
@@ -484,8 +501,7 @@ if (args.telemetry) {
     console.log(`  rolloutSegments:     ${telemetry.rolloutSegments}`)
     console.log(`  transitionsTrained:  ${telemetry.transitionsTrained}`)
 
-    if ('actorActivation' in telemetry) {
-      console.log(`  actorActivation:     ${telemetry.actorActivation}`)
+    if ('entropyCoefficient' in telemetry) {
       console.log(`  entropyCoefficient:  ${telemetry.entropyCoefficient}`)
       console.log(
         `  triggerCounts:       reward=${telemetry.triggerCounts.reward}, done=${telemetry.triggerCounts.done}, info=${telemetry.triggerCounts.info}`

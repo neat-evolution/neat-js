@@ -18,6 +18,7 @@ import {
   defaultDatasetOptions,
   loadDataset,
 } from '@neat-evolution/dataset-environment'
+import { PluginStrategy } from '@neat-evolution/evaluation-strategy'
 import type { AnyAlgorithm } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
@@ -107,10 +108,10 @@ try {
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    evaluation: {
-      type: 'plugin-replacement',
-      plugin,
-    },
+    strategy: new PluginStrategy([plugin], {
+      algorithm: NEATAlgorithm as AnyAlgorithm,
+      environment,
+    }),
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,
