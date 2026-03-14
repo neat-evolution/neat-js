@@ -1,6 +1,9 @@
 import type { EvolutionOptions } from './EvolutionOptions.js'
+import { logger } from './logger.js'
 import type { Organism } from './Organism.js'
 import type { Population } from './Population.js'
+import type { GenerationRecord } from './records/GenerationRecord.js'
+import type { RunSummaryRecord } from './records/RunSummaryRecord.js'
 
 export const evolve = async <
   P extends Population<any>,
@@ -16,23 +19,27 @@ export const evolve = async <
   let bestFitness = -Infinity
   let bestIteration = -1
   let bestOrganism: O | undefined
+  let stopReason: RunSummaryRecord['stopReason'] = 'completed'
+  let completedIterations = 0
 
   for (let i = 0; i < iterations; i++) {
     if (i % options.logInterval === 0) {
-      console.log(`Iter: ${i}`)
+      logger.log(`Iter: ${i}`)
     }
     const iterationStartTime = Date.now()
 
     // Check abort/timeout before doing work
     if (options.signal?.aborted === true) {
-      console.log('🛑 Evolution aborted')
+      logger.log('🛑 Evolution aborted')
+      stopReason = 'aborted'
       break
     }
     if (
       options.secondsLimit > 0 &&
       Date.now() - startTime >= (options.secondsLimit + 3) * 1000
     ) {
-      console.log(`⌛ seconds limit ${options.secondsLimit} reached`)
+      logger.log(`⌛ seconds limit ${options.secondsLimit} reached`)
+      stopReason = 'timeout'
       break
     }
 
@@ -70,8 +77,8 @@ export const evolve = async <
       bestFitness = best.fitness ?? (0 as number)
       bestOrganism = best
       bestIteration = i
-      console.log(`🌟 New best ${bestFitness} in iteration ${bestIteration}`)
-      console.log(`---`)
+      logger.log(`🌟 New best ${bestFitness} in iteration ${bestIteration}`)
+      logger.log(`---`)
       options.handleNewBest?.(best, i)
     }
 
@@ -81,28 +88,71 @@ export const evolve = async <
       (best.fitness ?? 0) < bestFitness + options.earlyStopMinThreshold &&
       i - bestIteration > options.earlyStopPatience
     ) {
-      console.log(`🥵 early stop after ${i} iterations`)
+      logger.log(`🥵 early stop after ${i} iterations`)
+      stopReason = 'early-stop'
       break
     }
 
-    if (i % options.logInterval === 0) {
-      console.log(`fitness: ${best.fitness ?? 0}`)
-      console.log(`best: ${bestFitness} in iteration ${bestIteration}`)
-      console.log('genome:')
-      console.log(` hiddenNodes: ${best.genome.hiddenNodes.size}`)
-      console.log(` links: ${best.genome.links.size}`)
-      console.log(
-        `Population(species: ${population.species.size}, extinct: ${
-          population.extinctSpecies.size
-        }) ${Array.from(population.species.values())
-          .map((s) => s.organisms.length)
-          .join(' ')}`
+    completedIterations = i + 1
+
+    const wantsLog = i % options.logInterval === 0
+    const wantsStats = options.stats?.wants('generation') === true
+
+    // Core evolution reporting — always logged, gated by logInterval
+    if (wantsLog || wantsStats) {
+      const iterationMs = Date.now() - iterationStartTime
+      const speciesSizes = Array.from(population.species.values()).map(
+        (s) => s.organisms.length
       )
-      console.log(`took ${Date.now() - iterationStartTime}ms`)
-      console.log('---')
+
+      if (wantsLog) {
+        logger.log(`fitness: ${best.fitness ?? 0}`)
+        logger.log(`best: ${bestFitness} in iteration ${bestIteration}`)
+        logger.log('genome:')
+        logger.log(` hiddenNodes: ${best.genome.hiddenNodes.size}`)
+        logger.log(` links: ${best.genome.links.size}`)
+        logger.log(
+          `Population(species: ${population.species.size}, extinct: ${
+            population.extinctSpecies.size
+          }) ${speciesSizes.join(' ')}`
+        )
+        logger.log(`took ${iterationMs}ms`)
+        logger.log('---')
+      }
+
+      // Consumer stats — every iteration, consumers gate themselves
+      if (wantsStats && options.stats != null) {
+        const record: GenerationRecord = {
+          iteration: i,
+          fitness: best.fitness ?? null,
+          bestFitness,
+          bestIteration,
+          speciesCount: population.species.size,
+          extinctSpeciesCount: population.extinctSpecies.size,
+          speciesSizes,
+          hiddenNodes: best.genome.hiddenNodes.size,
+          links: best.genome.links.size,
+          iterationMs,
+          totalMs: Date.now() - startTime,
+        }
+        options.stats.record('generation', record)
+      }
     }
   }
-  console.log(`ended after ${Date.now() - startTime}ms`)
-  console.log(`🏆 best fitness: ${bestFitness}`)
+
+  // Record run summary
+  if (options.stats?.wants('run-summary') === true) {
+    const summary: RunSummaryRecord = {
+      totalIterations: completedIterations,
+      totalMs: Date.now() - startTime,
+      bestFitness,
+      bestIteration,
+      stopReason,
+    }
+    options.stats.record('run-summary', summary)
+  }
+
+  logger.log(`ended after ${Date.now() - startTime}ms`)
+  logger.log(`🏆 best fitness: ${bestFitness}`)
   return bestOrganism
 }

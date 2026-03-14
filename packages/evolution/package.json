@@ -48,6 +48,8 @@
   "dependencies": {
     "@neat-evolution/core": "workspace:^",
     "@neat-evolution/evaluator": "workspace:^",
+    "@neat-evolution/logger": "workspace:^",
+    "@neat-evolution/stats": "workspace:^",
     "@neat-evolution/utils": "workspace:^",
     "@swc/helpers": "^0.5.19",
     "quick-lru": "^7.3.0"

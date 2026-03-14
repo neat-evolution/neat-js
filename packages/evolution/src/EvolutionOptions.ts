@@ -1,3 +1,5 @@
+import type { StatsRecorder } from '@neat-evolution/stats'
+
 import type { Organism } from './Organism.js'
 import type { Population } from './Population.js'
 
@@ -20,6 +22,7 @@ export interface EvolutionOptions<
   afterEvolve?: (population: P, iteration: number) => void
   afterEvolveInterval?: number
   signal?: AbortSignal
+  stats?: StatsRecorder
 }
 
 export const defaultEvolutionOptions: EvolutionOptions<

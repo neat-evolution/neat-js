@@ -49,6 +49,7 @@ import {
   type Terminable,
   type WorkerReproducerOptions,
 } from '@neat-evolution/worker-reproducer'
+import type { StatsRecorder } from '@neat-evolution/stats'
 import { hardwareConcurrency } from '@neat-evolution/worker-threads'
 
 import type {
@@ -77,6 +78,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       >
     | undefined
   private readonly workerConfig: WorkerConfig | undefined
+  private readonly stats: StatsRecorder | undefined
   private readonly signal: AbortSignal | undefined
 
   private readonly terminables = new Set<Terminable>()
@@ -109,6 +111,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       ({ ...config.algorithm.defaultOptions } as GenomeOptionsOf<Ctx>)
     this.populationFactoryOptions = config.populationFactoryOptions
     this.workerConfig = config.workerConfig
+    this.stats = config.stats
     this.signal = config.signal
   }
 
@@ -136,6 +139,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       evaluator = createLocalEvaluator(algorithm, environment, {
         createExecutor,
         ...(effectiveStrategy != null ? { strategy: effectiveStrategy } : {}),
+        ...(this.stats != null ? { stats: this.stats } : {}),
       })
       createReproducer = createLocalReproducer as unknown as ReproducerFactory<
         Population<Ctx>
@@ -201,6 +205,9 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       ...this.evolutionOptions,
       ...options,
       initialMutations: 0,
+    }
+    if (this.stats != null) {
+      evolveOptions.stats = this.stats
     }
     if (this.signal != null) {
       evolveOptions.signal = this.signal
@@ -342,6 +349,9 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     }
     if (workerConfig.pluginPaths != null) {
       evaluatorOptions.pluginPaths = workerConfig.pluginPaths
+    }
+    if (this.stats != null) {
+      evaluatorOptions.stats = this.stats
     }
 
     // Collect plugin data from initialized plugins for worker configuration.

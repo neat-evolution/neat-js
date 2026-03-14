@@ -52,6 +52,7 @@
     "@neat-evolution/evaluator": "workspace:*",
     "@neat-evolution/evolution": "workspace:*",
     "@neat-evolution/executor": "workspace:*",
+    "@neat-evolution/stats": "workspace:*",
     "@neat-evolution/worker-evaluator": "workspace:*",
     "@neat-evolution/worker-reproducer": "workspace:*",
     "@neat-evolution/worker-threads": "workspace:*",

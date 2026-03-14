@@ -16,6 +16,7 @@ import type {
   PopulationFactoryOptions,
   PopulationOptions,
 } from '@neat-evolution/evolution'
+import type { StatsRecorder } from '@neat-evolution/stats'
 
 export interface WorkerConfig {
   /** Module path to the environment factory (for worker reconstruction).
@@ -99,6 +100,11 @@ export interface EvolutionManagerConfig<
   /** Worker configuration. Required for any practical use case.
    *  Omit only for unit tests or trivial single-threaded experiments. */
   workerConfig?: WorkerConfig
+
+  /** Stats recorder for generation/run-summary and evaluation-level metrics.
+   *  The recorder's `toJSON()` config is sent to workers so they can create
+   *  a WorkerStatsRecorder that bridges records back to the main thread. */
+  stats?: StatsRecorder
 
   /** AbortSignal for cancelling evolution mid-run. */
   signal?: AbortSignal

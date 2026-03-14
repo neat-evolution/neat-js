@@ -961,6 +961,7 @@ __metadata:
     "@neat-evolution/core": "workspace:*"
     "@neat-evolution/environment": "workspace:*"
     "@neat-evolution/evaluation-strategy": "workspace:*"
+    "@neat-evolution/worker-rl": "workspace:*"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
@@ -1143,6 +1144,7 @@ __metadata:
     "@neat-evolution/utils": "workspace:^"
     "@neat-evolution/worker-evaluator": "workspace:^"
     "@neat-evolution/worker-reproducer": "workspace:^"
+    "@neat-evolution/worker-rl": "workspace:^"
     "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
@@ -1253,6 +1255,7 @@ __metadata:
     "@neat-evolution/core": "workspace:^"
     "@neat-evolution/environment": "workspace:^"
     "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/stats": "workspace:^"
     "@neat-evolution/worker-actions": "workspace:^"
     "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
@@ -1279,6 +1282,7 @@ __metadata:
     "@neat-evolution/environment": "workspace:^"
     "@neat-evolution/evaluation-strategy": "workspace:^"
     "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/stats": "workspace:^"
     "@neat-evolution/worker-actions": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
@@ -1308,6 +1312,7 @@ __metadata:
     "@neat-evolution/evolution": "workspace:*"
     "@neat-evolution/executor": "workspace:*"
     "@neat-evolution/neat": "workspace:^"
+    "@neat-evolution/stats": "workspace:*"
     "@neat-evolution/worker-evaluator": "workspace:*"
     "@neat-evolution/worker-reproducer": "workspace:*"
     "@neat-evolution/worker-threads": "workspace:*"
@@ -1333,6 +1338,8 @@ __metadata:
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
     "@neat-evolution/core": "workspace:^"
     "@neat-evolution/evaluator": "workspace:^"
+    "@neat-evolution/logger": "workspace:^"
+    "@neat-evolution/stats": "workspace:^"
     "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
@@ -1398,6 +1405,25 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@neat-evolution/logger@workspace:^, @neat-evolution/logger@workspace:packages/logger":
+  version: 0.0.0-use.local
+  resolution: "@neat-evolution/logger@workspace:packages/logger"
+  dependencies:
+    "@biomejs/biome": "npm:2.4.4"
+    "@heygrady/tsconfig-bases": "npm:^1.0.7"
+    "@swc/cli": "npm:^0.7.9"
+    "@swc/core": "npm:^1.15.3"
+    "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
+    "@vitest/coverage-v8": "npm:^4.0.14"
+    concurrently: "npm:^9.2.1"
+    lint-staged: "npm:^16.2.7"
+    nodemon: "npm:^3.1.11"
+    rimraf: "npm:^6.1.2"
+    typescript: "npm:^5.9.3"
+    vitest: "npm:^4.0.14"
+  languageName: unknown
+  linkType: soft
+
 "@neat-evolution/neat-publish@workspace:.claude/skills/neat-publish":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/neat-publish@workspace:.claude/skills/neat-publish"
@@ -1449,6 +1475,8 @@ __metadata:
     "@neat-evolution/environment": "workspace:*"
     "@neat-evolution/evaluation-strategy": "workspace:*"
     "@neat-evolution/q-learning": "workspace:*"
+    "@neat-evolution/utils": "workspace:*"
+    "@neat-evolution/worker-rl": "workspace:*"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
@@ -1471,6 +1499,26 @@ __metadata:
     "@neat-evolution/actor-critic": "workspace:*"
     "@neat-evolution/backprop": "workspace:*"
     "@neat-evolution/environment": "workspace:*"
+    "@neat-evolution/utils": "workspace:*"
+    "@swc/cli": "npm:^0.7.9"
+    "@swc/core": "npm:^1.15.3"
+    "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
+    "@vitest/coverage-v8": "npm:^4.0.14"
+    concurrently: "npm:^9.2.1"
+    lint-staged: "npm:^16.2.7"
+    nodemon: "npm:^3.1.11"
+    rimraf: "npm:^6.1.2"
+    typescript: "npm:^5.9.3"
+    vitest: "npm:^4.0.14"
+  languageName: unknown
+  linkType: soft
+
+"@neat-evolution/stats@workspace:*, @neat-evolution/stats@workspace:^, @neat-evolution/stats@workspace:packages/stats":
+  version: 0.0.0-use.local
+  resolution: "@neat-evolution/stats@workspace:packages/stats"
+  dependencies:
+    "@biomejs/biome": "npm:2.4.4"
+    "@heygrady/tsconfig-bases": "npm:^1.0.7"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
@@ -1510,6 +1558,7 @@ __metadata:
   dependencies:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
+    "@neat-evolution/logger": "workspace:^"
     "@neat-evolution/worker-pool": "workspace:^"
     "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
@@ -1541,6 +1590,7 @@ __metadata:
     "@neat-evolution/evolution": "workspace:^"
     "@neat-evolution/executor": "workspace:^"
     "@neat-evolution/neat": "workspace:^"
+    "@neat-evolution/stats": "workspace:^"
     "@neat-evolution/utils": "workspace:^"
     "@neat-evolution/worker-actions": "workspace:^"
     "@neat-evolution/worker-pool": "workspace:^"
@@ -1568,6 +1618,7 @@ __metadata:
   dependencies:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
+    "@neat-evolution/logger": "workspace:^"
     "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
@@ -1614,7 +1665,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-rl@workspace:packages/worker-rl":
+"@neat-evolution/worker-rl@workspace:*, @neat-evolution/worker-rl@workspace:^, @neat-evolution/worker-rl@workspace:packages/worker-rl":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-rl@workspace:packages/worker-rl"
   dependencies:
