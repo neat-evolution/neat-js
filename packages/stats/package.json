@@ -1,7 +1,17 @@
 {
-  "name": "@neat-evolution/evaluation-strategy",
-  "version": "0.3.12",
+  "name": "@neat-evolution/stats",
+  "version": "0.1.0",
   "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neat-evolution/neat-evolution.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
@@ -35,15 +45,6 @@
     "benchmark": "vitest bench --run --passWithNoTests",
     "check": "tsgo --noEmit"
   },
-  "dependencies": {
-    "@neat-evolution/core": "workspace:^",
-    "@neat-evolution/environment": "workspace:^",
-    "@neat-evolution/executor": "workspace:^",
-    "@neat-evolution/stats": "workspace:^",
-    "@neat-evolution/worker-actions": "workspace:^",
-    "@neat-evolution/worker-threads": "workspace:^",
-    "@swc/helpers": "^0.5.19"
-  },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
     "@heygrady/tsconfig-bases": "^1.0.7",
@@ -62,5 +63,15 @@
     "*": [
       "biome check --write --no-errors-on-unmatched"
     ]
-  }
+  },
+  "browserslist": [
+    "node >=16"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  },
+  "packageManager": "yarn@4.12.0"
 }

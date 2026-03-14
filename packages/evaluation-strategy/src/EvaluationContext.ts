@@ -5,6 +5,7 @@ import type {
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type { EpisodicContext } from '@neat-evolution/environment'
+import type { StatsRecorder } from '@neat-evolution/stats'
 import type { DispatcherContext } from '@neat-evolution/worker-actions'
 import type { WorkerTrainingCapabilities } from './WorkerTrainingCapabilities.js'
 
@@ -64,4 +65,7 @@ export interface EvaluationContext<G extends AnyGenome = AnyGenome>
    * can read it back via this method to populate their own caches.
    */
   getTelemetry?: (genome: G) => unknown
+
+  /** Optional stats recorder for evaluation-level metrics. */
+  stats?: StatsRecorder
 }
