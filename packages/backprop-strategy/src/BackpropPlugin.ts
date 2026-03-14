@@ -1,8 +1,4 @@
-import type {
-  AnyAlgorithm,
-  AnyGenome,
-  PhenotypeAction,
-} from '@neat-evolution/core'
+import type { AnyAlgorithm, AnyGenome } from '@neat-evolution/core'
 import {
   isSupervisedEnvironment,
   type SupervisedEnvironment,
@@ -36,8 +32,8 @@ const defaultBackpropPluginOptions: Required<BackpropPluginOptions> = {
  * Uses the REPLACEMENT pattern: evaluateGenome() does NOT call defaultEvaluate.
  * It runs its own forward/backward training loop, then evaluates on validation data.
  *
- * Lamarckian writeback is handled via afterFitness(): trained weights are written
- * back to the genome after fitness is assigned.
+ * Lamarckian writeback is returned in EvaluationResult.updatedActions.
+ * The evaluator applies writebacks after all fitness has been yielded.
  */
 export class BackpropPlugin<G extends AnyGenome = AnyGenome>
   implements EvaluationPlugin<G>
@@ -46,9 +42,6 @@ export class BackpropPlugin<G extends AnyGenome = AnyGenome>
   private readonly algorithm: AnyAlgorithm
   private readonly options: Required<BackpropPluginOptions>
   private supervisedEnvironment: SupervisedEnvironment | undefined
-
-  /** Tracks updated actions per genome for writeback in afterFitness. */
-  private readonly pendingWritebacks = new Map<G, PhenotypeAction[]>()
 
   constructor(
     algorithm: AnyAlgorithm,
@@ -72,21 +65,13 @@ export class BackpropPlugin<G extends AnyGenome = AnyGenome>
 
   async evaluateGenome(
     genome: G,
-    _defaultEvaluate: (genome: G) => Promise<number>,
+    _defaultEvaluate: (genome: G, seed?: string) => Promise<number>,
     context: EvaluationContext<G>
   ): Promise<EvaluationResult> {
     if (context.workerTrainingCapabilities != null) {
       return this.evaluateWorker(genome, context)
     }
     return this.evaluateLocal(genome)
-  }
-
-  afterFitness(genome: G, _fitness: number, _context: PluginContext): void {
-    const updatedActions = this.pendingWritebacks.get(genome)
-    if (updatedActions) {
-      this.algorithm.writeBackWeights(genome, updatedActions)
-      this.pendingWritebacks.delete(genome)
-    }
   }
 
   // BackpropPlugin does not provide context hooks — it replaces evaluation entirely.
@@ -106,11 +91,12 @@ export class BackpropPlugin<G extends AnyGenome = AnyGenome>
       })
     )
 
-    if (isLamarckian && result.updatedActions) {
-      this.pendingWritebacks.set(genome, result.updatedActions)
+    return {
+      fitness: result.fitness,
+      ...(isLamarckian && result.updatedActions != null
+        ? { updatedActions: result.updatedActions }
+        : {}),
     }
-
-    return { fitness: result.fitness }
   }
 
   private evaluateLocal(genome: G): EvaluationResult {
@@ -128,10 +114,11 @@ export class BackpropPlugin<G extends AnyGenome = AnyGenome>
       isLamarckian,
     })
 
-    if (isLamarckian && result.updatedActions) {
-      this.pendingWritebacks.set(genome, result.updatedActions)
+    return {
+      fitness: result.fitness,
+      ...(isLamarckian && result.updatedActions != null
+        ? { updatedActions: result.updatedActions }
+        : {}),
     }
-
-    return { fitness: result.fitness }
   }
 }

@@ -299,7 +299,7 @@ describe('ACPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new ACPlugin(
         algorithm,
-        { learningRate: 0.01, actorActivation: 'softmax' },
+        { learningRate: 0.01 },
         deterministicRng()
       )
 
@@ -365,7 +365,7 @@ describe('ACPlugin', () => {
       const env = makeMockEpisodicEnvironment()
       const plugin = new ACPlugin(
         algorithm,
-        { learningRate: 0.01, actorActivation: 'softmax' },
+        { learningRate: 0.01 },
         deterministicRng()
       )
       const pluginContext = makeMockPluginContext(algorithm, env)
@@ -410,7 +410,6 @@ describe('ACPlugin', () => {
         algorithm,
         {
           learningRate: 0.01,
-          actorActivation: 'softmax',
           rewardThreshold: 0.1,
         },
         deterministicRng()
@@ -452,8 +451,8 @@ describe('ACPlugin', () => {
     })
   })
 
-  describe('Lamarckian writeback via afterFitness', () => {
-    it('calls algorithm.writeBackWeights when isLamarckian: true', async () => {
+  describe('Lamarckian writeback via EvaluationResult', () => {
+    it('returns updatedActions when isLamarckian: true', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockEpisodicEnvironment()
       const plugin = new ACPlugin(
@@ -473,17 +472,11 @@ describe('ACPlugin', () => {
         evalContext
       )
 
-      // afterFitness triggers writeback
-      plugin.afterFitness(mockGenome, result.fitness, pluginContext)
-
-      expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
-      expect(algorithm.writeBackWeights).toHaveBeenCalledWith(
-        mockGenome,
-        expect.any(Array)
-      )
+      expect(result.updatedActions).toBeDefined()
+      expect(result.updatedActions).toEqual(expect.any(Array))
     })
 
-    it('does NOT call writeBackWeights when isLamarckian: false', async () => {
+    it('does NOT return updatedActions when isLamarckian: false', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockEpisodicEnvironment()
       const plugin = new ACPlugin(
@@ -503,12 +496,10 @@ describe('ACPlugin', () => {
         evalContext
       )
 
-      plugin.afterFitness(mockGenome, result.fitness, pluginContext)
-
-      expect(algorithm.writeBackWeights).not.toHaveBeenCalled()
+      expect(result.updatedActions).toBeUndefined()
     })
 
-    it('defaults to Lamarckian (isLamarckian: true) when not specified', async () => {
+    it('defaults to Lamarckian (returns updatedActions) when not specified', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockEpisodicEnvironment()
       const plugin = new ACPlugin(
@@ -528,17 +519,18 @@ describe('ACPlugin', () => {
         evalContext
       )
 
-      plugin.afterFitness(mockGenome, result.fitness, pluginContext)
-
-      expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
+      expect(result.updatedActions).toBeDefined()
+      expect(result.updatedActions).toEqual(expect.any(Array))
     })
+  })
 
-    it('cleans up pending writebacks after afterFitness', async () => {
+  describe('telemetry in EvaluationResult', () => {
+    it('returns telemetry in result for local evaluation', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockEpisodicEnvironment()
       const plugin = new ACPlugin(
         algorithm,
-        { learningRate: 0.01, isLamarckian: true },
+        { learningRate: 0.01 },
         deterministicRng()
       )
 
@@ -553,11 +545,7 @@ describe('ACPlugin', () => {
         evalContext
       )
 
-      plugin.afterFitness(mockGenome, result.fitness, pluginContext)
-      // Second call should be a no-op (writeback already consumed)
-      plugin.afterFitness(mockGenome, result.fitness, pluginContext)
-
-      expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
+      expect(result.telemetry).toBeDefined()
     })
   })
 

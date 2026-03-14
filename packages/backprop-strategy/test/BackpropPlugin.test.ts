@@ -213,8 +213,8 @@ describe('BackpropPlugin', () => {
     })
   })
 
-  describe('Lamarckian writeback via afterFitness', () => {
-    it('calls algorithm.writeBackWeights when isLamarckian: true', async () => {
+  describe('Lamarckian writeback via EvaluationResult', () => {
+    it('returns updatedActions when isLamarckian: true', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockSupervisedEnvironment()
       const plugin = new BackpropPlugin(algorithm, {
@@ -233,17 +233,11 @@ describe('BackpropPlugin', () => {
         evalContext
       )
 
-      // afterFitness triggers writeback
-      plugin.afterFitness(mockGenome, result.fitness, pluginContext)
-
-      expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
-      expect(algorithm.writeBackWeights).toHaveBeenCalledWith(
-        mockGenome,
-        expect.any(Array)
-      )
+      expect(result.updatedActions).toBeDefined()
+      expect(result.updatedActions).toEqual(expect.any(Array))
     })
 
-    it('does NOT call writeBackWeights when isLamarckian: false', async () => {
+    it('does NOT return updatedActions when isLamarckian: false', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockSupervisedEnvironment()
       const plugin = new BackpropPlugin(algorithm, {
@@ -262,12 +256,10 @@ describe('BackpropPlugin', () => {
         evalContext
       )
 
-      plugin.afterFitness(mockGenome, result.fitness, pluginContext)
-
-      expect(algorithm.writeBackWeights).not.toHaveBeenCalled()
+      expect(result.updatedActions).toBeUndefined()
     })
 
-    it('defaults to Lamarckian (isLamarckian: true) when no options given', async () => {
+    it('defaults to Lamarckian (returns updatedActions) when no options given', async () => {
       const algorithm = makeMockAlgorithm()
       const env = makeMockSupervisedEnvironment()
       const plugin = new BackpropPlugin(algorithm)
@@ -283,35 +275,8 @@ describe('BackpropPlugin', () => {
         evalContext
       )
 
-      plugin.afterFitness(mockGenome, result.fitness, pluginContext)
-
-      expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
-    })
-
-    it('cleans up pending writebacks after afterFitness', async () => {
-      const algorithm = makeMockAlgorithm()
-      const env = makeMockSupervisedEnvironment()
-      const plugin = new BackpropPlugin(algorithm, {
-        isLamarckian: true,
-        trainingEpochs: 1,
-      })
-
-      const pluginContext = makeMockPluginContext(algorithm, env)
-      plugin.initialize(pluginContext)
-
-      const evalContext = makeMockEvaluationContext()
-      const defaultEvaluate = vi.fn()
-      const result = await plugin.evaluateGenome(
-        mockGenome,
-        defaultEvaluate,
-        evalContext
-      )
-
-      plugin.afterFitness(mockGenome, result.fitness, pluginContext)
-      // Second call should be a no-op (writeback already consumed)
-      plugin.afterFitness(mockGenome, result.fitness, pluginContext)
-
-      expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
+      expect(result.updatedActions).toBeDefined()
+      expect(result.updatedActions).toEqual(expect.any(Array))
     })
   })
 
@@ -353,9 +318,8 @@ describe('BackpropPlugin', () => {
       expect(evalContext.call).toHaveBeenCalledOnce()
       expect(defaultEvaluate).not.toHaveBeenCalled()
 
-      // Verify writeback stored for afterFitness
-      plugin.afterFitness(genomeWithFactory, result.fitness, pluginContext)
-      expect(algorithm.writeBackWeights).toHaveBeenCalledOnce()
+      // Verify updatedActions returned in result for evaluator-level writeback
+      expect(result.updatedActions).toEqual([[PhenotypeActionType.Link, 0, 2, 0.7]])
     })
   })
 })

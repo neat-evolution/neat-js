@@ -89,6 +89,8 @@ function trainStandard(
     G = transition.reward + config.discountFactor * G
     const tdError = (qValues[chosenActionIndex] as number) - G
     const errors = computeQLOutputErrors(transition, tdError, outputCount)
+    // Re-establish forward state so backward() uses correct activations
+    trainable.forward(transition.state)
     trainable.backward(errors, config.learningRate)
   }
 }
@@ -153,6 +155,8 @@ function trainMultiDiscrete(
       tdErrors,
       factorCount
     )
+    // Re-establish forward state so backward() uses correct activations
+    trainable.forward(transition.state)
     trainable.backward(errors, config.learningRate)
   }
 }
