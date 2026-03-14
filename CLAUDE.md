@@ -2,6 +2,8 @@
 
 All packages are under `packages/` and named `@neat-evolution/<dirname>`.
 
+TypeScript LSP is available and the plugin is enabled.
+
 ## Running Commands
 
 All commands run from the repo root. Both `yarn workspace` and `yarn turbo` handle routing to the correct package, so there's no need to navigate into package directories.
@@ -78,11 +80,11 @@ The pre-commit hook blocks direct commits to `main`, formats staged files (lint-
 
 There are three tiers, each with a different verbosity level:
 
-| Command                          | Output level | Use case                                      |
-| -------------------------------- | ------------ | --------------------------------------------- |
-| `yarn workspace <pkg> <script>`  | Full         | Focused work on one package — see everything   |
-| `yarn <script> [--filter=...]`   | Errors only  | Default for agents and developers — quiet      |
-| `yarn turbo <script>`            | Full         | CI and debugging — full turbo output           |
+| Command                         | Output level | Use case                                     |
+| ------------------------------- | ------------ | -------------------------------------------- |
+| `yarn workspace <pkg> <script>` | Full         | Focused work on one package — see everything |
+| `yarn <script> [--filter=...]`  | Errors only  | Default for agents and developers — quiet    |
+| `yarn turbo <script>`           | Full         | CI and debugging — full turbo output         |
 
 Prefer `yarn <script>` with `--filter` over `yarn turbo <script>` for everyday use. Use `yarn turbo` directly when you need full output (CI, debugging).
 
@@ -94,12 +96,12 @@ Biome enforces these rules and will reject code that violates them. Write code c
 
 ```ts
 // WRONG — will be flagged by biome
-const value = map.get(key)!
+const value = map.get(key)!;
 
 // CORRECT — use a type guard
-const value = map.get(key)
+const value = map.get(key);
 if (value === undefined) {
-  throw new Error(`Expected value for key: ${key}`)
+  throw new Error(`Expected value for key: ${key}`);
 }
 ```
 
@@ -125,6 +127,7 @@ yarn check                            # type-check everything
 Files under `.worktrees/hexagonoids-lamarkian/` belong to the hexagonoids repo, not neat-js. Commits there go to the hexagonoids branch. See `.worktrees/CLAUDE.md` for more on working with worktrees.
 
 Key hexagonoids packages:
+
 - `hexagonoids-demo` — CLI training runner (the main integration point)
 - `hexagonoids-environment` — game simulation + evaluation environment
 - `tictactoe-demo` / `tictactoe-environment` — tournament-style evaluation
