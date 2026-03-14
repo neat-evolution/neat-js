@@ -340,6 +340,75 @@ describe('PluginStrategy', () => {
     })
   })
 
+  describe('side-effect propagation', () => {
+    test('calls recordWriteback when plugin returns updatedActions', async () => {
+      const pluginContext = makeMockPluginContext()
+      const recordWriteback = vi.fn()
+      const context = {
+        ...makeMockContext(),
+        recordWriteback,
+      } as unknown as EvaluationContext
+
+      const updatedActions = [[1, 0, 2, 0.5]] as unknown as import('@neat-evolution/core').PhenotypeAction[]
+      const plugin: EvaluationPlugin = {
+        evaluateGenome: vi.fn(async () => ({
+          fitness: 0.7,
+          updatedActions,
+        })),
+      }
+
+      const strategy = new PluginStrategy([plugin], pluginContext)
+      const entries: GenomeEntry[] = [[0, 0, dummyGenome]]
+      await collect(strategy.evaluate(context, entries))
+
+      expect(recordWriteback).toHaveBeenCalledOnce()
+      expect(recordWriteback).toHaveBeenCalledWith(dummyGenome, updatedActions)
+    })
+
+    test('calls recordTelemetry when plugin returns telemetry', async () => {
+      const pluginContext = makeMockPluginContext()
+      const recordTelemetry = vi.fn()
+      const context = {
+        ...makeMockContext(),
+        recordTelemetry,
+      } as unknown as EvaluationContext
+
+      const telemetry = { episodes: 5, transitions: 100 }
+      const plugin: EvaluationPlugin = {
+        evaluateGenome: vi.fn(async () => ({
+          fitness: 0.7,
+          telemetry,
+        })),
+      }
+
+      const strategy = new PluginStrategy([plugin], pluginContext)
+      const entries: GenomeEntry[] = [[0, 0, dummyGenome]]
+      await collect(strategy.evaluate(context, entries))
+
+      expect(recordTelemetry).toHaveBeenCalledOnce()
+      expect(recordTelemetry).toHaveBeenCalledWith(dummyGenome, telemetry)
+    })
+
+    test('does not call recordWriteback when no updatedActions', async () => {
+      const pluginContext = makeMockPluginContext()
+      const recordWriteback = vi.fn()
+      const context = {
+        ...makeMockContext(),
+        recordWriteback,
+      } as unknown as EvaluationContext
+
+      const plugin: EvaluationPlugin = {
+        evaluateGenome: vi.fn(async () => ({ fitness: 0.7 })),
+      }
+
+      const strategy = new PluginStrategy([plugin], pluginContext)
+      const entries: GenomeEntry[] = [[0, 0, dummyGenome]]
+      await collect(strategy.evaluate(context, entries))
+
+      expect(recordWriteback).not.toHaveBeenCalled()
+    })
+  })
+
   describe('context hooks', () => {
     test('merges hooks from plugins with getContextHooks', async () => {
       const pluginContext = makeMockPluginContext()

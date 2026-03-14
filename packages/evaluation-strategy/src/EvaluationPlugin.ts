@@ -14,6 +14,8 @@ export interface EvaluationResult {
   fitness: number
   /** Updated network weights for Lamarckian writeback. */
   updatedActions?: PhenotypeAction[]
+  /** Plugin-specific telemetry data (e.g., RL training diagnostics). */
+  telemetry?: unknown
 }
 
 /** Static context available to plugins during initialize() and afterFitness(). */
@@ -46,7 +48,7 @@ export interface EvaluationPlugin<G extends AnyGenome = AnyGenome> {
    */
   evaluateGenome?(
     genome: G,
-    defaultEvaluate: (genome: G) => Promise<number>,
+    defaultEvaluate: (genome: G, seed?: string) => Promise<number>,
     context: EvaluationContext<G>
   ): Promise<EvaluationResult>
 

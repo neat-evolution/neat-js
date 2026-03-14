@@ -1,4 +1,5 @@
 import type {
+  AnyGenome,
   ConfigData,
   FitnessData,
   GenomeEntries,
@@ -25,4 +26,7 @@ export interface Evaluator<EFO = unknown> {
   ) => Promise<void>
 
   evaluate: (genomeEntries: GenomeEntries) => AsyncIterable<FitnessData>
+
+  /** Retrieve the latest telemetry for a genome (from evaluation). */
+  getTelemetry?: (genome: AnyGenome) => unknown
 }

@@ -97,12 +97,14 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
           ? { ...context, episodicContext: mergedHooks }
           : context
 
-        const defaultEvaluate = async (g: G): Promise<number> => {
-          const result = await genomeContext.evaluateGenomeEntry([
-            speciesIndex,
-            organismIndex,
-            g,
-          ])
+        const defaultEvaluate = async (
+          g: G,
+          seed?: string
+        ): Promise<number> => {
+          const result = await genomeContext.evaluateGenomeEntry(
+            [speciesIndex, organismIndex, g],
+            seed
+          )
           return result[2]
         }
 
@@ -110,6 +112,12 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
           .evaluateGenome(genome, defaultEvaluate, genomeContext)
           .then((result): FitnessData => {
             evaluated.push({ genome, fitness: result.fitness })
+            if (result.updatedActions != null) {
+              context.recordWriteback?.(genome, result.updatedActions)
+            }
+            if (result.telemetry != null) {
+              context.recordTelemetry?.(genome, result.telemetry)
+            }
             return [speciesIndex, organismIndex, result.fitness]
           })
       } else {

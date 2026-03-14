@@ -1,4 +1,4 @@
-import type { FitnessData } from '@neat-evolution/core'
+import type { AnyGenome, FitnessData, PhenotypeAction } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
 import type { EvaluationContext } from '@neat-evolution/evaluation-strategy'
 import { type ExecutorFactory, isAsyncExecutor } from '@neat-evolution/executor'
@@ -19,6 +19,11 @@ export class LocalEvaluator<EFO> implements Evaluator<EFO> {
 
   private readonly strategy?: EvaluatorFactoryOptions['strategy']
   private readonly localDispatcher: LocalDispatcher
+
+  /** Pending Lamarckian writebacks collected from plugin results. */
+  private readonly pendingWritebacks = new Map<AnyGenome, PhenotypeAction[]>()
+  /** Latest telemetry per genome from plugin results. */
+  private readonly telemetryByGenome = new WeakMap<AnyGenome, unknown>()
 
   constructor(
     algorithm: AnyAlgorithm,
@@ -51,15 +56,33 @@ export class LocalEvaluator<EFO> implements Evaluator<EFO> {
     // no-op
   }
 
+  /** Retrieve the latest telemetry for a genome (from plugin evaluation). */
+  getTelemetry(genome: AnyGenome): unknown {
+    return this.telemetryByGenome.get(genome)
+  }
+
   async *evaluate(genomeEntries: GenomeEntries): AsyncIterable<FitnessData> {
     if (this.strategy) {
+      // Clear pending writebacks from previous generation
+      this.pendingWritebacks.clear()
       const context: EvaluationContext = {
         evaluateGenomeEntry: (entry) => this.worker(entry),
         evaluateGenomeEntryBatch: (entries) =>
           Promise.all(entries.map((e) => this.worker(e))),
         ...this.localDispatcher.context,
+        recordWriteback: (genome, updatedActions) => {
+          this.pendingWritebacks.set(genome, updatedActions)
+        },
+        recordTelemetry: (genome, telemetry) => {
+          this.telemetryByGenome.set(genome, telemetry)
+        },
+        getTelemetry: (genome) => {
+          return this.telemetryByGenome.get(genome)
+        },
       }
       yield* this.strategy.evaluate(context, genomeEntries)
+      // After all fitness has been yielded, apply Lamarckian writebacks
+      this.applyWritebacks()
       return
     }
 
@@ -75,5 +98,13 @@ export class LocalEvaluator<EFO> implements Evaluator<EFO> {
         yield await p
       }
     }
+  }
+
+  /** Apply all pending Lamarckian writebacks to genomes. */
+  private applyWritebacks(): void {
+    for (const [genome, updatedActions] of this.pendingWritebacks) {
+      this.algorithm.writeBackWeights(genome, updatedActions)
+    }
+    this.pendingWritebacks.clear()
   }
 }

@@ -124,6 +124,15 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       removeMessageHandler: this.dispatcher.removeMessageHandler.bind(
         this.dispatcher
       ),
+      recordWriteback: (genome, updatedActions) => {
+        this.pendingWritebacks.set(genome, updatedActions)
+      },
+      recordTelemetry: (genome, telemetry) => {
+        this.telemetryByGenome.set(genome, telemetry)
+      },
+      getTelemetry: (genome) => {
+        return this.telemetryByGenome.get(genome)
+      },
     }
 
     // Initialize strategy with default if not provided

@@ -1,9 +1,7 @@
 import type { Environment } from '@neat-evolution/environment'
-import type { EvaluationPlugin } from '@neat-evolution/evaluation-strategy'
 import type { SyncExecutor } from '@neat-evolution/executor'
 import { NEATAlgorithm } from '@neat-evolution/neat'
 import { describe, expect, test } from 'vitest'
-import type { EvaluationConfig } from '../src/index.js'
 import {
   deserializeOrganism,
   EvolutionManager,
@@ -48,11 +46,9 @@ function createTestEnvironment(): Environment<null> {
 
 describe('EvolutionManager', () => {
   const environment = createTestEnvironment()
-  const baseEvaluation: EvaluationConfig = { type: 'strategy' }
   const baseConfig = {
     algorithm: NEATAlgorithm,
     environment,
-    evaluation: baseEvaluation,
   } as const
 
   describe('constructor validation', () => {
@@ -76,51 +72,9 @@ describe('EvolutionManager', () => {
       ).toThrow('EvolutionManager requires an environment')
     })
 
-    test('throws on missing evaluation config', () => {
-      expect(
-        () =>
-          new EvolutionManager({
-            algorithm: NEATAlgorithm,
-            environment,
-          } as never)
-      ).toThrow(
-        'EvolutionManager requires an explicit evaluation configuration.'
-      )
-    })
-
     test('constructs successfully with valid config', () => {
       const manager = new EvolutionManager({ ...baseConfig })
       expect(manager).toBeDefined()
-    })
-
-    test('plugin-augmentation rejects replacement plugins', () => {
-      const plugin: EvaluationPlugin = { mode: 'replacement' }
-      expect(() => {
-        return new EvolutionManager({
-          ...baseConfig,
-          evaluation: {
-            type: 'plugin-augmentation',
-            plugins: [plugin],
-          },
-        })
-      }).toThrow(
-        'Replacement plugins cannot run inside a plugin-augmentation evaluation.'
-      )
-    })
-
-    test('plugin-replacement requires explicit replacement mode', () => {
-      const plugin: EvaluationPlugin = {}
-      expect(() => {
-        return new EvolutionManager({
-          ...baseConfig,
-          evaluation: {
-            type: 'plugin-replacement',
-            plugin,
-          },
-        })
-      }).toThrow(
-        'plugin-replacement evaluation requires a plugin that declares mode "replacement"'
-      )
     })
   })
 

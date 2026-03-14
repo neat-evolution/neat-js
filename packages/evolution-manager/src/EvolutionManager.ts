@@ -15,10 +15,7 @@ import type {
   Environment,
   EnvironmentConfig,
 } from '@neat-evolution/environment'
-import type {
-  EvaluationPlugin,
-  EvaluationStrategy,
-} from '@neat-evolution/evaluation-strategy'
+import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
 import { PluginStrategy } from '@neat-evolution/evaluation-strategy'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import { createEvaluator as createLocalEvaluator } from '@neat-evolution/evaluator'
@@ -55,7 +52,6 @@ import {
 import { hardwareConcurrency } from '@neat-evolution/worker-threads'
 
 import type {
-  EvaluationConfig,
   EvolutionManagerConfig,
   WorkerConfig,
 } from './EvolutionManagerConfig.js'
@@ -65,7 +61,7 @@ const DEFAULT_EXECUTOR_PATHNAME = '@neat-evolution/executor'
 export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
   private readonly algorithm: Algorithm<Ctx> & PopulationCreator<Ctx>
   private readonly environment: EnvironmentConfig
-  private readonly evaluationConfig: EvaluationConfig
+  private readonly strategy: EvaluationStrategy | undefined
   private readonly evolutionOptions: EvolutionOptions
   private readonly populationOptions: PopulationOptions
   private readonly configData: ConfigDataOf<Ctx> | undefined
@@ -98,12 +94,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
 
     this.algorithm = config.algorithm
     this.environment = config.environment
-    if (config.evaluation == null) {
-      throw new Error(
-        'EvolutionManager requires an explicit evaluation configuration.'
-      )
-    }
-    this.evaluationConfig = this.validateEvaluationConfig(config.evaluation)
+    this.strategy = config.strategy
     this.evolutionOptions = {
       ...defaultEvolutionOptions,
       ...config.evolutionOptions,
@@ -130,8 +121,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     let evaluator: Evaluator
     let createReproducer: (population: Population<Ctx>) => Reproducer
 
-    // Resolve effective strategy: plugins wrap into PluginStrategy
-    const effectiveStrategy = this.resolveStrategy()
+    const effectiveStrategy = this.strategy
 
     if (this.workerConfig != null) {
       const result = this.createWorkerFactories(
@@ -302,71 +292,6 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       throw new Error('No best organism found')
     }
     return this.organismToExecutor(best)
-  }
-
-  /** Resolve the effective evaluation strategy.
-   *  If plugins are provided, wraps them in a PluginStrategy.
-   *  Otherwise returns the user-provided strategy (or undefined for default). */
-  private resolveStrategy(): EvaluationStrategy | undefined {
-    const evaluation = this.evaluationConfig
-
-    if (evaluation.type === 'plugin-augmentation') {
-      return this.createPluginStrategy(evaluation.plugins)
-    }
-    if (evaluation.type === 'plugin-replacement') {
-      return this.createPluginStrategy([evaluation.plugin])
-    }
-
-    return evaluation.strategy
-  }
-
-  private createPluginStrategy(
-    plugins: ReadonlyArray<EvaluationPlugin>
-  ): EvaluationStrategy {
-    const environment = this.environment as Environment
-
-    return new PluginStrategy(plugins, {
-      algorithm: this.algorithm as unknown as AnyErasedAlgorithm,
-      environment,
-    })
-  }
-
-  private validateEvaluationConfig(config: EvaluationConfig): EvaluationConfig {
-    if (config.type === 'plugin-augmentation') {
-      if (config.plugins.length === 0) {
-        throw new Error(
-          'plugin-augmentation evaluation requires at least one plugin'
-        )
-      }
-      for (const plugin of config.plugins) {
-        if (this.getPluginMode(plugin) === 'replacement') {
-          throw new Error(
-            'Replacement plugins cannot run inside a plugin-augmentation evaluation.'
-          )
-        }
-      }
-      return config
-    }
-
-    if (config.type === 'plugin-replacement') {
-      if (this.getPluginMode(config.plugin) !== 'replacement') {
-        throw new Error(
-          'plugin-replacement evaluation requires a plugin that declares mode "replacement".'
-        )
-      }
-      return config
-    }
-
-    return config
-  }
-
-  private getPluginMode(
-    plugin: EvaluationPlugin
-  ): 'augmentation' | 'replacement' {
-    const pluginWithMode = plugin as {
-      mode?: 'augmentation' | 'replacement'
-    }
-    return pluginWithMode.mode ?? 'augmentation'
   }
 
   private createWorkerFactories(

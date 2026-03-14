@@ -9,10 +9,7 @@ import type {
   StateDataOf,
 } from '@neat-evolution/core'
 import type { EnvironmentConfig } from '@neat-evolution/environment'
-import type {
-  EvaluationPlugin,
-  EvaluationStrategy,
-} from '@neat-evolution/evaluation-strategy'
+import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
 import type {
   EvolutionOptions,
   PopulationCreator,
@@ -53,23 +50,6 @@ export interface WorkerConfig {
   verbose?: boolean
 }
 
-export type EvaluationConfig =
-  | {
-      /** Use a plain evaluation strategy (default). */
-      type: 'strategy'
-      strategy?: EvaluationStrategy
-    }
-  | {
-      /** Compose augmentation plugins (e.g., RL agents) around evaluation. */
-      type: 'plugin-augmentation'
-      plugins: ReadonlyArray<EvaluationPlugin>
-    }
-  | {
-      /** Replace evaluation entirely with a single replacement plugin. */
-      type: 'plugin-replacement'
-      plugin: EvaluationPlugin
-    }
-
 export interface EvolutionManagerConfig<
   Ctx extends AlgorithmContext = AlgorithmContext,
 > {
@@ -83,12 +63,10 @@ export interface EvolutionManagerConfig<
   environment: EnvironmentConfig
 
   /**
-   * Explicit evaluation pipeline selection (required).
-   * - { type: 'strategy' } delegates fully to the provided strategy (or defaults).
-   * - { type: 'plugin-augmentation' } installs RL plugins that wrap evaluation.
-   * - { type: 'plugin-replacement' } hands evaluation to a single replacement plugin.
+   * Evaluation strategy. Pass a PluginStrategy to use evaluation plugins
+   * (RL, backprop, etc.). Omit for default individual evaluation.
    */
-  evaluation: EvaluationConfig
+  strategy?: EvaluationStrategy
 
   /** Evolution loop settings (iterations, secondsLimit, callbacks, etc.) */
   evolutionOptions?: Partial<EvolutionOptions>
