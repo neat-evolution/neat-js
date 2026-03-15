@@ -950,32 +950,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@neat-evolution/actor-critic-plugin@workspace:^, @neat-evolution/actor-critic-plugin@workspace:packages/actor-critic-plugin":
-  version: 0.0.0-use.local
-  resolution: "@neat-evolution/actor-critic-plugin@workspace:packages/actor-critic-plugin"
-  dependencies:
-    "@biomejs/biome": "npm:2.4.4"
-    "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/actor-critic": "workspace:*"
-    "@neat-evolution/core": "workspace:*"
-    "@neat-evolution/environment": "workspace:*"
-    "@neat-evolution/evaluation-strategy": "workspace:*"
-    "@neat-evolution/executor": "workspace:*"
-    "@neat-evolution/utils": "workspace:*"
-    "@neat-evolution/worker-rl": "workspace:*"
-    "@swc/cli": "npm:^0.7.9"
-    "@swc/core": "npm:^1.15.3"
-    "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
-    "@vitest/coverage-v8": "npm:^4.0.14"
-    concurrently: "npm:^9.2.1"
-    lint-staged: "npm:^16.2.7"
-    nodemon: "npm:^3.1.11"
-    rimraf: "npm:^6.1.2"
-    typescript: "npm:^5.9.3"
-    vitest: "npm:^4.0.14"
-  languageName: unknown
-  linkType: soft
-
 "@neat-evolution/actor-critic@workspace:*, @neat-evolution/actor-critic@workspace:^, @neat-evolution/actor-critic@workspace:packages/actor-critic":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/actor-critic@workspace:packages/actor-critic"
@@ -983,6 +957,8 @@ __metadata:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
     "@neat-evolution/environment": "workspace:*"
+    "@neat-evolution/executor": "workspace:*"
+    "@neat-evolution/utils": "workspace:*"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
@@ -1002,12 +978,8 @@ __metadata:
   dependencies:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "workspace:*"
     "@neat-evolution/environment": "workspace:*"
-    "@neat-evolution/evaluation-strategy": "workspace:*"
     "@neat-evolution/executor": "workspace:*"
-    "@neat-evolution/worker-actions": "workspace:*"
-    "@neat-evolution/worker-evaluator": "workspace:*"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
@@ -1101,7 +1073,6 @@ __metadata:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
     "@neat-evolution/actor-critic": "workspace:^"
-    "@neat-evolution/actor-critic-plugin": "workspace:^"
     "@neat-evolution/backprop-strategy": "workspace:^"
     "@neat-evolution/core": "workspace:^"
     "@neat-evolution/cppn": "workspace:^"
@@ -1117,11 +1088,9 @@ __metadata:
     "@neat-evolution/hyperneat": "workspace:^"
     "@neat-evolution/neat": "workspace:^"
     "@neat-evolution/q-learning": "workspace:^"
-    "@neat-evolution/q-learning-plugin": "workspace:^"
     "@neat-evolution/utils": "workspace:^"
     "@neat-evolution/worker-evaluator": "workspace:^"
     "@neat-evolution/worker-reproducer": "workspace:^"
-    "@neat-evolution/worker-rl": "workspace:^"
     "@neat-evolution/worker-threads": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
@@ -1443,33 +1412,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/q-learning-plugin@workspace:^, @neat-evolution/q-learning-plugin@workspace:packages/q-learning-plugin":
-  version: 0.0.0-use.local
-  resolution: "@neat-evolution/q-learning-plugin@workspace:packages/q-learning-plugin"
-  dependencies:
-    "@biomejs/biome": "npm:2.4.4"
-    "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/core": "workspace:*"
-    "@neat-evolution/environment": "workspace:*"
-    "@neat-evolution/evaluation-strategy": "workspace:*"
-    "@neat-evolution/executor": "workspace:*"
-    "@neat-evolution/q-learning": "workspace:*"
-    "@neat-evolution/utils": "workspace:*"
-    "@neat-evolution/worker-rl": "workspace:*"
-    "@swc/cli": "npm:^0.7.9"
-    "@swc/core": "npm:^1.15.3"
-    "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
-    "@vitest/coverage-v8": "npm:^4.0.14"
-    concurrently: "npm:^9.2.1"
-    lint-staged: "npm:^16.2.7"
-    nodemon: "npm:^3.1.11"
-    rimraf: "npm:^6.1.2"
-    typescript: "npm:^5.9.3"
-    vitest: "npm:^4.0.14"
-  languageName: unknown
-  linkType: soft
-
-"@neat-evolution/q-learning@workspace:*, @neat-evolution/q-learning@workspace:^, @neat-evolution/q-learning@workspace:packages/q-learning":
+"@neat-evolution/q-learning@workspace:^, @neat-evolution/q-learning@workspace:packages/q-learning":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/q-learning@workspace:packages/q-learning"
   dependencies:
@@ -1477,6 +1420,7 @@ __metadata:
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
     "@neat-evolution/actor-critic": "workspace:*"
     "@neat-evolution/environment": "workspace:*"
+    "@neat-evolution/executor": "workspace:*"
     "@neat-evolution/utils": "workspace:*"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
@@ -1530,7 +1474,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/worker-actions@workspace:*, @neat-evolution/worker-actions@workspace:^, @neat-evolution/worker-actions@workspace:packages/worker-actions":
+"@neat-evolution/worker-actions@workspace:^, @neat-evolution/worker-actions@workspace:packages/worker-actions":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/worker-actions@workspace:packages/worker-actions"
   dependencies:
@@ -1637,32 +1581,6 @@ __metadata:
     lint-staged: "npm:^16.2.7"
     nodemon: "npm:^3.1.11"
     quick-lru: "npm:^7.3.0"
-    rimraf: "npm:^6.1.2"
-    typescript: "npm:^5.9.3"
-    vitest: "npm:^4.0.14"
-  languageName: unknown
-  linkType: soft
-
-"@neat-evolution/worker-rl@workspace:*, @neat-evolution/worker-rl@workspace:^, @neat-evolution/worker-rl@workspace:packages/worker-rl":
-  version: 0.0.0-use.local
-  resolution: "@neat-evolution/worker-rl@workspace:packages/worker-rl"
-  dependencies:
-    "@biomejs/biome": "npm:2.4.4"
-    "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/actor-critic": "workspace:*"
-    "@neat-evolution/core": "workspace:*"
-    "@neat-evolution/environment": "workspace:*"
-    "@neat-evolution/q-learning": "workspace:*"
-    "@neat-evolution/utils": "workspace:*"
-    "@neat-evolution/worker-actions": "workspace:*"
-    "@neat-evolution/worker-evaluator": "workspace:*"
-    "@swc/cli": "npm:^0.7.9"
-    "@swc/core": "npm:^1.15.3"
-    "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
-    "@vitest/coverage-v8": "npm:^4.0.14"
-    concurrently: "npm:^9.2.1"
-    lint-staged: "npm:^16.2.7"
-    nodemon: "npm:^3.1.11"
     rimraf: "npm:^6.1.2"
     typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.14"
