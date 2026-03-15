@@ -58,7 +58,7 @@ export function computeACGradients(
     const prob = actionProbs[i] as number
     const actionVal = transition.action[i] as number
     const clampedProb = Math.max(prob, 1e-10)
-    errors[i] = -advantage * actionVal / clampedProb
+    errors[i] = (-advantage * actionVal) / clampedProb
   }
 
   // Entropy bonus: encourages exploration by penalizing confident distributions

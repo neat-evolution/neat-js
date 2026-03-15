@@ -8,7 +8,7 @@ import type {
   EvaluationContext,
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
-import type { SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ACPlugin } from '../src/ACPlugin.js'
@@ -92,11 +92,10 @@ function makeMockEvaluationContext(): EvaluationContext {
   } as unknown as EvaluationContext
 }
 
-function makeMockExecutor(): SyncExecutor {
+function makeMockExecutor(): StaticExecutor {
   return {
-    execute: vi.fn(),
-    executeBatch: vi.fn(),
-    isAsync: false as const,
+    forward: vi.fn(),
+    forwardBatch: vi.fn(),
   }
 }
 

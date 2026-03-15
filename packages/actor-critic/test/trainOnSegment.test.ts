@@ -29,6 +29,9 @@ function mockTrainable(): TrainableExecutor & {
     forward(_inputs: number[] | Float64Array): Float64Array {
       return new Float64Array(0)
     },
+    forwardBatch(batch: Array<number[] | Float64Array>) {
+      return batch.map((input) => this.forward(input))
+    },
     backward(outputErrors: Float64Array, learningRate: number): void {
       calls.push({ errors: Float64Array.from(outputErrors), lr: learningRate })
     },

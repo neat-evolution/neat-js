@@ -21,6 +21,9 @@ function mockTrainable(
     backward(_outputErrors: Float64Array, _learningRate: number): void {
       mock.backwardCalls++
     },
+    forwardBatch(batch: Array<number[] | Float64Array>) {
+      return batch.map((input) => mock.forward(input))
+    },
     getUpdatedActions() {
       return []
     },

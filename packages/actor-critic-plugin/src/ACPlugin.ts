@@ -1,7 +1,6 @@
 import { createACAgent } from '@neat-evolution/actor-critic'
 import { createTrainableExecutor } from '@neat-evolution/backprop'
-import { type AnyAlgorithm, type AnyGenome } from '@neat-evolution/core'
-import { createRNG } from '@neat-evolution/utils'
+import type { AnyAlgorithm, AnyGenome } from '@neat-evolution/core'
 import type {
   EpisodeInfo,
   EpisodeResult,
@@ -25,6 +24,7 @@ import type {
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
 import type { Executor } from '@neat-evolution/executor'
+import { createRNG } from '@neat-evolution/utils'
 import type {
   ActorCriticTelemetry,
   TriggerCounts,
