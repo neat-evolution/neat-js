@@ -20,6 +20,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./executor": {
+      "types": "./dist/types/executor.d.ts",
+      "import": "./dist/esm/executor.js",
+      "require": "./dist/cjs/executor.js"
     }
   },
   "files": [

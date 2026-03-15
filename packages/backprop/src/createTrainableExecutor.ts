@@ -4,6 +4,7 @@ import {
   type PhenotypeAction,
   PhenotypeActionType,
 } from '@neat-evolution/core'
+import type { BatchInputs, BatchOutputs } from '@neat-evolution/executor'
 import {
   type ActivationFunction,
   toActivationFunction,
@@ -257,5 +258,9 @@ export function createTrainableExecutor(
     return actions
   }
 
-  return { forward, backward, getUpdatedActions }
+  const forwardBatch = (batch: BatchInputs): BatchOutputs => {
+    return batch.map((input) => forward(input))
+  }
+
+  return { forward, forwardBatch, backward, getUpdatedActions }
 }
