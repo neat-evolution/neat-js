@@ -53,6 +53,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   public readonly pluginPaths: string[] | undefined
   public readonly pluginData: Record<string, unknown> | undefined
   public readonly hydrateEnvironmentOptions: Record<string, string> | undefined
+  public readonly environmentRuntimeData: Record<string, unknown> | undefined
   public readonly initPromise: Promise<void>
 
   private readonly pool: WorkerPool
@@ -93,6 +94,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     this.pluginPaths = options.pluginPaths
     this.pluginData = options.pluginData
     this.hydrateEnvironmentOptions = options.hydrateEnvironmentOptions
+    this.environmentRuntimeData = options.environmentRuntimeData
     this.stats = options.stats
 
     // Use provided workerScriptUrl or fall back to default (works in Node.js, not Vite)
@@ -150,6 +152,9 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       ...(this.pluginData ? { pluginData: this.pluginData } : {}),
       ...(this.hydrateEnvironmentOptions
         ? { hydrateEnvironmentOptions: this.hydrateEnvironmentOptions }
+        : {}),
+      ...(this.environmentRuntimeData
+        ? { environmentRuntimeData: this.environmentRuntimeData }
         : {}),
     }
 

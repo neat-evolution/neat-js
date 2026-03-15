@@ -37,6 +37,9 @@ export interface InitPayload {
   statsConfig?: StatsRecorderConfig
   /** Map of field names to module pathnames for worker-side hydration. */
   hydrateEnvironmentOptions?: Record<string, string>
+  /** Serializable runtime data merged into EnvironmentRuntimeOptions on workers.
+   *  Use for factory options and config blobs (functions go via hydrateEnvironmentOptions). */
+  environmentRuntimeData?: Record<string, unknown>
 }
 
 export interface InitGenomeFactoryPayload<

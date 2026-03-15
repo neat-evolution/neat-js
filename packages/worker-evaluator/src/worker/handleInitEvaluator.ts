@@ -23,6 +23,7 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     pluginData,
     statsConfig,
     hydrateEnvironmentOptions,
+    environmentRuntimeData,
   },
   context
 ) => {
@@ -52,6 +53,11 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     runtimeOptions.stats = context.stats
   }
 
+  // Merge serializable runtime data (factory options, config blobs)
+  if (environmentRuntimeData != null) {
+    Object.assign(runtimeOptions, environmentRuntimeData)
+  }
+
   // Hydrate each pathname: dynamically import and inject into runtimeOptions
   if (hydrateEnvironmentOptions != null) {
     for (const [field, path] of Object.entries(hydrateEnvironmentOptions)) {
@@ -71,6 +77,9 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     environment,
     ...(executorCacheMaxSize != null ? { executorCacheMaxSize } : {}),
   }
+
+  // Store base runtime options for per-genome merging in handleEvaluateGenome
+  context.baseRuntimeOptions = runtimeOptions
 
   // Store plugin data for worker plugins to consume during init
   if (pluginData != null) {

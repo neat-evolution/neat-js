@@ -1,3 +1,4 @@
+import type { EnvironmentRuntimeOptions } from '@neat-evolution/environment'
 import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import type { Handler } from '@neat-evolution/worker-actions'
@@ -33,4 +34,7 @@ export interface ThreadContext {
   evaluationEnhancer?: EvaluationEnhancer
   /** Stats recorder bridged to the main thread via fire-and-forget messages. */
   stats?: StatsRecorder
+  /** Base runtime options built during init (factories + options).
+   *  Merged with per-genome evaluationContext before each evaluation. */
+  baseRuntimeOptions?: EnvironmentRuntimeOptions
 }

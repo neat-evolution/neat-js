@@ -1,7 +1,9 @@
-import type { TrainableExecutor } from '@neat-evolution/backprop'
 import type { PhenotypeAction } from '@neat-evolution/core'
 import type { WorkerEvaluationContext } from '@neat-evolution/environment'
-import type { StaticExecutor } from '@neat-evolution/executor'
+import type {
+  StaticExecutor,
+  TrainableExecutor,
+} from '@neat-evolution/executor'
 import { isTrainableExecutor } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import type { WorkerMessage } from '@neat-evolution/worker-actions'

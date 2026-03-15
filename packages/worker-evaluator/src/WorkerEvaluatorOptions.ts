@@ -61,6 +61,10 @@ export interface WorkerEvaluatorOptions {
    *  EnvironmentRuntimeOptions under the given field name. */
   hydrateEnvironmentOptions?: Record<string, string>
 
+  /** Serializable runtime data merged into EnvironmentRuntimeOptions on workers.
+   *  Use for factory options and config blobs (functions go via hydrateEnvironmentOptions). */
+  environmentRuntimeData?: Record<string, unknown>
+
   /** Enable verbose logging */
   verbose?: boolean
 }

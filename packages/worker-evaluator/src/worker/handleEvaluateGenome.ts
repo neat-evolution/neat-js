@@ -1,3 +1,4 @@
+import { isRuntimeConfigurable } from '@neat-evolution/environment'
 import { createRNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
@@ -48,6 +49,14 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
 
   // Register executor in the bound context for writeback correlation
   boundContext.executorMap.set(executor, 0)
+
+  // Push runtime options to environment per-genome (merge base + eval context)
+  if (isRuntimeConfigurable(environment)) {
+    environment.setRuntimeOptions({
+      ...context.baseRuntimeOptions,
+      evaluationContext: boundContext,
+    })
+  }
 
   // evaluate the genome
   let fitness: number
