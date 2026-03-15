@@ -54,6 +54,7 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   }
 
   // Construct worker-side evaluation context
+  // TODO: Part 04 will rebuild this as a full WorkerEvaluationContext
   context.evaluationContext = {
     recordWriteback: (_genome: unknown, updatedActions: PhenotypeAction[]) => {
       context.pendingWriteback = updatedActions
@@ -64,7 +65,6 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     getTelemetry: () => context.pendingTelemetry,
     stats: context.stats,
   }
-  runtimeOptions.evaluationContext = context.evaluationContext
 
   // Hydrate each pathname: dynamically import and inject into runtimeOptions
   if (hydrateEnvironmentOptions != null) {
