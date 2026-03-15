@@ -2,7 +2,6 @@ import type { AnyGenome, FitnessData, GenomeEntry } from '@neat-evolution/core'
 import type { StaticExecutor } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import type { DispatcherContext } from '@neat-evolution/worker-actions'
-import type { WorkerTrainingCapabilities } from './WorkerTrainingCapabilities.js'
 
 export interface EvaluationContext<G extends AnyGenome = AnyGenome>
   extends DispatcherContext {
@@ -25,12 +24,6 @@ export interface EvaluationContext<G extends AnyGenome = AnyGenome>
     genomeEntries: Array<GenomeEntry<G>>,
     seed?: string
   ) => Promise<FitnessData[]>
-
-  /**
-   * Capabilities reported by WorkerEvaluator after worker initialization.
-   * Plugins can inspect this before dispatching custom worker actions.
-   */
-  workerTrainingCapabilities?: WorkerTrainingCapabilities
 
   /** Optional stats recorder for evaluation-level metrics. */
   stats?: StatsRecorder
