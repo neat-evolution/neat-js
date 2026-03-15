@@ -288,13 +288,6 @@ export class ACPlugin<G extends AnyGenome = AnyGenome>
         ?.supported === true
     ) {
       const fitness = await defaultEvaluate(genome, evalSeed)
-      // Read worker-produced telemetry from the evaluator and cache locally
-      const workerTelemetry = context.getTelemetry?.(genome) as
-        | ActorCriticTelemetry
-        | undefined
-      if (workerTelemetry !== undefined) {
-        this.localTelemetryByGenome.set(genome, workerTelemetry)
-      }
       return { fitness }
     }
 
