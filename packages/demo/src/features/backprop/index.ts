@@ -9,15 +9,13 @@
  *   yarn workspace @neat-evolution/demo backprop [--epochs N] [--lr N] [--iterations N] [--seconds N]
  */
 
-import { BackpropPlugin } from '@neat-evolution/backprop-strategy'
+import { createTrainer } from '@neat-evolution/backprop-strategy'
 import {
   DatasetEnvironment,
   type DatasetOptions,
   defaultDatasetOptions,
   loadDataset,
 } from '@neat-evolution/dataset-environment'
-import { PluginStrategy } from '@neat-evolution/evaluation-strategy'
-import type { AnyAlgorithm } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
@@ -87,14 +85,6 @@ console.log(
 )
 console.log()
 
-// --- Create BackpropPlugin (Baldwinian) ---
-
-const plugin = new BackpropPlugin(NEATAlgorithm as AnyAlgorithm, {
-  trainingEpochs: args.trainingEpochs,
-  learningRate: args.learningRate,
-  isLamarckian: false,
-})
-
 // --- Run evolution ---
 
 console.log('Starting NEAT evolution with backprop-enhanced evaluation...')
@@ -104,10 +94,14 @@ try {
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    strategy: new PluginStrategy([plugin], {
-      algorithm: NEATAlgorithm as AnyAlgorithm,
-      environment,
-    }),
+    environmentRuntimeOptions: {
+      trainerFactory: createTrainer,
+      trainerFactoryOptions: {
+        learningRate: args.learningRate,
+        epochs: args.trainingEpochs,
+        isLamarckian: false,
+      },
+    },
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,

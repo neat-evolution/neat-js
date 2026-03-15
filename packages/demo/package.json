@@ -71,7 +71,6 @@
   "dependencies": {
     "@neat-evolution/actor-critic": "workspace:^",
     "@neat-evolution/actor-critic-plugin": "workspace:^",
-    "@neat-evolution/backprop": "workspace:^",
     "@neat-evolution/backprop-strategy": "workspace:^",
     "@neat-evolution/core": "workspace:^",
     "@neat-evolution/cppn": "workspace:^",

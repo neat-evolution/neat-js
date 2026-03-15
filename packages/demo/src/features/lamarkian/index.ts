@@ -11,15 +11,13 @@
  *   yarn workspace @neat-evolution/demo lamarkian [--epochs N] [--lr N] [--iterations N] [--seconds N]
  */
 
-import { BackpropPlugin } from '@neat-evolution/backprop-strategy'
+import { createTrainer } from '@neat-evolution/backprop-strategy'
 import {
   DatasetEnvironment,
   type DatasetOptions,
   defaultDatasetOptions,
   loadDataset,
 } from '@neat-evolution/dataset-environment'
-import { PluginStrategy } from '@neat-evolution/evaluation-strategy'
-import type { AnyAlgorithm } from '@neat-evolution/evaluator'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
@@ -89,14 +87,6 @@ console.log(
 )
 console.log()
 
-// --- Create BackpropPlugin ---
-
-const plugin = new BackpropPlugin(NEATAlgorithm as AnyAlgorithm, {
-  trainingEpochs: args.trainingEpochs,
-  learningRate: args.learningRate,
-  isLamarckian: true,
-})
-
 // --- Run evolution ---
 
 console.log(
@@ -108,10 +98,14 @@ try {
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    strategy: new PluginStrategy([plugin], {
-      algorithm: NEATAlgorithm as AnyAlgorithm,
-      environment,
-    }),
+    environmentRuntimeOptions: {
+      trainerFactory: createTrainer,
+      trainerFactoryOptions: {
+        learningRate: args.learningRate,
+        epochs: args.trainingEpochs,
+        isLamarckian: true,
+      },
+    },
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,

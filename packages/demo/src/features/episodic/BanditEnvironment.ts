@@ -1,12 +1,15 @@
 import type {
   AgentEnvironment,
+  AgentFactoryOptions,
   Environment,
   EnvironmentDescription,
+  EnvironmentRuntimeOptions,
   EpisodicEnvironment,
   RLConfig,
+  RuntimeConfigurable,
 } from '@neat-evolution/environment'
 import {
-  createEpisodicAgent,
+  createVanillaAgent,
   type EpisodicAgent,
 } from '@neat-evolution/environment'
 import type { StaticExecutor } from '@neat-evolution/executor'
@@ -46,10 +49,12 @@ export class BanditEnvironment
   implements
     Environment<BanditFactoryOptions>,
     EpisodicEnvironment,
-    AgentEnvironment
+    AgentEnvironment,
+    RuntimeConfigurable
 {
   public readonly description: EnvironmentDescription
   public readonly isAsync = false
+  private runtimeOptions: EnvironmentRuntimeOptions | undefined
 
   private readonly episodes: BanditEpisode[] = [
     { index: 0, bestArm: 0 },
@@ -71,6 +76,10 @@ export class BanditEnvironment
     return { outputCount: this.description.outputs }
   }
 
+  setRuntimeOptions(options: EnvironmentRuntimeOptions): void {
+    this.runtimeOptions = options
+  }
+
   getRLConfig(): RLConfig {
     return {
       actionSize: this.armCount,
@@ -81,7 +90,14 @@ export class BanditEnvironment
   }
 
   evaluate(executor: StaticExecutor): number {
-    const agent = createEpisodicAgent(executor)
+    const factory = this.runtimeOptions?.agentFactory ?? createVanillaAgent
+    const options = (this.runtimeOptions?.agentFactoryOptions ??
+      {}) as AgentFactoryOptions
+    const agent = factory(
+      executor,
+      options,
+      this.runtimeOptions?.evaluationContext
+    )
     return this.evaluateAgent(agent)
   }
 

@@ -10,15 +10,16 @@
  *   yarn workspace @neat-evolution/demo episodic \
  *     [--iterations N] [--seconds N] [--lr N] \
  *     [--seed phase4-demo|--no-seed] [--ac-seed custom] [--ql-seed custom] \
- *     [--entropy 0.01] [--epsilon 0.3] [--epsilon-decay 0.95] [--epsilon-min 0.01] \
- *     [--telemetry]
+ *     [--entropy 0.01] [--epsilon 0.3] [--epsilon-decay 0.95] [--epsilon-min 0.01]
  */
 
-import { ACPlugin } from '@neat-evolution/actor-critic-plugin'
-import { Activation, type AnyGenome } from '@neat-evolution/core'
-import type { EvaluationPlugin } from '@neat-evolution/evaluation-strategy'
-import { PluginStrategy } from '@neat-evolution/evaluation-strategy'
-import type { AnyAlgorithm } from '@neat-evolution/evaluator'
+import type { ACAgentConfig } from '@neat-evolution/actor-critic'
+import { createAgent as createACAgent } from '@neat-evolution/actor-critic-plugin'
+import { Activation } from '@neat-evolution/core'
+import type {
+  EnvironmentRuntimeOptions,
+  RolloutBufferConfig,
+} from '@neat-evolution/environment'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
@@ -33,12 +34,9 @@ import {
   type NEATGenome,
   type NEATGenomeOptions,
 } from '@neat-evolution/neat'
-import { QLPlugin } from '@neat-evolution/q-learning-plugin'
-import { createRNG, setThreadRNGSeed, threadRNG } from '@neat-evolution/utils'
-import type {
-  ActorCriticTelemetry,
-  QLearningTelemetry,
-} from '@neat-evolution/worker-rl'
+import type { QLAgentConfig } from '@neat-evolution/q-learning'
+import { createAgent as createQLAgent } from '@neat-evolution/q-learning-plugin'
+import { setThreadRNGSeed } from '@neat-evolution/utils'
 
 import { BanditEnvironment } from './BanditEnvironment.js'
 
@@ -51,16 +49,14 @@ interface VariantSummary {
   notes?: string
 }
 
-type VariantTelemetry = ActorCriticTelemetry | QLearningTelemetry
-
 interface VariantConfig {
   name: string
   description: string
   outputCount: number
-  plugins?: ReadonlyArray<EvaluationPlugin>
+  environmentRuntimeOptions?: EnvironmentRuntimeOptions
+  workerConfigOverrides?: Partial<WorkerConfig>
   genomeOptions?: Partial<NEATGenomeOptions>
   summary: VariantSummary
-  getTelemetry?: (genome: AnyGenome) => VariantTelemetry | undefined
 }
 
 // --- Argument parsing ---
@@ -77,7 +73,6 @@ function parseArgs(argv: string[]) {
     epsilonInitial: 0.3,
     epsilonDecayPerEpisode: 0.1,
     epsilonMinimum: 0.01,
-    telemetry: false,
     workers: false,
     threadCount: undefined as number | undefined,
   }
@@ -117,8 +112,6 @@ function parseArgs(argv: string[]) {
     } else if (arg === '--epsilon-min' && next) {
       args.epsilonMinimum = Number(next)
       i++
-    } else if (arg === '--telemetry') {
-      args.telemetry = true
     } else if (arg === '--workers') {
       args.workers = true
     } else if (arg === '--threads' && next) {
@@ -137,25 +130,43 @@ if (args.seed) {
   setThreadRNGSeed(args.seed)
 }
 
-const algorithm = NEATAlgorithm as AnyAlgorithm
-
 const acSeedBase = args.acSeed ?? args.seed
 const qlSeedBase = args.qlSeed ?? args.seed
 
-const acLamarckSeed = acSeedBase ? `${acSeedBase}:ac-lamarck` : undefined
-const acDarwinSeed = acSeedBase ? `${acSeedBase}:ac-darwin` : undefined
-const qlSeed = qlSeedBase ? `${qlSeedBase}:q-learning` : undefined
+const acLamarckSeed = acSeedBase ? `${acSeedBase}:ac-lamarck` : 'ac-lamarck'
+const acDarwinSeed = acSeedBase ? `${acSeedBase}:ac-darwin` : 'ac-darwin'
+const qlSeed = qlSeedBase ? `${qlSeedBase}:q-learning` : 'q-learning'
 
-const acLamarckRng = acLamarckSeed ? createRNG(acLamarckSeed) : createRNG()
-const acDarwinRng = acDarwinSeed ? createRNG(acDarwinSeed) : createRNG()
-const qLearningRng = qlSeed ? createRNG(qlSeed) : threadRNG()
+// --- Build agent configs directly (replaces plugin buildAgentConfig) ---
 
-const baseAcOptions = {
-  learningRate: args.learningRate,
-  rolloutLength: 'episode' as const,
+const armCount = 3 // BanditEnvironment.armCount
+const stepsPerEpisode = 20 // BanditEnvironment.stepsPerEpisode
+
+const rolloutConfig: RolloutBufferConfig = {
+  rolloutLength: 'episode',
   rewardThreshold: 0.1,
-  entropyCoefficient: args.entropyCoefficient,
+}
+
+const acAgentConfig: ACAgentConfig = {
+  learningRate: args.learningRate,
+  actionCount: armCount,
+  gradientConfig: {
+    discountFactor: 0,
+    entropyCoefficient: args.entropyCoefficient,
+    clipGradients: false,
+    gradientClipValue: 1.0,
+  },
+  rolloutConfig,
+}
+
+const qlAgentConfig: QLAgentConfig = {
+  learningRate: args.learningRate,
+  actionCount: armCount,
   discountFactor: 0,
+  rolloutConfig,
+  epsilonInitial: args.epsilonInitial,
+  epsilonDecayPerEpisode: args.epsilonDecayPerEpisode,
+  epsilonMinimum: args.epsilonMinimum,
 }
 
 /** Per-group output activation: 3 actor outputs (Softmax) + 1 critic output (Linear) */
@@ -166,29 +177,6 @@ const acOutputActivation: readonly [
   [3, Activation.Softmax],
   [1, Activation.Linear],
 ]
-
-const qlOptions = {
-  learningRate: args.learningRate,
-  epsilonInitial: args.epsilonInitial,
-  epsilonDecayPerEpisode: args.epsilonDecayPerEpisode,
-  epsilonMinimum: args.epsilonMinimum,
-  isLamarckian: true,
-  rolloutLength: 'episode' as const,
-  rewardThreshold: 0.1,
-  discountFactor: 0,
-}
-
-const acLamarckPlugin = new ACPlugin(
-  algorithm,
-  { ...baseAcOptions, isLamarckian: true },
-  acLamarckRng.gen
-)
-const acDarwinPlugin = new ACPlugin(
-  algorithm,
-  { ...baseAcOptions, isLamarckian: false },
-  acDarwinRng.gen
-)
-const qlPlugin = new QLPlugin(algorithm, qlOptions, qLearningRng)
 
 const variants: VariantConfig[] = [
   {
@@ -210,9 +198,28 @@ const variants: VariantConfig[] = [
     name: 'AC-Lamarck',
     description: 'Actor-Critic with Lamarckian writeback',
     outputCount: 4,
-    plugins: [acLamarckPlugin],
+    environmentRuntimeOptions: {
+      agentFactory: createACAgent,
+      agentFactoryOptions: {
+        config: acAgentConfig,
+        rngSeed: acLamarckSeed,
+        isLamarckian: true,
+      },
+    },
+    workerConfigOverrides: {
+      createExecutorPathname: '@neat-evolution/executor/backprop',
+      hydrateEnvironmentOptions: {
+        agentFactory: '@neat-evolution/actor-critic-plugin',
+      },
+      environmentRuntimeData: {
+        agentFactoryOptions: {
+          config: acAgentConfig,
+          rngSeed: acLamarckSeed,
+          isLamarckian: true,
+        },
+      },
+    },
     genomeOptions: { outputActivation: acOutputActivation },
-    getTelemetry: (g) => acLamarckPlugin.getTelemetry(g),
     summary: {
       path: 'evaluateAgent()',
       method: 'actor-critic',
@@ -221,7 +228,7 @@ const variants: VariantConfig[] = [
         rolloutLength: 'episode',
         entropy: args.entropyCoefficient,
       },
-      seedLabel: acLamarckSeed ?? 'threadRNG()',
+      seedLabel: acLamarckSeed,
       notes:
         'Augments evaluation with evaluateAgent() and writes trained weights back',
     },
@@ -230,9 +237,28 @@ const variants: VariantConfig[] = [
     name: 'AC-Darwin',
     description: 'Actor-Critic without Lamarckian writeback',
     outputCount: 4,
-    plugins: [acDarwinPlugin],
+    environmentRuntimeOptions: {
+      agentFactory: createACAgent,
+      agentFactoryOptions: {
+        config: acAgentConfig,
+        rngSeed: acDarwinSeed,
+        isLamarckian: false,
+      },
+    },
+    workerConfigOverrides: {
+      createExecutorPathname: '@neat-evolution/executor/backprop',
+      hydrateEnvironmentOptions: {
+        agentFactory: '@neat-evolution/actor-critic-plugin',
+      },
+      environmentRuntimeData: {
+        agentFactoryOptions: {
+          config: acAgentConfig,
+          rngSeed: acDarwinSeed,
+          isLamarckian: false,
+        },
+      },
+    },
     genomeOptions: { outputActivation: acOutputActivation },
-    getTelemetry: (g) => acDarwinPlugin.getTelemetry(g),
     summary: {
       path: 'evaluateAgent()',
       method: 'actor-critic',
@@ -241,7 +267,7 @@ const variants: VariantConfig[] = [
         rolloutLength: 'episode',
         entropy: args.entropyCoefficient,
       },
-      seedLabel: acDarwinSeed ?? 'threadRNG()',
+      seedLabel: acDarwinSeed,
       notes:
         'Same AC config as Lamarckian run, but discards learned weights after evaluation',
     },
@@ -250,9 +276,28 @@ const variants: VariantConfig[] = [
     name: 'Q-Learning',
     description: 'DQN-style epsilon-greedy training with Lamarckian writeback',
     outputCount: 3,
-    plugins: [qlPlugin],
+    environmentRuntimeOptions: {
+      agentFactory: createQLAgent,
+      agentFactoryOptions: {
+        config: qlAgentConfig,
+        rngSeed: qlSeed,
+        isLamarckian: true,
+      },
+    },
+    workerConfigOverrides: {
+      createExecutorPathname: '@neat-evolution/executor/backprop',
+      hydrateEnvironmentOptions: {
+        agentFactory: '@neat-evolution/q-learning-plugin',
+      },
+      environmentRuntimeData: {
+        agentFactoryOptions: {
+          config: qlAgentConfig,
+          rngSeed: qlSeed,
+          isLamarckian: true,
+        },
+      },
+    },
     genomeOptions: { outputActivation: Activation.Linear },
-    getTelemetry: (g) => qlPlugin.getTelemetry(g),
     summary: {
       path: 'evaluateAgent()',
       method: 'q-learning',
@@ -262,23 +307,17 @@ const variants: VariantConfig[] = [
         epsilonDecay: args.epsilonDecayPerEpisode,
         epsilonMinimum: args.epsilonMinimum,
       },
-      seedLabel: qlSeed ?? 'threadRNG()',
+      seedLabel: qlSeed,
       notes:
         'Uses evaluateAgent() with epsilon scheduling and rollout segments in episode mode',
     },
   },
 ]
 
-const workerConfig: WorkerConfig | undefined = args.workers
-  ? {
-      createEnvironmentPathname: '@neat-evolution/demo/bandit-environment',
-      pluginPaths: ['@neat-evolution/worker-rl/workerPlugin'],
-      ...(args.threadCount != null ? { threadCount: args.threadCount } : {}),
-    }
-  : undefined
-
 console.log('=== Episodic Demo: Vanilla vs AC vs Q-Learning ===')
-console.log(`Environment: Multi-arm bandit (3 episodes × 20 steps)`)
+console.log(
+  `Environment: Multi-arm bandit (3 episodes × ${stepsPerEpisode} steps)`
+)
 console.log(`Optimal average reward: 1.00`)
 console.log(
   `Learning rate: ${args.learningRate}, Iterations: ${args.iterations}`
@@ -312,25 +351,34 @@ interface RunResult {
 }
 
 async function runVariant(
-  name: string,
-  outputCount: number,
-  plugins: ReadonlyArray<EvaluationPlugin> | undefined,
-  variantWorkerConfig?: WorkerConfig,
-  genomeOptions?: Partial<NEATGenomeOptions>
+  variant: VariantConfig,
+  baseWorkerConfig?: WorkerConfig
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
-  const environment = new BanditEnvironment(outputCount)
+  const environment = new BanditEnvironment(variant.outputCount)
 
-  const strategy = plugins
-    ? new PluginStrategy(plugins, { algorithm, environment })
-    : undefined
+  // Build per-variant worker config by merging base + overrides
+  let variantWorkerConfig: WorkerConfig | undefined
+  if (baseWorkerConfig != null) {
+    variantWorkerConfig = {
+      ...baseWorkerConfig,
+      ...variant.workerConfigOverrides,
+    }
+  }
 
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    ...(strategy != null ? { strategy } : {}),
-    ...(genomeOptions != null
-      ? { genomeOptions: { ...defaultNEATGenomeOptions, ...genomeOptions } }
+    ...(variant.environmentRuntimeOptions != null
+      ? { environmentRuntimeOptions: variant.environmentRuntimeOptions }
+      : {}),
+    ...(variant.genomeOptions != null
+      ? {
+          genomeOptions: {
+            ...defaultNEATGenomeOptions,
+            ...variant.genomeOptions,
+          },
+        }
       : {}),
     evolutionOptions: {
       ...defaultEvolutionOptions,
@@ -360,7 +408,7 @@ async function runVariant(
     const elapsedMs = performance.now() - start
 
     return {
-      name,
+      name: variant.name,
       fitnessLog,
       bestFitness: best?.fitness ?? 0,
       bestGenome: best?.genome as NEATGenome | undefined,
@@ -374,16 +422,17 @@ async function runVariant(
 
 // --- Run each variant ---
 
+const baseWorkerConfig: WorkerConfig | undefined = args.workers
+  ? {
+      createEnvironmentPathname: '@neat-evolution/demo/bandit-environment',
+      ...(args.threadCount != null ? { threadCount: args.threadCount } : {}),
+    }
+  : undefined
+
 const results: RunResult[] = []
 for (const variant of variants) {
   console.log(`Running: ${variant.name}...`)
-  const result = await runVariant(
-    variant.name,
-    variant.outputCount,
-    variant.plugins,
-    workerConfig,
-    variant.genomeOptions
-  )
+  const result = await runVariant(variant, baseWorkerConfig)
   console.log(
     `  Done: ${result.bestFitness.toFixed(4)} in ${(result.elapsedMs / 1000).toFixed(1)}s`
   )
@@ -454,14 +503,14 @@ function summarizeComparison(
   )
 }
 
-const heldConstants = `Bandit env (3×20), iterations=${args.iterations}, learningRate=${args.learningRate}, rolloutLength='episode'`
+const heldConstants = `Bandit env (3×${stepsPerEpisode}), iterations=${args.iterations}, learningRate=${args.learningRate}, rolloutLength='episode'`
 
 summarizeComparison(
   'Vanilla evolution vs AC Lamarckian',
   vanilla,
   acLamarckian,
   `${heldConstants}, same genomes + evaluator, base seed=${args.seed ?? 'thread RNG'}`,
-  'AC plugin owns evaluateAgent(), trains actor-critic minisodes, Lamarckian weight writeback'
+  'AC agent factory trains actor-critic minisodes, Lamarckian weight writeback'
 )
 
 summarizeComparison(
@@ -469,7 +518,7 @@ summarizeComparison(
   vanilla,
   qLearning,
   `${heldConstants}, same genomes + evaluator, base seed=${args.seed ?? 'thread RNG'}`,
-  'QL plugin owns evaluateAgent(), epsilon schedule + rollout segments, Lamarckian weight writeback'
+  'QL agent factory uses epsilon schedule + rollout segments, Lamarckian weight writeback'
 )
 
 summarizeComparison(
@@ -479,56 +528,3 @@ summarizeComparison(
   `${heldConstants}, identical actor-critic config + seeds`,
   'Only Lamarckian writeback differs (Darwinian discards learned weights)'
 )
-
-// --- Telemetry ---
-
-if (args.telemetry) {
-  console.log()
-  console.log('=== RL Telemetry (best genome, final generation) ===')
-
-  for (const variant of variants) {
-    const result = resultByName.get(variant.name)
-    if (!result?.bestGenome || !variant.getTelemetry) continue
-
-    const telemetry = variant.getTelemetry(
-      result.bestGenome as unknown as AnyGenome
-    )
-    if (!telemetry) continue
-
-    console.log()
-    console.log(`--- ${variant.name} ---`)
-    console.log(`  episodes:            ${telemetry.episodes}`)
-    console.log(`  rolloutSegments:     ${telemetry.rolloutSegments}`)
-    console.log(`  transitionsTrained:  ${telemetry.transitionsTrained}`)
-
-    if ('entropyCoefficient' in telemetry) {
-      console.log(`  entropyCoefficient:  ${telemetry.entropyCoefficient}`)
-      console.log(
-        `  triggerCounts:       reward=${telemetry.triggerCounts.reward}, done=${telemetry.triggerCounts.done}, info=${telemetry.triggerCounts.info}`
-      )
-      if (telemetry.segmentReturn) {
-        console.log(
-          `  segmentReturn:       mean=${telemetry.segmentReturn.mean.toFixed(4)}, min=${telemetry.segmentReturn.min.toFixed(4)}, max=${telemetry.segmentReturn.max.toFixed(4)}`
-        )
-      }
-      if (telemetry.episodeReturn) {
-        console.log(
-          `  episodeReturn:       mean=${telemetry.episodeReturn.mean.toFixed(4)}, min=${telemetry.episodeReturn.min.toFixed(4)}, max=${telemetry.episodeReturn.max.toFixed(4)}`
-        )
-      }
-      if (telemetry.policyEntropy) {
-        console.log(
-          `  policyEntropy:       mean=${telemetry.policyEntropy.mean.toFixed(4)}, min=${telemetry.policyEntropy.min.toFixed(4)}, max=${telemetry.policyEntropy.max.toFixed(4)} (${telemetry.policyEntropy.samples} samples)`
-        )
-      }
-    }
-
-    if ('epsilonInitial' in telemetry) {
-      console.log(`  epsilonInitial:      ${telemetry.epsilonInitial}`)
-      console.log(`  epsilonFinal:        ${telemetry.epsilonFinal}`)
-      console.log(`  epsilonDecay:        ${telemetry.epsilonDecayPerEpisode}`)
-      console.log(`  epsilonMinimum:      ${telemetry.epsilonMinimum}`)
-      console.log(`  multiDiscrete:       ${telemetry.multiDiscrete}`)
-    }
-  }
-}
