@@ -29,7 +29,7 @@ export function isEpisodicEnvironment(
  * When an RL plugin creates an agent (AC or QL), the agent's act() method
  * handles forward passes, transition recording, and training internally.
  * The standard evaluation pipeline can't thread the agent through
- * (Environment.evaluate only receives a SyncExecutor, not an EpisodicAgent).
+ * (Environment.evaluate only receives a StaticExecutor, not an EpisodicAgent).
  *
  * Environments that implement AgentEnvironment expose evaluateAgent() so
  * plugins can pass the RL agent directly, bypassing the executor pipeline.

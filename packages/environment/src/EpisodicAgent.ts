@@ -1,4 +1,4 @@
-import type { SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import type { EpisodicContext } from './EpisodicContext.js'
 
 /** Episode start metadata. */
@@ -59,12 +59,12 @@ export interface EpisodicAgent {
  * With context: RL-capable agent (hooks wire up rollout capture + training).
  */
 export function createEpisodicAgent(
-  executor: SyncExecutor,
+  executor: StaticExecutor,
   context?: EpisodicContext
 ): EpisodicAgent {
   return {
     act(inputs: Float64Array): Float64Array {
-      const output = executor.execute(inputs)
+      const output = executor.forward(inputs)
       return output instanceof Float64Array ? output : Float64Array.from(output)
     },
     reward(reward: number, done: boolean): void {

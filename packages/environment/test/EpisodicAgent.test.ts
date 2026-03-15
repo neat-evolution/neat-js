@@ -1,13 +1,12 @@
-import type { SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import { describe, expect, test, vi } from 'vitest'
 import type { EpisodeInfo, EpisodeResult } from '../src/EpisodicAgent.js'
 import { createEpisodicAgent } from '../src/EpisodicAgent.js'
 import type { EpisodicContext } from '../src/EpisodicContext.js'
 
-const mockExecutor: SyncExecutor = {
-  isAsync: false,
-  execute: (input) => Float64Array.from(input as Float64Array),
-  executeBatch: (batch) =>
+const mockExecutor: StaticExecutor = {
+  forward: (input) => Float64Array.from(input as Float64Array),
+  forwardBatch: (batch) =>
     batch.map((input) => Float64Array.from(input as Float64Array)),
 }
 
@@ -35,7 +34,7 @@ describe('createEpisodicAgent', () => {
       expect(typeof agent.endEpisode).toBe('function')
     })
 
-    test('act() delegates to executor.execute()', () => {
+    test('act() delegates to executor.forward()', () => {
       const agent = createEpisodicAgent(mockExecutor)
       const inputs = new Float64Array([1.0, 2.0, 3.0])
       const output = agent.act(inputs)
@@ -44,10 +43,9 @@ describe('createEpisodicAgent', () => {
     })
 
     test('act() converts number[] output to Float64Array', () => {
-      const arrayExecutor: SyncExecutor = {
-        isAsync: false,
-        execute: () => [1.0, 2.0],
-        executeBatch: () => [[1.0, 2.0]],
+      const arrayExecutor: StaticExecutor = {
+        forward: () => [1.0, 2.0],
+        forwardBatch: () => [[1.0, 2.0]],
       }
       const agent = createEpisodicAgent(arrayExecutor)
       const output = agent.act(new Float64Array([0.5]))

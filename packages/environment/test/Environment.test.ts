@@ -1,4 +1,4 @@
-import type { Executor, SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import { describe, expect, test } from 'vitest'
 
 import type {
@@ -6,16 +6,14 @@ import type {
   StandardEnvironment,
 } from '../src/index.js'
 
-const mockExecutor: Executor = {
-  isAsync: false,
-  execute: () => [],
-  executeBatch: () => [],
+const mockExecutor: StaticExecutor = {
+  forward: () => [],
+  forwardBatch: () => [],
 }
 
-const mockSyncExecutor: SyncExecutor = {
-  isAsync: false,
-  execute: () => [],
-  executeBatch: () => [],
+const mockSyncExecutor: StaticExecutor = {
+  forward: () => [],
+  forwardBatch: () => [],
 }
 
 describe('StandardEnvironment', () => {
@@ -24,11 +22,11 @@ describe('StandardEnvironment', () => {
       description: EnvironmentDescription = { inputs: 2, outputs: 1 }
       isAsync = false
 
-      evaluate(_executor: SyncExecutor): number {
+      evaluate(_executor: StaticExecutor): number {
         return 1.0
       }
 
-      async evaluateAsync(_executor: Executor): Promise<number> {
+      async evaluateAsync(_executor: StaticExecutor): Promise<number> {
         return 1.0
       }
 
@@ -47,19 +45,19 @@ describe('StandardEnvironment', () => {
       description: EnvironmentDescription = { inputs: 2, outputs: 1 }
       isAsync = true
 
-      evaluate(_executor: SyncExecutor): number {
+      evaluate(_executor: StaticExecutor): number {
         throw new Error('Use async evaluation')
       }
 
-      async evaluateAsync(_executor: Executor): Promise<number> {
+      async evaluateAsync(_executor: StaticExecutor): Promise<number> {
         return 0.5
       }
 
-      evaluateBatch(_executors: SyncExecutor[]): number[] {
+      evaluateBatch(_executors: StaticExecutor[]): number[] {
         throw new Error('Use async evaluation')
       }
 
-      async evaluateBatchAsync(executors: Executor[]): Promise<number[]> {
+      async evaluateBatchAsync(executors: StaticExecutor[]): Promise<number[]> {
         // Simulate game: first executor wins
         return executors.map((_, i) => (i === 0 ? 1.0 : 0.0))
       }
@@ -87,7 +85,7 @@ describe('StandardEnvironment', () => {
         return 0
       }
 
-      async evaluateBatchAsync(executors: Executor[]): Promise<number[]> {
+      async evaluateBatchAsync(executors: StaticExecutor[]): Promise<number[]> {
         // Return fitness based on index
         return executors.map((_, i) => i * 0.1)
       }
@@ -98,9 +96,9 @@ describe('StandardEnvironment', () => {
     }
 
     const env = new TestEnvironment()
-    const mockExecutor1: Executor = mockExecutor
-    const mockExecutor2: Executor = mockExecutor
-    const mockExecutor3: Executor = mockExecutor
+    const mockExecutor1: StaticExecutor = mockExecutor
+    const mockExecutor2: StaticExecutor = mockExecutor
+    const mockExecutor3: StaticExecutor = mockExecutor
     const mockExecutors = [mockExecutor1, mockExecutor2, mockExecutor3]
 
     expect(env.evaluateBatchAsync).toBeDefined()
@@ -118,11 +116,11 @@ describe('StandardEnvironment', () => {
       description: EnvironmentDescription = { inputs: 4, outputs: 3 }
       isAsync = false
 
-      evaluate(_executor: SyncExecutor): number {
+      evaluate(_executor: StaticExecutor): number {
         return 0.95
       }
 
-      async evaluateAsync(_executor: Executor): Promise<number> {
+      async evaluateAsync(_executor: StaticExecutor): Promise<number> {
         return 0.95
       }
 
@@ -147,15 +145,15 @@ describe('StandardEnvironment', () => {
       description: EnvironmentDescription = { inputs: 1, outputs: 1 }
       isAsync = false
 
-      evaluate(_executor: SyncExecutor): number {
+      evaluate(_executor: StaticExecutor): number {
         return 0.5
       }
 
-      async evaluateAsync(_executor: Executor): Promise<number> {
+      async evaluateAsync(_executor: StaticExecutor): Promise<number> {
         return 0.5
       }
 
-      evaluateBatch(executors: SyncExecutor[]): number[] {
+      evaluateBatch(executors: StaticExecutor[]): number[] {
         // Simple sync batch evaluation
         return executors.map(() => 0.5)
       }
@@ -166,8 +164,8 @@ describe('StandardEnvironment', () => {
     }
 
     const env = new SyncBatchEnvironment()
-    const mockExecutor1: SyncExecutor = mockSyncExecutor
-    const mockExecutor2: SyncExecutor = mockSyncExecutor
+    const mockExecutor1: StaticExecutor = mockSyncExecutor
+    const mockExecutor2: StaticExecutor = mockSyncExecutor
     const mockExecutors = [mockExecutor1, mockExecutor2]
 
     expect(env.evaluateBatch).toBeDefined()
@@ -193,7 +191,7 @@ describe('StandardEnvironment', () => {
         return 1.0
       }
 
-      async evaluateBatchAsync(executors: Executor[]): Promise<number[]> {
+      async evaluateBatchAsync(executors: StaticExecutor[]): Promise<number[]> {
         return executors.map(() => 1.0)
       }
 
