@@ -5,6 +5,7 @@ import type {
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type { EpisodicContext } from '@neat-evolution/environment'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import type { DispatcherContext } from '@neat-evolution/worker-actions'
 import type { WorkerTrainingCapabilities } from './WorkerTrainingCapabilities.js'
@@ -68,4 +69,11 @@ export interface EvaluationContext<G extends AnyGenome = AnyGenome>
 
   /** Optional stats recorder for evaluation-level metrics. */
   stats?: StatsRecorder
+
+  /** Schedule Lamarckian writeback for an executor.
+   *  Part of the shared evaluation surface — implementations differ by side. */
+  scheduleWriteback?: (executor: StaticExecutor) => void
+
+  /** Register callback that fires after fitness is decided and writebacks are flushed. */
+  onFitness?: (callback: (fitness: number) => void) => void
 }
