@@ -1,5 +1,5 @@
 import type { Connection } from '@neat-evolution/core'
-import type { SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import type { Point } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
@@ -10,7 +10,7 @@ import { findConnectionsPoints } from './findConnections.js'
 export function exploreSubstrate<K extends number>(
   inputs: Point[],
   outputs: Point[],
-  cppn: SyncExecutor,
+  cppn: StaticExecutor,
   depth: number,
   reverse: boolean,
   allowConnectionsToInput: boolean,

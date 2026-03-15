@@ -18,7 +18,7 @@ import {
   createGenome,
   defaultCPPNGenomeOptions,
 } from '@neat-evolution/cppn'
-import { createExecutor, type SyncExecutor } from '@neat-evolution/executor'
+import { createExecutor, type StaticExecutor } from '@neat-evolution/executor'
 import type { Point } from '@neat-evolution/hyperneat'
 import {
   createConfig,
@@ -194,7 +194,7 @@ export interface TestCase {
   args: [
     x: number,
     y: number,
-    cppn: SyncExecutor,
+    cppn: StaticExecutor,
     reverse: boolean,
     options: ESHyperNEATGenomeOptions,
   ]

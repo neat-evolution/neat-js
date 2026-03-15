@@ -338,7 +338,7 @@ export const testCases: TestCase[] = rawTestCases.map(
 
     const f: WeightFn = (x2: number, y2: number): number => {
       const input = reverse ? [x2, y2, x, y] : [x, y, x2, y2]
-      return cppn.execute(input)[0] as number
+      return cppn.forward(input)[0] as number
     }
     const root = createQuadPoint(leaf)
     return {

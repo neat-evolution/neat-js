@@ -152,7 +152,7 @@ export const createPhenotype: PhenotypeFactory<
     } else {
       const nodeIndex = nodeMapping.get(action[0]) as number
       const [x, y] = pointById.get(action[0]) as Point
-      const [, bias] = cppn.execute([
+      const [, bias] = cppn.forward([
         0.0,
         0.0,
         x / genome.genomeOptions.resolution,

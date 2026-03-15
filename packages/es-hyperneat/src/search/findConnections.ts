@@ -1,4 +1,4 @@
-import type { SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import type { Point } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
@@ -12,7 +12,7 @@ type PointTarget = { node: Point; edge: number }
 export function findConnectionsPoints(
   x: number,
   y: number,
-  cppn: SyncExecutor,
+  cppn: StaticExecutor,
   reverse: boolean,
   options: ESHyperNEATGenomeOptions
 ): PointTarget[] {
@@ -35,7 +35,7 @@ export function findConnectionsPoints(
       cppnInput[3] = y2
     }
     // execute now returns Float64Array, and the first element is the weight
-    const result = cppn.execute(cppnInput)
+    const result = cppn.forward(cppnInput)
     return result[0] ?? 0
   }
 
