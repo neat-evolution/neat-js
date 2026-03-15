@@ -1,5 +1,5 @@
 import { createTrainableExecutor } from '@neat-evolution/backprop'
-import { type AnyAlgorithm, type AnyGenome } from '@neat-evolution/core'
+import type { AnyAlgorithm, AnyGenome } from '@neat-evolution/core'
 import type {
   EpisodeInfo,
   EpisodeResult,

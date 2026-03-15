@@ -18,6 +18,9 @@ function mockTrainable(
       }
       return output
     },
+    forwardBatch(batch: Array<number[] | Float64Array>) {
+      return batch.map((input) => mock.forward(input))
+    },
     backward(_outputErrors: Float64Array, _learningRate: number): void {
       mock.backwardCalls++
     },
@@ -62,6 +65,9 @@ function mockTrainableWithQValues(
     backwardCalls: 0,
     forward(_inputs: number[] | Float64Array): Float64Array {
       return new Float64Array(qValues)
+    },
+    forwardBatch(batch: Array<number[] | Float64Array>) {
+      return batch.map((input) => mock.forward(input))
     },
     backward(_outputErrors: Float64Array, _learningRate: number): void {
       mock.backwardCalls++
@@ -463,6 +469,9 @@ describe('createQLAgent', () => {
               weights[i] = w - learningRate * e
             }
           }
+        },
+        forwardBatch(batch: Array<number[] | Float64Array>) {
+          return batch.map((input) => this.forward(input))
         },
         getUpdatedActions() {
           return []

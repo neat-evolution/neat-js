@@ -363,9 +363,8 @@ describe('QLPlugin', () => {
       )
       const hooks = plugin.getContextHooks()
       const mockExecutor = {
-        execute: vi.fn(),
-        executeBatch: vi.fn(),
-        isAsync: false as const,
+        forward: vi.fn(),
+        forwardBatch: vi.fn(),
       }
 
       // These should not throw — they use optional chaining on currentAgent
@@ -399,9 +398,8 @@ describe('QLPlugin', () => {
 
       const hooks = plugin.getContextHooks()
       const mockExecutor = {
-        execute: vi.fn(),
-        executeBatch: vi.fn(),
-        isAsync: false as const,
+        forward: vi.fn(),
+        forwardBatch: vi.fn(),
       }
 
       // During defaultEvaluate, the agent should be active
@@ -446,9 +444,8 @@ describe('QLPlugin', () => {
 
       const hooks = plugin.getContextHooks()
       const mockExecutor = {
-        execute: vi.fn(),
-        executeBatch: vi.fn(),
-        isAsync: false as const,
+        forward: vi.fn(),
+        forwardBatch: vi.fn(),
       }
 
       const defaultEvaluate = vi.fn().mockImplementation(async () => {
