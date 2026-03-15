@@ -1,8 +1,11 @@
 import type {
   Environment,
   EnvironmentDescription,
+  EnvironmentRuntimeOptions,
   LossConfig,
+  RuntimeConfigurable,
   SupervisedEnvironment,
+  TrainerFactoryOptions,
   TrainingData,
 } from '@neat-evolution/environment'
 import type { StaticExecutor } from '@neat-evolution/executor'
@@ -13,11 +16,15 @@ import { crossentropy, mse } from './error.js'
 import type { Matrix } from './types.js'
 
 export class DatasetEnvironment
-  implements Environment<SharedArrayBuffer>, SupervisedEnvironment
+  implements
+    Environment<SharedArrayBuffer>,
+    SupervisedEnvironment,
+    RuntimeConfigurable
 {
   public readonly dataset: Dataset
   public readonly description: EnvironmentDescription
   public readonly isAsync = false
+  private runtimeOptions: EnvironmentRuntimeOptions | undefined
 
   constructor(dataset: Dataset) {
     this.dataset = dataset
@@ -25,6 +32,10 @@ export class DatasetEnvironment
       inputs: dataset.dimensions.inputs,
       outputs: dataset.dimensions.outputs,
     }
+  }
+
+  setRuntimeOptions(options: EnvironmentRuntimeOptions): void {
+    this.runtimeOptions = options
   }
 
   private fitness(targets: Matrix, predictions: Matrix): number {
@@ -38,17 +49,27 @@ export class DatasetEnvironment
   }
 
   evaluate(executor: StaticExecutor): number {
+    if (this.runtimeOptions?.trainerFactory != null) {
+      const options = (this.runtimeOptions?.trainerFactoryOptions ??
+        {}) as TrainerFactoryOptions
+      const trainer = this.runtimeOptions.trainerFactory(
+        executor,
+        options,
+        this.runtimeOptions.evaluationContext
+      )
+      trainer.train(this.getTrainingData())
+      const validation = this.getValidationData()
+      const predictions = executor.forwardBatch(
+        validation.inputs as (number[] | Float64Array)[]
+      )
+      return this.computeFitness(validation.targets, predictions)
+    }
     const predictions = executor.forwardBatch(this.dataset.trainingInputs)
-
-    const fitness = this.fitness(this.dataset.trainingTargets, predictions)
-    return fitness
+    return this.fitness(this.dataset.trainingTargets, predictions)
   }
 
   async evaluateAsync(executor: StaticExecutor): Promise<number> {
-    const predictions = executor.forwardBatch(this.dataset.trainingInputs)
-
-    const fitness = this.fitness(this.dataset.trainingTargets, predictions)
-    return fitness
+    return this.evaluate(executor)
   }
 
   evaluateBatch(executors: StaticExecutor[]): number[] {

@@ -5,10 +5,7 @@ import type { WorkerEvaluationContext } from './WorkerEvaluationContext.js'
 export type TrainerFactoryOptions = Record<string, unknown>
 
 export interface Trainer {
-  train(
-    data: TrainingData,
-    options: { epochs: number; learningRate: number }
-  ): void
+  train(data: TrainingData): void
 }
 
 export type TrainerFactory = (
