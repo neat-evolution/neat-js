@@ -1,4 +1,4 @@
-import type { TrainableExecutor } from '@neat-evolution/backprop'
+import type { TrainableExecutor } from '@neat-evolution/executor'
 import { describe, expect, it, vi } from 'vitest'
 import type { ACAgentConfig } from '../src/createACAgent.js'
 import { createACAgent } from '../src/createACAgent.js'

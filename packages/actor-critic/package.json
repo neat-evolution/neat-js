@@ -46,7 +46,6 @@
     "check": "tsgo --noEmit"
   },
   "dependencies": {
-    "@neat-evolution/backprop": "workspace:*",
     "@neat-evolution/environment": "workspace:*"
   },
   "devDependencies": {

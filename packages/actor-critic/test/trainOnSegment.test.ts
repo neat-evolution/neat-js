@@ -1,5 +1,5 @@
-import type { TrainableExecutor } from '@neat-evolution/backprop'
 import type { Transition } from '@neat-evolution/environment'
+import type { TrainableExecutor } from '@neat-evolution/executor'
 import { describe, expect, it } from 'vitest'
 import type { TrainOnSegmentConfig } from '../src/trainOnSegment.js'
 import { trainOnSegment } from '../src/trainOnSegment.js'

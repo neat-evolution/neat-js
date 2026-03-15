@@ -1,4 +1,3 @@
-import type { TrainableExecutor } from '@neat-evolution/backprop'
 import type {
   EpisodeInfo,
   EpisodeResult,
@@ -8,6 +7,7 @@ import type {
   Transition,
   TransitionInfo,
 } from '@neat-evolution/environment'
+import type { TrainableExecutor } from '@neat-evolution/executor'
 import type { ACGradientConfig } from './computeACGradients.js'
 import { RolloutBuffer } from './RolloutBuffer.js'
 import { trainOnSegment } from './trainOnSegment.js'

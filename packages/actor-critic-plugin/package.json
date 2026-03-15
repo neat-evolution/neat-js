@@ -47,10 +47,11 @@
   },
   "dependencies": {
     "@neat-evolution/actor-critic": "workspace:*",
-    "@neat-evolution/backprop": "workspace:*",
     "@neat-evolution/core": "workspace:*",
     "@neat-evolution/environment": "workspace:*",
     "@neat-evolution/evaluation-strategy": "workspace:*",
+    "@neat-evolution/executor": "workspace:*",
+    "@neat-evolution/utils": "workspace:*",
     "@neat-evolution/worker-rl": "workspace:*"
   },
   "devDependencies": {
