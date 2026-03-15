@@ -1,4 +1,3 @@
-import type { PhenotypeAction } from '@neat-evolution/core'
 import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import type { Handler } from '@neat-evolution/worker-actions'
@@ -19,9 +18,6 @@ export type EvaluationEnhancer = (
   seed?: string
 ) => EvaluateGenomeResult | Promise<EvaluateGenomeResult>
 
-/** Callback for Lamarckian writeback extraction after training. */
-export type WritebackExtractor = () => PhenotypeAction[] | undefined
-
 export interface ThreadContext {
   threadInfo?: ThreadInfo
   genomeFactoryConfig?: GenomeFactoryConfig
@@ -37,10 +33,4 @@ export interface ThreadContext {
   evaluationEnhancer?: EvaluationEnhancer
   /** Stats recorder bridged to the main thread via fire-and-forget messages. */
   stats?: StatsRecorder
-  /** Worker-side evaluation context (loosely typed to avoid importing EvaluationContext). */
-  evaluationContext?: Record<string, unknown>
-  /** Pending Lamarckian writeback from environment-side recording. */
-  pendingWriteback?: PhenotypeAction[] | undefined
-  /** Pending telemetry from environment-side recording. */
-  pendingTelemetry?: unknown | undefined
 }
