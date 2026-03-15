@@ -1,8 +1,5 @@
 import type { Phenotype } from '@neat-evolution/core'
 
-import type { AsyncExecutor, SyncExecutor } from './Executor.js'
+import type { StaticExecutor } from './Executor.js'
 
-export type ExecutorFactory = SyncExecutorFactory | AsyncExecutorFactory
-
-export type SyncExecutorFactory = (phenotype: Phenotype) => SyncExecutor
-export type AsyncExecutorFactory = (phenotype: Phenotype) => AsyncExecutor
+export type ExecutorFactory = (phenotype: Phenotype) => StaticExecutor

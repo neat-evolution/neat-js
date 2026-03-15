@@ -25,7 +25,7 @@ describe('createExecutor', () => {
     ]
     const executor = createExecutor(phenotype)
 
-    const outputs = await executor.executeBatch(data)
+    const outputs = await executor.forwardBatch(data)
     expect(outputs).toBeDefined()
     expect(outputs).toHaveLength(data.length)
     expect(outputs[0]).toHaveLength(3)

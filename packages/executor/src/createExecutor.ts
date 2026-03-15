@@ -9,9 +9,9 @@ import type {
   BatchOutputs,
   Inputs,
   Outputs,
-  SyncExecutor,
+  StaticExecutor,
 } from './Executor.js'
-import type { SyncExecutorFactory } from './ExecutorFactory.js'
+import type { ExecutorFactory } from './ExecutorFactory.js'
 import {
   type ActivationFunction,
   toActivationFunction,
@@ -20,9 +20,9 @@ import {
 const LINK_ACTION = 0
 const ACTIVATION_ACTION = 1
 
-export const createExecutor: SyncExecutorFactory = (
+export const createExecutor: ExecutorFactory = (
   phenotype: Phenotype
-): SyncExecutor => {
+): StaticExecutor => {
   const values = new Float64Array(phenotype.length)
   const outputsCount = phenotype.outputs.length
   const inputsCount = phenotype.inputs.length
@@ -93,7 +93,7 @@ export const createExecutor: SyncExecutorFactory = (
     softmaxGroups.push({ start: groupStart, end: outputsCount })
   }
 
-  const execute = (inputs: Inputs): Outputs => {
+  const forward = (inputs: Inputs): Outputs => {
     // Clear network values - Float64Array.fill is very fast
     values.fill(0)
 
@@ -156,20 +156,19 @@ export const createExecutor: SyncExecutorFactory = (
     return output
   }
 
-  const executeBatch = (batch: BatchInputs): BatchOutputs => {
+  const forwardBatch = (batch: BatchInputs): BatchOutputs => {
     const outputs: BatchOutputs = new Array(batch.length)
     for (let i = 0; i < batch.length; i++) {
       const inputs = batch[i]
       if (inputs !== undefined) {
-        outputs[i] = execute(inputs)
+        outputs[i] = forward(inputs)
       }
     }
     return outputs
   }
 
   return {
-    isAsync: false,
-    execute,
-    executeBatch,
+    forward,
+    forwardBatch,
   }
 }
