@@ -92,9 +92,15 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
         // Merge context hooks from all plugins for this evaluation
         const mergedHooks = this.mergeContextHooks()
 
-        // Create a per-genome context with episodic hooks injected
+        // Create a per-genome context with episodic hooks injected.
+        // episodicContext is not on the EvaluationContext type (removed in Part 04)
+        // but plugins still read it via the spread object. PluginStrategy is
+        // transitional (removed in Part 10).
         const genomeContext: EvaluationContext<G> = mergedHooks
-          ? { ...context, episodicContext: mergedHooks }
+          ? ({
+              ...context,
+              episodicContext: mergedHooks,
+            } as EvaluationContext<G>)
           : context
 
         const defaultEvaluate = async (
@@ -112,12 +118,6 @@ export class PluginStrategy<G extends AnyGenome = AnyGenome>
           .evaluateGenome(genome, defaultEvaluate, genomeContext)
           .then((result): FitnessData => {
             evaluated.push({ genome, fitness: result.fitness })
-            if (result.updatedActions != null) {
-              context.recordWriteback?.(genome, result.updatedActions)
-            }
-            if (result.telemetry != null) {
-              context.recordTelemetry?.(genome, result.telemetry)
-            }
             return [speciesIndex, organismIndex, result.fitness]
           })
       } else {

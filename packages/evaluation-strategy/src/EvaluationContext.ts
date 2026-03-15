@@ -1,10 +1,4 @@
-import type {
-  AnyGenome,
-  FitnessData,
-  GenomeEntry,
-  PhenotypeAction,
-} from '@neat-evolution/core'
-import type { EpisodicContext } from '@neat-evolution/environment'
+import type { AnyGenome, FitnessData, GenomeEntry } from '@neat-evolution/core'
 import type { StaticExecutor } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import type { DispatcherContext } from '@neat-evolution/worker-actions'
@@ -37,35 +31,6 @@ export interface EvaluationContext<G extends AnyGenome = AnyGenome>
    * Plugins can inspect this before dispatching custom worker actions.
    */
   workerTrainingCapabilities?: WorkerTrainingCapabilities
-
-  /**
-   * Episodic context hooks provided by RL plugins.
-   * Set per-genome by PluginStrategy before calling defaultEvaluate.
-   * This is a partial integration surface; direct agent evaluation is the
-   * primary RL path when the environment supports it.
-   */
-  episodicContext?: EpisodicContext
-
-  /**
-   * Optional callback for plugins to record Lamarckian writeback data.
-   * PluginStrategy calls this when a plugin returns updatedActions in EvaluationResult.
-   * The evaluator (Local or Worker) stores the data and applies writebacks after evaluation.
-   */
-  recordWriteback?: (genome: G, updatedActions: PhenotypeAction[]) => void
-
-  /**
-   * Optional callback for plugins to record telemetry data.
-   * PluginStrategy calls this when a plugin returns telemetry in EvaluationResult.
-   * The evaluator stores it for later retrieval via getTelemetry().
-   */
-  recordTelemetry?: (genome: G, telemetry: unknown) => void
-
-  /**
-   * Retrieve telemetry stored by the evaluator for a genome.
-   * Worker evaluation stores telemetry directly in the evaluator; plugins
-   * can read it back via this method to populate their own caches.
-   */
-  getTelemetry?: (genome: G) => unknown
 
   /** Optional stats recorder for evaluation-level metrics. */
   stats?: StatsRecorder
