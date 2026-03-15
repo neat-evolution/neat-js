@@ -5,7 +5,7 @@ import {
 } from '@neat-evolution/core'
 import { describe, expect, it } from 'vitest'
 
-import { createTrainableExecutor } from '../src/createTrainableExecutor.js'
+import { createTrainableExecutor } from '../../../src/features/backprop/createTrainableExecutor.js'
 
 /**
  * Helper: build a simple phenotype from a description.

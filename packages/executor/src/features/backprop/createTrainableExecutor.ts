@@ -4,11 +4,11 @@ import {
   type PhenotypeAction,
   PhenotypeActionType,
 } from '@neat-evolution/core'
-import type { BatchInputs, BatchOutputs } from '@neat-evolution/executor'
+import type { BatchInputs, BatchOutputs } from '../../Executor.js'
 import {
   type ActivationFunction,
   toActivationFunction,
-} from '@neat-evolution/executor'
+} from '../../toActivationFunction.js'
 
 import type { TrainableExecutor } from './TrainableExecutor.js'
 import type { ActivationDerivative } from './toActivationDerivative.js'

@@ -10,13 +10,11 @@ export interface StaticExecutor {
 
 export type Executor = StaticExecutor
 
-// Structural guard — avoids circular dep with @neat-evolution/backprop
+import type { TrainableExecutor } from './features/backprop/TrainableExecutor.js'
+
 export function isTrainableExecutor(
   executor: unknown
-): executor is StaticExecutor & {
-  backward: (outputErrors: Float64Array, learningRate: number) => void
-  getUpdatedActions: () => unknown[]
-} {
+): executor is TrainableExecutor {
   return (
     typeof executor === 'object' &&
     executor !== null &&

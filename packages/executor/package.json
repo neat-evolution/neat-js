@@ -20,6 +20,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./backprop": {
+      "types": "./dist/types/backprop.d.ts",
+      "import": "./dist/esm/backprop.js",
+      "require": "./dist/cjs/backprop.js"
     }
   },
   "files": [
