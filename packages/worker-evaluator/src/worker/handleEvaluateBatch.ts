@@ -1,4 +1,4 @@
-import type { Executor, SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import { createRNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
@@ -31,12 +31,9 @@ export const handleEvaluateBatch: HandleEvaluateBatchFn = async (
   const entries = batchGenomeOptions.map((genomeFactoryOptions) =>
     createCachedExecutorEntry(genomeFactoryOptions, context, { cache: true })
   )
-  const executors: Executor[] = entries.map((entry) => entry.executor)
+  const executors: StaticExecutor[] = entries.map((entry) => entry.executor)
 
-  // Determine async
-  const isAsync = entries.some((entry) => entry.isAsync) || environment.isAsync
-
-  if (isAsync) {
+  if (environment.isAsync) {
     if (environment.evaluateBatchAsync == null) {
       throw new Error('evaluateBatchAsync not implemented on environment')
     }
@@ -46,5 +43,5 @@ export const handleEvaluateBatch: HandleEvaluateBatchFn = async (
   if (environment.evaluateBatch == null) {
     throw new Error('evaluateBatch not implemented on environment')
   }
-  return environment.evaluateBatch(executors as SyncExecutor[], rng)
+  return environment.evaluateBatch(executors, rng)
 }

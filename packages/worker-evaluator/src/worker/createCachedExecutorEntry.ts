@@ -5,7 +5,6 @@ import type { ThreadContext } from './ThreadContext.js'
 
 export interface CachedExecutorEntry {
   executor: Executor
-  isAsync: boolean
 }
 
 function toCacheKey(genomeFactoryOptions: GenomeFactoryOptions): string {
@@ -47,7 +46,6 @@ export const createCachedExecutorEntry = (
   const executor = createExecutor(phenotype)
   const created = {
     executor,
-    isAsync: executor.isAsync,
   }
   if (options.cache) {
     context.executorCache?.set(key, created)

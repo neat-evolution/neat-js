@@ -1,4 +1,3 @@
-import type { SyncExecutor } from '@neat-evolution/executor'
 import { createRNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
@@ -47,7 +46,7 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
 
   const rng = seed != null ? createRNG(seed) : undefined
   const { environment } = context.threadInfo
-  const { executor, isAsync } = createCachedExecutorEntry(
+  const { executor } = createCachedExecutorEntry(
     genomeFactoryOptions,
     context,
     { cache: false }
@@ -56,11 +55,11 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
   // evaluate the genome
   let fitness: number
 
-  // allow for different types of executors and environments
-  if (isAsync || environment.isAsync) {
+  // allow for different types of environments
+  if (environment.isAsync) {
     fitness = await environment.evaluateAsync(executor, rng)
   } else {
-    fitness = environment.evaluate(executor as SyncExecutor, rng)
+    fitness = environment.evaluate(executor, rng)
   }
 
   const result: EvaluateGenomeResult = { fitness }
