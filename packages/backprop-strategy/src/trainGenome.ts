@@ -1,6 +1,6 @@
-import { createTrainableExecutor } from '@neat-evolution/backprop'
 import type { Phenotype } from '@neat-evolution/core'
 import type { SupervisedEnvironment } from '@neat-evolution/environment'
+import { createTrainableExecutor } from '@neat-evolution/executor'
 
 import type { TrainGenomeResult } from './actions.js'
 

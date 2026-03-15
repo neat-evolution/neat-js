@@ -1,7 +1,5 @@
 import type { ACAgentConfig } from '@neat-evolution/actor-critic'
 import { createACAgent } from '@neat-evolution/actor-critic'
-import type { TrainableExecutor } from '@neat-evolution/backprop'
-import { createTrainableExecutor } from '@neat-evolution/backprop'
 import type { GenomeFactoryOptions, Phenotype } from '@neat-evolution/core'
 import type {
   EpisodeInfo,
@@ -10,6 +8,8 @@ import type {
   RolloutSegment,
 } from '@neat-evolution/environment'
 import { isAgentEnvironment } from '@neat-evolution/environment'
+import type { TrainableExecutor } from '@neat-evolution/executor'
+import { createTrainableExecutor } from '@neat-evolution/executor'
 import type { QLAgentConfig } from '@neat-evolution/q-learning'
 import { createQLAgent } from '@neat-evolution/q-learning'
 import type { RNG } from '@neat-evolution/utils'

@@ -40,7 +40,7 @@ let mockQLAgentConfig: {
   ) => void
 }
 
-vi.mock('@neat-evolution/backprop', () => ({
+vi.mock('@neat-evolution/executor', () => ({
   createTrainableExecutor: vi.fn(() => mockTrainableExecutor()),
 }))
 
