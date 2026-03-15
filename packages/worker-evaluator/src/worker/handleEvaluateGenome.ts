@@ -25,12 +25,6 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
     throw new Error('genomeFactoryConfig not initialized')
   }
 
-  // If a worker plugin installed an evaluation enhancer (e.g., RL training),
-  // delegate to it instead of the vanilla evaluation path.
-  if (context.evaluationEnhancer != null) {
-    return await context.evaluationEnhancer(genomeFactoryOptions, context, seed)
-  }
-
   const rng = seed != null ? createRNG(seed) : undefined
   const { environment } = context.threadInfo
 

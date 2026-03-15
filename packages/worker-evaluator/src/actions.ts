@@ -5,7 +5,6 @@ import type {
   InitConfig,
   PhenotypeAction,
 } from '@neat-evolution/core'
-import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
 import type { StatsRecorderConfig } from '@neat-evolution/stats'
 import {
   createMessage,
@@ -27,10 +26,6 @@ export interface InitPayload {
   createEnvironmentPathname: string
   environmentData: unknown
   executorCacheMaxSize?: number
-  /** Module paths for strategy plugins to load on workers. */
-  pluginPaths?: string[]
-  /** Opaque config blob passed to worker plugins during initialization. */
-  pluginData?: Record<string, unknown>
   /** Serialized stats recorder config from the main-thread recorder's `toJSON()`.
    *  When provided, workers create a WorkerStatsRecorder that sends
    *  records back to the main thread via fire-and-forget messages. */
@@ -77,20 +72,16 @@ export interface EvaluateBatchResult {
   writebacks?: Map<number, PhenotypeAction[]>
 }
 
-export type InitAction = WorkerMessage<
-  InitPayload,
-  WorkerTrainingCapabilities | undefined
->
+export type InitAction = WorkerMessage<InitPayload, undefined>
 
 export type InitSuccessAction = WorkerMessage<null, null>
 
 export type TerminateAction = WorkerMessage<null, null>
 
 // Action creators for worker-evaluator
-export const initEvaluator = createMessage<
-  InitPayload,
-  WorkerTrainingCapabilities | undefined
->(ActionType.INIT_EVALUATOR)
+export const initEvaluator = createMessage<InitPayload, undefined>(
+  ActionType.INIT_EVALUATOR
+)
 
 export const initGenomeFactory = createMessage<InitGenomeFactoryPayload, null>(
   ActionType.INIT_GENOME_FACTORY

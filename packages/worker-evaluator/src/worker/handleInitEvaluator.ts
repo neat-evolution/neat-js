@@ -1,5 +1,4 @@
 import type { EnvironmentRuntimeOptions } from '@neat-evolution/environment'
-import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
 import { createWorkerStatsRecorder } from '@neat-evolution/stats'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 import type { InitPayload } from '../actions.js'
@@ -10,7 +9,7 @@ import type { ThreadContext } from './ThreadContext.js'
 export type HandleInitEvaluatorFn = (
   payload: InitPayload,
   context: ThreadContext & Partial<WorkerContext>
-) => Promise<WorkerTrainingCapabilities | undefined>
+) => Promise<undefined>
 
 export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   {
@@ -19,8 +18,6 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     createExecutorPathname,
     environmentData,
     executorCacheMaxSize,
-    pluginPaths,
-    pluginData,
     statsConfig,
     hydrateEnvironmentOptions,
     environmentRuntimeData,
@@ -81,21 +78,5 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   // Store base runtime options for per-genome merging in handleEvaluateGenome
   context.baseRuntimeOptions = runtimeOptions
 
-  // Store plugin data for worker plugins to consume during init
-  if (pluginData != null) {
-    context.pluginData = pluginData
-  }
-
-  // Load strategy plugins
-  if (pluginPaths) {
-    for (const pluginPath of pluginPaths) {
-      const pluginModule = await import(/* @vite-ignore */ pluginPath)
-      const pluginInit = pluginModule.default ?? pluginModule.init
-      if (typeof pluginInit === 'function') {
-        await pluginInit(context.handler, context)
-      }
-    }
-  }
-
-  return context.workerCapabilities
+  return undefined
 }

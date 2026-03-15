@@ -37,20 +37,6 @@ export interface WorkerEvaluatorOptions {
    */
   workerScriptUrl?: URL | string
 
-  /**
-   * Module paths for strategy plugins to load on worker threads.
-   * Each module must default-export a function matching WorkerPluginInit.
-   * Plugins are loaded after INIT_EVALUATOR, before any evaluation.
-   */
-  pluginPaths?: string[]
-
-  /**
-   * Opaque config blob forwarded to worker plugins during initialization.
-   * Plugins read their configuration from this object (keyed by plugin concern).
-   * For RL: `{ rl: RLTrainingConfig }`.
-   */
-  pluginData?: Record<string, unknown>
-
   /** Optional stats recorder for evaluation-level metrics.
    *  When provided, workers receive the recorder's `toJSON()` config
    *  and create a WorkerStatsRecorder that bridges records back. */

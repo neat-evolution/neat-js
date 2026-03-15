@@ -10,9 +10,6 @@ import {
   type EvaluationContext,
   type EvaluationStrategy,
   IndividualStrategy,
-  type RLWorkerMethod,
-  type WorkerRLCapabilities,
-  type WorkerTrainingCapabilities,
 } from '@neat-evolution/evaluation-strategy'
 import type {
   AnyErasedAlgorithm,
@@ -50,15 +47,12 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   public readonly createEnvironmentPathname: string
   public readonly createExecutorPathname: string
   public readonly executorCacheMaxSize: number
-  public readonly pluginPaths: string[] | undefined
-  public readonly pluginData: Record<string, unknown> | undefined
   public readonly hydrateEnvironmentOptions: Record<string, string> | undefined
   public readonly environmentRuntimeData: Record<string, unknown> | undefined
   public readonly initPromise: Promise<void>
 
   private readonly pool: WorkerPool
   private readonly dispatcher: Dispatcher
-  private workerTrainingCapabilities: WorkerTrainingCapabilities | undefined
 
   /** Pending Lamarckian writebacks collected from worker responses. */
   private readonly pendingWritebacks = new Map<AnyGenome, PhenotypeAction[]>()
@@ -91,8 +85,6 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     this.createExecutorPathname = options.createExecutorPathname
     this.createEnvironmentPathname = options.createEnvironmentPathname
     this.executorCacheMaxSize = options.executorCacheMaxSize ?? 0
-    this.pluginPaths = options.pluginPaths
-    this.pluginData = options.pluginData
     this.hydrateEnvironmentOptions = options.hydrateEnvironmentOptions
     this.environmentRuntimeData = options.environmentRuntimeData
     this.stats = options.stats
@@ -148,8 +140,6 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       createEnvironmentPathname: this.createEnvironmentPathname,
       environmentData: this.environment.toFactoryOptions(),
       executorCacheMaxSize: this.executorCacheMaxSize,
-      ...(this.pluginPaths ? { pluginPaths: this.pluginPaths } : {}),
-      ...(this.pluginData ? { pluginData: this.pluginData } : {}),
       ...(this.hydrateEnvironmentOptions
         ? { hydrateEnvironmentOptions: this.hydrateEnvironmentOptions }
         : {}),
@@ -171,19 +161,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       }
     }
 
-    const workerCapabilities = await this.dispatcher.broadcast<
-      WorkerTrainingCapabilities | undefined
-    >(initEvaluator(data))
-    this.workerTrainingCapabilities = aggregateWorkerCapabilities(
-      workerCapabilities,
-      this.threadCount
-    )
-    if (this.workerTrainingCapabilities !== undefined) {
-      this.evaluationContext.workerTrainingCapabilities =
-        this.workerTrainingCapabilities
-    } else {
-      delete this.evaluationContext.workerTrainingCapabilities
-    }
+    await this.dispatcher.broadcast(initEvaluator(data))
   }
 
   async initGenomeFactory<CD extends ConfigData>(
@@ -289,77 +267,4 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     }
     this.pendingWritebacks.clear()
   }
-}
-
-const RL_METHODS: RLWorkerMethod[] = ['actor-critic', 'q-learning']
-
-const aggregateWorkerCapabilities = (
-  snapshots: Array<WorkerTrainingCapabilities | undefined>,
-  workerCount: number
-): WorkerTrainingCapabilities | undefined => {
-  if (workerCount === 0) {
-    return undefined
-  }
-
-  const rlSnapshots = snapshots
-    .map((cap) => cap?.rl)
-    .filter((rl): rl is WorkerRLCapabilities => rl != null)
-  if (rlSnapshots.length === 0) {
-    return {
-      rl: {
-        supported: false,
-        reason: 'Worker RL plugin not registered on workers',
-        methods: {},
-      },
-    }
-  }
-
-  const rlSupportedEverywhere =
-    rlSnapshots.length === workerCount &&
-    rlSnapshots.every((snapshot) => snapshot.supported)
-
-  const rlCapabilities: WorkerRLCapabilities = {
-    supported: rlSupportedEverywhere,
-    ...(rlSupportedEverywhere
-      ? {}
-      : {
-          reason:
-            rlSnapshots.length < workerCount
-              ? 'Worker RL plugin missing on some workers'
-              : 'Worker RL plugin reported RL disabled',
-        }),
-    methods: {},
-  }
-
-  for (const method of RL_METHODS) {
-    const methodSnapshots = snapshots.map((cap) => cap?.rl?.methods?.[method])
-    const definedCount = methodSnapshots.filter((entry) => entry != null).length
-    if (definedCount === 0) {
-      continue
-    }
-
-    const supportedEverywhere =
-      rlSupportedEverywhere &&
-      methodSnapshots.every((entry) => entry?.supported === true)
-    const supportsLamarckian =
-      supportedEverywhere &&
-      methodSnapshots.every(
-        (entry) => entry?.supportsLamarckianWriteback !== false
-      )
-
-    rlCapabilities.methods[method] = {
-      supported: supportedEverywhere,
-      supportsLamarckianWriteback: supportsLamarckian,
-      ...(supportedEverywhere
-        ? {}
-        : {
-            reason:
-              definedCount < workerCount
-                ? 'Method missing on some workers'
-                : 'Method disabled by worker plugin',
-          }),
-    }
-  }
-
-  return { rl: rlCapabilities }
 }
