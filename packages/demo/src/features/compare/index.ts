@@ -289,7 +289,7 @@ for (const result of results) {
   } else {
     // Vanilla: no training, just evaluate
     const executor = createExecutor(phenotype)
-    predictions = dataset.testInputs.map((input) => executor.execute(input))
+    predictions = dataset.testInputs.map((input) => executor.forward(input))
   }
 
   const testFitness = environment.computeFitness(

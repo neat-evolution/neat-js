@@ -200,7 +200,7 @@ const variants: VariantConfig[] = [
       method: 'vanilla',
       options: {
         outputs: 3,
-        agent: 'SyncExecutor',
+        agent: 'StaticExecutor',
       },
       seedLabel: args.seed ?? 'threadRNG()',
       notes: 'No RL updates, serves as the control run',

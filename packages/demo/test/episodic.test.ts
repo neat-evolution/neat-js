@@ -11,7 +11,7 @@ import {
   isAgentEnvironment,
   isEpisodicEnvironment,
 } from '@neat-evolution/environment'
-import type { SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import { threadRNG } from '@neat-evolution/utils'
 import { describe, expect, it, vi } from 'vitest'
 import { BanditEnvironment } from '../src/features/episodic/BanditEnvironment.js'
@@ -21,12 +21,11 @@ import { BanditEnvironment } from '../src/features/episodic/BanditEnvironment.js
 // ---------------------------------------------------------------------------
 
 /** Create a deterministic executor that always returns the same outputs. */
-function makeFixedExecutor(outputs: number[]): SyncExecutor {
+function makeFixedExecutor(outputs: number[]): StaticExecutor {
   const result = Float64Array.from(outputs)
   return {
-    isAsync: false as const,
-    execute: () => result,
-    executeBatch: (batch) => batch.map(() => result),
+    forward: () => result,
+    forwardBatch: (batch) => batch.map(() => result),
   }
 }
 

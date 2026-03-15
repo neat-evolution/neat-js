@@ -9,7 +9,7 @@ import {
   createEpisodicAgent,
   type EpisodicAgent,
 } from '@neat-evolution/environment'
-import type { Executor, SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 
 /** Configuration for a single bandit episode. */
 interface BanditEpisode {
@@ -80,14 +80,13 @@ export class BanditEnvironment
     }
   }
 
-  evaluate(executor: SyncExecutor): number {
+  evaluate(executor: StaticExecutor): number {
     const agent = createEpisodicAgent(executor)
     return this.evaluateAgent(agent)
   }
 
-  async evaluateAsync(executor: Executor): Promise<number> {
-    const syncExecutor = executor as SyncExecutor
-    return this.evaluate(syncExecutor)
+  async evaluateAsync(executor: StaticExecutor): Promise<number> {
+    return this.evaluate(executor)
   }
 
   /**
@@ -95,7 +94,7 @@ export class BanditEnvironment
    *
    * RL plugins call this directly with their trained agent (ACAgent or QLAgent),
    * so agent.act() routes through the RL agent's forward pass + transition recording.
-   * Vanilla evaluation wraps a SyncExecutor in a vanilla agent.
+   * Vanilla evaluation wraps a StaticExecutor in a vanilla agent.
    */
   evaluateAgent(agent: EpisodicAgent): number {
     let totalReward = 0
