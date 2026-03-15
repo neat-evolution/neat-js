@@ -70,7 +70,6 @@
   },
   "dependencies": {
     "@neat-evolution/actor-critic": "workspace:^",
-    "@neat-evolution/actor-critic-plugin": "workspace:^",
     "@neat-evolution/backprop-strategy": "workspace:^",
     "@neat-evolution/core": "workspace:^",
     "@neat-evolution/cppn": "workspace:^",
@@ -86,10 +85,8 @@
     "@neat-evolution/hyperneat": "workspace:^",
     "@neat-evolution/neat": "workspace:^",
     "@neat-evolution/q-learning": "workspace:^",
-    "@neat-evolution/q-learning-plugin": "workspace:^",
     "@neat-evolution/worker-evaluator": "workspace:^",
     "@neat-evolution/worker-reproducer": "workspace:^",
-    "@neat-evolution/worker-rl": "workspace:^",
     "@neat-evolution/worker-threads": "workspace:^",
     "@swc/helpers": "^0.5.19",
     "quick-lru": "^7.3.0"

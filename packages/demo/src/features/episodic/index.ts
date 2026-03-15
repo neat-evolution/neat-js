@@ -14,7 +14,7 @@
  */
 
 import type { ACAgentConfig } from '@neat-evolution/actor-critic'
-import { createAgent as createACAgent } from '@neat-evolution/actor-critic-plugin'
+import { createAgent as createACAgent } from '@neat-evolution/actor-critic/plugin'
 import { Activation } from '@neat-evolution/core'
 import type {
   EnvironmentRuntimeOptions,
@@ -35,8 +35,8 @@ import {
   type NEATGenomeOptions,
 } from '@neat-evolution/neat'
 import type { QLAgentConfig } from '@neat-evolution/q-learning'
-import { createAgent as createQLAgent } from '@neat-evolution/q-learning-plugin'
-import { setThreadRNGSeed } from '@neat-evolution/utils'
+import { createAgent as createQLAgent } from '@neat-evolution/q-learning/plugin'
+import { createRNG, setThreadRNGSeed } from '@neat-evolution/utils'
 
 import { BanditEnvironment } from './BanditEnvironment.js'
 
@@ -133,9 +133,13 @@ if (args.seed) {
 const acSeedBase = args.acSeed ?? args.seed
 const qlSeedBase = args.qlSeed ?? args.seed
 
-const acLamarckSeed = acSeedBase ? `${acSeedBase}:ac-lamarck` : 'ac-lamarck'
-const acDarwinSeed = acSeedBase ? `${acSeedBase}:ac-darwin` : 'ac-darwin'
-const qlSeed = qlSeedBase ? `${qlSeedBase}:q-learning` : 'q-learning'
+// Generate a random fallback seed when no seed is provided (matches old behavior
+// where createRNG() without a seed uses crypto.getRandomValues).
+const randomFallback = () => String(Math.floor(createRNG().gen() * 0x100000000))
+
+const acLamarckSeed = `${acSeedBase ?? randomFallback()}:ac-lamarck`
+const acDarwinSeed = `${acSeedBase ?? randomFallback()}:ac-darwin`
+const qlSeed = `${qlSeedBase ?? randomFallback()}:q-learning`
 
 // --- Build agent configs directly (replaces plugin buildAgentConfig) ---
 
@@ -209,7 +213,7 @@ const variants: VariantConfig[] = [
     workerConfigOverrides: {
       createExecutorPathname: '@neat-evolution/executor/backprop',
       hydrateEnvironmentOptions: {
-        agentFactory: '@neat-evolution/actor-critic-plugin',
+        agentFactory: '@neat-evolution/actor-critic/plugin',
       },
       environmentRuntimeData: {
         agentFactoryOptions: {
@@ -248,7 +252,7 @@ const variants: VariantConfig[] = [
     workerConfigOverrides: {
       createExecutorPathname: '@neat-evolution/executor/backprop',
       hydrateEnvironmentOptions: {
-        agentFactory: '@neat-evolution/actor-critic-plugin',
+        agentFactory: '@neat-evolution/actor-critic/plugin',
       },
       environmentRuntimeData: {
         agentFactoryOptions: {
@@ -287,7 +291,7 @@ const variants: VariantConfig[] = [
     workerConfigOverrides: {
       createExecutorPathname: '@neat-evolution/executor/backprop',
       hydrateEnvironmentOptions: {
-        agentFactory: '@neat-evolution/q-learning-plugin',
+        agentFactory: '@neat-evolution/q-learning/plugin',
       },
       environmentRuntimeData: {
         agentFactoryOptions: {

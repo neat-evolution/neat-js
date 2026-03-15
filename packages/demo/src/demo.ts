@@ -14,10 +14,6 @@ import {
 } from '@neat-evolution/des-hyperneat'
 import { ESHyperNEATAlgorithm } from '@neat-evolution/es-hyperneat'
 import {
-  type EvaluationStrategy,
-  IndividualStrategy,
-} from '@neat-evolution/evaluation-strategy'
-import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
   type EvolutionOptions,
@@ -81,7 +77,6 @@ export interface DemoOptions {
   evolutionOptions?: Partial<EvolutionOptions>
   populationOptions?: Partial<PopulationOptions>
   datasetOptions?: Partial<DatasetOptions>
-  strategy?: EvaluationStrategy
   workerConfig?: WorkerConfig
 }
 
@@ -107,7 +102,6 @@ export const demo = async (
   const manager = new EvolutionManager({
     ...algorithmConfig(selectedMethod),
     environment,
-    strategy: options.strategy ?? new IndividualStrategy(),
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: 2,
