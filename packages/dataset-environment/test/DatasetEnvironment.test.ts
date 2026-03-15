@@ -1,4 +1,4 @@
-import type { Executor, SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import type { Dataset, DatasetOptions } from '../src/index.js'
 import {
@@ -45,8 +45,8 @@ describe('DatasetEnvironment', () => {
 
   describe('batch evaluation', () => {
     let environment: DatasetEnvironment
-    let executors: SyncExecutor[]
-    let asyncExecutors: Executor[]
+    let executors: StaticExecutor[]
+    let asyncExecutors: StaticExecutor[]
 
     beforeEach(async () => {
       const mockDataset: Dataset = {
@@ -73,20 +73,18 @@ describe('DatasetEnvironment', () => {
         .map(() => [...perfectPrediction])
 
       executors = [
-        { executeBatch: vi.fn().mockImplementation(() => predictions) },
-        { executeBatch: vi.fn().mockImplementation(() => predictions) },
-      ] as unknown as SyncExecutor[]
+        { forwardBatch: vi.fn().mockImplementation(() => predictions) },
+        { forwardBatch: vi.fn().mockImplementation(() => predictions) },
+      ] as unknown as StaticExecutor[]
 
       asyncExecutors = [
         {
-          executeBatch: vi.fn().mockImplementation(async () => predictions),
-          isAsync: true,
+          forwardBatch: vi.fn().mockImplementation(() => predictions),
         },
         {
-          executeBatch: vi.fn().mockImplementation(async () => predictions),
-          isAsync: true,
+          forwardBatch: vi.fn().mockImplementation(() => predictions),
         },
-      ] as unknown as Executor[]
+      ] as unknown as StaticExecutor[]
     })
 
     test('evaluateBatch should return fitness for multiple executors', () => {

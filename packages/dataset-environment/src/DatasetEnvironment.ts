@@ -5,7 +5,7 @@ import type {
   SupervisedEnvironment,
   TrainingData,
 } from '@neat-evolution/environment'
-import type { Executor, SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 
 import type { Dataset } from './Dataset.js'
 import { datasetToSharedBuffer } from './datasetToSharedBuffer.js'
@@ -37,25 +37,25 @@ export class DatasetEnvironment
     }
   }
 
-  evaluate(executor: SyncExecutor): number {
-    const predictions = executor.executeBatch(this.dataset.trainingInputs)
+  evaluate(executor: StaticExecutor): number {
+    const predictions = executor.forwardBatch(this.dataset.trainingInputs)
 
     const fitness = this.fitness(this.dataset.trainingTargets, predictions)
     return fitness
   }
 
-  async evaluateAsync(executor: Executor): Promise<number> {
-    const predictions = await executor.executeBatch(this.dataset.trainingInputs)
+  async evaluateAsync(executor: StaticExecutor): Promise<number> {
+    const predictions = executor.forwardBatch(this.dataset.trainingInputs)
 
     const fitness = this.fitness(this.dataset.trainingTargets, predictions)
     return fitness
   }
 
-  evaluateBatch(executors: SyncExecutor[]): number[] {
+  evaluateBatch(executors: StaticExecutor[]): number[] {
     return executors.map((executor) => this.evaluate(executor))
   }
 
-  async evaluateBatchAsync(executors: Executor[]): Promise<number[]> {
+  async evaluateBatchAsync(executors: StaticExecutor[]): Promise<number[]> {
     const promises = executors.map(
       async (executor) => await this.evaluateAsync(executor)
     )
