@@ -6,8 +6,8 @@ import type {
 } from '@neat-evolution/environment'
 import type { Executor } from '@neat-evolution/executor'
 import { isTrainableExecutor } from '@neat-evolution/executor'
-import type { QLAgentConfig } from '@neat-evolution/q-learning'
-import { createQLAgent } from '@neat-evolution/q-learning'
+import type { QLAgentConfig } from '../../index.js'
+import { createQLAgent } from '../../index.js'
 import { createRNG } from '@neat-evolution/utils'
 
 interface QLAgentFactoryOptions extends AgentFactoryOptions {

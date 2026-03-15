@@ -20,6 +20,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/types/plugin.d.ts",
+      "import": "./dist/esm/plugin.js",
+      "require": "./dist/cjs/plugin.js"
     }
   },
   "files": [
@@ -48,6 +53,7 @@
   "dependencies": {
     "@neat-evolution/actor-critic": "workspace:*",
     "@neat-evolution/environment": "workspace:*",
+    "@neat-evolution/executor": "workspace:*",
     "@neat-evolution/utils": "workspace:*"
   },
   "devDependencies": {
