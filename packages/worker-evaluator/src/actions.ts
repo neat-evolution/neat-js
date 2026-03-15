@@ -35,6 +35,8 @@ export interface InitPayload {
    *  When provided, workers create a WorkerStatsRecorder that sends
    *  records back to the main thread via fire-and-forget messages. */
   statsConfig?: StatsRecorderConfig
+  /** Map of field names to module pathnames for worker-side hydration. */
+  hydrateEnvironmentOptions?: Record<string, string>
 }
 
 export interface InitGenomeFactoryPayload<

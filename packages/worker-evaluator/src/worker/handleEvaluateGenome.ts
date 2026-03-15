@@ -24,10 +24,25 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
     throw new Error('genomeFactoryConfig not initialized')
   }
 
+  // Clear pending writeback/telemetry from previous evaluation
+  context.pendingWriteback = undefined
+  context.pendingTelemetry = undefined
+
   // If a worker plugin installed an evaluation enhancer (e.g., RL training),
   // delegate to it instead of the vanilla evaluation path.
   if (context.evaluationEnhancer != null) {
-    return await context.evaluationEnhancer(genomeFactoryOptions, context, seed)
+    const result = await context.evaluationEnhancer(
+      genomeFactoryOptions,
+      context,
+      seed
+    )
+    if (context.pendingWriteback != null) {
+      result.updatedActions ??= context.pendingWriteback
+    }
+    if (context.pendingTelemetry != null) {
+      result.telemetry ??= context.pendingTelemetry
+    }
+    return result
   }
 
   const rng = seed != null ? createRNG(seed) : undefined
@@ -48,5 +63,12 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
     fitness = environment.evaluate(executor as SyncExecutor, rng)
   }
 
-  return { fitness }
+  const result: EvaluateGenomeResult = { fitness }
+  if (context.pendingWriteback != null) {
+    result.updatedActions = context.pendingWriteback
+  }
+  if (context.pendingTelemetry != null) {
+    result.telemetry = context.pendingTelemetry
+  }
+  return result
 }

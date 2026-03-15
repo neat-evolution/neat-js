@@ -37,4 +37,10 @@ export interface ThreadContext {
   evaluationEnhancer?: EvaluationEnhancer
   /** Stats recorder bridged to the main thread via fire-and-forget messages. */
   stats?: StatsRecorder
+  /** Worker-side evaluation context (loosely typed to avoid importing EvaluationContext). */
+  evaluationContext?: Record<string, unknown>
+  /** Pending Lamarckian writeback from environment-side recording. */
+  pendingWriteback?: PhenotypeAction[] | undefined
+  /** Pending telemetry from environment-side recording. */
+  pendingTelemetry?: unknown | undefined
 }

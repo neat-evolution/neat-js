@@ -6,7 +6,6 @@ import type {
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
-import type { StatsRecorder } from '@neat-evolution/stats'
 import {
   type EvaluationContext,
   type EvaluationStrategy,
@@ -22,14 +21,15 @@ import type {
   GenomeEntries,
   GenomeEntry,
 } from '@neat-evolution/evaluator'
+import type { StatsRecorder } from '@neat-evolution/stats'
 import { Dispatcher } from '@neat-evolution/worker-actions'
 import { WorkerPool } from '@neat-evolution/worker-pool'
 
 import {
   type EvaluateGenomeResult,
-  type RecordStatsPayload,
   initEvaluator,
   initGenomeFactory as initGenomeFactoryAction,
+  type RecordStatsPayload,
   recordStats,
   requestEvaluateBatch,
   requestEvaluateGenome,
@@ -51,6 +51,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   public readonly executorCacheMaxSize: number
   public readonly pluginPaths: string[] | undefined
   public readonly pluginData: Record<string, unknown> | undefined
+  public readonly hydrateEnvironmentOptions: Record<string, string> | undefined
   public readonly initPromise: Promise<void>
 
   private readonly pool: WorkerPool
@@ -90,6 +91,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     this.executorCacheMaxSize = options.executorCacheMaxSize ?? 0
     this.pluginPaths = options.pluginPaths
     this.pluginData = options.pluginData
+    this.hydrateEnvironmentOptions = options.hydrateEnvironmentOptions
     this.stats = options.stats
 
     // Use provided workerScriptUrl or fall back to default (works in Node.js, not Vite)
@@ -154,6 +156,9 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       executorCacheMaxSize: this.executorCacheMaxSize,
       ...(this.pluginPaths ? { pluginPaths: this.pluginPaths } : {}),
       ...(this.pluginData ? { pluginData: this.pluginData } : {}),
+      ...(this.hydrateEnvironmentOptions
+        ? { hydrateEnvironmentOptions: this.hydrateEnvironmentOptions }
+        : {}),
     }
 
     // Serialize stats config and register handler for worker stats messages
@@ -162,13 +167,10 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
       if (statsConfig.wantedMetrics.length > 0) {
         data.statsConfig = statsConfig
         const stats = this.stats
-        this.dispatcher.addMessageHandler(
-          recordStats,
-          (message) => {
-            const payload = message.payload as RecordStatsPayload
-            stats.record(payload.metric, payload.value)
-          }
-        )
+        this.dispatcher.addMessageHandler(recordStats, (message) => {
+          const payload = message.payload as RecordStatsPayload
+          stats.record(payload.metric, payload.value)
+        })
       }
     }
 

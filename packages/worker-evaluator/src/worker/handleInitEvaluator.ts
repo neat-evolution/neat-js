@@ -1,9 +1,10 @@
+import type { PhenotypeAction } from '@neat-evolution/core'
+import type { EnvironmentRuntimeOptions } from '@neat-evolution/environment'
 import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
 import { createWorkerStatsRecorder } from '@neat-evolution/stats'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
-
-import { recordStats } from '../actions.js'
 import type { InitPayload } from '../actions.js'
+import { recordStats } from '../actions.js'
 
 import type { ThreadContext } from './ThreadContext.js'
 
@@ -22,6 +23,7 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     pluginPaths,
     pluginData,
     statsConfig,
+    hydrateEnvironmentOptions,
   },
   context
 ) => {
@@ -33,7 +35,46 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   const { createExecutor } = await import(
     /* @vite-ignore */ createExecutorPathname
   )
-  const environment = createEnvironment(environmentData)
+
+  // FIXME: should this just be handled by returning true?
+  if (context.send == null) {
+    throw new Error('send not properly added to context')
+  }
+
+  // Build runtime options for the environment
+  const runtimeOptions: EnvironmentRuntimeOptions = {}
+
+  // Create worker-side stats recorder that bridges to main thread
+  if (statsConfig != null) {
+    const send = context.send
+    context.stats = createWorkerStatsRecorder(statsConfig, (metric, value) => {
+      send(recordStats({ metric, value }))
+    })
+    runtimeOptions.stats = context.stats
+  }
+
+  // Construct worker-side evaluation context
+  context.evaluationContext = {
+    recordWriteback: (_genome: unknown, updatedActions: PhenotypeAction[]) => {
+      context.pendingWriteback = updatedActions
+    },
+    recordTelemetry: (_genome: unknown, telemetry: unknown) => {
+      context.pendingTelemetry = telemetry
+    },
+    getTelemetry: () => context.pendingTelemetry,
+    stats: context.stats,
+  }
+  runtimeOptions.evaluationContext = context.evaluationContext
+
+  // Hydrate each pathname: dynamically import and inject into runtimeOptions
+  if (hydrateEnvironmentOptions != null) {
+    for (const [field, path] of Object.entries(hydrateEnvironmentOptions)) {
+      const mod = await import(/* @vite-ignore */ path)
+      runtimeOptions[field] = mod.default ?? mod[field]
+    }
+  }
+
+  const environment = createEnvironment(environmentData, runtimeOptions)
 
   context.threadInfo = {
     createConfig,
@@ -48,22 +89,6 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
   // Store plugin data for worker plugins to consume during init
   if (pluginData != null) {
     context.pluginData = pluginData
-  }
-
-  // FIXME: should this just be handled by returning true?
-  if (context.send == null) {
-    throw new Error('send not properly added to context')
-  }
-
-  // Create worker-side stats recorder that bridges to main thread
-  if (statsConfig != null) {
-    const send = context.send
-    context.stats = createWorkerStatsRecorder(
-      statsConfig,
-      (metric, value) => {
-        send(recordStats({ metric, value }))
-      }
-    )
   }
 
   // Load strategy plugins
