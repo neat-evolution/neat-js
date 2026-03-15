@@ -41,9 +41,6 @@ export interface WorkerConfig {
   /** Number of evaluation tasks per generation. Default: populationSize */
   taskCount?: number
 
-  /** Strategy plugin paths to load on workers */
-  pluginPaths?: string[]
-
   /** Worker script URLs for Vite compatibility.
    *  In Vite: import with `?worker&url` suffix.
    *  In Node: not needed (uses default worker script). */
@@ -76,10 +73,8 @@ export interface EvolutionManagerConfig<
    *  For local evaluation (no workerConfig), pass a full Environment with evaluate methods. */
   environment: EnvironmentConfig
 
-  /**
-   * Evaluation strategy. Pass a PluginStrategy to use evaluation plugins
-   * (RL, backprop, etc.). Omit for default individual evaluation.
-   */
+  /** Evaluation strategy for orchestrating genome evaluation.
+   *  Omit for default individual evaluation. */
   strategy?: EvaluationStrategy
 
   /** Evolution loop settings (iterations, secondsLimit, callbacks, etc.) */

@@ -17,7 +17,6 @@ import type {
   EnvironmentRuntimeOptions,
 } from '@neat-evolution/environment'
 import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
-import { PluginStrategy } from '@neat-evolution/evaluation-strategy'
 import type { Evaluator } from '@neat-evolution/evaluator'
 import { createEvaluator as createLocalEvaluator } from '@neat-evolution/evaluator'
 import type {
@@ -365,9 +364,6 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     if (workerConfig.verbose != null) {
       evaluatorOptions.verbose = workerConfig.verbose
     }
-    if (workerConfig.pluginPaths != null) {
-      evaluatorOptions.pluginPaths = workerConfig.pluginPaths
-    }
     if (workerConfig.hydrateEnvironmentOptions != null) {
       evaluatorOptions.hydrateEnvironmentOptions =
         workerConfig.hydrateEnvironmentOptions
@@ -378,16 +374,6 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     if (workerConfig.environmentRuntimeData != null) {
       evaluatorOptions.environmentRuntimeData =
         workerConfig.environmentRuntimeData
-    }
-
-    // Collect plugin data from initialized plugins for worker configuration.
-    // Plugins provide training config (RL method, agent config, etc.) that
-    // workers receive once during init instead of per-genome.
-    if (effectiveStrategy instanceof PluginStrategy) {
-      const pluginData = effectiveStrategy.collectWorkerPluginData()
-      if (Object.keys(pluginData).length > 0) {
-        evaluatorOptions.pluginData = pluginData
-      }
     }
 
     const algorithm = this.algorithm as unknown as AnyErasedAlgorithm
