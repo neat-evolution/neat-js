@@ -1202,6 +1202,7 @@ __metadata:
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
     "@neat-evolution/core": "workspace:^"
     "@neat-evolution/executor": "workspace:^"
+    "@neat-evolution/stats": "workspace:^"
     "@neat-evolution/utils": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"

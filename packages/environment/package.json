@@ -48,6 +48,7 @@
   "dependencies": {
     "@neat-evolution/core": "workspace:^",
     "@neat-evolution/executor": "workspace:^",
+    "@neat-evolution/stats": "workspace:^",
     "@neat-evolution/utils": "workspace:^",
     "@swc/helpers": "^0.5.19"
   },
