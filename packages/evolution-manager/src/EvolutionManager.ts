@@ -39,6 +39,7 @@ import {
 } from '@neat-evolution/evolution'
 import type { SyncExecutor } from '@neat-evolution/executor'
 import { createExecutor } from '@neat-evolution/executor'
+import type { StatsRecorder } from '@neat-evolution/stats'
 import {
   createEvaluator as createWorkerEvaluator,
   type WorkerEvaluator,
@@ -49,7 +50,6 @@ import {
   type Terminable,
   type WorkerReproducerOptions,
 } from '@neat-evolution/worker-reproducer'
-import type { StatsRecorder } from '@neat-evolution/stats'
 import { hardwareConcurrency } from '@neat-evolution/worker-threads'
 
 import type {
@@ -349,6 +349,10 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     }
     if (workerConfig.pluginPaths != null) {
       evaluatorOptions.pluginPaths = workerConfig.pluginPaths
+    }
+    if (workerConfig.hydrateEnvironmentOptions != null) {
+      evaluatorOptions.hydrateEnvironmentOptions =
+        workerConfig.hydrateEnvironmentOptions
     }
     if (this.stats != null) {
       evaluatorOptions.stats = this.stats

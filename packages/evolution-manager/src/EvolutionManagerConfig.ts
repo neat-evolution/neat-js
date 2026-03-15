@@ -47,6 +47,11 @@ export interface WorkerConfig {
   evaluatorWorkerScriptUrl?: URL | string
   reproducerWorkerScriptUrl?: URL | string
 
+  /** Map of field names to module pathnames for worker-side hydration.
+   *  Each entry is dynamically imported on the worker and injected into
+   *  EnvironmentRuntimeOptions under the given field name. */
+  hydrateEnvironmentOptions?: Record<string, string>
+
   /** Enable verbose logging */
   verbose?: boolean
 }
