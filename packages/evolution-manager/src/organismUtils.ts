@@ -11,14 +11,14 @@ import type {
   StateDataOf,
 } from '@neat-evolution/core'
 import { Organism, type OrganismData } from '@neat-evolution/evolution'
-import type { SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import { createExecutor } from '@neat-evolution/executor'
 
 /** Convert an organism to a sync executor for inference. */
 export function organismToExecutor<Ctx extends AlgorithmContext>(
   algorithm: Algorithm<Ctx>,
   organism: Organism<Ctx>
-): SyncExecutor {
+): StaticExecutor {
   return createExecutor(algorithm.createPhenotype(organism.genome))
 }
 
@@ -61,7 +61,7 @@ export function deserializeOrganism<Ctx extends AlgorithmContext>(
   )
 }
 
-/** Convenience: deserialize organism data directly to a SyncExecutor.
+/** Convenience: deserialize organism data directly to a StaticExecutor.
  *  Combines deserializeOrganism() + organismToExecutor() in one call.
  *
  *  @param algorithm - The algorithm that created the organism
@@ -79,7 +79,7 @@ export function serializedToExecutor<Ctx extends AlgorithmContext>(
     GenomeOptionsOf<Ctx>
   >,
   initConfig: InitConfig
-): SyncExecutor {
+): StaticExecutor {
   const organism = deserializeOrganism(algorithm, organismData, initConfig)
   return organismToExecutor(algorithm, organism)
 }

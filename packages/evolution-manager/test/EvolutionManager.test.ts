@@ -1,5 +1,5 @@
 import type { Environment } from '@neat-evolution/environment'
-import type { SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import { NEATAlgorithm } from '@neat-evolution/neat'
 import { describe, expect, test } from 'vitest'
 import {
@@ -25,10 +25,10 @@ function createTestEnvironment(): Environment<null> {
     description: { inputs: 2, outputs: 1 },
     isAsync: false,
     toFactoryOptions: () => null,
-    evaluate: (executor: SyncExecutor) => {
+    evaluate: (executor: StaticExecutor) => {
       let totalError = 0
       for (const { input, expected } of testCases) {
-        const output = executor.execute(input)
+        const output = executor.forward(input)
         totalError += Math.abs((output[0] ?? 0) - expected)
       }
       return 1 - totalError / testCases.length
@@ -36,7 +36,7 @@ function createTestEnvironment(): Environment<null> {
     evaluateAsync: async (executor) => {
       let totalError = 0
       for (const { input, expected } of testCases) {
-        const output = await executor.execute(input)
+        const output = executor.forward(input)
         totalError += Math.abs((output[0] ?? 0) - expected)
       }
       return 1 - totalError / testCases.length
@@ -313,7 +313,7 @@ describe('EvolutionManager', () => {
       const executor = manager.getBestExecutor()
       expect(executor).toBeDefined()
       // Should produce output for our 2-input environment
-      const output = executor.execute([0, 1])
+      const output = executor.forward([0, 1])
       expect(output).toHaveLength(1)
       expect(typeof output[0]).toBe('number')
       await manager.terminate()
@@ -341,7 +341,7 @@ describe('EvolutionManager', () => {
         throw new Error('No best organism')
       }
       const executor = manager.organismToExecutor(best)
-      const output = executor.execute([1, 0])
+      const output = executor.forward([1, 0])
       expect(output).toHaveLength(1)
       expect(typeof output[0]).toBe('number')
       await manager.terminate()
@@ -411,8 +411,8 @@ describe('EvolutionManager', () => {
       const originalExecutor = manager.organismToExecutor(best)
       const restoredExecutor = manager.organismToExecutor(restored)
       const input = [0.5, 0.5]
-      const originalOutput = originalExecutor.execute(input)
-      const restoredOutput = restoredExecutor.execute(input)
+      const originalOutput = originalExecutor.forward(input)
+      const restoredOutput = restoredExecutor.forward(input)
       expect(restoredOutput).toHaveLength(originalOutput.length)
       // Genome factory options round-trip may produce slightly different
       // connection ordering, so check approximate equality
@@ -527,7 +527,7 @@ describe('EvolutionManager', () => {
 
       // Should produce working executor
       const executor = organismToExecutor(NEATAlgorithm, restored)
-      const output = executor.execute([0, 1])
+      const output = executor.forward([0, 1])
       expect(output).toHaveLength(1)
     })
 
@@ -551,7 +551,7 @@ describe('EvolutionManager', () => {
       // Get reference output
       const originalExecutor = manager.organismToExecutor(best)
       const input = [0.3, 0.7]
-      const expectedOutput = originalExecutor.execute(input)
+      const expectedOutput = originalExecutor.forward(input)
       await manager.terminate()
 
       // serializedToExecutor should produce same output
@@ -560,7 +560,7 @@ describe('EvolutionManager', () => {
         organismData,
         environment.description
       )
-      expect(executor.execute(input)).toEqual(expectedOutput)
+      expect(executor.forward(input)).toEqual(expectedOutput)
     })
   })
 })

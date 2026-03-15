@@ -37,7 +37,7 @@ import {
   type PopulationData,
   type PopulationFactoryOptions,
 } from '@neat-evolution/evolution'
-import type { SyncExecutor } from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
 import { createExecutor } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import {
@@ -233,7 +233,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
   }
 
   /** Convert an organism to a sync executor for inference. */
-  organismToExecutor(organism: Organism<Ctx>): SyncExecutor {
+  organismToExecutor(organism: Organism<Ctx>): StaticExecutor {
     return createExecutor(this.algorithm.createPhenotype(organism.genome))
   }
 
@@ -289,7 +289,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
   }
 
   /** Get the best organism's executor. Throws if no best found. */
-  getBestExecutor(): SyncExecutor {
+  getBestExecutor(): StaticExecutor {
     const population = this.population
     if (population == null) {
       throw new Error('Population not initialized')
