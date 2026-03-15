@@ -1,5 +1,5 @@
-import type { ACAgentConfig } from '@neat-evolution/actor-critic'
-import { createACAgent } from '@neat-evolution/actor-critic'
+import type { ACAgentConfig } from '../../index.js'
+import { createACAgent } from '../../index.js'
 import type {
   AgentFactory,
   AgentFactoryOptions,
