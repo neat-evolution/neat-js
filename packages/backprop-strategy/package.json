@@ -20,11 +20,6 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
-    },
-    "./workerPlugin": {
-      "types": "./dist/types/workerPlugin.d.ts",
-      "import": "./dist/esm/workerPlugin.js",
-      "require": "./dist/cjs/workerPlugin.js"
     }
   },
   "files": [
@@ -51,16 +46,12 @@
     "check": "tsgo --noEmit"
   },
   "dependencies": {
-    "@neat-evolution/core": "workspace:*",
     "@neat-evolution/environment": "workspace:*",
-    "@neat-evolution/evaluation-strategy": "workspace:*",
-    "@neat-evolution/executor": "workspace:*",
-    "@neat-evolution/worker-actions": "workspace:*"
+    "@neat-evolution/executor": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
     "@heygrady/tsconfig-bases": "^1.0.7",
-    "@neat-evolution/worker-evaluator": "workspace:*",
     "@swc/cli": "^0.7.9",
     "@swc/core": "^1.15.3",
     "@typescript/native-preview": "7.0.0-dev.20260220.1",
