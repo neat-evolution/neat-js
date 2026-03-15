@@ -14,6 +14,7 @@ import type {
 import type {
   Environment,
   EnvironmentConfig,
+  EnvironmentRuntimeOptions,
 } from '@neat-evolution/environment'
 import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
 import { PluginStrategy } from '@neat-evolution/evaluation-strategy'
@@ -37,8 +38,11 @@ import {
   type PopulationData,
   type PopulationFactoryOptions,
 } from '@neat-evolution/evolution'
-import type { StaticExecutor } from '@neat-evolution/executor'
-import { createExecutor } from '@neat-evolution/executor'
+import type { ExecutorFactory, StaticExecutor } from '@neat-evolution/executor'
+import {
+  createExecutor,
+  createTrainableExecutor,
+} from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import {
   createEvaluator as createWorkerEvaluator,
@@ -77,6 +81,9 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
         GenomeOptionsOf<Ctx>
       >
     | undefined
+  private readonly environmentRuntimeOptions:
+    | EnvironmentRuntimeOptions
+    | undefined
   private readonly workerConfig: WorkerConfig | undefined
   private readonly stats: StatsRecorder | undefined
   private readonly signal: AbortSignal | undefined
@@ -110,6 +117,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       config.genomeOptions ??
       ({ ...config.algorithm.defaultOptions } as GenomeOptionsOf<Ctx>)
     this.populationFactoryOptions = config.populationFactoryOptions
+    this.environmentRuntimeOptions = config.environmentRuntimeOptions
     this.workerConfig = config.workerConfig
     this.stats = config.stats
     this.signal = config.signal
@@ -136,10 +144,20 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     } else {
       const algorithm = this.algorithm as unknown as AnyErasedAlgorithm
       const environment = this.environment as Environment
+      // When the environment needs a trainer or agent factory, use trainable executors
+      const needsTrainable =
+        this.environmentRuntimeOptions?.trainerFactory != null ||
+        this.environmentRuntimeOptions?.agentFactory != null
+      const executorFactory: ExecutorFactory = needsTrainable
+        ? createTrainableExecutor
+        : createExecutor
       evaluator = createLocalEvaluator(algorithm, environment, {
-        createExecutor,
+        createExecutor: executorFactory,
         ...(effectiveStrategy != null ? { strategy: effectiveStrategy } : {}),
         ...(this.stats != null ? { stats: this.stats } : {}),
+        ...(this.environmentRuntimeOptions != null
+          ? { environmentRuntimeOptions: this.environmentRuntimeOptions }
+          : {}),
       })
       createReproducer = createLocalReproducer as unknown as ReproducerFactory<
         Population<Ctx>
@@ -356,6 +374,10 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     }
     if (this.stats != null) {
       evaluatorOptions.stats = this.stats
+    }
+    if (workerConfig.environmentRuntimeData != null) {
+      evaluatorOptions.environmentRuntimeData =
+        workerConfig.environmentRuntimeData
     }
 
     // Collect plugin data from initialized plugins for worker configuration.

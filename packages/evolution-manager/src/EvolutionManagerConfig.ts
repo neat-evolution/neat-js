@@ -8,7 +8,10 @@ import type {
   NodeHiddenDataOf,
   StateDataOf,
 } from '@neat-evolution/core'
-import type { EnvironmentConfig } from '@neat-evolution/environment'
+import type {
+  EnvironmentConfig,
+  EnvironmentRuntimeOptions,
+} from '@neat-evolution/environment'
 import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
 import type {
   EvolutionOptions,
@@ -51,6 +54,11 @@ export interface WorkerConfig {
    *  Each entry is dynamically imported on the worker and injected into
    *  EnvironmentRuntimeOptions under the given field name. */
   hydrateEnvironmentOptions?: Record<string, string>
+
+  /** Serializable runtime data forwarded to workers and merged into
+   *  EnvironmentRuntimeOptions. Use for factory options and config blobs.
+   *  Functions (factories) go via hydrateEnvironmentOptions instead. */
+  environmentRuntimeData?: Record<string, unknown>
 
   /** Enable verbose logging */
   verbose?: boolean
@@ -101,6 +109,12 @@ export interface EvolutionManagerConfig<
     GenomeFactoryOptionsOf<Ctx>,
     GenomeOptionsOf<Ctx>
   >
+
+  /** Runtime options forwarded to the environment during evaluation.
+   *  Contains factory functions + their options for local evaluation.
+   *  For workers, serializable data goes via workerConfig.environmentRuntimeData
+   *  and factory functions go via workerConfig.hydrateEnvironmentOptions. */
+  environmentRuntimeOptions?: EnvironmentRuntimeOptions
 
   /** Worker configuration. Required for any practical use case.
    *  Omit only for unit tests or trivial single-threaded experiments. */
