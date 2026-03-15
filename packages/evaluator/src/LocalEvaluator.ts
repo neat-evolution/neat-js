@@ -82,15 +82,6 @@ export class LocalEvaluator<EFO> implements Evaluator<EFO> {
         evaluateGenomeEntryBatch: (entries) =>
           Promise.all(entries.map((e) => this.worker(e))),
         ...this.localDispatcher.context,
-        recordWriteback: (genome, updatedActions) => {
-          this.pendingWritebacks.set(genome, updatedActions)
-        },
-        recordTelemetry: (genome, telemetry) => {
-          this.telemetryByGenome.set(genome, telemetry)
-        },
-        getTelemetry: (genome) => {
-          return this.telemetryByGenome.get(genome)
-        },
         ...(this.stats != null ? { stats: this.stats } : {}),
       }
       if (isRuntimeConfigurable(this.environment)) {
