@@ -1,3 +1,4 @@
+import type { EnvironmentRuntimeOptions } from '@neat-evolution/environment'
 import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
 import type { ExecutorFactory } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
@@ -7,4 +8,5 @@ export interface EvaluatorFactoryOptions<G extends AnyGenome = AnyGenome> {
   createExecutor: ExecutorFactory
   strategy?: EvaluationStrategy<G>
   stats?: StatsRecorder
+  environmentRuntimeOptions?: EnvironmentRuntimeOptions
 }

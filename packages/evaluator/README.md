@@ -118,9 +118,9 @@ The `evaluator` package exposes the following key types and functions:
   A factory function that creates an `Evaluator` instance. It takes an
   `Algorithm`, an `Environment`, and `EvaluatorFactoryOptions` (including an
   `ExecutorFactory` and an optional `EvaluationStrategy`) to construct the
-  evaluator. Uses `LocalEvaluator` as its underlying implementation.
+  evaluator. Uses `TestEvaluator` as its underlying implementation.
 
-- **`LocalEvaluator` class**:
+- **`TestEvaluator` class**:
 
   The standard non-worker implementation of the `Evaluator` interface. Supports
   pluggable `EvaluationStrategy` via `LocalDispatcher` for in-process message
