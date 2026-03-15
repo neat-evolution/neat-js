@@ -1,10 +1,13 @@
 import type { StatsRecorder } from '@neat-evolution/stats'
 import type { AgentFactory } from './AgentFactory.js'
+import type { TrainerFactory } from './TrainerFactory.js'
+import type { WorkerEvaluationContext } from './WorkerEvaluationContext.js'
 
 export interface EnvironmentRuntimeOptions {
   stats?: StatsRecorder
   agentFactory?: AgentFactory
-  evaluationContext?: unknown // typed unknown to avoid circular dep
+  trainerFactory?: TrainerFactory
+  evaluationContext?: WorkerEvaluationContext
   [key: string]: unknown // extensible for hydrated pathnames
 }
 

@@ -1204,6 +1204,7 @@ __metadata:
     "@neat-evolution/executor": "workspace:^"
     "@neat-evolution/stats": "workspace:^"
     "@neat-evolution/utils": "workspace:^"
+    "@neat-evolution/worker-actions": "workspace:^"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
     "@swc/helpers": "npm:^0.5.19"

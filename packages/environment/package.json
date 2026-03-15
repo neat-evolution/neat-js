@@ -50,6 +50,7 @@
     "@neat-evolution/executor": "workspace:^",
     "@neat-evolution/stats": "workspace:^",
     "@neat-evolution/utils": "workspace:^",
+    "@neat-evolution/worker-actions": "workspace:^",
     "@swc/helpers": "^0.5.19"
   },
   "devDependencies": {
