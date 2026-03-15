@@ -1,4 +1,4 @@
-import type { TrainableExecutor } from '@neat-evolution/backprop'
+import type { TrainableExecutor } from '@neat-evolution/executor'
 import type { RNG } from '@neat-evolution/utils'
 import { describe, expect, it, vi } from 'vitest'
 import type { QLAgentConfig } from '../src/createQLAgent.js'

@@ -1,4 +1,3 @@
-import { createTrainableExecutor } from '@neat-evolution/backprop'
 import type { AnyAlgorithm, AnyGenome } from '@neat-evolution/core'
 import type {
   EpisodeInfo,
@@ -23,6 +22,7 @@ import type {
   PluginContext,
 } from '@neat-evolution/evaluation-strategy'
 import type { Executor } from '@neat-evolution/executor'
+import { createTrainableExecutor } from '@neat-evolution/executor'
 import type { QLAgent, QLAgentConfig } from '@neat-evolution/q-learning'
 import { createQLAgent } from '@neat-evolution/q-learning'
 import type { RNG } from '@neat-evolution/utils'

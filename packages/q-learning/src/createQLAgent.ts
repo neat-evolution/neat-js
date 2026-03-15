@@ -1,5 +1,4 @@
 import { RolloutBuffer } from '@neat-evolution/actor-critic'
-import type { TrainableExecutor } from '@neat-evolution/backprop'
 import type {
   EpisodeInfo,
   EpisodeResult,
@@ -9,6 +8,7 @@ import type {
   Transition,
   TransitionInfo,
 } from '@neat-evolution/environment'
+import type { TrainableExecutor } from '@neat-evolution/executor'
 import type { RNG } from '@neat-evolution/utils'
 import type { QLGradientConfig } from './computeQLOutputErrors.js'
 import { trainOnSegment } from './trainOnSegment.js'

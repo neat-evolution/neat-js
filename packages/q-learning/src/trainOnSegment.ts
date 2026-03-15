@@ -1,5 +1,5 @@
-import type { TrainableExecutor } from '@neat-evolution/backprop'
 import type { Transition } from '@neat-evolution/environment'
+import type { TrainableExecutor } from '@neat-evolution/executor'
 import type { QLGradientConfig } from './computeQLOutputErrors.js'
 import {
   computeQLMultiDiscreteOutputErrors,
