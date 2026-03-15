@@ -56,8 +56,8 @@ describe('createPhenotype', () => {
     const executorA = createExecutor(createPhenotype(genome))
     const executorB = createExecutor(phenotype)
     for (const input of inputs) {
-      const result = executorA.execute(input) as [number, number]
-      const expected = executorB.execute(input) as [number, number]
+      const result = executorA.forward(input) as [number, number]
+      const expected = executorB.forward(input) as [number, number]
       expect(result[0]).toBeCloseTo(expected[0], 5)
       expect(result[1]).toBeCloseTo(expected[1], 5)
     }

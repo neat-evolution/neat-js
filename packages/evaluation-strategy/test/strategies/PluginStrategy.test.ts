@@ -349,7 +349,9 @@ describe('PluginStrategy', () => {
         recordWriteback,
       } as unknown as EvaluationContext
 
-      const updatedActions = [[1, 0, 2, 0.5]] as unknown as import('@neat-evolution/core').PhenotypeAction[]
+      const updatedActions = [
+        [1, 0, 2, 0.5],
+      ] as unknown as import('@neat-evolution/core').PhenotypeAction[]
       const plugin: EvaluationPlugin = {
         evaluateGenome: vi.fn(async () => ({
           fitness: 0.7,

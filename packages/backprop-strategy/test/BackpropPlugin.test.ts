@@ -319,7 +319,9 @@ describe('BackpropPlugin', () => {
       expect(defaultEvaluate).not.toHaveBeenCalled()
 
       // Verify updatedActions returned in result for evaluator-level writeback
-      expect(result.updatedActions).toEqual([[PhenotypeActionType.Link, 0, 2, 0.7]])
+      expect(result.updatedActions).toEqual([
+        [PhenotypeActionType.Link, 0, 2, 0.7],
+      ])
     })
   })
 })

@@ -39,7 +39,7 @@ export const createPhenotype: PhenotypeFactory<
   for (const action of substrate.actions) {
     if (isSubstrateLinkAction(action)) {
       const { from, to, x0, y0, x1, y1 } = action
-      const [weight] = cppn.execute([x0, y0, x1, y1]) as [
+      const [weight] = cppn.forward([x0, y0, x1, y1]) as [
         weight: number,
         bias: number,
       ]
@@ -48,7 +48,7 @@ export const createPhenotype: PhenotypeFactory<
       }
     } else {
       const { node, x, y } = action
-      const [, bias] = cppn.execute([0.0, 0.0, x, y]) as [
+      const [, bias] = cppn.forward([0.0, 0.0, x, y]) as [
         weight: number,
         bias: number,
       ]

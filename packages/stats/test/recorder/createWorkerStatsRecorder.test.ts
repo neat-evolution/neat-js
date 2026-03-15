@@ -15,10 +15,7 @@ describe('createWorkerStatsRecorder', () => {
 
   it('record() sends wanted metrics', () => {
     const send = vi.fn()
-    const recorder = createWorkerStatsRecorder(
-      { wantedMetrics: ['foo'] },
-      send
-    )
+    const recorder = createWorkerStatsRecorder({ wantedMetrics: ['foo'] }, send)
 
     recorder.record('foo', { value: 42 })
     expect(send).toHaveBeenCalledWith('foo', { value: 42 })
@@ -26,10 +23,7 @@ describe('createWorkerStatsRecorder', () => {
 
   it('record() does not send unwanted metrics', () => {
     const send = vi.fn()
-    const recorder = createWorkerStatsRecorder(
-      { wantedMetrics: ['foo'] },
-      send
-    )
+    const recorder = createWorkerStatsRecorder({ wantedMetrics: ['foo'] }, send)
 
     recorder.record('bar', { value: 42 })
     expect(send).not.toHaveBeenCalled()

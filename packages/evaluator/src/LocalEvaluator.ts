@@ -8,7 +8,7 @@ import {
   isRuntimeConfigurable,
 } from '@neat-evolution/environment'
 import type { EvaluationContext } from '@neat-evolution/evaluation-strategy'
-import { type ExecutorFactory, isAsyncExecutor } from '@neat-evolution/executor'
+import type { ExecutorFactory } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
 
 import type { Evaluator } from './Evaluator.js'
@@ -56,7 +56,7 @@ export class LocalEvaluator<EFO> implements Evaluator<EFO> {
 
     let fitness: number
 
-    if (isAsyncExecutor(executor)) {
+    if (this.environment.isAsync) {
       fitness = await this.environment.evaluateAsync(executor)
     } else {
       fitness = this.environment.evaluate(executor)
