@@ -26,6 +26,7 @@ import { Dispatcher } from '@neat-evolution/worker-actions'
 import { WorkerPool } from '@neat-evolution/worker-pool'
 
 import {
+  type EvaluateBatchResult,
   type EvaluateGenomeResult,
   initEvaluator,
   initGenomeFactory as initGenomeFactoryAction,
@@ -268,12 +269,13 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     const genomeFactoryOptions = genomeEntries.map(([, , genome]) =>
       genome.toFactoryOptions()
     )
-    const fitnessScores = await this.dispatcher.call<number[]>(
+    const batchResult = await this.dispatcher.call<EvaluateBatchResult>(
       requestEvaluateBatch({
         genomeOptions: genomeFactoryOptions,
         seed,
       })
     )
+    const { fitnessScores } = batchResult
 
     return genomeEntries.map(([speciesIndex, organismIndex], index) => {
       const fitness = fitnessScores[index]

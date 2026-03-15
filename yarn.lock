@@ -1584,6 +1584,7 @@ __metadata:
   dependencies:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
+    "@neat-evolution/backprop": "workspace:^"
     "@neat-evolution/core": "workspace:^"
     "@neat-evolution/dataset-environment": "workspace:^"
     "@neat-evolution/environment": "workspace:^"

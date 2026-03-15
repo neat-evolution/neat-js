@@ -69,6 +69,11 @@ export interface EvaluateBatchPayload {
   seed?: string | undefined
 }
 
+export interface EvaluateBatchResult {
+  fitnessScores: number[]
+  writebacks?: Map<number, PhenotypeAction[]>
+}
+
 export type InitAction = WorkerMessage<
   InitPayload,
   WorkerTrainingCapabilities | undefined
@@ -95,7 +100,7 @@ export const requestEvaluateGenome = createMessage<
 
 export const requestEvaluateBatch = createMessage<
   EvaluateBatchPayload,
-  number[]
+  EvaluateBatchResult
 >(ActionType.REQUEST_EVALUATE_BATCH)
 
 export interface RecordStatsPayload {

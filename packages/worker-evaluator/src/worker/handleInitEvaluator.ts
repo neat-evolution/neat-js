@@ -1,4 +1,3 @@
-import type { PhenotypeAction } from '@neat-evolution/core'
 import type { EnvironmentRuntimeOptions } from '@neat-evolution/environment'
 import type { WorkerTrainingCapabilities } from '@neat-evolution/evaluation-strategy'
 import { createWorkerStatsRecorder } from '@neat-evolution/stats'
@@ -51,19 +50,6 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
       send(recordStats({ metric, value }))
     })
     runtimeOptions.stats = context.stats
-  }
-
-  // Construct worker-side evaluation context
-  // TODO: Part 04 will rebuild this as a full WorkerEvaluationContext
-  context.evaluationContext = {
-    recordWriteback: (_genome: unknown, updatedActions: PhenotypeAction[]) => {
-      context.pendingWriteback = updatedActions
-    },
-    recordTelemetry: (_genome: unknown, telemetry: unknown) => {
-      context.pendingTelemetry = telemetry
-    },
-    getTelemetry: () => context.pendingTelemetry,
-    stats: context.stats,
   }
 
   // Hydrate each pathname: dynamically import and inject into runtimeOptions

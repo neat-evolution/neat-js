@@ -61,6 +61,6 @@ describe('handleEvaluateBatch', () => {
     )
 
     expect(mockEnvironment.evaluateBatch).toHaveBeenCalledTimes(1)
-    expect(result).toEqual([1.0, 2.0])
+    expect(result).toEqual({ fitnessScores: [1.0, 2.0] })
   })
 })

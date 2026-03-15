@@ -3,6 +3,7 @@ import type { WorkerContext } from '@neat-evolution/worker-actions'
 
 import type { EvaluateGenomePayload, EvaluateGenomeResult } from '../actions.js'
 
+import { createBoundContext } from './createBoundContext.js'
 import { createCachedExecutorEntry } from './createCachedExecutorEntry.js'
 import type { ThreadContext } from './ThreadContext.js'
 
@@ -46,11 +47,22 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
 
   const rng = seed != null ? createRNG(seed) : undefined
   const { environment } = context.threadInfo
+
+  // Create a bound context for this evaluation
+  const boundContext = createBoundContext({
+    send: context.send,
+    call: context.call,
+    stats: context.stats,
+  })
+
   const { executor } = createCachedExecutorEntry(
     genomeFactoryOptions,
     context,
     { cache: false }
   )
+
+  // Register executor in the bound context for writeback correlation
+  boundContext.executorMap.set(executor, 0)
 
   // evaluate the genome
   let fitness: number
@@ -62,9 +74,23 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
     fitness = environment.evaluate(executor, rng)
   }
 
+  // Flush writebacks and fire onFitness callbacks
+  const writebacks = boundContext.flush()
+  boundContext.fireFitnessCallbacks(fitness)
+
   const result: EvaluateGenomeResult = { fitness }
+
+  // Extract writeback for this executor (index 0)
+  if (writebacks != null) {
+    const updatedActions = writebacks.get(0)
+    if (updatedActions != null) {
+      result.updatedActions = updatedActions
+    }
+  }
+
+  // Preserve existing pendingWriteback/pendingTelemetry path (Part 04 removes)
   if (context.pendingWriteback != null) {
-    result.updatedActions = context.pendingWriteback
+    result.updatedActions ??= context.pendingWriteback
   }
   if (context.pendingTelemetry != null) {
     result.telemetry = context.pendingTelemetry
