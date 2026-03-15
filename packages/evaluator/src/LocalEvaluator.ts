@@ -96,7 +96,6 @@ export class LocalEvaluator<EFO> implements Evaluator<EFO> {
       if (isRuntimeConfigurable(this.environment)) {
         this.environment.setRuntimeOptions({
           ...(this.stats != null ? { stats: this.stats } : {}),
-          evaluationContext: context,
         })
       }
       yield* this.strategy.evaluate(context, genomeEntries)
