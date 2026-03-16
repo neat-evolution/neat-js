@@ -1,13 +1,15 @@
 import type {
   Environment,
   EnvironmentDescription,
+  SupervisedEnvironment,
+} from '@neat-evolution/environment'
+import type {
   EnvironmentRuntimeOptions,
   LossConfig,
   RuntimeConfigurable,
-  SupervisedEnvironment,
   TrainerFactoryOptions,
   TrainingData,
-} from '@neat-evolution/environment'
+} from '@neat-evolution/execution-manager'
 import type { StaticExecutor } from '@neat-evolution/executor'
 
 import type { Dataset } from './Dataset.js'

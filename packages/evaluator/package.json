@@ -49,6 +49,7 @@
     "@neat-evolution/core": "workspace:^",
     "@neat-evolution/environment": "workspace:^",
     "@neat-evolution/evaluation-strategy": "workspace:^",
+    "@neat-evolution/execution-manager": "workspace:*",
     "@neat-evolution/executor": "workspace:^",
     "@neat-evolution/stats": "workspace:^",
     "@neat-evolution/worker-actions": "workspace:^",

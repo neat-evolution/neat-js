@@ -1,4 +1,4 @@
-import { isRuntimeConfigurable } from '@neat-evolution/environment'
+import { isRuntimeConfigurable } from '@neat-evolution/execution-manager'
 import { createRNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 

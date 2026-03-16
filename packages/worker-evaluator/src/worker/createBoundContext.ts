@@ -1,5 +1,5 @@
 import type { PhenotypeAction } from '@neat-evolution/core'
-import type { WorkerEvaluationContext } from '@neat-evolution/environment'
+import type { WorkerEvaluationContext } from '@neat-evolution/execution-manager'
 import type {
   StaticExecutor,
   TrainableExecutor,

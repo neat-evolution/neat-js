@@ -1,4 +1,4 @@
-import type { EnvironmentRuntimeOptions } from '@neat-evolution/environment'
+import type { EnvironmentRuntimeOptions } from '@neat-evolution/execution-manager'
 import { createWorkerStatsRecorder } from '@neat-evolution/stats'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 import type { InitPayload } from '../actions.js'

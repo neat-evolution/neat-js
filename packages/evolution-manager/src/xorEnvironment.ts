@@ -1,7 +1,5 @@
-import type {
-  Environment,
-  EnvironmentRuntimeOptions,
-} from '@neat-evolution/environment'
+import type { Environment } from '@neat-evolution/environment'
+import type { EnvironmentRuntimeOptions } from '@neat-evolution/execution-manager'
 import type { StaticExecutor } from '@neat-evolution/executor'
 
 /**

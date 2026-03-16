@@ -3,12 +3,12 @@ import type {
   FitnessData,
   PhenotypeAction,
 } from '@neat-evolution/core'
+import type { Environment } from '@neat-evolution/environment'
+import type { EvaluationContext } from '@neat-evolution/evaluation-strategy'
 import {
-  type Environment,
   type EnvironmentRuntimeOptions,
   isRuntimeConfigurable,
-} from '@neat-evolution/environment'
-import type { EvaluationContext } from '@neat-evolution/evaluation-strategy'
+} from '@neat-evolution/execution-manager'
 import type { ExecutorFactory } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import { createBoundContext } from './createBoundContext.js'

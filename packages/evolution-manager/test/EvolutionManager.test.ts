@@ -13,7 +13,8 @@ describe('EvolutionManager', () => {
   const baseConfig = {
     algorithm: NEATAlgorithm,
     environment,
-    createEnvironmentPathname: '@neat-evolution/evolution-manager/xor-environment',
+    createEnvironmentPathname:
+      '@neat-evolution/evolution-manager/xor-environment',
   } as const
 
   describe('constructor validation', () => {

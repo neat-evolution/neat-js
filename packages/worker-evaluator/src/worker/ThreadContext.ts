@@ -1,12 +1,10 @@
-import type { EnvironmentRuntimeOptions } from '@neat-evolution/environment'
+import type { EnvironmentRuntimeOptions } from '@neat-evolution/execution-manager'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import type { Handler } from '@neat-evolution/worker-actions'
 import type QuickLRU from 'quick-lru'
-
+import type { CachedExecutorEntry } from './createCachedExecutorEntry.js'
 import type { GenomeFactoryConfig } from './GenomeFactoryConfig.js'
 import type { ThreadInfo } from './ThreadInfo.js'
-
-import type { CachedExecutorEntry } from './createCachedExecutorEntry.js'
 
 export interface ThreadContext {
   threadInfo?: ThreadInfo

@@ -13,4 +13,3 @@ export interface EvaluatorFactoryOptions<G extends AnyGenome = AnyGenome> {
    *  For all other cases, use WorkerEvaluator via EvolutionManager. */
   unsafeLocalEvaluation?: boolean
 }
-
