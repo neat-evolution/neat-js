@@ -1,8 +1,8 @@
 import type {
   AgentFactory,
   AgentFactoryOptions,
+  PartialEvaluationContext,
   RolloutSegment,
-  WorkerEvaluationContext,
 } from '@neat-evolution/execution-manager'
 import type { Executor } from '@neat-evolution/executor'
 import { isTrainableExecutor } from '@neat-evolution/executor'
@@ -37,7 +37,7 @@ function isQLAgentFactoryOptions(
 export const createAgent: AgentFactory = (
   executor: Executor,
   agentFactoryOptions: AgentFactoryOptions,
-  context?: WorkerEvaluationContext
+  context?: PartialEvaluationContext
 ) => {
   if (!isTrainableExecutor(executor)) {
     throw new Error('QL agent factory requires a TrainableExecutor')
@@ -51,7 +51,7 @@ export const createAgent: AgentFactory = (
   const { config, rngSeed, isLamarckian } = agentFactoryOptions
 
   if (isLamarckian !== false && context != null) {
-    context.scheduleWriteback(executor)
+    context.scheduleWriteback?.(executor)
   }
 
   const onSegmentTrained = (segment: RolloutSegment): void => {

@@ -68,7 +68,7 @@ function trainStandard(
   }
 
   // Bootstrap with max Q-value (DQN) when not terminal
-  const terminalValue = lastTransition.done ? 0 : maxValue(lastQValues)
+  const terminalValue = lastTransition.terminated ? 0 : maxValue(lastQValues)
 
   // Compute n-step returns backward
   let G = terminalValue
@@ -120,7 +120,7 @@ function trainMultiDiscrete(
 
   // Per-factor bootstrap values: max of each pair
   const terminalValues = new Float64Array(factorCount)
-  if (!lastTransition.done) {
+  if (!lastTransition.terminated) {
     for (let i = 0; i < factorCount; i++) {
       const qOn = lastQValues[2 * i] as number
       const qOff = lastQValues[2 * i + 1] as number

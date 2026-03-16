@@ -183,7 +183,7 @@ describe('createQLAgent', () => {
         const action = agent.act(new Float64Array([1, 0]))
         const idx = Array.from(action).indexOf(1)
         chosenIndices.add(idx)
-        agent.reward(0, true)
+        agent.reward(0, true, false)
       }
 
       // With random exploration across multiple episodes, should pick different actions
@@ -203,7 +203,7 @@ describe('createQLAgent', () => {
         expect(action[1]).toBe(1) // argmax index
         expect(action[0]).toBe(0)
         expect(action[2]).toBe(0)
-        agent.reward(0.01, false)
+        agent.reward(0.01, false, false)
       }
     })
   })
@@ -276,12 +276,12 @@ describe('createQLAgent', () => {
 
       for (let i = 0; i < 5; i++) {
         agent.act(new Float64Array([1, 0]))
-        agent.reward(0.01, false)
+        agent.reward(0.01, false, false)
       }
       expect(trainable.backwardCalls).toBe(0)
 
       agent.act(new Float64Array([1, 0]))
-      agent.reward(1.0, false)
+      agent.reward(1.0, false, false)
       // Capture + train on 6 transitions
       expect(trainable.backwardCalls).toBe(6)
     })
@@ -296,9 +296,9 @@ describe('createQLAgent', () => {
 
       agent.startEpisode({ episodeIndex: 0 })
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, false)
+      agent.reward(0.01, false, false)
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, true)
+      agent.reward(0.01, true, false)
       expect(trainable.backwardCalls).toBe(2)
     })
 
@@ -313,7 +313,7 @@ describe('createQLAgent', () => {
       agent.startEpisode({ episodeIndex: 0 })
       for (let i = 0; i < 10; i++) {
         agent.act(new Float64Array([1, 0]))
-        agent.reward(0.01, false)
+        agent.reward(0.01, false, false)
       }
       expect(trainable.backwardCalls).toBe(0)
     })
@@ -329,11 +329,11 @@ describe('createQLAgent', () => {
 
       agent.startEpisode({ episodeIndex: 0 })
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, false)
+      agent.reward(0.01, false, false)
 
       agent.startEpisode({ episodeIndex: 1 })
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, true)
+      agent.reward(0.01, true, false)
       // Only 1 transition from episode 1 trained (episode 0 was reset)
       expect(trainable.backwardCalls).toBe(1)
     })
@@ -350,7 +350,7 @@ describe('createQLAgent', () => {
       agent.startEpisode({ episodeIndex: 0 })
       for (let i = 0; i < 5; i++) {
         agent.act(new Float64Array([1, 0]))
-        agent.reward(0.01, false)
+        agent.reward(0.01, false, false)
       }
       expect(trainable.backwardCalls).toBe(0)
 
@@ -399,16 +399,16 @@ describe('createQLAgent', () => {
       agent.startEpisode({ episodeIndex: 0 })
 
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, false)
+      agent.reward(0.01, false, false)
       agent.act(new Float64Array([1, 0]))
-      agent.reward(5.0, false)
+      agent.reward(5.0, false, false)
       // Only 2 transitions, minRolloutLength = 4 -> deferred
       expect(trainable.backwardCalls).toBe(0)
 
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, false)
+      agent.reward(0.01, false, false)
       agent.act(new Float64Array([1, 0]))
-      agent.reward(5.0, false)
+      agent.reward(5.0, false, false)
       // Now 4 transitions -> capture
       expect(trainable.backwardCalls).toBe(4)
     })
@@ -441,7 +441,7 @@ describe('createQLAgent', () => {
       for (let i = 0; i < 20; i++) {
         const action = agent.act(new Float64Array([1, 0, 0, 0]))
         expect(action.length).toBe(4)
-        agent.reward(i === 19 ? 1.0 : 0.01, i === 19)
+        agent.reward(i === 19 ? 1.0 : 0.01, i === 19, false)
       }
 
       // done=true on last reward triggers training
@@ -507,7 +507,7 @@ describe('createQLAgent', () => {
         // Action 0 -> reward 1, action 1 -> reward 0
         const chosenAction = action[0] === 1 ? 0 : 1
         const reward = chosenAction === 0 ? 1 : 0
-        agent.reward(reward, true)
+        agent.reward(reward, true, false)
         agent.endEpisode({
           fitness: reward,
           episodeReturn: reward,
@@ -544,7 +544,7 @@ describe('createQLAgent', () => {
 
       agent.startEpisode({ episodeIndex: 0 })
       agent.act(new Float64Array([1, 0]))
-      agent.reward(1, false)
+      agent.reward(1, false, false)
 
       expect(onSegmentTrained).toHaveBeenCalledTimes(1)
     })

@@ -13,7 +13,8 @@ function makeTransition(overrides: Partial<Transition> = {}): Transition {
     qValues: new Float64Array([0.5, 0.3, 0.1]),
     chosenActionIndex: 0,
     reward: 1,
-    done: false,
+    terminated: false,
+    truncated: false,
     ...overrides,
   }
 }
@@ -64,7 +65,8 @@ describe('computeQLOutputErrors', () => {
       action: new Float64Array([1, 0, 0]),
       qValues: new Float64Array([0.5, 0.3, 0.1]),
       reward: 1,
-      done: false,
+      terminated: false,
+      truncated: false,
     }
     expect(() => computeQLOutputErrors(transition, 0.5, 3)).toThrow(
       'missing chosenActionIndex'

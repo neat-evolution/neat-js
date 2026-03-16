@@ -35,12 +35,6 @@ export interface QLAgentConfig {
   onSegmentTrained?: (segment: RolloutSegment) => void
 }
 
-/** QL agent with transition metadata support for plugin integration. */
-export type QLAgent = EpisodicAgent & {
-  /** Set pending transition metadata (`info`) for the current transition. */
-  setTransitionInfo(info: TransitionInfo): void
-}
-
 /**
  * Create a Q-learning (DQN-style) EpisodicAgent.
  *
@@ -63,7 +57,7 @@ export function createQLAgent(
   trainable: TrainableExecutor,
   config: QLAgentConfig,
   rng: RNG
-): QLAgent {
+): EpisodicAgent {
   const rolloutBuffer = new RolloutBuffer(config.rolloutConfig)
   const multiDiscrete = config.multiDiscrete ?? false
   const actionCount = config.actionCount
@@ -103,7 +97,7 @@ export function createQLAgent(
     if (currentTransition === null) {
       return null
     }
-    if (currentTransition.done) {
+    if (currentTransition.terminated || currentTransition.truncated) {
       return 'done'
     }
     if (Math.abs(currentTransition.reward) > rewardThreshold) {
@@ -199,7 +193,8 @@ export function createQLAgent(
         action,
         qValues,
         reward: 0,
-        done: false,
+        terminated: false,
+        truncated: false,
       }
       if (chosenActionIndex !== undefined) {
         transition.chosenActionIndex = chosenActionIndex
@@ -215,12 +210,13 @@ export function createQLAgent(
       return action
     },
 
-    reward(reward: number, done: boolean): void {
+    reward(reward: number, terminated: boolean, truncated: boolean): void {
       if (currentTransition === null) {
         return
       }
       currentTransition.reward = reward
-      currentTransition.done = done
+      currentTransition.terminated = terminated
+      currentTransition.truncated = truncated
 
       doTrain()
     },

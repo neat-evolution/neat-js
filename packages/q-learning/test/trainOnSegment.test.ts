@@ -17,7 +17,8 @@ function makeTransition(
     qValues: new Float64Array(qValues),
     chosenActionIndex,
     reward,
-    done,
+    terminated: done,
+    truncated: false,
   }
 }
 
@@ -33,7 +34,8 @@ function makeMultiDiscreteTransition(
     action: new Float64Array(action),
     qValues: new Float64Array(qValues),
     reward,
-    done,
+    terminated: done,
+    truncated: false,
   }
 }
 
@@ -194,7 +196,8 @@ describe('trainOnSegment (standard mode)', () => {
         action: new Float64Array([1, 0]),
         chosenActionIndex: 0,
         reward: 1,
-        done: true,
+        terminated: true,
+        truncated: false,
       },
     ]
     expect(() =>
