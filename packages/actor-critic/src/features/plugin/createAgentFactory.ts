@@ -1,14 +1,14 @@
-import type { ACAgentConfig } from '../../index.js'
-import { createACAgent } from '../../index.js'
 import type {
   AgentFactory,
   AgentFactoryOptions,
   RolloutSegment,
   WorkerEvaluationContext,
-} from '@neat-evolution/environment'
+} from '@neat-evolution/execution-manager'
 import type { Executor } from '@neat-evolution/executor'
 import { isTrainableExecutor } from '@neat-evolution/executor'
 import { createRNG } from '@neat-evolution/utils'
+import type { ACAgentConfig } from '../../index.js'
+import { createACAgent } from '../../index.js'
 
 interface ACAgentFactoryOptions extends AgentFactoryOptions {
   config: ACAgentConfig

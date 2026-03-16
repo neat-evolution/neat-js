@@ -2,7 +2,7 @@ import type {
   RolloutBufferConfig,
   RolloutSegment,
   Transition,
-} from '@neat-evolution/environment'
+} from '@neat-evolution/execution-manager'
 
 /**
  * Ring buffer that accumulates transitions during inference

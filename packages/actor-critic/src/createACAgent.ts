@@ -6,9 +6,10 @@ import type {
   RolloutSegment,
   Transition,
   TransitionInfo,
-} from '@neat-evolution/environment'
+} from '@neat-evolution/execution-manager'
 import type { TrainableExecutor } from '@neat-evolution/executor'
 import type { ACGradientConfig } from './computeACGradients.js'
+import { sampleActionMultiDiscrete } from './features/multi-discrete/sampleActionMultiDiscrete.js'
 import { RolloutBuffer } from './RolloutBuffer.js'
 import { trainOnSegment } from './trainOnSegment.js'
 
@@ -22,6 +23,8 @@ export interface ACAgentConfig {
   gradientConfig: ACGradientConfig
   /** Rollout buffer configuration. */
   rolloutConfig: RolloutBufferConfig
+  /** Multi-discrete mode: treat actionCount as factorCount (N binary factors → 2N+1 outputs). */
+  multiDiscrete?: boolean
   /** Optional callback invoked whenever a rollout segment trains (telemetry). */
   onSegmentTrained?: (segment: RolloutSegment) => void
 }
@@ -75,6 +78,8 @@ export function createACAgent(
   rng: () => number
 ): ACAgent {
   const rolloutBuffer = new RolloutBuffer(config.rolloutConfig)
+  const multiDiscrete = config.multiDiscrete ?? false
+  const factorCount = config.actionCount
   const rewardThreshold = config.rolloutConfig.rewardThreshold
   let currentTransition: Transition | null = null
   let pendingInfo: TransitionInfo | null = null
@@ -91,7 +96,13 @@ export function createACAgent(
     }
     const segment = rolloutBuffer.capture(trigger)
     if (segment !== null) {
-      trainOnSegment(trainable, segment.transitions, trainConfig)
+      trainOnSegment(
+        trainable,
+        segment.transitions,
+        trainConfig,
+        multiDiscrete,
+        factorCount
+      )
       config.onSegmentTrained?.(segment)
     }
   }
@@ -114,24 +125,38 @@ export function createACAgent(
 
   return {
     act(inputs: Float64Array): Float64Array {
-      // 1. Forward pass -> output (N+1 values, executor handles activations)
+      // 1. Forward pass -> output (executor handles activations)
       const output = trainable.forward(inputs)
 
-      // 2. Pop last output as criticValue
-      const actionCount = config.actionCount
-      const criticValue = output[actionCount] as number
+      let action: Float64Array
+      let actionProbabilities: Float64Array
+      let criticValue: number
 
-      // 3. Read actor outputs directly as action probabilities
-      //    (executor already applied per-group Softmax normalization)
-      const actionProbabilities = new Float64Array(actionCount)
-      for (let i = 0; i < actionCount; i++) {
-        actionProbabilities[i] = output[i] as number
+      if (multiDiscrete) {
+        // Multi-discrete: 2N actor outputs (N pairs) + 1 critic = 2N+1
+        const totalActorOutputs = 2 * factorCount
+        actionProbabilities = new Float64Array(totalActorOutputs)
+        for (let i = 0; i < totalActorOutputs; i++) {
+          actionProbabilities[i] = output[i] as number
+        }
+        criticValue = output[totalActorOutputs] as number
+        action = sampleActionMultiDiscrete(
+          actionProbabilities,
+          factorCount,
+          rng
+        )
+      } else {
+        // Standard: N actor outputs + 1 critic = N+1
+        const actionCount = config.actionCount
+        criticValue = output[actionCount] as number
+        actionProbabilities = new Float64Array(actionCount)
+        for (let i = 0; i < actionCount; i++) {
+          actionProbabilities[i] = output[i] as number
+        }
+        action = sampleAction(actionProbabilities, rng)
       }
 
-      // 4. Sample action from probabilities (stochastic)
-      const action = sampleAction(actionProbabilities, rng)
-
-      // 5. Record Transition into RolloutBuffer
+      // Record Transition into RolloutBuffer
       currentTransition = {
         state: Float64Array.from(inputs),
         rawOutput: Float64Array.from(output),
@@ -147,7 +172,7 @@ export function createACAgent(
       pendingInfo = null
       rolloutBuffer.push(currentTransition)
 
-      // 6. Return action (N values - environment never sees the critic)
+      // Return action (N values - environment never sees the critic)
       return action
     },
 
@@ -171,7 +196,13 @@ export function createACAgent(
       if (currentTransition !== null && rolloutBuffer.length > 0) {
         const segment = rolloutBuffer.capture('done')
         if (segment !== null) {
-          trainOnSegment(trainable, segment.transitions, trainConfig)
+          trainOnSegment(
+            trainable,
+            segment.transitions,
+            trainConfig,
+            multiDiscrete,
+            factorCount
+          )
           config.onSegmentTrained?.(segment)
         }
       }

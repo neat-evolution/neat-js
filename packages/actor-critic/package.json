@@ -51,7 +51,7 @@
     "check": "tsgo --noEmit"
   },
   "dependencies": {
-    "@neat-evolution/environment": "workspace:*",
+    "@neat-evolution/execution-manager": "workspace:*",
     "@neat-evolution/executor": "workspace:*",
     "@neat-evolution/utils": "workspace:*"
   },

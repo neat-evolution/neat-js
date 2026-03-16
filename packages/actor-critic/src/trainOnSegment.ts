@@ -1,9 +1,10 @@
-import type { Transition } from '@neat-evolution/environment'
+import type { Transition } from '@neat-evolution/execution-manager'
 import type { TrainableExecutor } from '@neat-evolution/executor'
 import {
   type ACGradientConfig,
   computeACGradients,
 } from './computeACGradients.js'
+import { computeACMultiDiscreteGradients } from './features/multi-discrete/computeACMultiDiscreteGradients.js'
 
 /** Configuration for trainOnSegment, combining gradient config with learning rate. */
 export interface TrainOnSegmentConfig extends ACGradientConfig {
@@ -20,12 +21,18 @@ export interface TrainOnSegmentConfig extends ACGradientConfig {
  * Where V(s_n) = 0 if the segment ends at a terminal state (done=true),
  * otherwise V(s_n) is the critic's value estimate at the last transition.
  *
- * This is standard A2C/PPO n-step return computation.
+ * Standard mode: N+1 outputs (N actor + 1 critic)
+ * Multi-discrete mode: 2N+1 outputs (N×[P_on, P_off] pairs + 1 critic)
+ *
+ * Both modes share a single scalar critic V(s). The n-step return G is
+ * a single scalar. Only the gradient computation differs per mode.
  */
 export function trainOnSegment(
   trainable: TrainableExecutor,
   transitions: Transition[],
-  config: TrainOnSegmentConfig
+  config: TrainOnSegmentConfig,
+  multiDiscrete = false,
+  factorCount = 0
 ): void {
   const n = transitions.length
   if (n === 0) {
@@ -44,7 +51,7 @@ export function trainOnSegment(
   }
   const terminalValue = lastTransition.done ? 0 : lastCriticValue
 
-  // Compute n-step returns backward
+  // Compute n-step returns backward (single scalar G, shared critic)
   let G = terminalValue
   for (let t = n - 1; t >= 0; t--) {
     const transition = transitions[t]
@@ -57,7 +64,16 @@ export function trainOnSegment(
     }
     G = transition.reward + config.discountFactor * G
     const advantage = G - criticValue
-    const errors = computeACGradients(transition, advantage, config)
+
+    const errors = multiDiscrete
+      ? computeACMultiDiscreteGradients(
+          transition,
+          advantage,
+          config,
+          factorCount
+        )
+      : computeACGradients(transition, advantage, config)
+
     // Re-establish forward state so backward() uses correct activations
     trainable.forward(transition.state)
     trainable.backward(errors, config.learningRate)

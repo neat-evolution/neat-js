@@ -1,4 +1,4 @@
-import type { Transition } from '@neat-evolution/environment'
+import type { Transition } from '@neat-evolution/execution-manager'
 
 /** Configuration for Actor-Critic gradient computation. */
 export interface ACGradientConfig {

@@ -1,4 +1,4 @@
-import type { Transition } from '@neat-evolution/environment'
+import type { Transition } from '@neat-evolution/execution-manager'
 import { describe, expect, it } from 'vitest'
 import type { ACGradientConfig } from '../src/computeACGradients.js'
 import { computeACGradients } from '../src/computeACGradients.js'

@@ -4,18 +4,29 @@ import type { ACAgentConfig } from '../src/createACAgent.js'
 import { createACAgent } from '../src/createACAgent.js'
 
 function mockTrainable(
-  actionCount: number
+  actionCount: number,
+  multiDiscrete = false
 ): TrainableExecutor & { forwardCalls: number; backwardCalls: number } {
+  const outputCount = multiDiscrete ? 2 * actionCount + 1 : actionCount + 1
   const mock = {
     forwardCalls: 0,
     backwardCalls: 0,
     forward(_inputs: number[] | Float64Array): Float64Array {
       mock.forwardCalls++
-      const output = new Float64Array(actionCount + 1)
-      for (let i = 0; i < actionCount; i++) {
-        output[i] = i * 0.5
+      const output = new Float64Array(outputCount)
+      if (multiDiscrete) {
+        // N pairs of [P_on, P_off] softmax probabilities + 1 critic
+        for (let i = 0; i < actionCount; i++) {
+          output[2 * i] = 0.6 // P_on
+          output[2 * i + 1] = 0.4 // P_off
+        }
+        output[2 * actionCount] = 0.5 // critic
+      } else {
+        for (let i = 0; i < actionCount; i++) {
+          output[i] = i * 0.5
+        }
+        output[actionCount] = 0.5
       }
-      output[actionCount] = 0.5
       return output
     },
     backward(_outputErrors: Float64Array, _learningRate: number): void {
@@ -305,6 +316,84 @@ describe('createACAgent', () => {
         oneHotSum += action[i] as number
       }
       expect(oneHotSum).toBe(1)
+    })
+  })
+
+  describe('multi-discrete mode', () => {
+    function multiDiscreteConfig(factorCount: number): ACAgentConfig {
+      return {
+        learningRate: 0.01,
+        actionCount: factorCount,
+        gradientConfig: {
+          discountFactor: 0.99,
+          entropyCoefficient: 0,
+          clipGradients: false,
+          gradientClipValue: 1,
+        },
+        rolloutConfig: {
+          rolloutLength: 'episode',
+          rewardThreshold: 0.1,
+        },
+        multiDiscrete: true,
+      }
+    }
+
+    it('returns N-length action from 2N+1 internal outputs', () => {
+      const factorCount = 3
+      const trainable = mockTrainable(factorCount, true)
+      const agent = createACAgent(
+        trainable,
+        multiDiscreteConfig(factorCount),
+        deterministicRng()
+      )
+
+      agent.startEpisode({ episodeIndex: 0 })
+      const action = agent.act(new Float64Array([1, 0, 0]))
+
+      // Environment receives N values, not 2N+1
+      expect(action.length).toBe(factorCount)
+    })
+
+    it('each returned value is 0 or 1', () => {
+      const factorCount = 4
+      const trainable = mockTrainable(factorCount, true)
+      const agent = createACAgent(
+        trainable,
+        multiDiscreteConfig(factorCount),
+        deterministicRng()
+      )
+
+      agent.startEpisode({ episodeIndex: 0 })
+      const action = agent.act(new Float64Array([1, 0, 0, 0]))
+
+      for (let i = 0; i < action.length; i++) {
+        const val = action[i] as number
+        expect(val === 0 || val === 1).toBe(true)
+      }
+    })
+
+    it('training happens correctly (backward called)', () => {
+      const factorCount = 3
+      const trainable = mockTrainable(factorCount, true)
+      const agent = createACAgent(
+        trainable,
+        multiDiscreteConfig(factorCount),
+        deterministicRng()
+      )
+
+      agent.startEpisode({ episodeIndex: 0 })
+      agent.act(new Float64Array([1, 0, 0]))
+      agent.reward(0.5, false)
+      agent.act(new Float64Array([0, 1, 0]))
+      agent.reward(1.0, false)
+
+      agent.endEpisode({
+        fitness: 1,
+        episodeReturn: 1.5,
+        totalSteps: 2,
+        terminated: false,
+      })
+      expect(trainable.backwardCalls).toBe(2)
     })
   })
 

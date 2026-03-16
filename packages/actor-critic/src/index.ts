@@ -1,4 +1,5 @@
 export * from './computeACGradients.js'
 export * from './createACAgent.js'
+export * from './features/multi-discrete/index.js'
 export * from './RolloutBuffer.js'
 export * from './trainOnSegment.js'
