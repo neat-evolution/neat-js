@@ -6,5 +6,8 @@ import { createEpisodicAgent } from './EpisodicAgent.js'
  * with no-op lifecycle hooks and no writeback. Ignores agentFactoryOptions
  * and context.
  */
-export const createVanillaAgent: AgentFactory = (executor) =>
-  createEpisodicAgent(executor)
+export const createVanillaAgent: AgentFactory = (
+  executor,
+  _agentFactoryOptions,
+  _context
+) => createEpisodicAgent(executor)
