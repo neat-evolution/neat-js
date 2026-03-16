@@ -16,19 +16,33 @@ import type { Evaluator } from './Evaluator.js'
 import type { EvaluatorFactoryOptions } from './EvaluatorFactoryOptions.js'
 import type { GenomeEntries, GenomeEntry } from './GenomeEntries.js'
 import { LocalDispatcher } from './LocalDispatcher.js'
+import type { RuntimeConfig } from './RuntimeConfig.js'
 import type { AnyAlgorithm } from './types.js'
 
-export class TestEvaluator<EFO> implements Evaluator<EFO> {
+const DEFAULT_EXECUTOR_PATHNAME = '@neat-evolution/executor'
+
+/**
+ * In-process evaluator for isolated unit tests only.
+ *
+ * Production code must use WorkerEvaluator via EvolutionManager.
+ * This evaluator runs everything on the main thread and does not
+ * exercise the worker hydration path — any behavior validated here
+ * may diverge from production.
+ *
+ * @deprecated Use WorkerEvaluator via EvolutionManager instead.
+ */
+export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
   public readonly algorithm: AnyAlgorithm
   public readonly enableAsync = true
 
   public readonly environment: Environment<EFO>
 
-  public readonly createExecutor: ExecutorFactory
+  private executorFactory: ExecutorFactory | undefined
+  private baseRuntimeOptions: EnvironmentRuntimeOptions | undefined
 
+  private readonly runtimeConfig: RuntimeConfig | undefined
   private readonly strategy?: EvaluatorFactoryOptions['strategy']
   private readonly stats?: StatsRecorder
-  private readonly environmentRuntimeOptions?: EnvironmentRuntimeOptions
   private readonly localDispatcher: LocalDispatcher
 
   /** Pending Lamarckian writebacks collected from plugin results. */
@@ -41,23 +55,35 @@ export class TestEvaluator<EFO> implements Evaluator<EFO> {
     environment: Environment<EFO>,
     options: EvaluatorFactoryOptions
   ) {
+    if (options.unsafeLocalEvaluation !== true) {
+      throw new Error(
+        'UnsafeTestEvaluator is for isolated unit tests only. ' +
+          'Use WorkerEvaluator via EvolutionManager for all other cases. ' +
+          'To opt in, pass { unsafeLocalEvaluation: true } in options.'
+      )
+    }
+
     this.algorithm = algorithm
     this.environment = environment
-    this.createExecutor = options.createExecutor
+    this.runtimeConfig = options.runtimeConfig
     this.strategy = options.strategy
     if (options.stats != null) {
       this.stats = options.stats
-    }
-    if (options.environmentRuntimeOptions != null) {
-      this.environmentRuntimeOptions = options.environmentRuntimeOptions
     }
     this.localDispatcher = new LocalDispatcher()
   }
 
   private async worker(entry: GenomeEntry): Promise<FitnessData> {
     const [speciesIndex, organismIndex, genome] = entry
+
+    if (this.executorFactory == null) {
+      throw new Error(
+        'TestEvaluator not initialized — call initGenomeFactory() first'
+      )
+    }
+
     const phenotype = this.algorithm.createPhenotype(genome)
-    const executor = this.createExecutor(phenotype)
+    const executor = this.executorFactory(phenotype)
 
     // Create bound context (same lifecycle as handleEvaluateGenome)
     const boundContext = createBoundContext({
@@ -70,8 +96,7 @@ export class TestEvaluator<EFO> implements Evaluator<EFO> {
     // Push runtime options to environment per-genome
     if (isRuntimeConfigurable(this.environment)) {
       this.environment.setRuntimeOptions({
-        ...this.environmentRuntimeOptions,
-        ...(this.stats != null ? { stats: this.stats } : {}),
+        ...this.baseRuntimeOptions,
         evaluationContext: boundContext,
       })
     }
@@ -99,7 +124,29 @@ export class TestEvaluator<EFO> implements Evaluator<EFO> {
   }
 
   async initGenomeFactory(): Promise<void> {
-    // no-op
+    // Dynamic import executor factory (mirrors handleInitEvaluator)
+    const pathname =
+      this.runtimeConfig?.createExecutorPathname ?? DEFAULT_EXECUTOR_PATHNAME
+    const mod = await import(/* @vite-ignore */ pathname)
+    this.executorFactory = mod.createExecutor
+
+    // Build baseRuntimeOptions (same flow as handleInitEvaluator)
+    const runtimeOptions: EnvironmentRuntimeOptions = {}
+    if (this.stats != null) {
+      runtimeOptions.stats = this.stats
+    }
+    if (this.runtimeConfig?.environmentRuntimeData != null) {
+      Object.assign(runtimeOptions, this.runtimeConfig.environmentRuntimeData)
+    }
+    if (this.runtimeConfig?.hydrateEnvironmentOptions != null) {
+      for (const [field, path] of Object.entries(
+        this.runtimeConfig.hydrateEnvironmentOptions
+      )) {
+        const mod = await import(/* @vite-ignore */ path)
+        runtimeOptions[field] = mod.default ?? mod[field]
+      }
+    }
+    this.baseRuntimeOptions = runtimeOptions
   }
 
   /** Retrieve the latest telemetry for a genome (from plugin evaluation). */

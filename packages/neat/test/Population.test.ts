@@ -16,7 +16,6 @@ import {
   type PopulationOptions,
   type Species,
 } from '@neat-evolution/evolution'
-import { createExecutor } from '@neat-evolution/executor'
 import {
   afterEach,
   beforeEach,
@@ -73,7 +72,7 @@ describe('Population class', () => {
     populationOptions = defaultPopulationOptions
     environment = await createEnvironment()
     evaluator = createEvaluator(NEATAlgorithm as AnyAlgorithm, environment, {
-      createExecutor,
+      unsafeLocalEvaluation: true,
     })
   })
 
