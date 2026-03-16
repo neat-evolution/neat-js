@@ -4,9 +4,9 @@ import type {
   SupervisedEnvironment,
 } from '@neat-evolution/environment'
 import type {
-  EnvironmentRuntimeOptions,
+  EnvironmentInitOptions,
   LossConfig,
-  RuntimeConfigurable,
+  PartialEvaluationContext,
   TrainerFactoryOptions,
   TrainingData,
 } from '@neat-evolution/execution-manager'
@@ -18,38 +18,31 @@ import { crossentropy, mse } from './error.js'
 import type { Matrix } from './types.js'
 
 export class DatasetEnvironment
-  implements
-    Environment<SharedArrayBuffer>,
-    SupervisedEnvironment,
-    RuntimeConfigurable
+  implements Environment<SharedArrayBuffer>, SupervisedEnvironment
 {
   public readonly dataset: Dataset
   public readonly description: EnvironmentDescription
   public readonly isAsync = false
-  private runtimeOptions: EnvironmentRuntimeOptions | undefined
+  private readonly initOptions: EnvironmentInitOptions | undefined
 
-  constructor(dataset: Dataset) {
+  constructor(dataset: Dataset, initOptions?: EnvironmentInitOptions) {
     this.dataset = dataset
     this.description = {
       inputs: dataset.dimensions.inputs,
       outputs: dataset.dimensions.outputs,
     }
+    this.initOptions = initOptions
   }
 
-  setRuntimeOptions(options: EnvironmentRuntimeOptions): void {
-    this.runtimeOptions = options
-  }
-
-  evaluate(executor: StaticExecutor): number {
-    if (this.runtimeOptions?.createTrainer != null) {
+  evaluate(
+    executor: StaticExecutor,
+    context?: PartialEvaluationContext
+  ): number {
+    if (this.initOptions?.createTrainer != null) {
       // Supervised: train on training split, score on validation split
-      const options = (this.runtimeOptions?.trainerFactoryOptions ??
+      const options = (this.initOptions?.trainerFactoryOptions ??
         {}) as TrainerFactoryOptions
-      const trainer = this.runtimeOptions.createTrainer(
-        executor,
-        options,
-        this.runtimeOptions.evaluationContext
-      )
+      const trainer = this.initOptions.createTrainer(executor, options, context)
       trainer.train(this.getTrainingData())
       const validation = this.getValidationData()
       const predictions = executor.forwardBatch(
@@ -62,17 +55,26 @@ export class DatasetEnvironment
     return this.computeFitness(this.dataset.trainingTargets, predictions)
   }
 
-  async evaluateAsync(executor: StaticExecutor): Promise<number> {
-    return this.evaluate(executor)
+  async evaluateAsync(
+    executor: StaticExecutor,
+    context?: PartialEvaluationContext
+  ): Promise<number> {
+    return this.evaluate(executor, context)
   }
 
-  evaluateBatch(executors: StaticExecutor[]): number[] {
-    return executors.map((executor) => this.evaluate(executor))
+  evaluateBatch(
+    executors: StaticExecutor[],
+    context?: PartialEvaluationContext
+  ): number[] {
+    return executors.map((executor) => this.evaluate(executor, context))
   }
 
-  async evaluateBatchAsync(executors: StaticExecutor[]): Promise<number[]> {
+  async evaluateBatchAsync(
+    executors: StaticExecutor[],
+    context?: PartialEvaluationContext
+  ): Promise<number[]> {
     const promises = executors.map(
-      async (executor) => await this.evaluateAsync(executor)
+      async (executor) => await this.evaluateAsync(executor, context)
     )
     return await Promise.all(promises)
   }
