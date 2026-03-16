@@ -20,6 +20,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./xor-environment": {
+      "types": "./dist/types/xorEnvironment.d.ts",
+      "import": "./dist/esm/xorEnvironment.js",
+      "require": "./dist/cjs/xorEnvironment.js"
     }
   },
   "files": [

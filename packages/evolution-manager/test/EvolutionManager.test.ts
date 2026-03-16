@@ -1,5 +1,3 @@
-import type { Environment } from '@neat-evolution/environment'
-import type { StaticExecutor } from '@neat-evolution/executor'
 import { NEATAlgorithm } from '@neat-evolution/neat'
 import { describe, expect, test } from 'vitest'
 import {
@@ -8,47 +6,14 @@ import {
   organismToExecutor,
   serializedToExecutor,
 } from '../src/index.js'
-
-/**
- * Minimal environment for testing: 2 inputs, 1 output.
- * Fitness = 1 - average absolute error on a simple pattern.
- */
-function createTestEnvironment(): Environment<null> {
-  const testCases = [
-    { input: [0, 0], expected: 0 },
-    { input: [0, 1], expected: 1 },
-    { input: [1, 0], expected: 1 },
-    { input: [1, 1], expected: 0 },
-  ]
-
-  return {
-    description: { inputs: 2, outputs: 1 },
-    isAsync: false,
-    toFactoryOptions: () => null,
-    evaluate: (executor: StaticExecutor) => {
-      let totalError = 0
-      for (const { input, expected } of testCases) {
-        const output = executor.forward(input)
-        totalError += Math.abs((output[0] ?? 0) - expected)
-      }
-      return 1 - totalError / testCases.length
-    },
-    evaluateAsync: async (executor) => {
-      let totalError = 0
-      for (const { input, expected } of testCases) {
-        const output = executor.forward(input)
-        totalError += Math.abs((output[0] ?? 0) - expected)
-      }
-      return 1 - totalError / testCases.length
-    },
-  }
-}
+import { createEnvironment } from '../src/xorEnvironment.js'
 
 describe('EvolutionManager', () => {
-  const environment = createTestEnvironment()
+  const environment = createEnvironment(null)
   const baseConfig = {
     algorithm: NEATAlgorithm,
     environment,
+    createEnvironmentPathname: '@neat-evolution/evolution-manager/xor-environment',
   } as const
 
   describe('constructor validation', () => {
@@ -110,7 +75,7 @@ describe('EvolutionManager', () => {
     })
   })
 
-  describe('local mode (no workerConfig)', () => {
+  describe('local mode (no evaluatorConfig)', () => {
     test('creates population with local evaluator and reproducer', async () => {
       const manager = new EvolutionManager({
         ...baseConfig,
@@ -171,7 +136,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 3,
-          logInterval: 1000,
         },
       })
       // No init() call — evolve() should handle it
@@ -189,7 +153,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 2,
           initialMutations: 5,
-          logInterval: 1000,
         },
       })
       const best = await manager.evolve()
@@ -206,7 +169,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 5,
           initialMutations: 3,
-          logInterval: 1000,
         },
       })
       // Override iterations to 1 via per-call options
@@ -230,7 +192,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 10,
-          logInterval: 1000,
         },
       })
       await manager.initializePopulation()
@@ -306,7 +267,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 3,
-          logInterval: 1000,
         },
       })
       await manager.evolve()
@@ -328,7 +288,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 3,
-          logInterval: 1000,
         },
       })
       await manager.evolve()
@@ -365,7 +324,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 3,
-          logInterval: 1000,
         },
       })
       await manager.evolve()
@@ -386,7 +344,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 5,
-          logInterval: 1000,
         },
       })
       await manager.evolve()
@@ -432,7 +389,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 2,
           initialMutations: 5,
-          logInterval: 1000,
         },
       })
       await manager1.evolve()
@@ -447,7 +403,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 0,
-          logInterval: 1000,
         },
       })
       await manager2.evolve()
@@ -471,7 +426,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 5,
-          logInterval: 1000,
         },
       })
       await manager1.evolve()
@@ -488,7 +442,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 0,
-          logInterval: 1000,
         },
       })
       await manager2.evolve()
@@ -505,7 +458,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 3,
-          logInterval: 1000,
         },
       })
       await manager.evolve()
@@ -538,7 +490,6 @@ describe('EvolutionManager', () => {
         evolutionOptions: {
           iterations: 1,
           initialMutations: 3,
-          logInterval: 1000,
         },
       })
       await manager.evolve()

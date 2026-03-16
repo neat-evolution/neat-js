@@ -14,20 +14,16 @@ import type {
 import type {
   Environment,
   EnvironmentConfig,
-  EnvironmentRuntimeOptions,
 } from '@neat-evolution/environment'
 import type { EvaluationStrategy } from '@neat-evolution/evaluation-strategy'
 import type { Evaluator } from '@neat-evolution/evaluator'
-import { createEvaluator as createLocalEvaluator } from '@neat-evolution/evaluator'
 import type {
   EvolutionOptions,
   PopulationCreator,
   PopulationOptions,
   Reproducer,
-  ReproducerFactory,
 } from '@neat-evolution/evolution'
 import {
-  createReproducer as createLocalReproducer,
   defaultEvolutionOptions,
   defaultPopulationOptions,
   evolve,
@@ -37,11 +33,8 @@ import {
   type PopulationData,
   type PopulationFactoryOptions,
 } from '@neat-evolution/evolution'
-import type { ExecutorFactory, StaticExecutor } from '@neat-evolution/executor'
-import {
-  createExecutor,
-  createTrainableExecutor,
-} from '@neat-evolution/executor'
+import type { StaticExecutor } from '@neat-evolution/executor'
+import { createExecutor } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import {
   createEvaluator as createWorkerEvaluator,
@@ -56,8 +49,8 @@ import {
 import { hardwareConcurrency } from '@neat-evolution/worker-threads'
 
 import type {
+  EvaluatorConfig,
   EvolutionManagerConfig,
-  WorkerConfig,
 } from './EvolutionManagerConfig.js'
 
 const DEFAULT_EXECUTOR_PATHNAME = '@neat-evolution/executor'
@@ -65,6 +58,7 @@ const DEFAULT_EXECUTOR_PATHNAME = '@neat-evolution/executor'
 export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
   private readonly algorithm: Algorithm<Ctx> & PopulationCreator<Ctx>
   private readonly environment: EnvironmentConfig
+  private readonly createEnvironmentPathname: string
   private readonly strategy: EvaluationStrategy | undefined
   private readonly evolutionOptions: EvolutionOptions
   private readonly populationOptions: PopulationOptions
@@ -80,10 +74,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
         GenomeOptionsOf<Ctx>
       >
     | undefined
-  private readonly environmentRuntimeOptions:
-    | EnvironmentRuntimeOptions
-    | undefined
-  private readonly workerConfig: WorkerConfig | undefined
+  private readonly evaluatorConfig: EvaluatorConfig | undefined
   private readonly stats: StatsRecorder | undefined
   private readonly signal: AbortSignal | undefined
 
@@ -102,6 +93,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
 
     this.algorithm = config.algorithm
     this.environment = config.environment
+    this.createEnvironmentPathname = config.createEnvironmentPathname
     this.strategy = config.strategy
     this.evolutionOptions = {
       ...defaultEvolutionOptions,
@@ -116,8 +108,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       config.genomeOptions ??
       ({ ...config.algorithm.defaultOptions } as GenomeOptionsOf<Ctx>)
     this.populationFactoryOptions = config.populationFactoryOptions
-    this.environmentRuntimeOptions = config.environmentRuntimeOptions
-    this.workerConfig = config.workerConfig
+    this.evaluatorConfig = config.evaluatorConfig
     this.stats = config.stats
     this.signal = config.signal
   }
@@ -128,40 +119,13 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       return
     }
 
-    let evaluator: Evaluator
-    let createReproducer: (population: Population<Ctx>) => Reproducer
-
     const effectiveStrategy = this.strategy
 
-    if (this.workerConfig != null) {
-      const result = this.createWorkerFactories(
-        this.workerConfig,
-        effectiveStrategy
-      )
-      evaluator = result.evaluator
-      createReproducer = result.createReproducer
-    } else {
-      const algorithm = this.algorithm as unknown as AnyErasedAlgorithm
-      const environment = this.environment as Environment
-      // When the environment needs a trainer or agent factory, use trainable executors
-      const needsTrainable =
-        this.environmentRuntimeOptions?.trainerFactory != null ||
-        this.environmentRuntimeOptions?.agentFactory != null
-      const executorFactory: ExecutorFactory = needsTrainable
-        ? createTrainableExecutor
-        : createExecutor
-      evaluator = createLocalEvaluator(algorithm, environment, {
-        createExecutor: executorFactory,
-        ...(effectiveStrategy != null ? { strategy: effectiveStrategy } : {}),
-        ...(this.stats != null ? { stats: this.stats } : {}),
-        ...(this.environmentRuntimeOptions != null
-          ? { environmentRuntimeOptions: this.environmentRuntimeOptions }
-          : {}),
-      })
-      createReproducer = createLocalReproducer as unknown as ReproducerFactory<
-        Population<Ctx>
-      >
-    }
+    const result = this.createWorkerFactories(effectiveStrategy)
+
+    const evaluator: Evaluator = result.evaluator
+    const createReproducer: (population: Population<Ctx>) => Reproducer =
+      result.createReproducer
 
     this.population = this.algorithm.createPopulation(
       createReproducer,
@@ -318,29 +282,28 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     return this.organismToExecutor(best)
   }
 
-  private createWorkerFactories(
-    workerConfig: WorkerConfig,
-    effectiveStrategy?: EvaluationStrategy
-  ) {
+  private createWorkerFactories(effectiveStrategy?: EvaluationStrategy) {
+    const evaluatorConfig = this.evaluatorConfig
     const algorithmPathname =
-      workerConfig.algorithmPathname ?? this.algorithm.pathname
+      evaluatorConfig?.algorithmPathname ?? this.algorithm.pathname
     const createExecutorPathname =
-      workerConfig.createExecutorPathname ?? DEFAULT_EXECUTOR_PATHNAME
+      evaluatorConfig?.createExecutorPathname ?? DEFAULT_EXECUTOR_PATHNAME
     const threadCount =
-      workerConfig.threadCount ?? Math.max(1, hardwareConcurrency - 1)
+      evaluatorConfig?.threadCount ?? Math.max(1, hardwareConcurrency - 1)
     const taskCount =
-      workerConfig.taskCount ?? this.populationOptions.populationSize
+      evaluatorConfig?.taskCount ?? this.populationOptions.populationSize
 
     const reproducerOptions: WorkerReproducerOptions = {
       algorithmPathname,
       threadCount,
       enableCustomState: this.algorithm.enableCustomState,
     }
-    if (workerConfig.reproducerWorkerScriptUrl != null) {
-      reproducerOptions.workerScriptUrl = workerConfig.reproducerWorkerScriptUrl
+    if (evaluatorConfig?.reproducerWorkerScriptUrl != null) {
+      reproducerOptions.workerScriptUrl =
+        evaluatorConfig.reproducerWorkerScriptUrl
     }
-    if (workerConfig.verbose != null) {
-      reproducerOptions.verbose = workerConfig.verbose
+    if (evaluatorConfig?.verbose != null) {
+      reproducerOptions.verbose = evaluatorConfig.verbose
     }
 
     const reproducerFactory = createWorkerReproducerFactory(
@@ -350,7 +313,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
 
     const evaluatorOptions: WorkerEvaluatorOptions = {
       algorithmPathname,
-      createEnvironmentPathname: workerConfig.createEnvironmentPathname,
+      createEnvironmentPathname: this.createEnvironmentPathname,
       createExecutorPathname,
       taskCount,
       threadCount,
@@ -358,22 +321,23 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     if (effectiveStrategy != null) {
       evaluatorOptions.strategy = effectiveStrategy
     }
-    if (workerConfig.evaluatorWorkerScriptUrl != null) {
-      evaluatorOptions.workerScriptUrl = workerConfig.evaluatorWorkerScriptUrl
+    if (evaluatorConfig?.evaluatorWorkerScriptUrl != null) {
+      evaluatorOptions.workerScriptUrl =
+        evaluatorConfig.evaluatorWorkerScriptUrl
     }
-    if (workerConfig.verbose != null) {
-      evaluatorOptions.verbose = workerConfig.verbose
+    if (evaluatorConfig?.verbose != null) {
+      evaluatorOptions.verbose = evaluatorConfig.verbose
     }
-    if (workerConfig.hydrateEnvironmentOptions != null) {
+    if (evaluatorConfig?.hydrateEnvironmentOptions != null) {
       evaluatorOptions.hydrateEnvironmentOptions =
-        workerConfig.hydrateEnvironmentOptions
+        evaluatorConfig.hydrateEnvironmentOptions
     }
     if (this.stats != null) {
       evaluatorOptions.stats = this.stats
     }
-    if (workerConfig.environmentRuntimeData != null) {
+    if (evaluatorConfig?.environmentRuntimeData != null) {
       evaluatorOptions.environmentRuntimeData =
-        workerConfig.environmentRuntimeData
+        evaluatorConfig.environmentRuntimeData
     }
 
     const algorithm = this.algorithm as unknown as AnyErasedAlgorithm
