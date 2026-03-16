@@ -12,7 +12,7 @@ export interface EvolutionOptions<
   initialMutations: number
   secondsLimit: number
   logInterval: number
-  logSecInterval: number
+  logTimeIntervalMs: number
   earlyStop: boolean
   earlyStopPatience: number
   earlyStopMinThreshold: number
@@ -23,6 +23,7 @@ export interface EvolutionOptions<
   afterEvolveInterval?: number
   signal?: AbortSignal
   stats?: StatsRecorder
+  quiet?: boolean
 }
 
 export const defaultEvolutionOptions: EvolutionOptions<
@@ -34,7 +35,7 @@ export const defaultEvolutionOptions: EvolutionOptions<
   initialMutations: 100,
   secondsLimit: 0,
   logInterval: 10,
-  logSecInterval: 0,
+  logTimeIntervalMs: 0,
   earlyStop: false,
   earlyStopPatience: 10,
   earlyStopMinThreshold: 0,

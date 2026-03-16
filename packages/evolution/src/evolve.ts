@@ -1,5 +1,7 @@
+import { muteChannel } from '@neat-evolution/logger'
+
 import type { EvolutionOptions } from './EvolutionOptions.js'
-import { logger } from './logger.js'
+import { logger, tui } from './logger.js'
 import type { Organism } from './Organism.js'
 import type { Population } from './Population.js'
 import type { GenerationRecord } from './records/GenerationRecord.js'
@@ -12,6 +14,9 @@ export const evolve = async <
   population: P,
   options: EvolutionOptions<P, O>
 ): Promise<O | undefined> => {
+  if (options.quiet === true) {
+    muteChannel('neat:evolution:tui')
+  }
   const iterations =
     options.iterations > 0 ? options.iterations : Number.MAX_SAFE_INTEGER
 
@@ -21,11 +26,9 @@ export const evolve = async <
   let bestOrganism: O | undefined
   let stopReason: RunSummaryRecord['stopReason'] = 'completed'
   let completedIterations = 0
+  let prevLogTime = startTime
 
   for (let i = 0; i < iterations; i++) {
-    if (i % options.logInterval === 0) {
-      logger.log(`Iter: ${i}`)
-    }
     const iterationStartTime = Date.now()
 
     // Check abort/timeout before doing work
@@ -77,8 +80,8 @@ export const evolve = async <
       bestFitness = best.fitness ?? (0 as number)
       bestOrganism = best
       bestIteration = i
-      logger.log(`🌟 New best ${bestFitness} in iteration ${bestIteration}`)
-      logger.log(`---`)
+      tui.log(`🌟 New best ${bestFitness} in iteration ${bestIteration}`)
+      tui.log(`---`)
       options.handleNewBest?.(best, i)
     }
 
@@ -95,29 +98,39 @@ export const evolve = async <
 
     completedIterations = i + 1
 
-    const wantsLog = i % options.logInterval === 0
+    const now = Date.now()
+    const wantsIterationLog =
+      options.logInterval > 0 && i % options.logInterval === 0
+    const wantsTimeLog =
+      options.logTimeIntervalMs > 0 &&
+      now - prevLogTime >= options.logTimeIntervalMs
+    const wantsLog = wantsIterationLog || wantsTimeLog
     const wantsStats = options.stats?.wants('generation') === true
 
-    // Core evolution reporting — always logged, gated by logInterval
+    // Core evolution reporting — gated by logInterval or logTimeIntervalMs
     if (wantsLog || wantsStats) {
+      if (wantsLog) {
+        prevLogTime = now
+      }
       const iterationMs = Date.now() - iterationStartTime
       const speciesSizes = Array.from(population.species.values()).map(
         (s) => s.organisms.length
       )
 
       if (wantsLog) {
-        logger.log(`fitness: ${best.fitness ?? 0}`)
-        logger.log(`best: ${bestFitness} in iteration ${bestIteration}`)
-        logger.log('genome:')
-        logger.log(` hiddenNodes: ${best.genome.hiddenNodes.size}`)
-        logger.log(` links: ${best.genome.links.size}`)
-        logger.log(
+        tui.log(`Iter: ${i}`)
+        tui.log(`fitness: ${best.fitness ?? 0}`)
+        tui.log(`best: ${bestFitness} in iteration ${bestIteration}`)
+        tui.log('genome:')
+        tui.log(` hiddenNodes: ${best.genome.hiddenNodes.size}`)
+        tui.log(` links: ${best.genome.links.size}`)
+        tui.log(
           `Population(species: ${population.species.size}, extinct: ${
             population.extinctSpecies.size
           }) ${speciesSizes.join(' ')}`
         )
-        logger.log(`took ${iterationMs}ms`)
-        logger.log('---')
+        tui.log(`took ${iterationMs}ms`)
+        tui.log('---')
       }
 
       // Consumer stats — every iteration, consumers gate themselves
@@ -152,7 +165,7 @@ export const evolve = async <
     options.stats.record('run-summary', summary)
   }
 
-  logger.log(`ended after ${Date.now() - startTime}ms`)
-  logger.log(`🏆 best fitness: ${bestFitness}`)
+  tui.log(`ended after ${Date.now() - startTime}ms`)
+  tui.log(`🏆 best fitness: ${bestFitness}`)
   return bestOrganism
 }

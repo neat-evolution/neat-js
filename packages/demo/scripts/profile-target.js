@@ -27,7 +27,7 @@ function parseArgs(argv) {
     memorySampleMs: 1000,
     shutdownTimeoutMs: 15000,
     progressLogMs: 30000,
-    evolveLogSecInterval: 15,
+    evolveLogTimeIntervalMs: 15000,
     quietTraining: false,
     verbose: false,
   }
@@ -56,8 +56,8 @@ function parseArgs(argv) {
       options.shutdownTimeoutMs = Number(args[++i])
     } else if (arg === '--progress-log-ms' && args[i + 1]) {
       options.progressLogMs = Number(args[++i])
-    } else if (arg === '--evolve-log-sec-interval' && args[i + 1]) {
-      options.evolveLogSecInterval = Number(args[++i])
+    } else if (arg === '--evolve-log-time-interval-ms' && args[i + 1]) {
+      options.evolveLogTimeIntervalMs = Number(args[++i])
     } else if (arg === '--quiet-training') {
       options.quietTraining = true
     } else if (arg === '--verbose-training') {
@@ -109,11 +109,11 @@ function parseArgs(argv) {
     1000,
     Number.isFinite(options.progressLogMs) ? options.progressLogMs : 30000
   )
-  options.evolveLogSecInterval = Math.max(
+  options.evolveLogTimeIntervalMs = Math.max(
     0,
-    Number.isFinite(options.evolveLogSecInterval)
-      ? options.evolveLogSecInterval
-      : 15
+    Number.isFinite(options.evolveLogTimeIntervalMs)
+      ? options.evolveLogTimeIntervalMs
+      : 15000
   )
 
   return options
@@ -317,7 +317,7 @@ async function run() {
           evolutionOptions: {
             iterations: options.iterations,
             secondsLimit: options.secondsLimit,
-            logSecInterval: options.evolveLogSecInterval,
+            logTimeIntervalMs: options.evolveLogTimeIntervalMs,
             ...(Number.isFinite(options.initialMutations)
               ? { initialMutations: options.initialMutations }
               : {}),
