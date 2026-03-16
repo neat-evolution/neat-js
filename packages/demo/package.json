@@ -45,8 +45,6 @@
     "dev:types": "tsc --watch --declaration --emitDeclarationOnly --project tsconfig.types.json --outDir dist/types",
     "dev:workspace": "turbo run dev --filter=@neat-evolution/demo... --concurrency 20",
     "demo": "node ./dist/esm/worker.js",
-    "backprop": "node ./dist/esm/features/backprop/index.js",
-    "lamarkian": "node ./dist/esm/features/lamarkian/index.js",
     "compare": "node ./dist/esm/features/compare/index.js",
     "episodic": "node ./dist/esm/features/episodic/index.js",
     "start": "caffeinate -s node ./dist/esm/worker.js",

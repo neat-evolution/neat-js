@@ -90,7 +90,7 @@ export class BanditEnvironment
   }
 
   evaluate(executor: StaticExecutor): number {
-    const factory = this.runtimeOptions?.agentFactory ?? createVanillaAgent
+    const factory = this.runtimeOptions?.createAgent ?? createVanillaAgent
     const options = (this.runtimeOptions?.agentFactoryOptions ??
       {}) as AgentFactoryOptions
     const agent = factory(

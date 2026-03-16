@@ -20,9 +20,6 @@ const selectedMethod = parseMethodArg(process.argv.slice(2))
 try {
   await demo({
     method: selectedMethod,
-    workerConfig: {
-      createEnvironmentPathname: '@neat-evolution/dataset-environment',
-    },
   })
 } catch (e) {
   console.error(e)

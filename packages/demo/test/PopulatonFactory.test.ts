@@ -7,7 +7,7 @@ import {
 import {
   type AnyAlgorithm,
   type FitnessData,
-  TestEvaluator,
+  UnsafeTestEvaluator,
 } from '@neat-evolution/evaluator'
 import {
   createReproducer,
@@ -17,7 +17,6 @@ import {
   Population,
   type PopulationOptions,
 } from '@neat-evolution/evolution'
-import { createExecutor } from '@neat-evolution/executor'
 import {
   defaultNEATGenomeOptions,
   NEATAlgorithm,
@@ -37,7 +36,7 @@ import {
 } from './fixtures/debugOutput.js'
 
 describe('PopulationFactory', () => {
-  let evaluator: TestEvaluator<SharedArrayBuffer>
+  let evaluator: UnsafeTestEvaluator<SharedArrayBuffer>
   let algorithm: typeof NEATAlgorithm
   let configProvider: NEATConfig
   let population: NEATPopulation
@@ -57,8 +56,8 @@ describe('PopulationFactory', () => {
 
     const dataset = await loadDataset(datasetOptions)
     const environment = new DatasetEnvironment(dataset)
-    evaluator = new TestEvaluator(algorithm as AnyAlgorithm, environment, {
-      createExecutor,
+    evaluator = new UnsafeTestEvaluator(algorithm as AnyAlgorithm, environment, {
+      unsafeLocalEvaluation: true,
     })
 
     configProvider = algorithm.createConfig({ neat: defaultNEATConfigOptions })

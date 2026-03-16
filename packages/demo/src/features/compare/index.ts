@@ -12,7 +12,6 @@
  *   yarn workspace @neat-evolution/demo compare [--epochs N] [--lr N] [--iterations N] [--seconds N]
  */
 
-import { createTrainer } from '@neat-evolution/backprop-strategy'
 import {
   DatasetEnvironment,
   type DatasetOptions,
@@ -21,16 +20,16 @@ import {
   type Matrix,
   oneHotAccuracy,
 } from '@neat-evolution/dataset-environment'
-import type { EnvironmentRuntimeOptions } from '@neat-evolution/environment'
+import type { TrainerFactory } from '@neat-evolution/environment'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
 } from '@neat-evolution/evolution'
-import { EvolutionManager } from '@neat-evolution/evolution-manager'
 import {
-  createExecutor,
-  createTrainableExecutor,
-} from '@neat-evolution/executor'
+  type EvaluatorConfig,
+  EvolutionManager,
+} from '@neat-evolution/evolution-manager'
+import type { Executor, ExecutorFactory } from '@neat-evolution/executor'
 import {
   createPhenotype,
   NEATAlgorithm,
@@ -107,23 +106,43 @@ interface RunResult {
   bestFitness: number
   bestGenome: NEATGenome | undefined
   elapsedMs: number
+  evaluatorConfig: Partial<EvaluatorConfig>
+}
+
+const CREATE_ENVIRONMENT_PATHNAME = '@neat-evolution/dataset-environment'
+
+function backpropEvaluatorConfig(
+  trainerOptions: Record<string, unknown>
+): Partial<EvaluatorConfig> {
+  return {
+    createExecutorPathname: '@neat-evolution/executor/backprop',
+    hydrateEnvironmentOptions: {
+      createTrainer: '@neat-evolution/backprop-strategy',
+    },
+    environmentRuntimeData: {
+      trainerFactoryOptions: trainerOptions,
+    },
+  }
 }
 
 async function runVariant(
   name: string,
-  environmentRuntimeOptions?: EnvironmentRuntimeOptions
+  evaluatorConfigOverrides: Partial<EvaluatorConfig> = {}
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
 
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    ...(environmentRuntimeOptions != null ? { environmentRuntimeOptions } : {}),
+    createEnvironmentPathname: CREATE_ENVIRONMENT_PATHNAME,
+    ...(Object.keys(evaluatorConfigOverrides).length > 0
+      ? { evaluatorConfig: evaluatorConfigOverrides }
+      : {}),
     evolutionOptions: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,
       secondsLimit: args.seconds,
-      logInterval: Number.MAX_SAFE_INTEGER, // suppress built-in logging
+      quiet: true,
       afterEvaluate: (population) => {
         const best = population.best()
         fitnessLog.push(best?.fitness ?? 0)
@@ -133,10 +152,6 @@ async function runVariant(
       ...defaultPopulationOptions,
     },
   })
-
-  // Suppress evolve()'s built-in console.log output
-  const originalLog = console.log
-  console.log = () => {}
 
   const start = performance.now()
   try {
@@ -149,9 +164,9 @@ async function runVariant(
       bestFitness: best?.fitness ?? 0,
       bestGenome: best?.genome as NEATGenome | undefined,
       elapsedMs,
+      evaluatorConfig: evaluatorConfigOverrides,
     }
   } finally {
-    console.log = originalLog
     await manager.terminate()
   }
 }
@@ -165,28 +180,28 @@ console.log(
 
 // Baldwinian (backprop, no writeback) — train on training, fitness on validation
 console.log('Running: Baldwinian (backprop, discard weights)...')
-const baldwinian = await runVariant('Baldwinian', {
-  trainerFactory: createTrainer,
-  trainerFactoryOptions: {
+const baldwinian = await runVariant(
+  'Baldwinian',
+  backpropEvaluatorConfig({
     learningRate: args.learningRate,
     epochs: args.trainingEpochs,
     isLamarckian: false,
-  },
-})
+  })
+)
 console.log(
   `  Done: ${baldwinian.bestFitness.toFixed(6)} in ${(baldwinian.elapsedMs / 1000).toFixed(1)}s`
 )
 
 // Lamarckian (backprop + writeback) — train on training, fitness on validation
 console.log('Running: Lamarckian (backprop + writeback)...')
-const lamarckian = await runVariant('Lamarckian', {
-  trainerFactory: createTrainer,
-  trainerFactoryOptions: {
+const lamarckian = await runVariant(
+  'Lamarckian',
+  backpropEvaluatorConfig({
     learningRate: args.learningRate,
     epochs: args.trainingEpochs,
     isLamarckian: true,
-  },
-})
+  })
+)
 console.log(
   `  Done: ${lamarckian.bestFitness.toFixed(6)} in ${(lamarckian.elapsedMs / 1000).toFixed(1)}s`
 )
@@ -234,7 +249,45 @@ console.log(
   `${'ms/iter'.padEnd(10)}${results.map((r) => `${(r.elapsedMs / r.fitnessLog.length).toFixed(1)}`.padStart(colWidth)).join('')}`
 )
 
-// --- Test-set evaluation ---
+// --- Test-set helpers ---
+
+function evaluateOnTest(executor: Executor) {
+  const predictions: Matrix = dataset.testInputs.map((input) =>
+    executor.forward(input)
+  )
+  const fitness = environment.computeFitness(dataset.testTargets, predictions)
+  const accuracy = oneHotAccuracy(dataset.testTargets, predictions)
+  return { fitness, accuracy }
+}
+
+function formatTestResult(
+  name: string,
+  result: { fitness: number; accuracy: number }
+) {
+  return `${name.padEnd(12)} fitness: ${result.fitness.toFixed(6)}  accuracy: ${(result.accuracy * 100).toFixed(1)}%`
+}
+
+// --- Raw genome evaluation (no backprop) ---
+
+console.log()
+console.log('=== Raw Genome on Test Set (forward-only, no backprop) ===')
+console.log()
+
+for (const result of results) {
+  if (!result.bestGenome) {
+    console.log(`${result.name.padEnd(12)} no genome`)
+    continue
+  }
+
+  const phenotype = createPhenotype(result.bestGenome)
+  const executorMod = await import('@neat-evolution/executor')
+  const executorFactory = executorMod.createExecutor as ExecutorFactory
+  const executor = executorFactory(phenotype)
+
+  console.log(formatTestResult(result.name, evaluateOnTest(executor)))
+}
+
+// --- Test-set evaluation with backprop ---
 
 console.log()
 console.log('=== Test Set Evaluation (held-out, unseen data) ===')
@@ -246,49 +299,35 @@ for (const result of results) {
     continue
   }
 
+  const { evaluatorConfig } = result
   const phenotype = createPhenotype(result.bestGenome)
 
-  // For Baldwinian/Lamarckian, train the best genome before test evaluation
-  // (Baldwinian trains fresh; Lamarckian genome already has trained weights)
-  let predictions: Matrix
+  // Hydrate executor factory from pathname (same as TestEvaluator.initGenomeFactory)
+  const executorPathname =
+    evaluatorConfig.createExecutorPathname ?? '@neat-evolution/executor'
+  const executorMod = await import(executorPathname)
+  const executorFactory = executorMod.createExecutor as ExecutorFactory
+  const executor = executorFactory(phenotype)
 
-  if (result.name === 'Baldwinian') {
-    // Baldwinian: must re-train since weights were discarded during evolution
-    const trainable = createTrainableExecutor(phenotype)
-    for (let epoch = 0; epoch < args.trainingEpochs; epoch++) {
-      for (let s = 0; s < dataset.trainingCount; s++) {
-        const input = dataset.trainingInputs[
-          s
-        ] as (typeof dataset.trainingInputs)[number]
-        const target = dataset.trainingTargets[
-          s
-        ] as (typeof dataset.trainingTargets)[number]
-        const output = trainable.forward(input)
-        const errors = new Float64Array(output.length)
-        for (let j = 0; j < output.length; j++) {
-          errors[j] = (output[j] as number) - (target[j] as number)
-        }
-        trainable.backward(errors, args.learningRate)
-      }
+  // Hydrate trainer if configured (backprop variants)
+  const trainerPathname =
+    evaluatorConfig.hydrateEnvironmentOptions?.createTrainer
+  if (trainerPathname != null) {
+    const trainerMod = await import(trainerPathname)
+    const createTrainer = (trainerMod.default ??
+      trainerMod.createTrainer) as TrainerFactory
+    const trainerOptions = evaluatorConfig.environmentRuntimeData
+      ?.trainerFactoryOptions as Record<string, unknown>
+    if (trainerOptions == null) {
+      throw new Error(`trainerFactoryOptions missing for ${result.name}`)
     }
-    predictions = dataset.testInputs.map((input) => trainable.forward(input))
-  } else if (result.name === 'Lamarckian') {
-    // Lamarckian: genome already has trained weights, just build and evaluate
-    const trainable = createTrainableExecutor(phenotype)
-    predictions = dataset.testInputs.map((input) => trainable.forward(input))
-  } else {
-    // Vanilla: no training, just evaluate
-    const executor = createExecutor(phenotype)
-    predictions = dataset.testInputs.map((input) => executor.forward(input))
+    const trainer = createTrainer(executor, trainerOptions)
+    trainer.train({
+      inputs: dataset.trainingInputs,
+      targets: dataset.trainingTargets,
+      count: dataset.trainingCount,
+    })
   }
 
-  const testFitness = environment.computeFitness(
-    dataset.testTargets,
-    predictions
-  )
-  const testAccuracy = oneHotAccuracy(dataset.testTargets, predictions)
-
-  console.log(
-    `${result.name.padEnd(12)} fitness: ${testFitness.toFixed(6)}  accuracy: ${(testAccuracy * 100).toFixed(1)}%`
-  )
+  console.log(formatTestResult(result.name, evaluateOnTest(executor)))
 }

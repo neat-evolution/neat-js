@@ -13,17 +13,10 @@ import {
   defaultTopologyConfigOptions,
 } from '@neat-evolution/des-hyperneat'
 import { ESHyperNEATAlgorithm } from '@neat-evolution/es-hyperneat'
-import {
-  defaultEvolutionOptions,
-  defaultPopulationOptions,
-  type EvolutionOptions,
-  type Organism,
-  type PopulationOptions,
-} from '@neat-evolution/evolution'
+import type { Organism } from '@neat-evolution/evolution'
 import {
   EvolutionManager,
   type EvolutionManagerConfig,
-  type WorkerConfig,
 } from '@neat-evolution/evolution-manager'
 import { HyperNEATAlgorithm } from '@neat-evolution/hyperneat'
 import { NEATAlgorithm } from '@neat-evolution/neat'
@@ -72,18 +65,26 @@ function algorithmConfig(selectedMethod: Methods): ErasedManagerConfig {
   }
 }
 
-export interface DemoOptions {
+export interface DemoOptions
+  extends Partial<
+    Omit<
+      EvolutionManagerConfig,
+      'algorithm' | 'environment' | 'createEnvironmentPathname'
+    >
+  > {
   method?: Methods
-  evolutionOptions?: Partial<EvolutionOptions>
-  populationOptions?: Partial<PopulationOptions>
   datasetOptions?: Partial<DatasetOptions>
-  workerConfig?: WorkerConfig
 }
 
 export const demo = async (
   options: DemoOptions = {}
 ): Promise<Organism<AlgorithmContext> | undefined> => {
-  const selectedMethod = options.method ?? method
+  const {
+    method: selectedMethod = method,
+    datasetOptions: datasetOverrides,
+    ...managerOverrides
+  } = options
+
   const datasetOptions: DatasetOptions = {
     ...defaultDatasetOptions,
     dataset: new URL(
@@ -93,7 +94,7 @@ export const demo = async (
     ).pathname,
     validationFraction: 0.1,
     testFraction: 0.1,
-    ...options.datasetOptions,
+    ...datasetOverrides,
   }
 
   const dataset = await loadDataset(datasetOptions)
@@ -102,19 +103,12 @@ export const demo = async (
   const manager = new EvolutionManager({
     ...algorithmConfig(selectedMethod),
     environment,
+    createEnvironmentPathname: '@neat-evolution/dataset-environment',
     evolutionOptions: {
-      ...defaultEvolutionOptions,
-      iterations: 2,
+      iterations: 20,
       secondsLimit: 5,
-      ...options.evolutionOptions,
     },
-    populationOptions: {
-      ...defaultPopulationOptions,
-      ...options.populationOptions,
-    },
-    ...(options.workerConfig != null
-      ? { workerConfig: options.workerConfig }
-      : {}),
+    ...managerOverrides,
   })
 
   const best = await manager.evolve()

@@ -8,25 +8,21 @@
  *
  * Usage:
  *   yarn workspace @neat-evolution/demo episodic \
- *     [--iterations N] [--seconds N] [--lr N] \
+ *     [--iterations N] [--seconds N] [--lr N] [--threads N] \
  *     [--seed phase4-demo|--no-seed] [--ac-seed custom] [--ql-seed custom] \
  *     [--entropy 0.01] [--epsilon 0.3] [--epsilon-decay 0.95] [--epsilon-min 0.01]
  */
 
 import type { ACAgentConfig } from '@neat-evolution/actor-critic'
-import { createAgent as createACAgent } from '@neat-evolution/actor-critic/plugin'
 import { Activation } from '@neat-evolution/core'
-import type {
-  EnvironmentRuntimeOptions,
-  RolloutBufferConfig,
-} from '@neat-evolution/environment'
+import type { RolloutBufferConfig } from '@neat-evolution/environment'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
 } from '@neat-evolution/evolution'
 import {
   EvolutionManager,
-  type WorkerConfig,
+  type EvaluatorConfig,
 } from '@neat-evolution/evolution-manager'
 import {
   defaultNEATGenomeOptions,
@@ -35,7 +31,6 @@ import {
   type NEATGenomeOptions,
 } from '@neat-evolution/neat'
 import type { QLAgentConfig } from '@neat-evolution/q-learning'
-import { createAgent as createQLAgent } from '@neat-evolution/q-learning/plugin'
 import { createRNG, setThreadRNGSeed } from '@neat-evolution/utils'
 
 import { BanditEnvironment } from './BanditEnvironment.js'
@@ -53,8 +48,7 @@ interface VariantConfig {
   name: string
   description: string
   outputCount: number
-  environmentRuntimeOptions?: EnvironmentRuntimeOptions
-  workerConfigOverrides?: Partial<WorkerConfig>
+  evaluatorConfig: Partial<EvaluatorConfig>
   genomeOptions?: Partial<NEATGenomeOptions>
   summary: VariantSummary
 }
@@ -73,7 +67,6 @@ function parseArgs(argv: string[]) {
     epsilonInitial: 0.3,
     epsilonDecayPerEpisode: 0.1,
     epsilonMinimum: 0.01,
-    workers: false,
     threadCount: undefined as number | undefined,
   }
 
@@ -112,11 +105,8 @@ function parseArgs(argv: string[]) {
     } else if (arg === '--epsilon-min' && next) {
       args.epsilonMinimum = Number(next)
       i++
-    } else if (arg === '--workers') {
-      args.workers = true
     } else if (arg === '--threads' && next) {
       args.threadCount = Number(next)
-      args.workers = true
       i++
     }
   }
@@ -182,11 +172,29 @@ const acOutputActivation: readonly [
   [1, Activation.Linear],
 ]
 
+/** Worker config overrides for RL variants that need a trainable executor + agent factory. */
+function rlEvaluatorConfig(
+  agentFactoryPathname: string,
+  agentFactoryOptions: Record<string, unknown>
+): Partial<EvaluatorConfig> {
+  return {
+    createExecutorPathname: '@neat-evolution/executor/backprop',
+    hydrateEnvironmentOptions: {
+      createAgent: agentFactoryPathname,
+    },
+    environmentRuntimeData: {
+      agentFactoryOptions,
+    },
+  }
+}
+
 const variants: VariantConfig[] = [
   {
     name: 'Vanilla',
     description: 'Baseline evolution via evaluate()',
     outputCount: 3,
+    evaluatorConfig: {},
+    genomeOptions: { outputActivation: Activation.Softmax },
     summary: {
       path: 'evaluate()',
       method: 'vanilla',
@@ -202,27 +210,11 @@ const variants: VariantConfig[] = [
     name: 'AC-Lamarck',
     description: 'Actor-Critic with Lamarckian writeback',
     outputCount: 4,
-    environmentRuntimeOptions: {
-      agentFactory: createACAgent,
-      agentFactoryOptions: {
-        config: acAgentConfig,
-        rngSeed: acLamarckSeed,
-        isLamarckian: true,
-      },
-    },
-    workerConfigOverrides: {
-      createExecutorPathname: '@neat-evolution/executor/backprop',
-      hydrateEnvironmentOptions: {
-        agentFactory: '@neat-evolution/actor-critic/plugin',
-      },
-      environmentRuntimeData: {
-        agentFactoryOptions: {
-          config: acAgentConfig,
-          rngSeed: acLamarckSeed,
-          isLamarckian: true,
-        },
-      },
-    },
+    evaluatorConfig: rlEvaluatorConfig('@neat-evolution/actor-critic/plugin', {
+      config: acAgentConfig,
+      rngSeed: acLamarckSeed,
+      isLamarckian: true,
+    }),
     genomeOptions: { outputActivation: acOutputActivation },
     summary: {
       path: 'evaluateAgent()',
@@ -241,27 +233,11 @@ const variants: VariantConfig[] = [
     name: 'AC-Darwin',
     description: 'Actor-Critic without Lamarckian writeback',
     outputCount: 4,
-    environmentRuntimeOptions: {
-      agentFactory: createACAgent,
-      agentFactoryOptions: {
-        config: acAgentConfig,
-        rngSeed: acDarwinSeed,
-        isLamarckian: false,
-      },
-    },
-    workerConfigOverrides: {
-      createExecutorPathname: '@neat-evolution/executor/backprop',
-      hydrateEnvironmentOptions: {
-        agentFactory: '@neat-evolution/actor-critic/plugin',
-      },
-      environmentRuntimeData: {
-        agentFactoryOptions: {
-          config: acAgentConfig,
-          rngSeed: acDarwinSeed,
-          isLamarckian: false,
-        },
-      },
-    },
+    evaluatorConfig: rlEvaluatorConfig('@neat-evolution/actor-critic/plugin', {
+      config: acAgentConfig,
+      rngSeed: acDarwinSeed,
+      isLamarckian: false,
+    }),
     genomeOptions: { outputActivation: acOutputActivation },
     summary: {
       path: 'evaluateAgent()',
@@ -280,27 +256,11 @@ const variants: VariantConfig[] = [
     name: 'Q-Learning',
     description: 'DQN-style epsilon-greedy training with Lamarckian writeback',
     outputCount: 3,
-    environmentRuntimeOptions: {
-      agentFactory: createQLAgent,
-      agentFactoryOptions: {
-        config: qlAgentConfig,
-        rngSeed: qlSeed,
-        isLamarckian: true,
-      },
-    },
-    workerConfigOverrides: {
-      createExecutorPathname: '@neat-evolution/executor/backprop',
-      hydrateEnvironmentOptions: {
-        agentFactory: '@neat-evolution/q-learning/plugin',
-      },
-      environmentRuntimeData: {
-        agentFactoryOptions: {
-          config: qlAgentConfig,
-          rngSeed: qlSeed,
-          isLamarckian: true,
-        },
-      },
-    },
+    evaluatorConfig: rlEvaluatorConfig('@neat-evolution/q-learning/plugin', {
+      config: qlAgentConfig,
+      rngSeed: qlSeed,
+      isLamarckian: true,
+    }),
     genomeOptions: { outputActivation: Activation.Linear },
     summary: {
       path: 'evaluateAgent()',
@@ -330,7 +290,7 @@ if (args.seconds > 0) {
   console.log(`Time limit: ${args.seconds}s per run`)
 }
 console.log(
-  `Workers: ${args.workers ? `enabled${args.threadCount != null ? ` (${args.threadCount} threads)` : ''}` : 'disabled (main thread)'}`
+  `Threads: ${args.threadCount != null ? args.threadCount : 'auto'}`
 )
 console.log(`Base RNG seed: ${args.seed ?? 'not set (thread RNG)'}`)
 console.log('\nVariant configuration:')
@@ -354,28 +314,21 @@ interface RunResult {
   elapsedMs: number
 }
 
-async function runVariant(
-  variant: VariantConfig,
-  baseWorkerConfig?: WorkerConfig
-): Promise<RunResult> {
+const CREATE_ENVIRONMENT_PATHNAME = '@neat-evolution/demo/bandit-environment'
+
+async function runVariant(variant: VariantConfig): Promise<RunResult> {
   const fitnessLog: number[] = []
   const environment = new BanditEnvironment(variant.outputCount)
 
-  // Build per-variant worker config by merging base + overrides
-  let variantWorkerConfig: WorkerConfig | undefined
-  if (baseWorkerConfig != null) {
-    variantWorkerConfig = {
-      ...baseWorkerConfig,
-      ...variant.workerConfigOverrides,
-    }
+  const evaluatorConfig: EvaluatorConfig = {
+    ...(args.threadCount != null ? { threadCount: args.threadCount } : {}),
+    ...variant.evaluatorConfig,
   }
 
   const manager = new EvolutionManager({
     algorithm: NEATAlgorithm,
     environment,
-    ...(variant.environmentRuntimeOptions != null
-      ? { environmentRuntimeOptions: variant.environmentRuntimeOptions }
-      : {}),
+    createEnvironmentPathname: CREATE_ENVIRONMENT_PATHNAME,
     ...(variant.genomeOptions != null
       ? {
           genomeOptions: {
@@ -388,7 +341,7 @@ async function runVariant(
       ...defaultEvolutionOptions,
       iterations: args.iterations,
       secondsLimit: args.seconds,
-      logInterval: Number.MAX_SAFE_INTEGER,
+      quiet: true,
       afterEvaluate: (population) => {
         const best = population.best()
         fitnessLog.push(best?.fitness ?? 0)
@@ -397,14 +350,8 @@ async function runVariant(
     populationOptions: {
       ...defaultPopulationOptions,
     },
-    ...(variantWorkerConfig != null
-      ? { workerConfig: variantWorkerConfig }
-      : {}),
+    evaluatorConfig,
   })
-
-  // Suppress evolve()'s built-in logging
-  const originalLog = console.log
-  console.log = () => {}
 
   const start = performance.now()
   try {
@@ -419,24 +366,16 @@ async function runVariant(
       elapsedMs,
     }
   } finally {
-    console.log = originalLog
     await manager.terminate()
   }
 }
 
 // --- Run each variant ---
 
-const baseWorkerConfig: WorkerConfig | undefined = args.workers
-  ? {
-      createEnvironmentPathname: '@neat-evolution/demo/bandit-environment',
-      ...(args.threadCount != null ? { threadCount: args.threadCount } : {}),
-    }
-  : undefined
-
 const results: RunResult[] = []
 for (const variant of variants) {
   console.log(`Running: ${variant.name}...`)
-  const result = await runVariant(variant, baseWorkerConfig)
+  const result = await runVariant(variant)
   console.log(
     `  Done: ${result.bestFitness.toFixed(4)} in ${(result.elapsedMs / 1000).toFixed(1)}s`
   )
