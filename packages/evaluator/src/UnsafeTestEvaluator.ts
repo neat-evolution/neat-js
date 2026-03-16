@@ -123,9 +123,6 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
 
     // Build initOptions (same flow as handleInitEvaluator)
     const initOptions: EnvironmentInitOptions = {}
-    if (this.stats != null) {
-      initOptions.stats = this.stats
-    }
     if (this.runtimeConfig?.environmentRuntimeData != null) {
       Object.assign(initOptions, this.runtimeConfig.environmentRuntimeData)
     }

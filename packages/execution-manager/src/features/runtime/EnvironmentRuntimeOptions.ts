@@ -5,7 +5,6 @@ import type { TrainerFactory } from '../trainer/TrainerFactory.js'
 import type { WorkerEvaluationContext } from './WorkerEvaluationContext.js'
 
 export interface EnvironmentInitOptions {
-  stats?: StatsRecorder
   createAgent?: AgentFactory
   createTrainer?: TrainerFactory
   [key: string]: unknown // extensible for hydrated pathnames

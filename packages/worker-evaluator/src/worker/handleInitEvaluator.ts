@@ -47,7 +47,6 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     context.stats = createWorkerStatsRecorder(statsConfig, (metric, value) => {
       send(recordStats({ metric, value }))
     })
-    initOptions.stats = context.stats
   }
 
   // Merge serializable runtime data (factory options, config blobs)
