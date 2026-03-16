@@ -16,7 +16,8 @@ function makeTransition(
     actionProbabilities: new Float64Array([0.7, 0.3]),
     criticValue,
     reward,
-    done,
+    terminated: done,
+    truncated: false,
   }
 }
 
@@ -146,7 +147,8 @@ describe('trainOnSegment', () => {
         action: new Float64Array([1]),
         actionProbabilities: new Float64Array([1]),
         reward: 1,
-        done: true,
+        terminated: true,
+        truncated: false,
       },
     ]
     expect(() => trainOnSegment(trainable, transitions, defaultConfig)).toThrow(

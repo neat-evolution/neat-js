@@ -9,7 +9,8 @@ function makeTransition(overrides: Partial<Transition> = {}): Transition {
     rawOutput: new Float64Array([0.5, 0.3, 0.1]),
     action: new Float64Array([1, 0]),
     reward: 1,
-    done: false,
+    terminated: false,
+    truncated: false,
     actionProbabilities: new Float64Array([0.7, 0.3]),
     criticValue: 0.5,
     ...overrides,
@@ -158,7 +159,8 @@ describe('computeACGradients', () => {
       rawOutput: new Float64Array([0.5, 0.3, 0.1]),
       action: new Float64Array([1, 0]),
       reward: 1,
-      done: false,
+      terminated: false,
+      truncated: false,
       criticValue: 0.5,
     }
     expect(() => computeACGradients(transition, 0.5, defaultConfig)).toThrow(
@@ -172,7 +174,8 @@ describe('computeACGradients', () => {
       rawOutput: new Float64Array([0.5, 0.3, 0.1]),
       action: new Float64Array([1, 0]),
       reward: 1,
-      done: false,
+      terminated: false,
+      truncated: false,
       actionProbabilities: new Float64Array([0.7, 0.3]),
     }
     expect(() => computeACGradients(transition, 0.5, defaultConfig)).toThrow(

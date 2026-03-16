@@ -10,7 +10,8 @@ function makeTransition(overrides: Partial<Transition> = {}): Transition {
     rawOutput: new Float64Array([0.7, 0.3, 0.6, 0.4, 0.5]),
     action: new Float64Array([1, 0]), // factor 0 = on, factor 1 = off
     reward: 1,
-    done: false,
+    terminated: false,
+    truncated: false,
     actionProbabilities: new Float64Array([0.7, 0.3, 0.6, 0.4]),
     criticValue: 0.5,
     ...overrides,
@@ -151,7 +152,8 @@ describe('computeACMultiDiscreteGradients', () => {
       rawOutput: new Float64Array([0.7, 0.3, 0.6, 0.4, 0.5]),
       action: new Float64Array([1, 0]),
       reward: 1,
-      done: false,
+      terminated: false,
+      truncated: false,
       criticValue: 0.5,
     }
     expect(() =>
@@ -170,7 +172,8 @@ describe('computeACMultiDiscreteGradients', () => {
       rawOutput: new Float64Array([0.7, 0.3, 0.6, 0.4, 0.5]),
       action: new Float64Array([1, 0]),
       reward: 1,
-      done: false,
+      terminated: false,
+      truncated: false,
       actionProbabilities: new Float64Array([0.7, 0.3, 0.6, 0.4]),
     }
     expect(() =>

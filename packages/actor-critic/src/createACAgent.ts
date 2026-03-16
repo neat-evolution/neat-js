@@ -52,12 +52,6 @@ function sampleAction(
   return action
 }
 
-/** EpisodicAgent extended with transition metadata support for plugin use. */
-export type ACAgent = EpisodicAgent & {
-  /** Set pending transition metadata (`info`) for the current transition. */
-  setTransitionInfo(info: TransitionInfo): void
-}
-
 /**
  * Create an Actor-Critic EpisodicAgent (A2C pattern).
  *
@@ -76,7 +70,7 @@ export function createACAgent(
   trainable: TrainableExecutor,
   config: ACAgentConfig,
   rng: () => number
-): ACAgent {
+): EpisodicAgent {
   const rolloutBuffer = new RolloutBuffer(config.rolloutConfig)
   const multiDiscrete = config.multiDiscrete ?? false
   const factorCount = config.actionCount
@@ -111,7 +105,7 @@ export function createACAgent(
     if (currentTransition === null) {
       return null
     }
-    if (currentTransition.done) {
+    if (currentTransition.terminated || currentTransition.truncated) {
       return 'done'
     }
     if (Math.abs(currentTransition.reward) > rewardThreshold) {
@@ -164,7 +158,8 @@ export function createACAgent(
         actionProbabilities,
         criticValue,
         reward: 0,
-        done: false,
+        terminated: false,
+        truncated: false,
       }
       if (pendingInfo !== null) {
         currentTransition.info = pendingInfo
@@ -176,12 +171,13 @@ export function createACAgent(
       return action
     },
 
-    reward(reward: number, done: boolean): void {
+    reward(reward: number, terminated: boolean, truncated: boolean): void {
       if (currentTransition === null) {
         return
       }
       currentTransition.reward = reward
-      currentTransition.done = done
+      currentTransition.terminated = terminated
+      currentTransition.truncated = truncated
 
       doTrain()
     },

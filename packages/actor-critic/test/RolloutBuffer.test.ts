@@ -8,7 +8,8 @@ function makeTransition(reward = 0, done = false): Transition {
     rawOutput: new Float64Array([0.5, 0.3, 0.1]),
     action: new Float64Array([1, 0]),
     reward,
-    done,
+    terminated: done,
+    truncated: false,
     actionProbabilities: new Float64Array([0.7, 0.3]),
     criticValue: 0.5,
   }

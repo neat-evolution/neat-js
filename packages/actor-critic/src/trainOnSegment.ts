@@ -49,7 +49,7 @@ export function trainOnSegment(
       'Last transition missing criticValue for n-step return bootstrap'
     )
   }
-  const terminalValue = lastTransition.done ? 0 : lastCriticValue
+  const terminalValue = lastTransition.terminated ? 0 : lastCriticValue
 
   // Compute n-step returns backward (single scalar G, shared critic)
   let G = terminalValue

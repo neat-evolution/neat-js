@@ -99,9 +99,9 @@ describe('createACAgent', () => {
 
       agent.startEpisode({ episodeIndex: 0 })
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.5, false)
+      agent.reward(0.5, false, false)
       agent.act(new Float64Array([0, 1]))
-      agent.reward(1.0, false)
+      agent.reward(1.0, false, false)
 
       agent.endEpisode({
         fitness: 1,
@@ -124,7 +124,7 @@ describe('createACAgent', () => {
         agent.startEpisode({ episodeIndex: ep })
         const action = agent.act(new Float64Array([1, 0]))
         actions.push(Float64Array.from(action))
-        agent.reward(0, true)
+        agent.reward(0, true, false)
       }
 
       const uniqueActions = new Set(actions.map((a) => Array.from(a).join(',')))
@@ -144,12 +144,12 @@ describe('createACAgent', () => {
 
       for (let i = 0; i < 5; i++) {
         agent.act(new Float64Array([1, 0]))
-        agent.reward(0.01, false)
+        agent.reward(0.01, false, false)
       }
       expect(trainable.backwardCalls).toBe(0)
 
       agent.act(new Float64Array([1, 0]))
-      agent.reward(1.0, false)
+      agent.reward(1.0, false, false)
       expect(trainable.backwardCalls).toBe(6)
     })
 
@@ -162,9 +162,9 @@ describe('createACAgent', () => {
 
       agent.startEpisode({ episodeIndex: 0 })
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, false)
+      agent.reward(0.01, false, false)
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, true)
+      agent.reward(0.01, true, false)
       expect(trainable.backwardCalls).toBe(2)
     })
 
@@ -178,7 +178,7 @@ describe('createACAgent', () => {
       agent.startEpisode({ episodeIndex: 0 })
       for (let i = 0; i < 10; i++) {
         agent.act(new Float64Array([1, 0]))
-        agent.reward(0.01, false)
+        agent.reward(0.01, false, false)
       }
       expect(trainable.backwardCalls).toBe(0)
     })
@@ -196,11 +196,11 @@ describe('createACAgent', () => {
 
       agent.startEpisode({ episodeIndex: 0 })
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, false)
+      agent.reward(0.01, false, false)
 
       agent.startEpisode({ episodeIndex: 1 })
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, true)
+      agent.reward(0.01, true, false)
       expect(trainable.backwardCalls).toBe(1)
     })
   })
@@ -218,7 +218,7 @@ describe('createACAgent', () => {
       agent.startEpisode({ episodeIndex: 0 })
       for (let i = 0; i < 5; i++) {
         agent.act(new Float64Array([1, 0]))
-        agent.reward(0.01, false)
+        agent.reward(0.01, false, false)
       }
       expect(trainable.backwardCalls).toBe(0)
 
@@ -266,15 +266,15 @@ describe('createACAgent', () => {
       agent.startEpisode({ episodeIndex: 0 })
 
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, false)
+      agent.reward(0.01, false, false)
       agent.act(new Float64Array([1, 0]))
-      agent.reward(5.0, false)
+      agent.reward(5.0, false, false)
       expect(trainable.backwardCalls).toBe(0)
 
       agent.act(new Float64Array([1, 0]))
-      agent.reward(0.01, false)
+      agent.reward(0.01, false, false)
       agent.act(new Float64Array([1, 0]))
-      agent.reward(5.0, false)
+      agent.reward(5.0, false, false)
       expect(trainable.backwardCalls).toBe(4)
     })
   })
@@ -294,7 +294,7 @@ describe('createACAgent', () => {
       for (let i = 0; i < 20; i++) {
         const action = agent.act(new Float64Array([1, 0, 0, 0]))
         expect(action.length).toBe(4)
-        agent.reward(i === 19 ? 1.0 : 0.01, i === 19)
+        agent.reward(i === 19 ? 1.0 : 0.01, i === 19, false)
       }
 
       expect(trainable.backwardCalls).toBe(20)
@@ -383,9 +383,9 @@ describe('createACAgent', () => {
 
       agent.startEpisode({ episodeIndex: 0 })
       agent.act(new Float64Array([1, 0, 0]))
-      agent.reward(0.5, false)
+      agent.reward(0.5, false, false)
       agent.act(new Float64Array([0, 1, 0]))
-      agent.reward(1.0, false)
+      agent.reward(1.0, false, false)
 
       agent.endEpisode({
         fitness: 1,
@@ -414,7 +414,7 @@ describe('createACAgent', () => {
 
       agent.startEpisode({ episodeIndex: 0 })
       agent.act(new Float64Array([1, 0]))
-      agent.reward(1, false)
+      agent.reward(1, false, false)
 
       expect(onSegmentTrained).toHaveBeenCalledTimes(1)
     })
