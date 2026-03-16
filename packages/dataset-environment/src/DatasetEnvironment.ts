@@ -38,21 +38,12 @@ export class DatasetEnvironment
     this.runtimeOptions = options
   }
 
-  private fitness(targets: Matrix, predictions: Matrix): number {
-    const norm = this.dataset.isClassification && this.dataset.oneHotOutput
-    if (norm) {
-      return Math.exp(-crossentropy(targets, predictions, norm))
-    } else {
-      const e = 1.0 - mse(targets, predictions, norm)
-      return Number.isFinite(e) ? e : 0.0
-    }
-  }
-
   evaluate(executor: StaticExecutor): number {
-    if (this.runtimeOptions?.trainerFactory != null) {
+    if (this.runtimeOptions?.createTrainer != null) {
+      // Supervised: train on training split, score on validation split
       const options = (this.runtimeOptions?.trainerFactoryOptions ??
         {}) as TrainerFactoryOptions
-      const trainer = this.runtimeOptions.trainerFactory(
+      const trainer = this.runtimeOptions.createTrainer(
         executor,
         options,
         this.runtimeOptions.evaluationContext
@@ -64,8 +55,9 @@ export class DatasetEnvironment
       )
       return this.computeFitness(validation.targets, predictions)
     }
+    // Direct: no training, score on training split
     const predictions = executor.forwardBatch(this.dataset.trainingInputs)
-    return this.fitness(this.dataset.trainingTargets, predictions)
+    return this.computeFitness(this.dataset.trainingTargets, predictions)
   }
 
   async evaluateAsync(executor: StaticExecutor): Promise<number> {
@@ -110,7 +102,14 @@ export class DatasetEnvironment
     targets: ReadonlyArray<number[] | Float64Array>,
     predictions: ReadonlyArray<number[] | Float64Array>
   ): number {
-    return this.fitness(targets as Matrix, predictions as Matrix)
+    const norm = this.dataset.isClassification && this.dataset.oneHotOutput
+    if (norm) {
+      return Math.exp(
+        -crossentropy(targets as Matrix, predictions as Matrix, norm)
+      )
+    }
+    const e = 1.0 - mse(targets as Matrix, predictions as Matrix, norm)
+    return Number.isFinite(e) ? e : 0.0
   }
 
   toFactoryOptions(): SharedArrayBuffer {

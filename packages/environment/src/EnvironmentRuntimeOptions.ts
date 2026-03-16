@@ -5,8 +5,8 @@ import type { WorkerEvaluationContext } from './WorkerEvaluationContext.js'
 
 export interface EnvironmentRuntimeOptions {
   stats?: StatsRecorder
-  agentFactory?: AgentFactory
-  trainerFactory?: TrainerFactory
+  createAgent?: AgentFactory
+  createTrainer?: TrainerFactory
   evaluationContext?: WorkerEvaluationContext
   [key: string]: unknown // extensible for hydrated pathnames
 }
