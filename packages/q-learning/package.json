@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@neat-evolution/actor-critic": "workspace:*",
-    "@neat-evolution/environment": "workspace:*",
+    "@neat-evolution/execution-manager": "workspace:*",
     "@neat-evolution/executor": "workspace:*",
     "@neat-evolution/utils": "workspace:*"
   },

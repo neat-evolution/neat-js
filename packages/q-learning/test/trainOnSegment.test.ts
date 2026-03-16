@@ -1,4 +1,4 @@
-import type { Transition } from '@neat-evolution/environment'
+import type { Transition } from '@neat-evolution/execution-manager'
 import type { TrainableExecutor } from '@neat-evolution/executor'
 import { describe, expect, it } from 'vitest'
 import type { QLGradientConfig } from '../src/computeQLOutputErrors.js'

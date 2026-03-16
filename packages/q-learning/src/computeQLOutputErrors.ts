@@ -1,4 +1,4 @@
-import type { Transition } from '@neat-evolution/environment'
+import type { Transition } from '@neat-evolution/execution-manager'
 
 /** Configuration for Q-learning gradient computation. */
 export interface QLGradientConfig {

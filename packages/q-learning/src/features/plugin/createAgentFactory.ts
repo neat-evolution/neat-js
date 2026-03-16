@@ -3,12 +3,12 @@ import type {
   AgentFactoryOptions,
   RolloutSegment,
   WorkerEvaluationContext,
-} from '@neat-evolution/environment'
+} from '@neat-evolution/execution-manager'
 import type { Executor } from '@neat-evolution/executor'
 import { isTrainableExecutor } from '@neat-evolution/executor'
+import { createRNG } from '@neat-evolution/utils'
 import type { QLAgentConfig } from '../../index.js'
 import { createQLAgent } from '../../index.js'
-import { createRNG } from '@neat-evolution/utils'
 
 interface QLAgentFactoryOptions extends AgentFactoryOptions {
   config: QLAgentConfig

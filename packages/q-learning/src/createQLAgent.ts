@@ -7,7 +7,7 @@ import type {
   RolloutSegment,
   Transition,
   TransitionInfo,
-} from '@neat-evolution/environment'
+} from '@neat-evolution/execution-manager'
 import type { TrainableExecutor } from '@neat-evolution/executor'
 import type { RNG } from '@neat-evolution/utils'
 import type { QLGradientConfig } from './computeQLOutputErrors.js'
