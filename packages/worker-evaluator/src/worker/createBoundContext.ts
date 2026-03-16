@@ -6,6 +6,7 @@ import type {
 } from '@neat-evolution/executor'
 import { isTrainableExecutor } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
+import type { RNG } from '@neat-evolution/utils'
 import type { WorkerMessage } from '@neat-evolution/worker-actions'
 
 interface BoundContext extends WorkerEvaluationContext {
@@ -26,6 +27,7 @@ interface BoundContextInit {
       ) => Promise<unknown>)
     | undefined
   stats?: StatsRecorder | undefined
+  rng: RNG
 }
 
 export function createBoundContext(
@@ -43,6 +45,7 @@ export function createBoundContext(
           new Error('call not available')
         ))) as BoundContext['call'],
     ...(baseContext.stats != null ? { stats: baseContext.stats } : {}),
+    rng: baseContext.rng,
     executorMap,
 
     scheduleWriteback(executor: StaticExecutor) {

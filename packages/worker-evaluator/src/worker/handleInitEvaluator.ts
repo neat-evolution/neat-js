@@ -1,4 +1,4 @@
-import type { EnvironmentRuntimeOptions } from '@neat-evolution/execution-manager'
+import type { EnvironmentInitOptions } from '@neat-evolution/execution-manager'
 import { createWorkerStatsRecorder } from '@neat-evolution/stats'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 import type { InitPayload } from '../actions.js'
@@ -38,8 +38,8 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     throw new Error('send not properly added to context')
   }
 
-  // Build runtime options for the environment
-  const runtimeOptions: EnvironmentRuntimeOptions = {}
+  // Build init options for the environment
+  const initOptions: EnvironmentInitOptions = {}
 
   // Create worker-side stats recorder that bridges to main thread
   if (statsConfig != null) {
@@ -47,23 +47,23 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     context.stats = createWorkerStatsRecorder(statsConfig, (metric, value) => {
       send(recordStats({ metric, value }))
     })
-    runtimeOptions.stats = context.stats
+    initOptions.stats = context.stats
   }
 
   // Merge serializable runtime data (factory options, config blobs)
   if (environmentRuntimeData != null) {
-    Object.assign(runtimeOptions, environmentRuntimeData)
+    Object.assign(initOptions, environmentRuntimeData)
   }
 
-  // Hydrate each pathname: dynamically import and inject into runtimeOptions
+  // Hydrate each pathname: dynamically import and inject into initOptions
   if (hydrateEnvironmentOptions != null) {
     for (const [field, path] of Object.entries(hydrateEnvironmentOptions)) {
       const mod = await import(/* @vite-ignore */ path)
-      runtimeOptions[field] = mod.default ?? mod[field]
+      initOptions[field] = mod.default ?? mod[field]
     }
   }
 
-  const environment = createEnvironment(environmentData, runtimeOptions)
+  const environment = createEnvironment(environmentData, initOptions)
 
   context.threadInfo = {
     createConfig,
@@ -74,9 +74,6 @@ export const handleInitEvaluator: HandleInitEvaluatorFn = async (
     environment,
     ...(executorCacheMaxSize != null ? { executorCacheMaxSize } : {}),
   }
-
-  // Store base runtime options for per-genome merging in handleEvaluateGenome
-  context.baseRuntimeOptions = runtimeOptions
 
   return undefined
 }

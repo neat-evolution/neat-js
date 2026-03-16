@@ -7,9 +7,9 @@ import type {
 } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
 import {
-  type EvaluationContext,
   type EvaluationStrategy,
   IndividualStrategy,
+  type ParentEvaluationContext,
 } from '@neat-evolution/evaluation-strategy'
 import type {
   AnyErasedAlgorithm,
@@ -63,7 +63,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   /**
    * Evaluation context exposing worker pool functionality to evaluation strategies
    */
-  public readonly evaluationContext: EvaluationContext
+  public readonly evaluationContext: ParentEvaluationContext
 
   /**
    * Evaluation strategy determining how genomes are evaluated
@@ -112,7 +112,9 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     this.evaluationContext = {
       evaluateGenomeEntry: this.evaluateGenomeEntry.bind(this),
       evaluateGenomeEntryBatch: this.evaluateGenomeEntryBatch.bind(this),
-      send: (message) => {
+      send: (
+        message: import('@neat-evolution/worker-actions').WorkerMessage
+      ) => {
         void this.dispatcher.send(message)
       },
       call: this.dispatcher.call.bind(this.dispatcher),

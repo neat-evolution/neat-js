@@ -1,4 +1,3 @@
-import { isRuntimeConfigurable } from '@neat-evolution/execution-manager'
 import { createRNG } from '@neat-evolution/utils'
 import type { WorkerContext } from '@neat-evolution/worker-actions'
 
@@ -25,7 +24,7 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
     throw new Error('genomeFactoryConfig not initialized')
   }
 
-  const rng = seed != null ? createRNG(seed) : undefined
+  const rng = createRNG(seed)
   const { environment } = context.threadInfo
 
   // Create a bound context for this evaluation
@@ -33,6 +32,7 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
     send: context.send,
     call: context.call,
     stats: context.stats,
+    rng,
   })
 
   const { executor } = createCachedExecutorEntry(
@@ -44,22 +44,14 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
   // Register executor in the bound context for writeback correlation
   boundContext.executorMap.set(executor, 0)
 
-  // Push runtime options to environment per-genome (merge base + eval context)
-  if (isRuntimeConfigurable(environment)) {
-    environment.setRuntimeOptions({
-      ...context.baseRuntimeOptions,
-      evaluationContext: boundContext,
-    })
-  }
-
   // evaluate the genome
   let fitness: number
 
   // allow for different types of environments
   if (environment.isAsync) {
-    fitness = await environment.evaluateAsync(executor, rng)
+    fitness = await environment.evaluateAsync(executor, boundContext)
   } else {
-    fitness = environment.evaluate(executor, rng)
+    fitness = environment.evaluate(executor, boundContext)
   }
 
   // Flush writebacks and fire onFitness callbacks

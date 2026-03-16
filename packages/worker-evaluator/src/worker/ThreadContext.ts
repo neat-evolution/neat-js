@@ -1,4 +1,3 @@
-import type { EnvironmentRuntimeOptions } from '@neat-evolution/execution-manager'
 import type { StatsRecorder } from '@neat-evolution/stats'
 import type { Handler } from '@neat-evolution/worker-actions'
 import type QuickLRU from 'quick-lru'
@@ -14,7 +13,4 @@ export interface ThreadContext {
   handler?: Handler
   /** Stats recorder bridged to the main thread via fire-and-forget messages. */
   stats?: StatsRecorder
-  /** Base runtime options built during init (factories + options).
-   *  Merged with per-genome evaluationContext before each evaluation. */
-  baseRuntimeOptions?: EnvironmentRuntimeOptions
 }

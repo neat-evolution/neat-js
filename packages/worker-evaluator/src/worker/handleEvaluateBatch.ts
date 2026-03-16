@@ -25,7 +25,7 @@ export const handleEvaluateBatch: HandleEvaluateBatchFn = async (
     throw new Error('genomeFactoryConfig not initialized')
   }
 
-  const rng = seed != null ? createRNG(seed) : undefined
+  const rng = createRNG(seed)
   const { environment } = context.threadInfo
 
   // Create a bound context for this batch evaluation
@@ -33,6 +33,7 @@ export const handleEvaluateBatch: HandleEvaluateBatchFn = async (
     send: context.send,
     call: context.call,
     stats: context.stats,
+    rng,
   })
 
   // Hydrate all genomes and register executors in bound context
@@ -50,12 +51,15 @@ export const handleEvaluateBatch: HandleEvaluateBatchFn = async (
     if (environment.evaluateBatchAsync == null) {
       throw new Error('evaluateBatchAsync not implemented on environment')
     }
-    fitnessScores = await environment.evaluateBatchAsync(executors, rng)
+    fitnessScores = await environment.evaluateBatchAsync(
+      executors,
+      boundContext
+    )
   } else {
     if (environment.evaluateBatch == null) {
       throw new Error('evaluateBatch not implemented on environment')
     }
-    fitnessScores = environment.evaluateBatch(executors, rng)
+    fitnessScores = environment.evaluateBatch(executors, boundContext)
   }
 
   // Flush writebacks and fire onFitness callbacks for each fitness score
