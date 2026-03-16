@@ -4,7 +4,7 @@ import type {
   GenomeEntries,
 } from '@neat-evolution/core'
 
-import type { EvaluationContext } from './EvaluationContext.js'
+import type { ParentEvaluationContext } from './ParentEvaluationContext.js'
 
 /**
  * Defines the interface for a pluggable evaluation strategy.
@@ -20,7 +20,7 @@ export interface EvaluationStrategy<G extends AnyGenome = AnyGenome> {
    * @returns An async iterable that yields fitness data for the evaluated genomes.
    */
   evaluate: (
-    context: EvaluationContext<G>,
+    context: ParentEvaluationContext<G>,
     genomeEntries: GenomeEntries<G>
   ) => AsyncIterable<FitnessData>
 }

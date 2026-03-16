@@ -3,15 +3,14 @@ import type {
   FitnessData,
   GenomeEntries,
 } from '@neat-evolution/core'
-
-import type { EvaluationContext } from '../EvaluationContext.js'
 import type { EvaluationStrategy } from '../EvaluationStrategy.js'
+import type { ParentEvaluationContext } from '../ParentEvaluationContext.js'
 
 export class IndividualStrategy<G extends AnyGenome = AnyGenome>
   implements EvaluationStrategy<G>
 {
   async *evaluate(
-    context: EvaluationContext<G>,
+    context: ParentEvaluationContext<G>,
     genomeEntries: GenomeEntries<G>
   ): AsyncIterable<FitnessData> {
     const promises: Array<Promise<FitnessData>> = []

@@ -1,12 +1,15 @@
 import type { FitnessData, GenomeEntries } from '@neat-evolution/evaluator'
 import { describe, expectTypeOf, test } from 'vitest'
 
-import type { EvaluationContext, EvaluationStrategy } from '../src/index.js'
+import type {
+  EvaluationStrategy,
+  ParentEvaluationContext,
+} from '../src/index.js'
 
-describe('EvaluationContext', () => {
+describe('ParentEvaluationContext', () => {
   // eslint-disable-next-line vitest/expect-expect
   test('should have correct type structure', () => {
-    type Context = EvaluationContext
+    type Context = ParentEvaluationContext
 
     expectTypeOf<Context>().toHaveProperty('evaluateGenomeEntry')
     expectTypeOf<Context>().toHaveProperty('evaluateGenomeEntryBatch')
@@ -26,7 +29,7 @@ describe('EvaluationStrategy', () => {
   test('should return AsyncIterable<FitnessData>', async () => {
     const mockStrategy: EvaluationStrategy = {
       evaluate: async function* (
-        _context: EvaluationContext,
+        _context: ParentEvaluationContext,
         _genomeEntries: GenomeEntries
       ): AsyncIterable<FitnessData> {
         yield [0, 0, 1.0] as FitnessData
@@ -34,7 +37,7 @@ describe('EvaluationStrategy', () => {
     }
 
     const result = mockStrategy.evaluate(
-      {} as unknown as EvaluationContext,
+      {} as unknown as ParentEvaluationContext,
       [] as GenomeEntries
     )
     expectTypeOf(result).toEqualTypeOf<AsyncIterable<FitnessData>>()

@@ -1,7 +1,7 @@
 import type { FitnessData, GenomeEntry } from '@neat-evolution/evaluator'
 import { describe, expect, test, vi } from 'vitest'
 
-import type { EvaluationContext } from '../../src/EvaluationContext.js'
+import type { ParentEvaluationContext } from '../../src/ParentEvaluationContext.js'
 import { IndividualStrategy } from '../../src/strategies/IndividualStrategy.js'
 
 describe('IndividualStrategy', () => {
@@ -15,7 +15,7 @@ describe('IndividualStrategy', () => {
         }
       ),
       evaluateGenomeEntryBatch: vi.fn(),
-    } as unknown as EvaluationContext
+    } as unknown as ParentEvaluationContext
 
     const strategy = new IndividualStrategy()
     const genomeEntries: Array<GenomeEntry> = [
