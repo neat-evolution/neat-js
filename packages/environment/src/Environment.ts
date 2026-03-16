@@ -1,6 +1,6 @@
 import type { InitConfig } from '@neat-evolution/core'
+import type { PartialEvaluationContext } from '@neat-evolution/execution-manager'
 import type { StaticExecutor } from '@neat-evolution/executor'
-import type { RNG } from '@neat-evolution/utils'
 
 export type EnvironmentDescription = InitConfig
 
@@ -24,12 +24,21 @@ export interface EnvironmentConfig<EFO = unknown> {
 export interface Environment<EFO = unknown> extends EnvironmentConfig<EFO> {
   /** Force async evaluation in the evaluator */
   isAsync: boolean
-  evaluate: (executor: StaticExecutor, rng?: RNG) => number
-  evaluateAsync: (executor: StaticExecutor, rng?: RNG) => Promise<number>
-  evaluateBatch?: (executors: StaticExecutor[], rng?: RNG) => number[]
+  evaluate: (
+    executor: StaticExecutor,
+    context?: PartialEvaluationContext
+  ) => number
+  evaluateAsync: (
+    executor: StaticExecutor,
+    context?: PartialEvaluationContext
+  ) => Promise<number>
+  evaluateBatch?: (
+    executors: StaticExecutor[],
+    context?: PartialEvaluationContext
+  ) => number[]
   evaluateBatchAsync?: (
     executors: StaticExecutor[],
-    rng?: RNG
+    context?: PartialEvaluationContext
   ) => Promise<number[]>
 }
 
