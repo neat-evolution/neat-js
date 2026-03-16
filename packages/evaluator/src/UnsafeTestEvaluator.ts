@@ -4,13 +4,11 @@ import type {
   PhenotypeAction,
 } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
-import type { EvaluationContext } from '@neat-evolution/evaluation-strategy'
-import {
-  type EnvironmentRuntimeOptions,
-  isRuntimeConfigurable,
-} from '@neat-evolution/execution-manager'
+import type { ParentEvaluationContext } from '@neat-evolution/evaluation-strategy'
+import type { EnvironmentInitOptions } from '@neat-evolution/execution-manager'
 import type { ExecutorFactory } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
+import { createRNG } from '@neat-evolution/utils'
 import { createBoundContext } from './createBoundContext.js'
 import type { Evaluator } from './Evaluator.js'
 import type { EvaluatorFactoryOptions } from './EvaluatorFactoryOptions.js'
@@ -38,7 +36,6 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
   public readonly environment: Environment<EFO>
 
   private executorFactory: ExecutorFactory | undefined
-  private baseRuntimeOptions: EnvironmentRuntimeOptions | undefined
 
   private readonly runtimeConfig: RuntimeConfig | undefined
   private readonly strategy?: EvaluatorFactoryOptions['strategy']
@@ -85,28 +82,22 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
     const phenotype = this.algorithm.createPhenotype(genome)
     const executor = this.executorFactory(phenotype)
 
-    // Create bound context (same lifecycle as handleEvaluateGenome)
+    // Create bound context with per-evaluation RNG
+    const rng = createRNG()
     const boundContext = createBoundContext({
       send: this.localDispatcher.context.send,
       call: this.localDispatcher.context.call,
       stats: this.stats,
+      rng,
     })
     boundContext.executorMap.set(executor, 0)
-
-    // Push runtime options to environment per-genome
-    if (isRuntimeConfigurable(this.environment)) {
-      this.environment.setRuntimeOptions({
-        ...this.baseRuntimeOptions,
-        evaluationContext: boundContext,
-      })
-    }
 
     let fitness: number
 
     if (this.environment.isAsync) {
-      fitness = await this.environment.evaluateAsync(executor)
+      fitness = await this.environment.evaluateAsync(executor, boundContext)
     } else {
-      fitness = this.environment.evaluate(executor)
+      fitness = this.environment.evaluate(executor, boundContext)
     }
 
     // Flush writebacks and fire onFitness callbacks
@@ -130,23 +121,22 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
     const mod = await import(/* @vite-ignore */ pathname)
     this.executorFactory = mod.createExecutor
 
-    // Build baseRuntimeOptions (same flow as handleInitEvaluator)
-    const runtimeOptions: EnvironmentRuntimeOptions = {}
+    // Build initOptions (same flow as handleInitEvaluator)
+    const initOptions: EnvironmentInitOptions = {}
     if (this.stats != null) {
-      runtimeOptions.stats = this.stats
+      initOptions.stats = this.stats
     }
     if (this.runtimeConfig?.environmentRuntimeData != null) {
-      Object.assign(runtimeOptions, this.runtimeConfig.environmentRuntimeData)
+      Object.assign(initOptions, this.runtimeConfig.environmentRuntimeData)
     }
     if (this.runtimeConfig?.hydrateEnvironmentOptions != null) {
       for (const [field, path] of Object.entries(
         this.runtimeConfig.hydrateEnvironmentOptions
       )) {
         const mod = await import(/* @vite-ignore */ path)
-        runtimeOptions[field] = mod.default ?? mod[field]
+        initOptions[field] = mod.default ?? mod[field]
       }
     }
-    this.baseRuntimeOptions = runtimeOptions
   }
 
   /** Retrieve the latest telemetry for a genome (from plugin evaluation). */
@@ -158,7 +148,7 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
     if (this.strategy) {
       // Clear pending writebacks from previous generation
       this.pendingWritebacks.clear()
-      const context: EvaluationContext = {
+      const context: ParentEvaluationContext = {
         evaluateGenomeEntry: (entry) => this.worker(entry),
         evaluateGenomeEntryBatch: (entries) =>
           Promise.all(entries.map((e) => this.worker(e))),
