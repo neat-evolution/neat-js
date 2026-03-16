@@ -68,7 +68,6 @@
   },
   "dependencies": {
     "@neat-evolution/actor-critic": "workspace:^",
-    "@neat-evolution/backprop-strategy": "workspace:^",
     "@neat-evolution/core": "workspace:^",
     "@neat-evolution/cppn": "workspace:^",
     "@neat-evolution/dataset-environment": "workspace:^",
@@ -79,6 +78,7 @@
     "@neat-evolution/evaluator": "workspace:^",
     "@neat-evolution/evolution": "workspace:^",
     "@neat-evolution/evolution-manager": "workspace:^",
+    "@neat-evolution/execution-manager": "workspace:*",
     "@neat-evolution/executor": "workspace:^",
     "@neat-evolution/hyperneat": "workspace:^",
     "@neat-evolution/neat": "workspace:^",

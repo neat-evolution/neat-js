@@ -15,15 +15,15 @@
 
 import type { ACAgentConfig } from '@neat-evolution/actor-critic'
 import { Activation } from '@neat-evolution/core'
-import type { RolloutBufferConfig } from '@neat-evolution/environment'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
 } from '@neat-evolution/evolution'
 import {
-  EvolutionManager,
   type EvaluatorConfig,
+  EvolutionManager,
 } from '@neat-evolution/evolution-manager'
+import type { RolloutBufferConfig } from '@neat-evolution/execution-manager'
 import {
   defaultNEATGenomeOptions,
   NEATAlgorithm,
@@ -289,9 +289,7 @@ console.log(
 if (args.seconds > 0) {
   console.log(`Time limit: ${args.seconds}s per run`)
 }
-console.log(
-  `Threads: ${args.threadCount != null ? args.threadCount : 'auto'}`
-)
+console.log(`Threads: ${args.threadCount != null ? args.threadCount : 'auto'}`)
 console.log(`Base RNG seed: ${args.seed ?? 'not set (thread RNG)'}`)
 console.log('\nVariant configuration:')
 for (const variant of variants) {

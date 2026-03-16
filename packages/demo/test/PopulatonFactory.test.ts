@@ -56,9 +56,13 @@ describe('PopulationFactory', () => {
 
     const dataset = await loadDataset(datasetOptions)
     const environment = new DatasetEnvironment(dataset)
-    evaluator = new UnsafeTestEvaluator(algorithm as AnyAlgorithm, environment, {
-      unsafeLocalEvaluation: true,
-    })
+    evaluator = new UnsafeTestEvaluator(
+      algorithm as AnyAlgorithm,
+      environment,
+      {
+        unsafeLocalEvaluation: true,
+      }
+    )
 
     configProvider = algorithm.createConfig({ neat: defaultNEATConfigOptions })
     populationOptions = { ...defaultPopulationOptions }

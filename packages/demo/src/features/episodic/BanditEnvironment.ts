@@ -1,17 +1,17 @@
 import type {
   AgentEnvironment,
-  AgentFactoryOptions,
   Environment,
   EnvironmentDescription,
-  EnvironmentRuntimeOptions,
   EpisodicEnvironment,
   RLConfig,
+} from '@neat-evolution/environment'
+import type {
+  AgentFactoryOptions,
+  EnvironmentRuntimeOptions,
+  EpisodicAgent,
   RuntimeConfigurable,
-} from '@neat-evolution/environment'
-import {
-  createVanillaAgent,
-  type EpisodicAgent,
-} from '@neat-evolution/environment'
+} from '@neat-evolution/execution-manager'
+import { createVanillaAgent } from '@neat-evolution/execution-manager'
 import type { StaticExecutor } from '@neat-evolution/executor'
 
 /** Configuration for a single bandit episode. */

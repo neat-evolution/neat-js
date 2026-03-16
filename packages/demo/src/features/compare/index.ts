@@ -20,7 +20,6 @@ import {
   type Matrix,
   oneHotAccuracy,
 } from '@neat-evolution/dataset-environment'
-import type { TrainerFactory } from '@neat-evolution/environment'
 import {
   defaultEvolutionOptions,
   defaultPopulationOptions,
@@ -29,6 +28,7 @@ import {
   type EvaluatorConfig,
   EvolutionManager,
 } from '@neat-evolution/evolution-manager'
+import type { TrainerFactory } from '@neat-evolution/execution-manager'
 import type { Executor, ExecutorFactory } from '@neat-evolution/executor'
 import {
   createPhenotype,
@@ -117,7 +117,7 @@ function backpropEvaluatorConfig(
   return {
     createExecutorPathname: '@neat-evolution/executor/backprop',
     hydrateEnvironmentOptions: {
-      createTrainer: '@neat-evolution/backprop-strategy',
+      createTrainer: '@neat-evolution/execution-manager/backprop',
     },
     environmentRuntimeData: {
       trainerFactoryOptions: trainerOptions,

@@ -40,23 +40,100 @@ Right now each algorithm produces different shaped outputs:
 - QL standard: 4 Linear → epsilon-greedy argmax → 1 one-hot (wrong shape for 4 buttons)
 - QL multi-discrete: 8 Linear → per-factor epsilon-greedy → 4 binary (correct shape, wrong output count)
 
-## Proposed solution: multi-discrete softmax for all modes
+## The output shape mismatch
 
-Standardize on multi-discrete output encoding. Each of the 4 buttons gets a 2-way softmax group (on/off probability):
+Each agent family's `act()` returns a fundamentally different shape:
 
-```
-8 outputs for vanilla/AC: [P_thrust_on, P_thrust_off, ..., P_right_on, P_right_off]
-  + 1 critic for AC:       [V(s)]
-  = 9 total for AC, 8 for vanilla
+| Agent | Network outputs | `act()` returns | Shape |
+|-------|----------------|-----------------|-------|
+| Vanilla (softmax pairs) | 8 (4 pairs) | 8 probabilities | 2N |
+| AC multi-discrete | 8+1 (4 pairs + critic) | 8 (one-hot per pair) | 2N |
+| QL multi-discrete | 8 (Q-value pairs) | 4 binary (0 or 1) | N |
 
-8 outputs for QL:          [Q_thrust_on, Q_thrust_off, ..., Q_right_on, Q_right_off]
-```
+QL multi-discrete collapses the paired Q-values into a binary decision *inside* `act()` — the environment never sees the pairs. AC and vanilla pass the pairs through. These are genuinely different contracts and can't be unified into one decoder.
 
-### Output activation configs
+**Standard (non-multi-discrete) QL would be worse** for hexagonoids — it picks one action from N (mutually exclusive), which can't press two buttons simultaneously. Multi-discrete is the right mode.
+
+## Proposed solution: environment-supplied decoders
+
+The environment is the authority on what button presses mean. It should supply decoders for each agent family, since it knows the action semantics and the agent families have known, fixed output contracts.
+
+### Decoder functions
 
 ```typescript
-// Vanilla: 4 independent softmax pairs
-const vanillaOutputActivation = [
+type ActionDecoder = (outputs: ArrayLike<number>) => PlayerInputState
+
+// For vanilla and AC: 2N paired outputs → compare pairs
+// Works because vanilla outputs softmax probabilities directly,
+// and AC multi-discrete act() returns one-hot per pair
+const pairedDecoder: ActionDecoder = (outputs) => ({
+  thrust: (outputs[0] ?? 0) >= (outputs[1] ?? 0),
+  fire:   (outputs[2] ?? 0) >= (outputs[3] ?? 0),
+  left:   (outputs[4] ?? 0) >= (outputs[5] ?? 0),
+  right:  (outputs[6] ?? 0) >= (outputs[7] ?? 0),
+})
+
+// For QL multi-discrete: N binary outputs → threshold
+const binaryDecoder: ActionDecoder = (outputs) => ({
+  thrust: (outputs[0] ?? 0) > 0.5,
+  fire:   (outputs[1] ?? 0) > 0.5,
+  left:   (outputs[2] ?? 0) > 0.5,
+  right:  (outputs[3] ?? 0) > 0.5,
+})
+```
+
+### Decoder selection
+
+The decoder is selected based on output length, which is determined by the evaluator config:
+
+```typescript
+function selectDecoder(outputLength: number): ActionDecoder {
+  if (outputLength >= 8) {
+    return pairedDecoder   // vanilla (8) or AC (8, critic stripped by act())
+  }
+  return binaryDecoder     // QL multi-discrete (4)
+}
+```
+
+This is simple and correct because:
+- Vanilla with softmax pairs outputs 8 values → paired decoder
+- AC multi-discrete `act()` returns 8 values (critic is internal) → paired decoder
+- QL multi-discrete `act()` returns 4 values → binary decoder
+- Vanilla could also work with 4 Sigmoid outputs + binary decoder (for experimentation)
+
+### Where the decoders live
+
+The decoders are baked into the environment package (`hexagonoids-environment`), not injected from outside. The environment knows its action semantics (4 buttons), and the agent families have stable, known output contracts.
+
+The call sites are already in the right places:
+
+```typescript
+// neatAgent.ts — vanilla path
+const outputs = context.executor.execute(inputs)
+return selectDecoder(outputs.length)(outputs)
+
+// EpisodeAgentBridge.ts — RL path
+const actionOutputs = rlAgent.act(floatInputs)
+return selectDecoder(actionOutputs.length)(actionOutputs)
+```
+
+For future exotic agent families with new output shapes, the environment would need a new decoder. But since agent families are defined in neat-js packages with stable contracts, new decoders only appear when new agent families are added — which is infrequent enough to handle case-by-case.
+
+The harder problem of passing custom decoders over the wire to workers (pathnames, not functions) is not needed yet. The environment already runs in the worker and owns its decoders. The evaluator config just tells it which agent factory to use, and the environment selects the right decoder based on what `act()` returns.
+
+### Vanilla can work with either output count
+
+Vanilla doesn't care about output semantics — evolution optimizes whatever shape you give it. So vanilla can run with:
+- **8 outputs (4 softmax pairs)**: more parameters, principled on/off probabilities, shares decoder with AC
+- **4 outputs (Sigmoid or 4×[1,Softmax])**: fewer parameters, simpler topology, uses binary decoder
+
+This is worth experimenting with. The decoder adapts automatically based on output length.
+
+## Output activation configs
+
+```typescript
+// Vanilla (paired): 4 independent softmax pairs
+const vanillaPairedActivation = [
   [2, Activation.Softmax],  // thrust on/off
   [2, Activation.Softmax],  // fire on/off
   [2, Activation.Softmax],  // left on/off
@@ -72,127 +149,25 @@ const acOutputActivation = [
   [1, Activation.Linear],   // V(s)
 ] as const
 
-// QL: 8 linear Q-values (multi-discrete mode handles the pairing)
+// QL: 8 linear Q-values (multi-discrete mode handles the pairing internally)
 const qlOutputActivation = Activation.Linear
 ```
-
-### New `decodeOutputs` for multi-discrete
-
-Replace the threshold-based decoder with one that reads paired outputs:
-
-```typescript
-function decodeMultiDiscreteOutputs(outputs: ArrayLike<number>): PlayerInputState {
-  // Each pair: index 2*i = on probability/Q-value, 2*i+1 = off
-  // Action = "on" when first value >= second value
-  return {
-    thrust: (outputs[0] ?? 0) >= (outputs[1] ?? 0),
-    fire:   (outputs[2] ?? 0) >= (outputs[3] ?? 0),
-    left:   (outputs[4] ?? 0) >= (outputs[5] ?? 0),
-    right:  (outputs[6] ?? 0) >= (outputs[7] ?? 0),
-  }
-}
-```
-
-This works uniformly for all three modes:
-- **Vanilla with softmax pairs**: P_on >= P_off means the network prefers "on" → true
-- **AC with softmax pairs**: same — the one-hot from `act()` would be per-factor, so outputs[2*i] = 1 when that factor is "on"
-- **QL with Q-value pairs**: Q_on >= Q_off means the agent values "on" more → true
-
-The left/right conflict resolution currently in `decodeOutputs` may no longer be needed — with independent softmax groups, the network can learn that left and right are anti-correlated through training. But it could be kept as a post-processing step if the game engine truly can't handle both pressed.
-
-### How each agent's `act()` output maps to `decodeOutputs`
-
-**Vanilla (no agent, pure executor):**
-```
-executor.forward([...34 inputs...])
-  → Softmax per pair: [0.8, 0.2,  0.3, 0.7,  0.1, 0.9,  0.6, 0.4]
-  → decodeMultiDiscreteOutputs: thrust=true, fire=false, left=false, right=true
-```
-
-No sampling needed. The softmax pairs directly encode the network's preference. This replaces the 0.75 threshold with a principled comparison: is on-probability > off-probability?
-
-**AC (multi-discrete, requires new feature):**
-```
-agent.act([...34 inputs...])
-  → forward: [0.8, 0.2,  0.3, 0.7,  0.1, 0.9,  0.6, 0.4,  V=0.42]
-  → per-factor sample: [1, 0, 0, 1] (4 binary decisions)
-  → returned as Float64Array(8): [1,0, 0,1, 0,1, 1,0]  ← one-hot per factor pair
-  → decodeMultiDiscreteOutputs: thrust=true, fire=false, left=false, right=true
-```
-
-AC multi-discrete `act()` would return 2N values where each pair is one-hot (the sampled action for that factor). The decoder reads them the same way.
-
-**QL (multi-discrete, already implemented):**
-```
-agent.act([...34 inputs...])
-  → forward: [1.5, 0.3,  -0.2, 0.8,  0.1, 0.9,  1.1, 0.4]
-  → per-factor epsilon-greedy: [1, 0, 0, 1]
-  → returned as Float64Array(4): [1, 0, 0, 1]  ← binary per factor
-```
-
-Wait — QL multi-discrete returns N values (one per factor, 0 or 1), not 2N. So `decodeOutputs` for QL would need to handle the 4-value binary output directly:
-
-```typescript
-function decodeBinaryOutputs(outputs: ArrayLike<number>): PlayerInputState {
-  return {
-    thrust: (outputs[0] ?? 0) > 0.5,
-    fire:   (outputs[1] ?? 0) > 0.5,
-    left:   (outputs[2] ?? 0) > 0.5,
-    right:  (outputs[3] ?? 0) > 0.5,
-  }
-}
-```
-
-This is the same shape as the current 4-output vanilla path, just with a 0.5 threshold (since values are 0 or 1).
-
-### The translation belongs in the environment bridge
-
-The EpisodeAgentBridge already sits between the RL agent and the game simulation:
-
-```typescript
-// Current bridge (EpisodeAgentBridge.ts)
-const actionOutputs = rlAgent.act(floatInputs)
-return decodeOutputs(actionOutputs)  // ← this is where translation happens
-```
-
-The bridge should select the right decoder based on the agent type or output count:
-
-```typescript
-const actionOutputs = rlAgent.act(floatInputs)
-if (actionOutputs.length >= 8) {
-  return decodeMultiDiscreteOutputs(actionOutputs)  // AC/vanilla with paired outputs
-} else {
-  return decodeBinaryOutputs(actionOutputs)          // QL multi-discrete binary
-}
-```
-
-Or more cleanly, the decoder could be configured at bridge creation time based on the evaluator config.
-
-### Vanilla path needs the same treatment
-
-The vanilla path in `neatAgent.ts` also calls `decodeOutputs`:
-
-```typescript
-const outputs = context.executor.execute(inputs)
-return decodeOutputs(outputs)
-```
-
-If vanilla switches to 8 softmax-paired outputs, the neatAgent needs to use the paired decoder too. This means the environment's `description.outputs` changes from 4 to 8, and genome creation must use the paired softmax activation config.
 
 ## Migration summary
 
 | Component | Current | After |
 |-----------|---------|-------|
-| **Output count (vanilla)** | 4 | 8 |
+| **Output count (vanilla)** | 4 | 8 (or keep 4 for comparison) |
 | **Output count (AC)** | 5 (4 actor + 1 critic) | 9 (8 actor + 1 critic) |
-| **Output count (QL)** | 4 or 8 (standard or multi-discrete) | 8 (multi-discrete only) |
+| **Output count (QL)** | 8 (multi-discrete) | 8 (unchanged) |
 | **Vanilla activation** | Sigmoid (default) | 4 × [2, Softmax] |
 | **AC activation** | [4, Softmax], [1, Linear] | 4 × [2, Softmax], [1, Linear] |
 | **QL activation** | Linear | Linear (unchanged) |
-| **decodeOutputs** | 0.75 threshold on 4 values | paired comparison on 8 values (or binary on 4 for QL) |
+| **decodeOutputs** | 0.75 threshold on 4 values | replaced by pairedDecoder + binaryDecoder |
 | **Left/right conflict** | explicit in decoder | removed — network learns anti-correlation |
-| **EpisodeAgentBridge** | calls decodeOutputs directly | selects decoder based on output shape |
-| **neatAgent** | calls decodeOutputs directly | uses paired decoder |
+| **Decoder selection** | none (one decoder) | by output length: >= 8 → paired, else → binary |
+| **EpisodeAgentBridge** | hardcoded decodeOutputs | selectDecoder(outputs.length) |
+| **neatAgent** | hardcoded decodeOutputs | selectDecoder(outputs.length) |
 
 ## What needs to happen in neat-js first
 
@@ -200,24 +175,25 @@ If vanilla switches to 8 softmax-paired outputs, the neatAgent needs to use the 
    - `sampleActionMultiDiscrete()` — per-factor binary sampling from softmax pairs
    - `computeACMultiDiscreteGradients()` — per-factor policy gradient + entropy
    - Config option: `multiDiscrete: true` + `factorCount: N`
-   - The executor's softmax group support already handles multiple independent groups
+   - The executor already supports multiple independent softmax groups in both forward and backward passes — the gap is in the agent-side action selection and gradient computation
+   - QL's multi-discrete implementation (`createQLAgent.ts`, `computeQLOutputErrors.ts`, `trainOnSegment.ts`) is a good reference for the per-factor patterns
 
 2. **Output activation config validation** — ensure `[[2, Softmax], [2, Softmax], ..., [1, Linear]]` flows correctly through genome creation, phenotype building, and executor instantiation. The executor iterates softmax groups already, but this many groups hasn't been tested.
 
 ## What needs to happen in hexagonoids
 
-1. **Update `HexagonoidsEnvironment`**:
-   - `description.outputs` = 8 (or 9 for AC)
+1. **New decoder module** (`encoding/actionDecoders.ts`):
+   - `pairedDecoder` — 2N paired outputs → N booleans (vanilla + AC)
+   - `binaryDecoder` — N binary outputs → N booleans (QL)
+   - `selectDecoder(outputLength)` — picks the right one
+   - Deprecate/remove old `decodeOutputs.ts` with 0.75 threshold
+
+2. **Update call sites**:
+   - `neatAgent.ts`: `return selectDecoder(outputs.length)(outputs)`
+   - `EpisodeAgentBridge.ts`: `return selectDecoder(actionOutputs.length)(actionOutputs)`
+
+3. **Update `HexagonoidsEnvironment`**:
+   - `description.outputs` — configurable (8 for paired vanilla/AC, 8 for QL)
    - `getRLConfig().actionSize` = 4 (number of binary factors, not output count)
-   - Config option for output mode (vanilla/ac/ql) or derive from evaluator config
 
-2. **New decoder functions**:
-   - `decodeMultiDiscreteOutputs(8 values)` — paired comparison
-   - `decodeBinaryOutputs(4 values)` — simple threshold for QL returns
-   - Factory that selects the right one based on output shape
-
-3. **Update EpisodeAgentBridge** — use the right decoder
-
-4. **Update neatAgent** — use paired decoder, or make it configurable
-
-5. **Update hexagonoids-demo** — configure output activations per variant in EvolutionManager setup
+4. **Update hexagonoids-demo** — configure output activations per variant in EvolutionManager setup

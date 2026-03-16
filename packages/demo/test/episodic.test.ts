@@ -1,10 +1,12 @@
 import {
-  createEpisodicAgent,
-  type EpisodeResult,
-  type EpisodicAgent,
   isAgentEnvironment,
   isEpisodicEnvironment,
 } from '@neat-evolution/environment'
+import {
+  createEpisodicAgent,
+  type EpisodeResult,
+  type EpisodicAgent,
+} from '@neat-evolution/execution-manager'
 import type { StaticExecutor } from '@neat-evolution/executor'
 import { describe, expect, it } from 'vitest'
 import { BanditEnvironment } from '../src/features/episodic/BanditEnvironment.js'
