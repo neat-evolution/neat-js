@@ -6,7 +6,8 @@ import {
 } from './BanditEnvironment.js'
 
 export const createEnvironment: EnvironmentFactory<BanditFactoryOptions> = (
-  options
+  options,
+  initOptions
 ) => {
-  return new BanditEnvironment(options?.outputCount)
+  return new BanditEnvironment(options?.outputCount, initOptions)
 }

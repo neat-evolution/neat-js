@@ -34,7 +34,7 @@ function makeMockAgent(
     startEpisode: number
     endEpisode: number
     act: number
-    reward: Array<{ reward: number; done: boolean }>
+    reward: Array<{ reward: number; terminated: boolean; truncated: boolean }>
     episodeResults: EpisodeResult[]
   }
 } {
@@ -42,7 +42,11 @@ function makeMockAgent(
     startEpisode: 0,
     endEpisode: 0,
     act: 0,
-    reward: [] as Array<{ reward: number; done: boolean }>,
+    reward: [] as Array<{
+      reward: number
+      terminated: boolean
+      truncated: boolean
+    }>,
     episodeResults: [] as EpisodeResult[],
   }
 
@@ -54,9 +58,10 @@ function makeMockAgent(
       calls.act++
       return action
     },
-    reward(reward: number, done: boolean): void {
-      calls.reward.push({ reward, done })
+    reward(reward: number, terminated: boolean, truncated: boolean): void {
+      calls.reward.push({ reward, terminated, truncated })
     },
+    setTransitionInfo(): void {},
     startEpisode(_info): void {
       calls.startEpisode++
     },
@@ -151,7 +156,8 @@ describe('BanditEnvironment', () => {
           action[episodeIndex] = 1
           return action
         },
-        reward(): void {},
+        reward(_r: number, _t: boolean, _tr: boolean): void {},
+        setTransitionInfo(): void {},
         startEpisode(info): void {
           episodeIndex = info.episodeIndex
         },
@@ -192,17 +198,17 @@ describe('BanditEnvironment', () => {
       expect(calls.reward).toHaveLength(60)
     })
 
-    it('sets done=true only on last step of each episode', () => {
+    it('sets truncated=true only on last step of each episode', () => {
       const env = new BanditEnvironment()
       const { agent, calls } = makeMockAgent(0)
       env.evaluateAgent(agent)
 
       // 3 episodes × 20 steps = 60 rewards
-      // done=true on steps 19, 39, 59 (last step of each episode)
-      const doneIndices = calls.reward
-        .map((r, i) => (r.done ? i : -1))
+      // truncated=true on steps 19, 39, 59 (last step of each episode)
+      const truncatedIndices = calls.reward
+        .map((r, i) => (r.truncated ? i : -1))
         .filter((i) => i >= 0)
-      expect(doneIndices).toEqual([19, 39, 59])
+      expect(truncatedIndices).toEqual([19, 39, 59])
     })
 
     it('gives reward 1 when agent picks the correct arm', () => {
@@ -238,7 +244,8 @@ describe('BanditEnvironment', () => {
           action[0] = 1
           return action
         },
-        reward(): void {},
+        reward(_r: number, _t: boolean, _tr: boolean): void {},
+        setTransitionInfo(): void {},
         startEpisode(info): void {
           activeEpisode = info.episodeIndex
         },

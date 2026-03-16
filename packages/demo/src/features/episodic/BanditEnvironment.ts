@@ -7,9 +7,9 @@ import type {
 } from '@neat-evolution/environment'
 import type {
   AgentFactoryOptions,
-  EnvironmentRuntimeOptions,
+  EnvironmentInitOptions,
   EpisodicAgent,
-  RuntimeConfigurable,
+  PartialEvaluationContext,
 } from '@neat-evolution/execution-manager'
 import { createVanillaAgent } from '@neat-evolution/execution-manager'
 import type { StaticExecutor } from '@neat-evolution/executor'
@@ -49,12 +49,11 @@ export class BanditEnvironment
   implements
     Environment<BanditFactoryOptions>,
     EpisodicEnvironment,
-    AgentEnvironment,
-    RuntimeConfigurable
+    AgentEnvironment
 {
   public readonly description: EnvironmentDescription
   public readonly isAsync = false
-  private runtimeOptions: EnvironmentRuntimeOptions | undefined
+  private readonly initOptions: EnvironmentInitOptions | undefined
 
   private readonly episodes: BanditEpisode[] = [
     { index: 0, bestArm: 0 },
@@ -65,19 +64,16 @@ export class BanditEnvironment
   private readonly stepsPerEpisode = 20
   private readonly armCount = 3
 
-  constructor(outputCount?: number) {
+  constructor(outputCount?: number, initOptions?: EnvironmentInitOptions) {
     this.description = {
       inputs: 3,
       outputs: outputCount ?? 3,
     }
+    this.initOptions = initOptions
   }
 
   toFactoryOptions(): BanditFactoryOptions {
     return { outputCount: this.description.outputs }
-  }
-
-  setRuntimeOptions(options: EnvironmentRuntimeOptions): void {
-    this.runtimeOptions = options
   }
 
   getRLConfig(): RLConfig {
@@ -89,20 +85,22 @@ export class BanditEnvironment
     }
   }
 
-  evaluate(executor: StaticExecutor): number {
-    const factory = this.runtimeOptions?.createAgent ?? createVanillaAgent
-    const options = (this.runtimeOptions?.agentFactoryOptions ??
+  evaluate(
+    executor: StaticExecutor,
+    context?: PartialEvaluationContext
+  ): number {
+    const factory = this.initOptions?.createAgent ?? createVanillaAgent
+    const options = (this.initOptions?.agentFactoryOptions ??
       {}) as AgentFactoryOptions
-    const agent = factory(
-      executor,
-      options,
-      this.runtimeOptions?.evaluationContext
-    )
+    const agent = factory(executor, options, context)
     return this.evaluateAgent(agent)
   }
 
-  async evaluateAsync(executor: StaticExecutor): Promise<number> {
-    return this.evaluate(executor)
+  async evaluateAsync(
+    executor: StaticExecutor,
+    context?: PartialEvaluationContext
+  ): Promise<number> {
+    return this.evaluate(executor, context)
   }
 
   /**
@@ -131,7 +129,7 @@ export class BanditEnvironment
         const reward = chosenArm === episode.bestArm ? 1 : 0
         const done = step === this.stepsPerEpisode - 1
 
-        agent.reward(reward, done)
+        agent.reward(reward, false, done)
         totalReward += reward
         episodeReward += reward
       }
