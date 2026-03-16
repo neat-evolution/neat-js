@@ -1,5 +1,5 @@
 import type { Environment } from '@neat-evolution/environment'
-import type { EnvironmentRuntimeOptions } from '@neat-evolution/execution-manager'
+import type { EnvironmentInitOptions } from '@neat-evolution/execution-manager'
 import type { StaticExecutor } from '@neat-evolution/executor'
 
 /**
@@ -24,7 +24,7 @@ function evaluate(executor: StaticExecutor): number {
 
 export function createEnvironment(
   _factoryOptions: null,
-  _runtimeOptions?: EnvironmentRuntimeOptions
+  _initOptions?: EnvironmentInitOptions
 ): Environment<null> {
   return {
     description: { inputs: 2, outputs: 1 },
