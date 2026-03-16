@@ -92,18 +92,6 @@ These interfaces extend the base environment contract for reinforcement learning
 
 - **`EpisodicEnvironment`**: Environments that support episodic RL implement this alongside `Environment`. Provides `getRLConfig()` returning `RLConfig` (action size, discount factor, max steps, suggested rollout length).
 
-- **`AgentEnvironment`**: Environments that support direct agent evaluation. Exposes `evaluateAgent(agent: EpisodicAgent): number` so RL plugins can pass trained agents (AC or QL) directly, bypassing the executor pipeline.
-
-- **`EpisodicAgent`**: The generic RL agent interface. Methods: `act(inputs)`, `reward(reward, done)`, `startEpisode(info)`, `endEpisode(result)`. All RL methods (AC, QL) implement this.
-
-- **`EpisodeInfo`**: Episode start metadata including `episodeIndex`, optional `type` (e.g., `'scenario'`, `'full-game'`), `phase`, and `metadata`.
-
-- **`EpisodeResult`**: Episode completion data including `fitness` (per-episode evolutionary contribution), `episodeReturn` (cumulative reward for RL), `totalSteps`, `terminated`, and optional `metadata`.
-
-- **`EpisodicContext`**: Plugin-provided hooks (`reward`, `episodeStart`, `episodeEnd`, `transitionInfo`) that environments call during evaluation. These are supplemental signals; they do not replace the direct `evaluateAgent()` contract.
-
-- **`TransitionInfo`**: Per-transition metadata (`eventLabel`, `tags`, `isInteresting`, `situationClass`, `metadata`) emitted by the environment for agent capture decisions. Metadata describes transitions but does not carry reward semantics.
-
 ### Signal Boundaries
 
 | Signal | Scope | Consumed by |

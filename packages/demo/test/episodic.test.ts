@@ -1,7 +1,4 @@
-import {
-  isAgentEnvironment,
-  isEpisodicEnvironment,
-} from '@neat-evolution/environment'
+import { isEpisodicEnvironment } from '@neat-evolution/environment'
 import {
   createEpisodicAgent,
   type EpisodeResult,
@@ -83,11 +80,6 @@ describe('BanditEnvironment', () => {
     it('passes isEpisodicEnvironment type guard', () => {
       const env = new BanditEnvironment()
       expect(isEpisodicEnvironment(env)).toBe(true)
-    })
-
-    it('passes isAgentEnvironment type guard', () => {
-      const env = new BanditEnvironment()
-      expect(isAgentEnvironment(env)).toBe(true)
     })
 
     it('has correct description', () => {

@@ -1,5 +1,4 @@
 import type {
-  AgentEnvironment,
   Environment,
   EnvironmentDescription,
   EpisodicEnvironment,
@@ -46,10 +45,7 @@ export interface BanditFactoryOptions {
 }
 
 export class BanditEnvironment
-  implements
-    Environment<BanditFactoryOptions>,
-    EpisodicEnvironment,
-    AgentEnvironment
+  implements Environment<BanditFactoryOptions>, EpisodicEnvironment
 {
   public readonly description: EnvironmentDescription
   public readonly isAsync = false

@@ -154,8 +154,8 @@ full field definitions.
 
 ## Further Reading
 
-- [Environment contract](../../environment/README.md) — `AgentEnvironment`,
-  `EpisodicAgent`, `RLConfig`, `TransitionInfo`, and the signal boundary table.
+- [Environment contract](../../environment/README.md) — `EpisodicEnvironment`,
+  `RLConfig`, and the environment interface.
 - [Actor-Critic plugin](../../actor-critic-plugin/README.md) — plugin lifecycle,
   telemetry field reference, and worker dispatch.
 - [Q-Learning plugin](../../q-learning-plugin/README.md) — epsilon schedule,
