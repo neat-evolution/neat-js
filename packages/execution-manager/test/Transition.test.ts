@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import type { TransitionInfo } from '../src/features/agent/EpisodicContext.js'
+import type { TransitionInfo } from '../src/features/agent/EpisodicAgentOptions.js'
 import type {
   RolloutBufferConfig,
   RolloutSegment,
@@ -14,10 +14,11 @@ describe('Transition', () => {
       rawOutput: new Float64Array([0.5, 0.3, 0.2]),
       action: new Float64Array([0.5, 0.3]),
       reward: 1.0,
-      done: false,
+      terminated: false,
+      truncated: false,
     }
     expect(transition.reward).toBe(1.0)
-    expect(transition.done).toBe(false)
+    expect(transition.terminated).toBe(false)
     expect(transition.criticValue).toBeUndefined()
     expect(transition.qValues).toBeUndefined()
   })
@@ -28,7 +29,8 @@ describe('Transition', () => {
       rawOutput: new Float64Array([0.8, 0.2, 0.5]),
       action: new Float64Array([0.8, 0.2]),
       reward: 0.5,
-      done: false,
+      terminated: false,
+      truncated: false,
       actionProbabilities: new Float64Array([0.7, 0.3]),
       criticValue: 0.85,
     }
@@ -45,7 +47,8 @@ describe('Transition', () => {
       rawOutput: new Float64Array([0.3, 0.7, 0.1]),
       action: new Float64Array([0, 1, 0]),
       reward: 1.0,
-      done: true,
+      terminated: true,
+      truncated: false,
       qValues: new Float64Array([0.3, 0.7, 0.1]),
       chosenActionIndex: 1,
     }
@@ -69,7 +72,8 @@ describe('Transition', () => {
       rawOutput: new Float64Array([0.5]),
       action: new Float64Array([0.5]),
       reward: 0.0,
-      done: false,
+      terminated: false,
+      truncated: false,
       info,
     }
     expect(transition.info?.isInteresting).toBe(true)
@@ -88,14 +92,16 @@ describe('RolloutSegment', () => {
         rawOutput: new Float64Array([0.5]),
         action: new Float64Array([0.5]),
         reward: 0.0,
-        done: false,
+        terminated: false,
+        truncated: false,
       },
       {
         state: new Float64Array([2.0]),
         rawOutput: new Float64Array([0.8]),
         action: new Float64Array([0.8]),
         reward: 1.0,
-        done: true,
+        terminated: true,
+        truncated: false,
       },
     ]
 

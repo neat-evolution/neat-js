@@ -19,9 +19,14 @@ export interface TransitionInfo {
 }
 
 /** Provided by RL plugin, consumed by environment during evaluate(). */
-export interface EpisodicContext {
+export interface EpisodicAgentOptions {
   /** Record reward for current transition. May trigger rollout capture + training. */
-  reward?(executor: Executor, reward: number, done: boolean): void
+  reward?(
+    executor: Executor,
+    reward: number,
+    terminated: boolean,
+    truncated: boolean
+  ): void
   /** Signal episode start. Resets rollout buffer. */
   episodeStart?(executor: Executor, info: EpisodeInfo): void
   /** Signal episode end. Flushes rollout buffer, trains on remaining transitions. */

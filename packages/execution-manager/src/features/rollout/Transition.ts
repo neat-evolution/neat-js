@@ -1,6 +1,6 @@
-import type { TransitionInfo } from '../agent/EpisodicContext.js'
+import type { TransitionInfo } from '../agent/EpisodicAgentOptions.js'
 
-/** A single (s, a, r, s', done) record, extended with value estimates and metadata. */
+/** A single (s, a, r, s', terminated, truncated) record, extended with value estimates and metadata. */
 export interface Transition {
   /** Input state (observation). */
   state: Float64Array
@@ -10,8 +10,10 @@ export interface Transition {
   action: Float64Array
   /** Reward received after taking action. */
   reward: number
-  /** Whether this transition ended the episode. */
-  done: boolean
+  /** Whether the episode ended due to a terminal state (e.g., death). */
+  terminated: boolean
+  /** Whether the episode ended due to a time limit or external cutoff. */
+  truncated: boolean
 
   // -- AC-specific fields (undefined for QL) --
   /** Action probabilities from softmax (AC only). */

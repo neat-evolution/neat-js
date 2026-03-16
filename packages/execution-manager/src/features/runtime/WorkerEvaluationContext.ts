@@ -1,8 +1,8 @@
 import type { StaticExecutor } from '@neat-evolution/executor'
-import type { StatsRecorder } from '@neat-evolution/stats'
 import type { WorkerMessage } from '@neat-evolution/worker-actions'
+import type { BaseEvaluationContext } from './EnvironmentRuntimeOptions.js'
 
-export interface WorkerEvaluationContext {
+export interface WorkerEvaluationContext extends BaseEvaluationContext {
   /** Fire-and-forget message to main thread. */
   send(message: WorkerMessage): void
   /** RPC call to main thread. */
@@ -10,9 +10,6 @@ export interface WorkerEvaluationContext {
     message: WorkerMessage,
     options?: { timeout?: number }
   ): Promise<R>
-
-  /** Stats recorder bridged to main thread. */
-  stats?: StatsRecorder
 
   /** Schedule Lamarckian writeback for an executor. Engine flushes once after fitness.
    *  Multiple calls for the same executor are idempotent (Set semantics).

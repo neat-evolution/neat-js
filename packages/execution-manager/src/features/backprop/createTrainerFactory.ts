@@ -1,6 +1,6 @@
 import type { StaticExecutor } from '@neat-evolution/executor'
 import { isTrainableExecutor } from '@neat-evolution/executor'
-import type { WorkerEvaluationContext } from '../runtime/WorkerEvaluationContext.js'
+import type { PartialEvaluationContext } from '../runtime/EnvironmentRuntimeOptions.js'
 import type {
   Trainer,
   TrainerFactory,
@@ -35,7 +35,7 @@ function isBackpropTrainerFactoryOptions(
 export const createTrainer: TrainerFactory = (
   executor: StaticExecutor,
   trainerOptions: TrainerFactoryOptions,
-  context?: WorkerEvaluationContext
+  context?: PartialEvaluationContext
 ) => {
   if (!isTrainableExecutor(executor)) {
     throw new Error('Backprop trainer factory requires a TrainableExecutor')
@@ -49,7 +49,7 @@ export const createTrainer: TrainerFactory = (
   const { learningRate, epochs, isLamarckian } = trainerOptions
 
   if (isLamarckian !== false && context != null) {
-    context.scheduleWriteback(executor)
+    context.scheduleWriteback?.(executor)
   }
 
   const trainer: Trainer = {

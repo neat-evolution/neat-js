@@ -5,7 +5,7 @@ import type {
   EpisodeResult,
 } from '../src/features/agent/EpisodicAgent.js'
 import { createEpisodicAgent } from '../src/features/agent/EpisodicAgent.js'
-import type { EpisodicContext } from '../src/features/agent/EpisodicContext.js'
+import type { EpisodicAgentOptions } from '../src/features/agent/EpisodicAgentOptions.js'
 
 const mockExecutor: StaticExecutor = {
   forward: (input) => Float64Array.from(input as Float64Array),
@@ -58,7 +58,7 @@ describe('createEpisodicAgent', () => {
 
     test('reward() is a no-op', () => {
       const agent = createEpisodicAgent(mockExecutor)
-      expect(() => agent.reward(1.0, false)).not.toThrow()
+      expect(() => agent.reward(1.0, false, false)).not.toThrow()
     })
 
     test('startEpisode() is a no-op', () => {
@@ -74,16 +74,21 @@ describe('createEpisodicAgent', () => {
 
   describe('context agent', () => {
     test('fires context.reward() when reward() is called', () => {
-      const context: EpisodicContext = {
+      const context: EpisodicAgentOptions = {
         reward: vi.fn(),
       }
       const agent = createEpisodicAgent(mockExecutor, context)
-      agent.reward(0.5, false)
-      expect(context.reward).toHaveBeenCalledWith(mockExecutor, 0.5, false)
+      agent.reward(0.5, false, false)
+      expect(context.reward).toHaveBeenCalledWith(
+        mockExecutor,
+        0.5,
+        false,
+        false
+      )
     })
 
     test('fires context.episodeStart() when startEpisode() is called', () => {
-      const context: EpisodicContext = {
+      const context: EpisodicAgentOptions = {
         episodeStart: vi.fn(),
       }
       const agent = createEpisodicAgent(mockExecutor, context)
@@ -95,7 +100,7 @@ describe('createEpisodicAgent', () => {
     })
 
     test('fires context.episodeEnd() when endEpisode() is called', () => {
-      const context: EpisodicContext = {
+      const context: EpisodicAgentOptions = {
         episodeEnd: vi.fn(),
       }
       const agent = createEpisodicAgent(mockExecutor, context)
@@ -107,7 +112,7 @@ describe('createEpisodicAgent', () => {
     })
 
     test('handles partial context (only some hooks provided)', () => {
-      const context: EpisodicContext = {
+      const context: EpisodicAgentOptions = {
         reward: vi.fn(),
         // episodeStart and episodeEnd not provided
       }
@@ -116,12 +121,17 @@ describe('createEpisodicAgent', () => {
       expect(() => agent.startEpisode(episodeInfo)).not.toThrow()
       expect(() => agent.endEpisode(episodeResult)).not.toThrow()
       // reward should still fire
-      agent.reward(1.0, true)
-      expect(context.reward).toHaveBeenCalledWith(mockExecutor, 1.0, true)
+      agent.reward(1.0, false, true)
+      expect(context.reward).toHaveBeenCalledWith(
+        mockExecutor,
+        1.0,
+        false,
+        true
+      )
     })
 
     test('context agent act() still delegates to executor', () => {
-      const context: EpisodicContext = {
+      const context: EpisodicAgentOptions = {
         reward: vi.fn(),
       }
       const agent = createEpisodicAgent(mockExecutor, context)

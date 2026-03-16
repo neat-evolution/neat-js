@@ -1,5 +1,5 @@
 import type { StaticExecutor } from '@neat-evolution/executor'
-import type { WorkerEvaluationContext } from '../runtime/WorkerEvaluationContext.js'
+import type { PartialEvaluationContext } from '../runtime/EnvironmentRuntimeOptions.js'
 import type { TrainingData } from './TrainingData.js'
 
 export type TrainerFactoryOptions = Record<string, unknown>
@@ -11,5 +11,5 @@ export interface Trainer {
 export type TrainerFactory = (
   executor: StaticExecutor,
   trainerOptions: TrainerFactoryOptions,
-  context?: WorkerEvaluationContext
+  context?: PartialEvaluationContext
 ) => Trainer

@@ -1,5 +1,8 @@
 import type { StaticExecutor } from '@neat-evolution/executor'
-import type { EpisodicContext } from './EpisodicContext.js'
+import type {
+  EpisodicAgentOptions,
+  TransitionInfo,
+} from './EpisodicAgentOptions.js'
 
 /** Episode start metadata. */
 export interface EpisodeInfo {
@@ -43,7 +46,7 @@ export interface EpisodicAgent {
    * not aggregated. Agents integrate rewards internally to compute
    * returns/advantages.
    */
-  reward(reward: number, done: boolean): void
+  reward(reward: number, terminated: boolean, truncated: boolean): void
   /** Reset state for a new episode. */
   startEpisode(info: EpisodeInfo): void
   /**
@@ -51,30 +54,35 @@ export interface EpisodicAgent {
    * the reported episode return/fitness for telemetry.
    */
   endEpisode(result: EpisodeResult): void
+  /** Set pending transition metadata (`info`) for the current transition. */
+  setTransitionInfo(info: TransitionInfo): void
 }
 
 /**
  * Creates an EpisodicAgent wrapping an executor.
- * Without context: vanilla agent (no-op hooks, just forwards execute() calls).
- * With context: RL-capable agent (hooks wire up rollout capture + training).
+ * Without options: vanilla agent (no-op hooks, just forwards execute() calls).
+ * With options: RL-capable agent (hooks wire up rollout capture + training).
  */
 export function createEpisodicAgent(
   executor: StaticExecutor,
-  context?: EpisodicContext
+  options?: EpisodicAgentOptions
 ): EpisodicAgent {
   return {
     act(inputs: Float64Array): Float64Array {
       const output = executor.forward(inputs)
       return output instanceof Float64Array ? output : Float64Array.from(output)
     },
-    reward(reward: number, done: boolean): void {
-      context?.reward?.(executor, reward, done)
+    reward(reward: number, terminated: boolean, truncated: boolean): void {
+      options?.reward?.(executor, reward, terminated, truncated)
     },
     startEpisode(info: EpisodeInfo): void {
-      context?.episodeStart?.(executor, info)
+      options?.episodeStart?.(executor, info)
     },
     endEpisode(result: EpisodeResult): void {
-      context?.episodeEnd?.(executor, result)
+      options?.episodeEnd?.(executor, result)
+    },
+    setTransitionInfo(info: TransitionInfo): void {
+      options?.transitionInfo?.(executor, info)
     },
   }
 }
