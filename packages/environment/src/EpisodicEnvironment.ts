@@ -35,7 +35,9 @@ export function isEpisodicEnvironment(
  * plugins can pass the RL agent directly, bypassing the executor pipeline.
  */
 export interface AgentEnvironment {
-  evaluateAgent(agent: import('./EpisodicAgent.js').EpisodicAgent): number
+  evaluateAgent(
+    agent: import('@neat-evolution/execution-manager').EpisodicAgent
+  ): number
 }
 
 /** Runtime type guard for direct agent evaluation environments. */

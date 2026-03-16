@@ -1,13 +1,9 @@
-export interface TrainingData {
-  inputs: ReadonlyArray<number[] | Float64Array>
-  targets: ReadonlyArray<number[] | Float64Array>
-  count: number
-}
+import type {
+  LossConfig,
+  TrainingData,
+} from '@neat-evolution/execution-manager'
 
-export interface LossConfig {
-  isClassification: boolean
-  oneHotOutput: boolean
-}
+export type { LossConfig, TrainingData }
 
 /**
  * Environments that provide supervised training data implement this.
