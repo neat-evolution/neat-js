@@ -7,6 +7,7 @@ import type {
   EnvironmentInitOptions,
   LossConfig,
   PartialEvaluationContext,
+  TrainerFactory,
   TrainerFactoryOptions,
   TrainingData,
 } from '@neat-evolution/execution-manager'
@@ -18,31 +19,42 @@ import { crossentropy, mse } from './error.js'
 import type { Matrix } from './types.js'
 
 export class DatasetEnvironment
-  implements Environment<SharedArrayBuffer>, SupervisedEnvironment
+  implements Environment<SharedArrayBuffer>, SupervisedEnvironment<SharedArrayBuffer>
 {
   public readonly dataset: Dataset
   public readonly description: EnvironmentDescription
   public readonly isAsync = false
-  private readonly initOptions: EnvironmentInitOptions | undefined
+  private readonly initOptions:
+    | EnvironmentInitOptions<TrainerFactory, TrainerFactoryOptions>
+    | undefined
 
-  constructor(dataset: Dataset, initOptions?: EnvironmentInitOptions) {
+  constructor(
+    dataset: Dataset,
+    initOptions?: EnvironmentInitOptions
+  ) {
     this.dataset = dataset
     this.description = {
       inputs: dataset.dimensions.inputs,
       outputs: dataset.dimensions.outputs,
     }
-    this.initOptions = initOptions
+    this.initOptions = initOptions as
+      | EnvironmentInitOptions<TrainerFactory, TrainerFactoryOptions>
+      | undefined
   }
 
   evaluate(
     executor: StaticExecutor,
     context?: PartialEvaluationContext
   ): number {
-    if (this.initOptions?.createTrainer != null) {
+    if (this.initOptions?.createExecutionManager != null) {
       // Supervised: train on training split, score on validation split
-      const options = (this.initOptions?.trainerFactoryOptions ??
+      const options = (this.initOptions?.executionManagerFactoryOptions ??
         {}) as TrainerFactoryOptions
-      const trainer = this.initOptions.createTrainer(executor, options, context)
+      const trainer = this.initOptions.createExecutionManager(
+        executor,
+        options,
+        context
+      )
       trainer.train(this.getTrainingData())
       const validation = this.getValidationData()
       const predictions = executor.forwardBatch(
