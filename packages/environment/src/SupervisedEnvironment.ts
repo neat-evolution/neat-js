@@ -2,6 +2,7 @@ import type {
   LossConfig,
   TrainingData,
 } from '@neat-evolution/execution-manager'
+import type { Environment } from './Environment.js'
 
 export type { LossConfig, TrainingData }
 
@@ -9,7 +10,7 @@ export type { LossConfig, TrainingData }
  * Environments that provide supervised training data implement this.
  * Strategies check for this at runtime to access raw samples.
  */
-export interface SupervisedEnvironment {
+export interface SupervisedEnvironment<EFO = unknown> extends Environment<EFO> {
   getTrainingData(): TrainingData
   getValidationData(): TrainingData
   getLossConfig(): LossConfig
