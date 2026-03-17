@@ -21,10 +21,10 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     },
-    "./bandit-environment": {
-      "types": "./dist/types/features/episodic/createBanditEnvironment.d.ts",
-      "import": "./dist/esm/features/episodic/createBanditEnvironment.js",
-      "require": "./dist/cjs/features/episodic/createBanditEnvironment.js"
+    "./step-bandit-environment": {
+      "types": "./dist/types/features/step/createStepBanditEnvironment.d.ts",
+      "import": "./dist/esm/features/step/createStepBanditEnvironment.js",
+      "require": "./dist/cjs/features/step/createStepBanditEnvironment.js"
     }
   },
   "files": [
@@ -46,7 +46,7 @@
     "dev:workspace": "turbo run dev --filter=@neat-evolution/demo... --concurrency 20",
     "demo": "node ./dist/esm/worker.js",
     "compare": "node ./dist/esm/features/compare/index.js",
-    "episodic": "node ./dist/esm/features/episodic/index.js",
+    "step": "node ./dist/esm/features/step/index.js",
     "start": "caffeinate -s node ./dist/esm/worker.js",
     "format": "biome check --write",
     "lint": "biome lint",
@@ -67,7 +67,6 @@
     "check": "tsgo --noEmit"
   },
   "dependencies": {
-    "@neat-evolution/actor-critic": "workspace:^",
     "@neat-evolution/core": "workspace:^",
     "@neat-evolution/cppn": "workspace:^",
     "@neat-evolution/dataset-environment": "workspace:^",
@@ -82,7 +81,7 @@
     "@neat-evolution/executor": "workspace:^",
     "@neat-evolution/hyperneat": "workspace:^",
     "@neat-evolution/neat": "workspace:^",
-    "@neat-evolution/q-learning": "workspace:^",
+    "@neat-evolution/rl-core": "workspace:^",
     "@neat-evolution/worker-evaluator": "workspace:^",
     "@neat-evolution/worker-reproducer": "workspace:^",
     "@neat-evolution/worker-threads": "workspace:^",

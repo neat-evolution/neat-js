@@ -7,44 +7,45 @@ HyperNEAT, ES-HyperNEAT, DES-HyperNEAT) can be applied to a dataset environment,
 specifically using the Iris dataset. The demo illustrates both vanilla
 (single-threaded) and worker-based (multi-threaded) evaluation strategies.
 
-## Phase 4 RL Demo (Episodic Bandit)
+## Phase 11 RL Demo (Step Bandit)
 
-Phase 4 adds a public RL surface that mirrors the shipped architecture:
+The maintained RL demo surface is now the step bandit path:
 
-- Vanilla NEAT acts as the control path via `evaluate(executor)`.
-- Actor-Critic and Q-learning plugins run through `evaluateAgent(agent)` so rollout segments, transition metadata, and Lamarckian writeback are exercised exactly as they run in production.
-- The CLI prints a comparison summary so you can see how Lamarckian vs Darwinian evaluations diverge without reverse-engineering the spike notebooks.
+- Vanilla NEAT acts as the control path via `evaluate(executor, context)`.
+- Step Actor-Critic and step Q-learning are injected through
+  `createExecutionManager`.
+- The CLI compares vanilla, Lamarckian, and Darwinian variants on one runtime
+  seam.
 
 ### Command
 
 ```sh
-yarn workspace @neat-evolution/demo episodic \\
+yarn workspace @neat-evolution/demo step \\
   [--iterations N] [--seconds N] [--lr N] \\
-  [--seed phase4-demo|--no-seed] [--ac-seed custom] [--ql-seed custom] \\
+  [--seed phase11-step-demo|--no-seed] [--ac-seed custom] [--ql-seed custom] \\
   [--entropy 0.01] [--epsilon 0.3] [--epsilon-decay 0.95] [--epsilon-min 0.01] \\
-  [--telemetry]
 ```
 
 Key options:
 
-- `--seed <label>`: seeds NEAT's global RNG (defaults to `phase4-demo`). Use `--no-seed` for stochastic runs.
+- `--seed <label>`: seeds NEAT's global RNG. Use `--no-seed` for stochastic runs.
 - `--ac-seed <label>` / `--ql-seed <label>`: override the derived RNG seeds per RL method without touching the population seed.
-- `--entropy <value>`: sets the actor-critic entropy coefficient when running `evaluateAgent()`.
+- `--entropy <value>`: sets the actor-critic entropy coefficient.
 - `--epsilon`, `--epsilon-decay`, `--epsilon-min`: tune the epsilon-greedy schedule for Q-learning.
 
-The script logs the variant configuration (method, evaluation path, Lamarckian flag, seeds, and key hyperparameters), the generation-by-generation fitness table, and then a comparison summary that states what was held constant and what changed for every pair. Pass `--telemetry` to also print per-variant RL diagnostics (episodes, rollout segments, trigger counts, epsilon schedule, etc.) for the best genome of the final generation.
-
-See [`docs/rl-comparisons.md`](docs/rl-comparisons.md) for a detailed walkthrough of the comparison workflow.
+The script logs the variant configuration, the generation-by-generation fitness
+table, and a comparison summary that states what was held constant and what
+changed for each pair.
 
 ### Comparison Playbook
 
-- **Vanilla vs Actor-Critic (Lamarckian).** Holds the environment, iteration count, learning rate, and NEAT config constant. Actor-Critic routes through `evaluateAgent()`, captures rollout segments in `'episode'` mode, applies entropy-regularised updates, and writes trained weights back before reproduction.
-- **Vanilla vs Q-Learning.** Same constants as above; the only change is the epsilon-greedy Q-learning plugin, which also owns `evaluateAgent()` and performs Lamarckian writeback. The CLI surfaces the epsilon schedule so you can match logs to configuration.
+- **Vanilla vs Actor-Critic (Lamarckian).** Holds the environment, iteration count, learning rate, and NEAT config constant. Step Actor-Critic trains inside the step loop and writes trained weights back before reproduction.
+- **Vanilla vs Q-Learning.** Same constants as above; the only change is the step Q-learning execution manager, which also performs Lamarckian writeback.
 - **Actor-Critic Lamarckian vs Darwinian.** Identical agent config and seeds. The Darwinian variant keeps RL training online but discards learned weights, isolating the impact of Lamarckian inheritance.
 
 Each run shows the absolute best fitness, elapsed wall-clock time, and ms/iteration so you can compare convergence speed as well as peak scores. Because the RNG seeds are explicit, copying a command reproduces the same ordering of events and rollout triggers.
 
-> The sections below describe the legacy dataset demos (NEAT / CPPN / HyperNEAT on Iris). They remain available for completeness but are not part of the Phase 4 RL closure work.
+> The sections below describe the legacy dataset demos (NEAT / CPPN / HyperNEAT on Iris). They remain available for completeness but are not part of the maintained step RL demo surface.
 
 ## Purpose
 

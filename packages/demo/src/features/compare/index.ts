@@ -117,10 +117,10 @@ function backpropEvaluatorConfig(
   return {
     createExecutorPathname: '@neat-evolution/executor/backprop',
     hydrateEnvironmentOptions: {
-      createTrainer: '@neat-evolution/execution-manager/backprop',
+      createExecutionManager: '@neat-evolution/execution-manager/backprop',
     },
     environmentRuntimeData: {
-      trainerFactoryOptions: trainerOptions,
+      executionManagerFactoryOptions: trainerOptions,
     },
   }
 }
@@ -311,15 +311,15 @@ for (const result of results) {
 
   // Hydrate trainer if configured (backprop variants)
   const trainerPathname =
-    evaluatorConfig.hydrateEnvironmentOptions?.createTrainer
+    evaluatorConfig.hydrateEnvironmentOptions?.createExecutionManager
   if (trainerPathname != null) {
     const trainerMod = await import(trainerPathname)
     const createTrainer = (trainerMod.default ??
       trainerMod.createTrainer) as TrainerFactory
     const trainerOptions = evaluatorConfig.environmentRuntimeData
-      ?.trainerFactoryOptions as Record<string, unknown>
+      ?.executionManagerFactoryOptions as Record<string, unknown>
     if (trainerOptions == null) {
-      throw new Error(`trainerFactoryOptions missing for ${result.name}`)
+      throw new Error(`executionManagerFactoryOptions missing for ${result.name}`)
     }
     const trainer = createTrainer(executor, trainerOptions)
     trainer.train({
