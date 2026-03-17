@@ -115,10 +115,12 @@ import type { GenerationRecord } from "@neat-evolution/evolution";
 // Create a recorder that captures generation and run-summary data
 const recorder = createMemoryRecorder(["generation", "run-summary"]);
 
-// Pass to evolution via EvolutionOptions or EvolutionManagerConfig
+// Pass to evolution via EvolutionOptions or EvolutionManagerOptions
 const manager = new EvolutionManager({
   // ...
-  stats: recorder,
+  evaluation: {
+    stats: recorder,
+  },
 });
 
 await manager.evolve();
