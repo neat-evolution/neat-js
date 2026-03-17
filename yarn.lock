@@ -950,28 +950,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@neat-evolution/actor-critic@workspace:*, @neat-evolution/actor-critic@workspace:^, @neat-evolution/actor-critic@workspace:packages/actor-critic":
-  version: 0.0.0-use.local
-  resolution: "@neat-evolution/actor-critic@workspace:packages/actor-critic"
-  dependencies:
-    "@biomejs/biome": "npm:2.4.4"
-    "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/execution-manager": "workspace:*"
-    "@neat-evolution/executor": "workspace:*"
-    "@neat-evolution/utils": "workspace:*"
-    "@swc/cli": "npm:^0.7.9"
-    "@swc/core": "npm:^1.15.3"
-    "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
-    "@vitest/coverage-v8": "npm:^4.0.14"
-    concurrently: "npm:^9.2.1"
-    lint-staged: "npm:^16.2.7"
-    nodemon: "npm:^3.1.11"
-    rimraf: "npm:^6.1.2"
-    typescript: "npm:^5.9.3"
-    vitest: "npm:^4.0.14"
-  languageName: unknown
-  linkType: soft
-
 "@neat-evolution/core@workspace:*, @neat-evolution/core@workspace:^, @neat-evolution/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@neat-evolution/core@workspace:packages/core"
@@ -1052,7 +1030,6 @@ __metadata:
   dependencies:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/actor-critic": "workspace:^"
     "@neat-evolution/core": "workspace:^"
     "@neat-evolution/cppn": "workspace:^"
     "@neat-evolution/dataset-environment": "workspace:^"
@@ -1067,7 +1044,7 @@ __metadata:
     "@neat-evolution/executor": "workspace:^"
     "@neat-evolution/hyperneat": "workspace:^"
     "@neat-evolution/neat": "workspace:^"
-    "@neat-evolution/q-learning": "workspace:^"
+    "@neat-evolution/rl-core": "workspace:^"
     "@neat-evolution/utils": "workspace:^"
     "@neat-evolution/worker-evaluator": "workspace:^"
     "@neat-evolution/worker-reproducer": "workspace:^"
@@ -1416,18 +1393,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neat-evolution/q-learning@workspace:^, @neat-evolution/q-learning@workspace:packages/q-learning":
+"@neat-evolution/rl-core@workspace:^, @neat-evolution/rl-core@workspace:packages/rl-core":
   version: 0.0.0-use.local
-  resolution: "@neat-evolution/q-learning@workspace:packages/q-learning"
+  resolution: "@neat-evolution/rl-core@workspace:packages/rl-core"
   dependencies:
     "@biomejs/biome": "npm:2.4.4"
     "@heygrady/tsconfig-bases": "npm:^1.0.7"
-    "@neat-evolution/actor-critic": "workspace:*"
-    "@neat-evolution/execution-manager": "workspace:*"
     "@neat-evolution/executor": "workspace:*"
+    "@neat-evolution/stats": "workspace:*"
     "@neat-evolution/utils": "workspace:*"
     "@swc/cli": "npm:^0.7.9"
     "@swc/core": "npm:^1.15.3"
+    "@swc/helpers": "npm:^0.5.19"
     "@typescript/native-preview": "npm:7.0.0-dev.20260220.1"
     "@vitest/coverage-v8": "npm:^4.0.14"
     concurrently: "npm:^9.2.1"
