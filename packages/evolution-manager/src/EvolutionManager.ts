@@ -50,8 +50,9 @@ import { hardwareConcurrency } from '@neat-evolution/worker-threads'
 
 import type {
   EvaluatorConfig,
-  EvolutionManagerConfig,
+  EvolutionManagerOptions,
 } from './EvolutionManagerConfig.js'
+import { createEvolutionManagerConfig } from './EvolutionManagerConfig.js'
 
 const DEFAULT_EXECUTOR_PATHNAME = '@neat-evolution/executor'
 
@@ -83,34 +84,35 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
   private initialized = false
   private populationInitialized = false
 
-  constructor(config: EvolutionManagerConfig<Ctx>) {
-    if (config.algorithm == null) {
+  constructor(config: EvolutionManagerOptions<Ctx>) {
+    const resolvedConfig = createEvolutionManagerConfig(config)
+    if (resolvedConfig.algorithm == null) {
       throw new Error('EvolutionManager requires an algorithm')
     }
-    if (config.environment == null) {
+    if (resolvedConfig.environment == null) {
       throw new Error('EvolutionManager requires an environment')
     }
 
-    this.algorithm = config.algorithm
-    this.environment = config.environment
-    this.createEnvironmentPathname = config.createEnvironmentPathname
-    this.strategy = config.strategy
+    this.algorithm = resolvedConfig.algorithm
+    this.environment = resolvedConfig.environment
+    this.createEnvironmentPathname = resolvedConfig.createEnvironmentPathname
+    this.strategy = resolvedConfig.strategy
     this.evolutionOptions = {
       ...defaultEvolutionOptions,
-      ...config.evolutionOptions,
+      ...resolvedConfig.evolutionOptions,
     }
     this.populationOptions = {
       ...defaultPopulationOptions,
-      ...config.populationOptions,
+      ...resolvedConfig.populationOptions,
     }
-    this.configData = config.configData
+    this.configData = resolvedConfig.configData
     this.genomeOptions =
-      config.genomeOptions ??
-      ({ ...config.algorithm.defaultOptions } as GenomeOptionsOf<Ctx>)
-    this.populationFactoryOptions = config.populationFactoryOptions
-    this.evaluatorConfig = config.evaluatorConfig
-    this.stats = config.stats
-    this.signal = config.signal
+      resolvedConfig.genomeOptions ??
+      ({ ...resolvedConfig.algorithm.defaultOptions } as GenomeOptionsOf<Ctx>)
+    this.populationFactoryOptions = resolvedConfig.populationFactoryOptions
+    this.evaluatorConfig = resolvedConfig.evaluatorConfig
+    this.stats = resolvedConfig.stats
+    this.signal = resolvedConfig.signal
   }
 
   /** Create evaluator, reproducer, population. Idempotent. */
@@ -252,8 +254,8 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
 
   /** Get the current population's serialized state for persistence.
    *  Returns PopulationData which can be saved to IndexedDB, file, etc.
-   *  The `factoryOptions` field can be passed back as `populationFactoryOptions`
-   *  in a new EvolutionManagerConfig to restore the population. */
+   *  The `factoryOptions` field can be passed back as `population.factoryOptions`
+   *  in a new EvolutionManagerOptions object to restore the population. */
   getPopulationData(): PopulationData<
     ConfigDataOf<Ctx>,
     StateDataOf<Ctx>,

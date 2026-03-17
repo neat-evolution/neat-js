@@ -1,59 +1,142 @@
-import { NEATAlgorithm } from '@neat-evolution/neat'
+import { NEATAlgorithm, type NEATContext } from '@neat-evolution/neat'
 import { describe, expect, test } from 'vitest'
 import {
+  createEvolutionManagerConfig,
   deserializeOrganism,
   EvolutionManager,
+  getBuiltInEvolutionAlgorithmDefinition,
   organismToExecutor,
+  type EvolutionManagerOptions,
   serializedToExecutor,
 } from '../src/index.js'
 import { createEnvironment } from '../src/xorEnvironment.js'
 
 describe('EvolutionManager', () => {
   const environment = createEnvironment(null)
-  const baseConfig = {
-    algorithm: NEATAlgorithm,
-    environment,
-    createEnvironmentPathname:
-      '@neat-evolution/evolution-manager/xor-environment',
-  } as const
+  const slotConfig: EvolutionManagerOptions<NEATContext> = {
+    algorithm: {
+      name: 'NEAT',
+    },
+    environment: {
+      config: environment,
+      pathname: '@neat-evolution/evolution-manager/xor-environment',
+    },
+  }
+
+  function createManager(
+    overrides: Partial<EvolutionManagerOptions<NEATContext>> = {}
+  ): EvolutionManager<NEATContext> {
+    return new EvolutionManager({
+      ...slotConfig,
+      ...overrides,
+      algorithm: {
+        ...slotConfig.algorithm,
+        ...(overrides.algorithm ?? {}),
+      },
+      environment: {
+        ...slotConfig.environment,
+        ...(overrides.environment ?? {}),
+      },
+    })
+  }
 
   describe('constructor validation', () => {
     test('throws on missing algorithm', () => {
-      expect(
-        () =>
-          new EvolutionManager({
-            ...baseConfig,
-            algorithm: undefined as never,
-          })
+      expect(() =>
+        new EvolutionManager({
+          ...slotConfig,
+          algorithm: undefined as never,
+        })
       ).toThrow('EvolutionManager requires an algorithm')
     })
 
     test('throws on missing environment', () => {
-      expect(
-        () =>
-          new EvolutionManager({
-            ...baseConfig,
-            environment: undefined as never,
-          })
+      expect(() =>
+        new EvolutionManager({
+          ...slotConfig,
+          environment: undefined as never,
+        })
       ).toThrow('EvolutionManager requires an environment')
     })
 
-    test('constructs successfully with valid config', () => {
-      const manager = new EvolutionManager({ ...baseConfig })
+    test('constructs successfully with valid slot config', () => {
+      const manager = createManager()
       expect(manager).toBeDefined()
+    })
+  })
+
+  describe('config normalization', () => {
+    test('derives algorithm and genome defaults from the built-in catalog', () => {
+      const config = createEvolutionManagerConfig(slotConfig)
+
+      expect(config.algorithm).toBe(NEATAlgorithm)
+      expect(config.createEnvironmentPathname).toBe(
+        '@neat-evolution/evolution-manager/xor-environment'
+      )
+      expect(config.genomeOptions).toEqual(NEATAlgorithm.defaultOptions)
+      expect(config.configData).toEqual({
+        neat: expect.any(Object),
+      })
+    })
+
+    test('allows direct definitions from the shared catalog', () => {
+      const definition = getBuiltInEvolutionAlgorithmDefinition('HyperNEAT')
+      const config = createEvolutionManagerConfig({
+        algorithm: {
+          definition,
+        },
+        environment: {
+          config: environment,
+          pathname: '@neat-evolution/evolution-manager/xor-environment',
+        },
+      })
+
+      expect(config.algorithm).toBe(definition.algorithm)
+      expect(config.genomeOptions).toEqual(definition.createDefaultGenomeOptions())
+      expect(config.configData).toEqual(definition.createDefaultConfigData())
+    })
+
+    test('merges evaluation and execution slots into evaluator runtime config', () => {
+      const config = createEvolutionManagerConfig({
+        ...slotConfig,
+        evaluation: {
+          options: {
+            createExecutorPathname: '@neat-evolution/executor/backprop',
+            threadCount: 2,
+          },
+        },
+        execution: {
+          createExecutionManager: '@neat-evolution/rl-core/actor-critic',
+          executionManagerFactoryOptions: {
+            learningRate: 0.1,
+          },
+        },
+      })
+
+      expect(config.evaluatorConfig).toEqual({
+        createExecutorPathname: '@neat-evolution/executor/backprop',
+        threadCount: 2,
+        hydrateEnvironmentOptions: {
+          createExecutionManager: '@neat-evolution/rl-core/actor-critic',
+        },
+        environmentRuntimeData: {
+          executionManagerFactoryOptions: {
+            learningRate: 0.1,
+          },
+        },
+      })
     })
   })
 
   describe('currentPopulation', () => {
     test('returns undefined before init', () => {
-      const manager = new EvolutionManager({ ...baseConfig })
+      const manager = createManager()
       expect(manager.currentPopulation).toBeUndefined()
     })
 
     test('returns population after init', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
       })
       await manager.init()
       expect(manager.currentPopulation).toBeDefined()
@@ -63,9 +146,8 @@ describe('EvolutionManager', () => {
 
   describe('init() idempotency', () => {
     test('calling init() twice does not recreate population', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
       })
       await manager.init()
       const pop1 = manager.currentPopulation
@@ -76,16 +158,14 @@ describe('EvolutionManager', () => {
     })
   })
 
-  describe('local mode (no evaluatorConfig)', () => {
+  describe('local mode (no evaluation options)', () => {
     test('creates population with local evaluator and reproducer', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
       })
       await manager.init()
       const population = manager.currentPopulation
       expect(population).toBeDefined()
-      // Population should have species
       if (population == null) {
         throw new Error('Population not created')
       }
@@ -96,34 +176,29 @@ describe('EvolutionManager', () => {
 
   describe('initializePopulation()', () => {
     test('runs initial mutations and first evaluation', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: { initialMutations: 5 },
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: { initialMutations: 5 },
       })
       await manager.initializePopulation()
       const population = manager.currentPopulation
       if (population == null) {
         throw new Error('Population not created')
       }
-      // After evaluation, best organism should have a fitness value
-      const best = population.best()
-      expect(best).toBeDefined()
-      expect(best?.fitness).not.toBeNull()
+      expect(population.best()).toBeDefined()
+      expect(population.best()?.fitness).not.toBeNull()
       await manager.terminate()
     })
 
     test('is idempotent', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: { initialMutations: 3 },
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: { initialMutations: 3 },
       })
       await manager.initializePopulation()
       const best1 = manager.currentPopulation?.best()?.fitness
       await manager.initializePopulation()
       const best2 = manager.currentPopulation?.best()?.fitness
-      // Same fitness — population wasn't re-mutated or re-evaluated
       expect(best1).toBe(best2)
       await manager.terminate()
     })
@@ -131,15 +206,13 @@ describe('EvolutionManager', () => {
 
   describe('evolve()', () => {
     test('auto-inits when called without explicit init()', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 1,
           initialMutations: 3,
         },
       })
-      // No init() call — evolve() should handle it
       const best = await manager.evolve()
       expect(best).toBeDefined()
       expect(best?.fitness).not.toBeNull()
@@ -148,10 +221,9 @@ describe('EvolutionManager', () => {
     })
 
     test('returns best organism after evolution', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 2,
           initialMutations: 5,
         },
@@ -164,22 +236,19 @@ describe('EvolutionManager', () => {
 
     test('per-call options override constructor options', async () => {
       let afterEvaluateCount = 0
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 5,
           initialMutations: 3,
         },
       })
-      // Override iterations to 1 via per-call options
       await manager.evolve({
         iterations: 1,
         afterEvaluate: () => {
           afterEvaluateCount++
         },
       })
-      // afterEvaluate should have been called once (1 iteration)
       expect(afterEvaluateCount).toBe(1)
       await manager.terminate()
     })
@@ -187,25 +256,20 @@ describe('EvolutionManager', () => {
 
   describe('initialMutations', () => {
     test('applied during initializePopulation, not during evolve', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 1,
           initialMutations: 10,
         },
       })
       await manager.initializePopulation()
 
-      // After initializePopulation, organisms should have some hidden nodes/links from mutations
       const population = manager.currentPopulation
       if (population == null) {
         throw new Error('Population not created')
       }
 
-      // Now evolve — initialMutations should be forced to 0 (see EvolutionManager.evolve)
-      // If initialMutations were applied again, we'd see the evolve loop's first iteration
-      // run 10 mutations instead of the normal evolve cycle
       let afterEvaluateCount = 0
       await manager.evolve({
         iterations: 1,
@@ -213,7 +277,6 @@ describe('EvolutionManager', () => {
           afterEvaluateCount++
         },
       })
-      // evolve ran 1 iteration with afterEvaluate
       expect(afterEvaluateCount).toBe(1)
       await manager.terminate()
     })
@@ -221,9 +284,8 @@ describe('EvolutionManager', () => {
 
   describe('terminate() + re-init', () => {
     test('terminate resets state, init() can be called again', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
       })
       await manager.init()
       const pop1 = manager.currentPopulation
@@ -235,7 +297,6 @@ describe('EvolutionManager', () => {
       await manager.init()
       const pop2 = manager.currentPopulation
       expect(pop2).toBeDefined()
-      // New population, not the same object
       expect(pop2).not.toBe(pop1)
       await manager.terminate()
     })
@@ -243,37 +304,32 @@ describe('EvolutionManager', () => {
 
   describe('getBestExecutor()', () => {
     test('throws before population is initialized', () => {
-      const manager = new EvolutionManager({ ...baseConfig })
+      const manager = createManager()
       expect(() => manager.getBestExecutor()).toThrow(
         'Population not initialized'
       )
     })
 
-    test('returns executor even before evaluation (best picks first organism)', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
+    test('returns executor even before evaluation', async () => {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
       })
       await manager.init()
-      // Population exists — best() returns an organism even before evaluation
       const executor = manager.getBestExecutor()
       expect(executor).toBeDefined()
       await manager.terminate()
     })
 
     test('returns executor after evolution', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 1,
           initialMutations: 3,
         },
       })
       await manager.evolve()
       const executor = manager.getBestExecutor()
-      expect(executor).toBeDefined()
-      // Should produce output for our 2-input environment
       const output = executor.forward([0, 1])
       expect(output).toHaveLength(1)
       expect(typeof output[0]).toBe('number')
@@ -283,20 +339,15 @@ describe('EvolutionManager', () => {
 
   describe('organismToExecutor()', () => {
     test('converts organism to a working executor', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 1,
           initialMutations: 3,
         },
       })
       await manager.evolve()
-      const population = manager.currentPopulation
-      if (population == null) {
-        throw new Error('Population not created')
-      }
-      const best = population.best()
+      const best = manager.currentPopulation?.best()
       if (best == null) {
         throw new Error('No best organism')
       }
@@ -310,70 +361,55 @@ describe('EvolutionManager', () => {
 
   describe('getPopulationData()', () => {
     test('throws before population is initialized', () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-      })
+      const manager = createManager()
       expect(() => manager.getPopulationData()).toThrow(
         'Population not initialized'
       )
     })
 
     test('returns PopulationData after evolution', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 1,
           initialMutations: 3,
         },
       })
       await manager.evolve()
       const data = manager.getPopulationData()
-      expect(data).toBeDefined()
       expect(data.algorithmName).toBe('NEAT')
-      expect(data.factoryOptions).toBeDefined()
       expect(data.factoryOptions.species.length).toBeGreaterThan(0)
       await manager.terminate()
     })
   })
 
   describe('createOrganism()', () => {
-    test('round-trips: organism.toJSON() → createOrganism() → working organism', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+    test('round-trips: organism.toJSON() -> createOrganism()', async () => {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 1,
           initialMutations: 5,
         },
       })
       await manager.evolve()
-      const population = manager.currentPopulation
-      if (population == null) {
-        throw new Error('Population not created')
-      }
-      const best = population.best()
+      const best = manager.currentPopulation?.best()
       if (best == null) {
         throw new Error('No best organism')
       }
 
-      // Serialize
       const organismData = best.toJSON()
-
-      // Deserialize via manager
       const restored = manager.createOrganism(organismData)
       expect(restored.generation).toBe(best.generation)
       expect(restored.fitness).toBe(best.fitness)
 
-      // Restored organism should produce similar output
       const originalExecutor = manager.organismToExecutor(best)
       const restoredExecutor = manager.organismToExecutor(restored)
       const input = [0.5, 0.5]
       const originalOutput = originalExecutor.forward(input)
       const restoredOutput = restoredExecutor.forward(input)
+
       expect(restoredOutput).toHaveLength(originalOutput.length)
-      // Genome factory options round-trip may produce slightly different
-      // connection ordering, so check approximate equality
       for (let i = 0; i < originalOutput.length; i++) {
         expect(restoredOutput[i]).toBeCloseTo(originalOutput[i] ?? 0, 2)
       }
@@ -381,13 +417,11 @@ describe('EvolutionManager', () => {
     })
   })
 
-  describe('populationFactoryOptions (save/restore)', () => {
+  describe('population factory restore', () => {
     test('restores population and continues evolving', async () => {
-      // First run: evolve and save
-      const manager1 = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+      const manager1 = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 2,
           initialMutations: 5,
         },
@@ -396,12 +430,12 @@ describe('EvolutionManager', () => {
       const savedData = manager1.getPopulationData()
       await manager1.terminate()
 
-      // Second run: restore from saved data and continue
-      const manager2 = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        populationFactoryOptions: savedData.factoryOptions,
-        evolutionOptions: {
+      const manager2 = createManager({
+        population: {
+          options: { populationSize: 10 },
+          factoryOptions: savedData.factoryOptions,
+        },
+        evolution: {
           iterations: 1,
           initialMutations: 0,
         },
@@ -411,36 +445,30 @@ describe('EvolutionManager', () => {
       if (population2 == null) {
         throw new Error('Population not created')
       }
-      // Population was restored — should have organisms with fitness
-      const best2 = population2.best()
-      expect(best2).toBeDefined()
-      expect(best2?.fitness).not.toBeNull()
-      // The species structure should be preserved
+      expect(population2.best()).toBeDefined()
+      expect(population2.best()?.fitness).not.toBeNull()
       expect(population2.species.size).toBeGreaterThan(0)
       await manager2.terminate()
     })
 
-    test('full round-trip: getPopulationData → JSON → restore', async () => {
-      const manager1 = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+    test('full round-trip: getPopulationData -> JSON -> restore', async () => {
+      const manager1 = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 1,
           initialMutations: 5,
         },
       })
       await manager1.evolve()
       const savedData = manager1.getPopulationData()
+      const parsed = JSON.parse(JSON.stringify(savedData))
 
-      // Simulate JSON round-trip (as would happen with IndexedDB/localStorage)
-      const jsonString = JSON.stringify(savedData)
-      const parsed = JSON.parse(jsonString)
-
-      const manager2 = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        populationFactoryOptions: parsed.factoryOptions,
-        evolutionOptions: {
+      const manager2 = createManager({
+        population: {
+          options: { populationSize: 10 },
+          factoryOptions: parsed.factoryOptions,
+        },
+        evolution: {
           iterations: 1,
           initialMutations: 0,
         },
@@ -453,10 +481,9 @@ describe('EvolutionManager', () => {
 
   describe('standalone utilities', () => {
     test('deserializeOrganism() works without a manager', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 1,
           initialMutations: 3,
         },
@@ -469,7 +496,6 @@ describe('EvolutionManager', () => {
       const organismData = best.toJSON()
       await manager.terminate()
 
-      // Deserialize without a running manager
       const restored = deserializeOrganism(
         NEATAlgorithm,
         organismData,
@@ -478,17 +504,14 @@ describe('EvolutionManager', () => {
       expect(restored.generation).toBe(best.generation)
       expect(restored.fitness).toBe(best.fitness)
 
-      // Should produce working executor
       const executor = organismToExecutor(NEATAlgorithm, restored)
-      const output = executor.forward([0, 1])
-      expect(output).toHaveLength(1)
+      expect(executor.forward([0, 1])).toHaveLength(1)
     })
 
     test('serializedToExecutor() converts data directly to executor', async () => {
-      const manager = new EvolutionManager({
-        ...baseConfig,
-        populationOptions: { populationSize: 10 },
-        evolutionOptions: {
+      const manager = createManager({
+        population: { options: { populationSize: 10 } },
+        evolution: {
           iterations: 1,
           initialMutations: 3,
         },
@@ -500,13 +523,11 @@ describe('EvolutionManager', () => {
       }
       const organismData = best.toJSON()
 
-      // Get reference output
       const originalExecutor = manager.organismToExecutor(best)
       const input = [0.3, 0.7]
       const expectedOutput = originalExecutor.forward(input)
       await manager.terminate()
 
-      // serializedToExecutor should produce same output
       const executor = serializedToExecutor(
         NEATAlgorithm,
         organismData,
