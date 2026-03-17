@@ -6,7 +6,7 @@ describe('demo benchmark', () => {
     'DES-HyperNEAT demo',
     async () => {
       await demo({
-        evolutionOptions: {
+        evolution: {
           iterations: 1,
           secondsLimit: 2,
         },

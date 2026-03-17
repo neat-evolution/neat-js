@@ -5,7 +5,6 @@ import {
 } from '@neat-evolution/evolution-manager'
 import {
   defaultNEATGenomeOptions,
-  NEATAlgorithm,
   type NEATGenome,
   type NEATGenomeOptions,
 } from '@neat-evolution/neat'
@@ -139,16 +138,24 @@ const CREATE_ENVIRONMENT_PATHNAME = '@neat-evolution/demo/step-bandit-environmen
 async function run(): Promise<RunResult> {
   const fitnessLog: number[] = []
 
-  const manager = new EvolutionManager({
-    algorithm: NEATAlgorithm,
-    environment,
-    createEnvironmentPathname: CREATE_ENVIRONMENT_PATHNAME,
-    evaluatorConfig,
-    genomeOptions: {
-      ...defaultNEATGenomeOptions,
-      outputActivation,
+const manager = new EvolutionManager({
+    algorithm: {
+      name: 'NEAT',
+      genomeOptions: {
+        ...defaultNEATGenomeOptions,
+        outputActivation,
+      },
     },
-    evolutionOptions: {
+    environment: {
+      config: environment,
+      pathname: CREATE_ENVIRONMENT_PATHNAME,
+    },
+    population: {
+      options: {
+        ...defaultPopulationOptions,
+      },
+    },
+    evolution: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,
       secondsLimit: args.seconds,
@@ -157,8 +164,23 @@ async function run(): Promise<RunResult> {
         fitnessLog.push(population.best()?.fitness ?? 0)
       },
     },
-    populationOptions: {
-      ...defaultPopulationOptions,
+    evaluation: {
+      options: {
+        ...(evaluatorConfig.createExecutorPathname != null
+          ? { createExecutorPathname: evaluatorConfig.createExecutorPathname }
+          : {}),
+        ...(evaluatorConfig.threadCount != null
+          ? { threadCount: evaluatorConfig.threadCount }
+          : {}),
+      },
+    },
+    execution: {
+      createExecutionManager:
+        evaluatorConfig.hydrateEnvironmentOptions?.createExecutionManager ??
+        stepPluginPathname,
+      executionManagerFactoryOptions:
+        (evaluatorConfig.environmentRuntimeData
+          ?.executionManagerFactoryOptions as Record<string, unknown>) ?? {},
     },
   })
 

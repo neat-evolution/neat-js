@@ -314,7 +314,7 @@ async function run() {
       async () => {
         return await demo(createReproducer, createEvaluator, createExecutor, {
           method,
-          evolutionOptions: {
+          evolution: {
             iterations: options.iterations,
             secondsLimit: options.secondsLimit,
             logTimeIntervalMs: options.evolveLogTimeIntervalMs,

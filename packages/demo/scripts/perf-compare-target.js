@@ -264,7 +264,7 @@ async function run() {
     best = await withMaybeSilencedTrainingLogs(options.quietTraining, () =>
       demo(createReproducer, createEvaluator, createExecutor, {
         method,
-        evolutionOptions: {
+        evolution: {
           iterations: options.iterations,
           secondsLimit: options.secondsLimit,
           earlyStop: options.earlyStop,

@@ -1,6 +1,5 @@
 import type { AlgorithmContext } from '@neat-evolution/core'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
-import { CPPNAlgorithm } from '@neat-evolution/cppn'
 import {
   DatasetEnvironment,
   type DatasetOptions,
@@ -8,18 +7,14 @@ import {
   loadDataset,
 } from '@neat-evolution/dataset-environment'
 import {
-  DESHyperNEATAlgorithm,
   defaultDESHyperNEATGenomeOptions,
   defaultTopologyConfigOptions,
 } from '@neat-evolution/des-hyperneat'
-import { ESHyperNEATAlgorithm } from '@neat-evolution/es-hyperneat'
 import type { Organism } from '@neat-evolution/evolution'
 import {
   EvolutionManager,
-  type EvolutionManagerConfig,
+  type EvolutionManagerOptions,
 } from '@neat-evolution/evolution-manager'
-import { HyperNEATAlgorithm } from '@neat-evolution/hyperneat'
-import { NEATAlgorithm } from '@neat-evolution/neat'
 
 export enum Methods {
   NEAT = 'NEAT',
@@ -32,48 +27,54 @@ export enum Methods {
 export const method = Methods.DES_HyperNEAT
 
 type ErasedManagerConfig = Pick<
-  EvolutionManagerConfig,
-  'algorithm' | 'configData' | 'genomeOptions'
+  EvolutionManagerOptions,
+  'algorithm'
 >
 
-/** Build algorithm-specific config fields for EvolutionManagerConfig.
+/** Build algorithm-specific config fields for EvolutionManagerOptions.
  *  Type-erased: each algorithm has a specific Ctx, but the demo
  *  works with all of them generically. EvolutionManager erases types internally. */
 function algorithmConfig(selectedMethod: Methods): ErasedManagerConfig {
   switch (selectedMethod) {
     case Methods.NEAT:
-      return { algorithm: NEATAlgorithm } as unknown as ErasedManagerConfig
+      return { algorithm: { name: 'NEAT' } }
     case Methods.CPPN:
-      return { algorithm: CPPNAlgorithm } as unknown as ErasedManagerConfig
+      return { algorithm: { name: 'CPPN' } }
     case Methods.HyperNEAT:
       return {
-        algorithm: HyperNEATAlgorithm,
-      } as unknown as ErasedManagerConfig
+        algorithm: { name: 'HyperNEAT' },
+      }
     case Methods.ES_HyperNEAT:
       return {
-        algorithm: ESHyperNEATAlgorithm,
-      } as unknown as ErasedManagerConfig
+        algorithm: { name: 'ES-HyperNEAT' },
+      }
     case Methods.DES_HyperNEAT:
       return {
-        algorithm: DESHyperNEATAlgorithm,
-        configData: {
-          neat: defaultTopologyConfigOptions,
-          cppn: defaultNEATConfigOptions,
+        algorithm: {
+          name: 'DES-HyperNEAT',
+          configData: {
+            neat: defaultTopologyConfigOptions,
+            cppn: defaultNEATConfigOptions,
+          } as never,
+          genomeOptions: defaultDESHyperNEATGenomeOptions,
         },
-        genomeOptions: defaultDESHyperNEATGenomeOptions,
-      } as unknown as ErasedManagerConfig
+      }
   }
 }
 
-export interface DemoOptions
-  extends Partial<
-    Omit<
-      EvolutionManagerConfig,
-      'algorithm' | 'environment' | 'createEnvironmentPathname'
-    >
-  > {
+type DemoAlgorithmOverrides = Partial<
+  Omit<EvolutionManagerOptions['algorithm'], 'name'>
+>
+
+export interface DemoOptions {
   method?: Methods
   datasetOptions?: Partial<DatasetOptions>
+  algorithm?: DemoAlgorithmOverrides
+  population?: EvolutionManagerOptions['population']
+  evolution?: EvolutionManagerOptions['evolution']
+  evaluation?: EvolutionManagerOptions['evaluation']
+  execution?: EvolutionManagerOptions['execution']
+  signal?: AbortSignal
 }
 
 export const demo = async (
@@ -82,7 +83,12 @@ export const demo = async (
   const {
     method: selectedMethod = method,
     datasetOptions: datasetOverrides,
-    ...managerOverrides
+    algorithm: algorithmOverrides,
+    population,
+    evolution,
+    evaluation,
+    execution,
+    signal,
   } = options
 
   const datasetOptions: DatasetOptions = {
@@ -101,14 +107,23 @@ export const demo = async (
   const environment = new DatasetEnvironment(dataset)
 
   const manager = new EvolutionManager({
-    ...algorithmConfig(selectedMethod),
-    environment,
-    createEnvironmentPathname: '@neat-evolution/dataset-environment',
-    evolutionOptions: {
+    algorithm: {
+      ...algorithmConfig(selectedMethod).algorithm,
+      ...(algorithmOverrides ?? {}),
+    },
+    environment: {
+      config: environment,
+      pathname: '@neat-evolution/dataset-environment',
+    },
+    evolution: {
       iterations: 20,
       secondsLimit: 5,
+      ...(evolution ?? {}),
     },
-    ...managerOverrides,
+    ...(population != null ? { population } : {}),
+    ...(evaluation != null ? { evaluation } : {}),
+    ...(execution != null ? { execution } : {}),
+    ...(signal != null ? { signal } : {}),
   })
 
   const best = await manager.evolve()

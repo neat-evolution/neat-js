@@ -32,7 +32,6 @@ import type { TrainerFactory } from '@neat-evolution/execution-manager'
 import type { Executor, ExecutorFactory } from '@neat-evolution/executor'
 import {
   createPhenotype,
-  NEATAlgorithm,
   type NEATGenome,
 } from '@neat-evolution/neat'
 
@@ -113,13 +112,19 @@ const CREATE_ENVIRONMENT_PATHNAME = '@neat-evolution/dataset-environment'
 
 function backpropEvaluatorConfig(
   trainerOptions: Record<string, unknown>
-): Partial<EvaluatorConfig> {
+): {
+  evaluation: Partial<EvaluatorConfig>
+  execution: {
+    createExecutionManager: string
+    executionManagerFactoryOptions: Record<string, unknown>
+  }
+} {
   return {
-    createExecutorPathname: '@neat-evolution/executor/backprop',
-    hydrateEnvironmentOptions: {
-      createExecutionManager: '@neat-evolution/execution-manager/backprop',
+    evaluation: {
+      createExecutorPathname: '@neat-evolution/executor/backprop',
     },
-    environmentRuntimeData: {
+    execution: {
+      createExecutionManager: '@neat-evolution/execution-manager/backprop',
       executionManagerFactoryOptions: trainerOptions,
     },
   }
@@ -127,18 +132,30 @@ function backpropEvaluatorConfig(
 
 async function runVariant(
   name: string,
-  evaluatorConfigOverrides: Partial<EvaluatorConfig> = {}
+  configOverrides: {
+    evaluation?: Partial<EvaluatorConfig>
+    execution?: {
+      createExecutionManager: string
+      executionManagerFactoryOptions: Record<string, unknown>
+    }
+  } = {}
 ): Promise<RunResult> {
   const fitnessLog: number[] = []
 
   const manager = new EvolutionManager({
-    algorithm: NEATAlgorithm,
-    environment,
-    createEnvironmentPathname: CREATE_ENVIRONMENT_PATHNAME,
-    ...(Object.keys(evaluatorConfigOverrides).length > 0
-      ? { evaluatorConfig: evaluatorConfigOverrides }
-      : {}),
-    evolutionOptions: {
+    algorithm: {
+      name: 'NEAT',
+    },
+    environment: {
+      config: environment,
+      pathname: CREATE_ENVIRONMENT_PATHNAME,
+    },
+    population: {
+      options: {
+        ...defaultPopulationOptions,
+      },
+    },
+    evolution: {
       ...defaultEvolutionOptions,
       iterations: args.iterations,
       secondsLimit: args.seconds,
@@ -148,9 +165,18 @@ async function runVariant(
         fitnessLog.push(best?.fitness ?? 0)
       },
     },
-    populationOptions: {
-      ...defaultPopulationOptions,
-    },
+    ...(configOverrides.evaluation != null
+      ? {
+          evaluation: {
+            options: configOverrides.evaluation,
+          },
+        }
+      : {}),
+    ...(configOverrides.execution != null
+      ? {
+          execution: configOverrides.execution,
+        }
+      : {}),
   })
 
   const start = performance.now()
@@ -164,7 +190,7 @@ async function runVariant(
       bestFitness: best?.fitness ?? 0,
       bestGenome: best?.genome as NEATGenome | undefined,
       elapsedMs,
-      evaluatorConfig: evaluatorConfigOverrides,
+      evaluatorConfig: configOverrides.evaluation ?? {},
     }
   } finally {
     await manager.terminate()
