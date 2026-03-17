@@ -1,12 +1,17 @@
 import type { StatsRecorder } from '@neat-evolution/stats'
 import type { RNG } from '@neat-evolution/utils'
-import type { AgentFactory } from '../agent/AgentFactory.js'
-import type { TrainerFactory } from '../trainer/TrainerFactory.js'
+import type {
+  ExecutionManagerFactory,
+  ExecutionManagerFactoryOptions,
+} from './ExecutionManagerFactory.js'
 import type { WorkerEvaluationContext } from './WorkerEvaluationContext.js'
 
-export interface EnvironmentInitOptions {
-  createAgent?: AgentFactory
-  createTrainer?: TrainerFactory
+export interface EnvironmentInitOptions<
+  TExecutionManagerFactory = ExecutionManagerFactory<unknown>,
+  TExecutionManagerFactoryOptions = ExecutionManagerFactoryOptions,
+> {
+  createExecutionManager?: TExecutionManagerFactory
+  executionManagerFactoryOptions?: TExecutionManagerFactoryOptions
   [key: string]: unknown // extensible for hydrated pathnames
 }
 
