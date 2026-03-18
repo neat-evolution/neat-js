@@ -82,5 +82,6 @@ export const createPhenotype: PhenotypeFactory<NEATGenome, NEATContext> = (
     inputs,
     outputs,
     actions,
+    trainableBiases: genome.genomeOptions.useBias === true,
   }
 }

@@ -59,7 +59,13 @@ export const createPhenotype: PhenotypeFactory<
     initConfig.outputs
   )
 
+  const useBias = genome.genomeOptions.useBias === true
+  const biasByNodePointId = useBias
+    ? new Map<NodePointId, number>()
+    : undefined
+
   const pointIdByX = new Map<number, Map<number, number>>()
+  const pointById = new Map<number, Point>()
   let nextPointId = 0
   const getOrCreatePointId = (x: number, y: number): number => {
     let yMap = pointIdByX.get(x)
@@ -72,6 +78,7 @@ export const createPhenotype: PhenotypeFactory<
     const id = nextPointId
     nextPointId++
     yMap.set(y, id)
+    pointById.set(id, [x, y])
     return id
   }
   const getOrCreatePointIdFromPoint = (point: Point): number => {
@@ -254,7 +261,17 @@ export const createPhenotype: PhenotypeFactory<
       const nodes = substrateNodes.get(targetKey) as SubstratePointBucket
       if (layers[1] != null) {
         for (const node of layers[1]) {
-          addPointToBucket(nodes, node)
+          const ptId = addPointToBucket(nodes, node)
+          if (biasByNodePointId != null) {
+            const npId = getOrCreateNodePointId(targetKey, ptId)
+            const [, bias] = cppn.forward([
+              0.0,
+              0.0,
+              node[0] / r,
+              node[1] / r,
+            ]) as [weight: number, bias: number]
+            biasByNodePointId.set(npId, bias)
+          }
         }
       }
 
@@ -312,7 +329,17 @@ export const createPhenotype: PhenotypeFactory<
         for (let i = 1; i < layers.length; i++) {
           const layer = layers[i] as Point[]
           for (const node of layer) {
-            addPointToBucket(nodes, node)
+            const ptId = addPointToBucket(nodes, node)
+            if (biasByNodePointId != null) {
+              const npId = getOrCreateNodePointId(nodeKey, ptId)
+              const [, bias] = cppn.forward([
+                0.0,
+                0.0,
+                node[0] / r,
+                node[1] / r,
+              ]) as [weight: number, bias: number]
+              biasByNodePointId.set(npId, bias)
+            }
           }
         }
         for (const connection of connections) {
@@ -321,6 +348,7 @@ export const createPhenotype: PhenotypeFactory<
           const toId = getOrCreateNodePointId(nodeKey, toPointId)
           assembledConnections.add(fromId, toId, edge, true)
         }
+
       }
     }
   }
@@ -418,7 +446,7 @@ export const createPhenotype: PhenotypeFactory<
       actions.push([
         PhenotypeActionType.Activation,
         index,
-        0.0,
+        biasByNodePointId?.get(nodeKey) ?? 0.0,
         index < firstOutputId
           ? genome.genomeOptions.hiddenActivation
           : resolveOutputActivation(
@@ -434,5 +462,6 @@ export const createPhenotype: PhenotypeFactory<
     inputs,
     outputs,
     actions,
+    trainableBiases: useBias,
   }
 }

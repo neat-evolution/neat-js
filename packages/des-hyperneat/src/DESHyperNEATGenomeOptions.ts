@@ -27,12 +27,22 @@ export interface DESHyperNEATGenomeOptions
   maxHiddenSubstrateDepth: number
   enableIdentityMapping: boolean
   staticSubstrateDepth: number
+  /**
+   * Whether the substrate phenotype should include biases from the CPPN
+   * bias output channel. DES-HyperNEAT defaults to false (matching the
+   * original paper). When true, each node CPPN is queried for substrate
+   * node biases and the phenotype is marked as bias-trainable for backprop.
+   *
+   * @default false
+   */
+  useBias?: boolean
 }
 
 export const defaultDESHyperNEATGenomeOptions: DESHyperNEATGenomeOptions = {
   ...defaultGenomeOptions,
   ...defaultCPPNGenomeOptions,
   ...defaultESHyperNEATGenomeOptions,
+  useBias: false,
   singleCPPNState: false,
   inputConfig: 'line',
   outputConfig: 'line',
