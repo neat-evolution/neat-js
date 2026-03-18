@@ -305,6 +305,64 @@ describe('createTrainableExecutor', () => {
     })
   })
 
+  describe('trainableBiases', () => {
+    it('should not update biases when trainableBiases is false', () => {
+      const phenotype = makePhenotype({
+        inputs: 1,
+        hiddenCount: 1,
+        outputs: 1,
+        links: [
+          [0, 2, 0.5],
+          [2, 3, 0.8],
+        ],
+        hiddenActivation: Activation.Sigmoid,
+        outputActivation: Activation.Linear,
+        biases: { 2: 0, 3: 0 },
+      })
+      phenotype.trainableBiases = false
+
+      const executor = createTrainableExecutor(phenotype)
+
+      // Train for several steps
+      for (let i = 0; i < 50; i++) {
+        executor.forward([1.0])
+        executor.backward(new Float64Array([1.0]), 0.1)
+      }
+
+      // Biases should remain at 0
+      const actions = executor.getUpdatedActions()
+      for (const action of actions) {
+        if (action[0] === PhenotypeActionType.Activation) {
+          expect(action[2]).toBe(0)
+        }
+      }
+
+      // But weights should have changed
+      const link = actions.find((a) => a[0] === PhenotypeActionType.Link)
+      expect(link?.[3]).not.toBe(0.5)
+    })
+
+    it('should still update biases by default', () => {
+      const phenotype = makePhenotype({
+        inputs: 1,
+        hiddenCount: 0,
+        outputs: 1,
+        links: [[0, 1, 1.0]],
+        outputActivation: Activation.Linear,
+        biases: { 1: 0 },
+      })
+      // trainableBiases is undefined → default true
+
+      const executor = createTrainableExecutor(phenotype)
+      executor.forward([2.0])
+      executor.backward(new Float64Array([1.0]), 0.1)
+
+      const actions = executor.getUpdatedActions()
+      const act = actions.find((a) => a[0] === PhenotypeActionType.Activation)
+      expect(act?.[2]).not.toBe(0)
+    })
+  })
+
   describe('getUpdatedActions', () => {
     it('should return actions with updated weights and biases', () => {
       const phenotype = makePhenotype({
@@ -366,6 +424,51 @@ describe('createTrainableExecutor', () => {
           expect(updated[3]).toBe(orig[3]) // activation enum
         }
       }
+    })
+  })
+
+  describe('createSnapshot', () => {
+    it('should create a static executor with the current trained weights', () => {
+      const phenotype = makePhenotype({
+        inputs: 1,
+        hiddenCount: 0,
+        outputs: 1,
+        links: [[0, 1, 0.5]],
+        outputActivation: Activation.Linear,
+      })
+
+      const executor = createTrainableExecutor(phenotype)
+      executor.forward([3.0])
+      executor.backward(new Float64Array([-1.5]), 0.1)
+
+      const snapshot = executor.createSnapshot()
+      const liveOutput = executor.forward([3.0])
+      const snapshotOutput = snapshot.forward([3.0])
+
+      expect(snapshotOutput[0]).toBeCloseTo(liveOutput[0] as number)
+    })
+
+    it('should keep snapshot weights frozen after later training updates', () => {
+      const phenotype = makePhenotype({
+        inputs: 1,
+        hiddenCount: 0,
+        outputs: 1,
+        links: [[0, 1, 0.5]],
+        outputActivation: Activation.Linear,
+      })
+
+      const executor = createTrainableExecutor(phenotype)
+      const snapshot = executor.createSnapshot()
+      const snapshotBefore = snapshot.forward([2.0])
+
+      executor.forward([2.0])
+      executor.backward(new Float64Array([-3.0]), 0.1)
+
+      const snapshotAfter = snapshot.forward([2.0])
+      const liveAfter = executor.forward([2.0])
+
+      expect(snapshotAfter[0]).toBeCloseTo(snapshotBefore[0] as number)
+      expect(liveAfter[0]).not.toBeCloseTo(snapshotAfter[0] as number)
     })
   })
 

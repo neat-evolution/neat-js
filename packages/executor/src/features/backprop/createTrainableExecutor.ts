@@ -4,7 +4,7 @@ import {
   type PhenotypeAction,
   PhenotypeActionType,
 } from '@neat-evolution/core'
-import type { BatchInputs, BatchOutputs } from '../../Executor.js'
+import type { BatchInputs, BatchOutputs, StaticExecutor } from '../../Executor.js'
 import {
   type ActivationFunction,
   toActivationFunction,
@@ -96,6 +96,9 @@ export function createTrainableExecutor(
     softmaxGroups.push({ start: groupStart, end: outputsCount })
   }
 
+  // Whether to update biases during backward pass
+  const trainableBiases = phenotype.trainableBiases !== false
+
   // Per-node state for forward/backward passes
   const preActivation = new Float64Array(nodeCount)
   const postActivation = new Float64Array(nodeCount)
@@ -173,6 +176,80 @@ export function createTrainableExecutor(
     return output
   }
 
+  function createStaticExecutorSnapshot(
+    snapshotWeights: Float64Array,
+    snapshotBiases: Float64Array
+  ): StaticExecutor {
+    const snapshotPreActivation = new Float64Array(nodeCount)
+    const snapshotPostActivation = new Float64Array(nodeCount)
+
+    const snapshotForward = (inputs: number[] | Float64Array): Float64Array => {
+      snapshotPreActivation.fill(0)
+      snapshotPostActivation.fill(0)
+
+      const inputsMap = phenotype.inputs
+      for (let i = 0; i < inputsCount; i++) {
+        const inputIndex = inputsMap[i]
+        if (inputIndex !== undefined) {
+          const value = inputs[inputIndex] ?? 0
+          snapshotPreActivation[i] = value
+          snapshotPostActivation[i] = value
+        }
+      }
+
+      for (let i = 0; i < actionCount; i++) {
+        if (actionTypes[i] === LINK_ACTION) {
+          const from = actionNodeOrFrom[i] as number
+          const to = actionTo[i] as number
+          const weight = snapshotWeights[i] as number
+          snapshotPreActivation[to] =
+            (snapshotPreActivation[to] as number) +
+            (snapshotPostActivation[from] as number) * weight
+        } else {
+          const node = actionNodeOrFrom[i] as number
+          const fn = activationFns[i] as ActivationFunction
+          const bias = snapshotBiases[i] as number
+          const z = (snapshotPreActivation[node] as number) + bias
+          snapshotPreActivation[node] = z
+          snapshotPostActivation[node] = fn(z)
+        }
+      }
+
+      const output = new Float64Array(outputsCount)
+      for (let i = 0; i < outputsCount; i++) {
+        const o = phenotypeOutputs[i]
+        if (o !== undefined) {
+          const value = snapshotPostActivation[o]
+          output[i] = value !== undefined && Number.isFinite(value) ? value : 0
+        }
+      }
+
+      for (const group of softmaxGroups) {
+        let sum = 0
+        for (let i = group.start; i < group.end; i++) {
+          sum += output[i] as number
+        }
+        if (sum === 0) {
+          continue
+        }
+        for (let i = group.start; i < group.end; i++) {
+          output[i] = (output[i] as number) / sum
+        }
+      }
+
+      return output
+    }
+
+    const snapshotForwardBatch = (batch: BatchInputs): BatchOutputs => {
+      return batch.map((input) => snapshotForward(input))
+    }
+
+    return {
+      forward: snapshotForward,
+      forwardBatch: snapshotForwardBatch,
+    }
+  }
+
   const backward = (outputErrors: Float64Array, learningRate: number): void => {
     // Initialize errors to zero
     errors.fill(0)
@@ -216,7 +293,9 @@ export function createTrainableExecutor(
         const preError = (errors[node] as number) * dfn(z, a)
         errors[node] = preError
         // Update bias: bias -= lr * dL/dz
-        actionBiases[i] = (actionBiases[i] as number) - learningRate * preError
+        if (trainableBiases) {
+          actionBiases[i] = (actionBiases[i] as number) - learningRate * preError
+        }
       } else {
         const from = actionNodeOrFrom[i] as number
         const to = actionTo[i] as number
@@ -262,5 +341,11 @@ export function createTrainableExecutor(
     return batch.map((input) => forward(input))
   }
 
-  return { forward, forwardBatch, backward, getUpdatedActions }
+  const createSnapshot = () =>
+    createStaticExecutorSnapshot(
+      Float64Array.from(actionWeights),
+      Float64Array.from(actionBiases)
+    )
+
+  return { forward, forwardBatch, backward, getUpdatedActions, createSnapshot }
 }
