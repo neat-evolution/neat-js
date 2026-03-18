@@ -86,19 +86,11 @@ The `environment` package exposes the following key types:
 
 - **`EnvironmentFactory<EFO>`**: A function type for creating `Environment` instances from serialized options.
 
-### RL Interfaces
+### Additional Capabilities
 
-These interfaces extend the base environment contract for reinforcement learning:
-
-- **`EpisodicEnvironment`**: Environments that support episodic RL implement this alongside `Environment`. Provides `getRLConfig()` returning `RLConfig` (action size, discount factor, max steps, suggested rollout length).
-
-### Signal Boundaries
-
-| Signal | Scope | Consumed by |
-| --- | --- | --- |
-| **Reward** | Single transition | RL agent (TD targets, advantages) |
-| **Episode return** (`EpisodeResult.episodeReturn`) | Single episode | RL agent + telemetry |
-| **Fitness** (`EpisodeResult.fitness`, `evaluate()` return) | Full evaluation | Evolution (selection) |
+- **`SupervisedEnvironment<EFO>`**: A capability layered on top of `Environment`
+  for dataset-driven evaluation. It adds training/validation data access and
+  environment-owned fitness computation for supervised workflows.
 
 ## Usage
 
