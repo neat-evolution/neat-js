@@ -25,6 +25,11 @@
       "types": "./dist/types/features/step/createStepBanditEnvironment.d.ts",
       "import": "./dist/esm/features/step/createStepBanditEnvironment.js",
       "require": "./dist/cjs/features/step/createStepBanditEnvironment.js"
+    },
+    "./step-control-environment": {
+      "types": "./dist/types/features/step-control/createStepControlEnvironment.d.ts",
+      "import": "./dist/esm/features/step-control/createStepControlEnvironment.js",
+      "require": "./dist/cjs/features/step-control/createStepControlEnvironment.js"
     }
   },
   "files": [

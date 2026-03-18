@@ -7,13 +7,16 @@ HyperNEAT, ES-HyperNEAT, DES-HyperNEAT) can be applied to a dataset environment,
 specifically using the Iris dataset. The demo illustrates both vanilla
 (single-threaded) and worker-based (multi-threaded) evaluation strategies.
 
-## Phase 11 RL Demo (Step Bandit)
+## Phase 11 RL Demo
 
-The maintained RL demo surface is now the step bandit path:
+The maintained RL demo surface now includes two step environments:
+
+- `bandit`: the lightweight regression path
+- `control`: a delayed-reward control task used to prove temporal credit
+  assignment
 
 - Vanilla NEAT acts as the control path via `evaluate(executor, context)`.
-- Step Actor-Critic and step Q-learning are injected through
-  `createExecutionManager`.
+- Step AC/QL/DQL/A2C/PPO are injected through `createExecutionManager`.
 - The CLI compares vanilla, Lamarckian, and Darwinian variants on one runtime
   seam.
 
@@ -21,31 +24,31 @@ The maintained RL demo surface is now the step bandit path:
 
 ```sh
 yarn workspace @neat-evolution/demo step \\
-  [--iterations N] [--seconds N] [--lr N] \\
-  [--seed phase11-step-demo|--no-seed] [--ac-seed custom] [--ql-seed custom] \\
-  [--entropy 0.01] [--epsilon 0.3] [--epsilon-decay 0.95] [--epsilon-min 0.01] \\
+  [--algorithm actor-critic|n-step-actor-critic|q-learning|dql|a2c|ppo] \\
+  [--environment bandit|control] \\
+  [--iterations N] [--seconds N] [--lr N] [--threads N] \\
+  [--seed phase11-step-demo|--no-seed] [--entropy 0.01]
 ```
 
 Key options:
 
+- `--algorithm <name>`: selects the maintained step learner.
+- `--environment <bandit|control>`: selects the proving environment.
 - `--seed <label>`: seeds NEAT's global RNG. Use `--no-seed` for stochastic runs.
-- `--ac-seed <label>` / `--ql-seed <label>`: override the derived RNG seeds per RL method without touching the population seed.
-- `--entropy <value>`: sets the actor-critic entropy coefficient.
-- `--epsilon`, `--epsilon-decay`, `--epsilon-min`: tune the epsilon-greedy schedule for Q-learning.
+- `--entropy <value>`: sets the entropy coefficient for actor-critic-family learners.
 
 The script logs the variant configuration, the generation-by-generation fitness
 table, and a comparison summary that states what was held constant and what
 changed for each pair.
 
-### Comparison Playbook
+The `control` environment is the important proof task for advanced learners:
+it has delayed sparse reward, explicit truncation/termination behavior, and
+meaningful bootstrap pressure. The `bandit` environment remains the quick
+regression path.
 
-- **Vanilla vs Actor-Critic (Lamarckian).** Holds the environment, iteration count, learning rate, and NEAT config constant. Step Actor-Critic trains inside the step loop and writes trained weights back before reproduction.
-- **Vanilla vs Q-Learning.** Same constants as above; the only change is the step Q-learning execution manager, which also performs Lamarckian writeback.
-- **Actor-Critic Lamarckian vs Darwinian.** Identical agent config and seeds. The Darwinian variant keeps RL training online but discards learned weights, isolating the impact of Lamarckian inheritance.
-
-Each run shows the absolute best fitness, elapsed wall-clock time, and ms/iteration so you can compare convergence speed as well as peak scores. Because the RNG seeds are explicit, copying a command reproduces the same ordering of events and rollout triggers.
-
-> The sections below describe the legacy dataset demos (NEAT / CPPN / HyperNEAT on Iris). They remain available for completeness but are not part of the maintained step RL demo surface.
+> The sections below describe the dataset demos (NEAT / CPPN / HyperNEAT on
+> Iris). They remain available for completeness but are separate from the
+> maintained step RL demo surface.
 
 ## Purpose
 

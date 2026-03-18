@@ -1,3 +1,4 @@
+import { Activation } from '@neat-evolution/core'
 import { defaultEvolutionOptions, defaultPopulationOptions } from '@neat-evolution/evolution'
 import {
   type EvaluatorConfig,
@@ -9,16 +10,30 @@ import {
   type NEATGenomeOptions,
 } from '@neat-evolution/neat'
 import type {
+  A2CStepAgentConfig,
   ActorCriticStepAgentConfig,
+  DeepQLearningStepAgentConfig,
+  PPOStepAgentConfig,
   QLearningStepAgentConfig,
 } from '@neat-evolution/rl-core'
 import { setThreadRNGSeed } from '@neat-evolution/utils'
-import { Activation } from '@neat-evolution/core'
+import { StepControlEnvironment } from '../step-control/StepControlEnvironment.js'
 import { StepBanditEnvironment } from './StepBanditEnvironment.js'
+
+type StepAlgorithm =
+  | 'actor-critic'
+  | 'n-step-actor-critic'
+  | 'q-learning'
+  | 'dql'
+  | 'a2c'
+  | 'ppo'
+
+type StepEnvironmentKind = 'bandit' | 'control'
 
 function parseArgs(argv: string[]) {
   const args = {
-    algorithm: 'actor-critic' as 'actor-critic' | 'q-learning',
+    algorithm: 'actor-critic' as StepAlgorithm,
+    environment: 'bandit' as StepEnvironmentKind,
     learningRate: 0.1,
     iterations: 100,
     seconds: 0,
@@ -51,10 +66,24 @@ function parseArgs(argv: string[]) {
       args.threadCount = Number(next)
       i++
     } else if (arg === '--algorithm' && next) {
-      if (next === 'actor-critic' || next === 'q-learning') {
+      if (
+        next === 'actor-critic' ||
+        next === 'n-step-actor-critic' ||
+        next === 'q-learning' ||
+        next === 'dql' ||
+        next === 'a2c' ||
+        next === 'ppo'
+      ) {
         args.algorithm = next
       } else {
         throw new Error(`Unknown step demo algorithm: ${next}`)
+      }
+      i++
+    } else if (arg === '--environment' && next) {
+      if (next === 'bandit' || next === 'control') {
+        args.environment = next
+      } else {
+        throw new Error(`Unknown step demo environment: ${next}`)
       }
       i++
     }
@@ -75,11 +104,16 @@ if (args.seed != null) {
   setThreadRNGSeed(args.seed)
 }
 
+const actionCount = args.environment === 'control' ? 2 : 3
+const discountFactor = args.environment === 'control' ? 0.9 : 0
+
 const acConfig: ActorCriticStepAgentConfig = {
   learningRate: args.learningRate,
-  actionCount: 3,
+  actionCount,
+  variant: args.algorithm === 'n-step-actor-critic' ? 'n-step' : 'one-step',
+  ...(args.algorithm === 'n-step-actor-critic' ? { nStepHorizon: 3 } : {}),
   gradientConfig: {
-    discountFactor: 0,
+    discountFactor,
     entropyCoefficient: args.entropyCoefficient,
     clipGradients: false,
     gradientClipValue: 1,
@@ -91,8 +125,8 @@ const acConfig: ActorCriticStepAgentConfig = {
 
 const qlConfig: QLearningStepAgentConfig = {
   learningRate: args.learningRate,
-  actionCount: 3,
-  discountFactor: 0,
+  actionCount,
+  discountFactor,
   epsilonInitial: 0.2,
   epsilonDecayPerEpisode: 1,
   epsilonMinimum: 0.2,
@@ -101,13 +135,81 @@ const qlConfig: QLearningStepAgentConfig = {
   },
 }
 
-const stepPluginPathname =
-  args.algorithm === 'q-learning'
-    ? '@neat-evolution/rl-core/q-learning'
-    : '@neat-evolution/rl-core/actor-critic'
+const dqlConfig: DeepQLearningStepAgentConfig = {
+  learningRate: args.learningRate,
+  actionCount,
+  discountFactor,
+  epsilonInitial: 0.2,
+  epsilonDecayPerEpisode: 0.98,
+  epsilonMinimum: 0.05,
+  replayCapacity: 128,
+  replayBatchSize: 8,
+  replayWarmupSize: 8,
+  trainEverySteps: 1,
+  gradientStepsPerUpdate: 1,
+  targetSyncInterval: 4,
+}
 
-const stepConfig = args.algorithm === 'q-learning' ? qlConfig : acConfig
-const outputCount = args.algorithm === 'q-learning' ? 3 : 4
+const a2cConfig: A2CStepAgentConfig = {
+  learningRate: args.learningRate,
+  actionCount,
+  discountFactor,
+  gaeLambda: 0.95,
+  normalizeAdvantages: true,
+  gradientConfig: {
+    entropyCoefficient: args.entropyCoefficient,
+    clipGradients: false,
+    gradientClipValue: 1,
+  },
+  trajectoryConfig: {
+    rolloutLength: 'episode',
+    batchTransitions: args.environment === 'control' ? 12 : 30,
+  },
+}
+
+const ppoConfig: PPOStepAgentConfig = {
+  learningRate: args.learningRate,
+  actionCount,
+  discountFactor,
+  clipEpsilon: 0.2,
+  entropyCoefficient: args.entropyCoefficient,
+  gaeLambda: 0.95,
+  normalizeAdvantages: true,
+  minibatchSize: args.environment === 'control' ? 4 : 6,
+  epochs: 3,
+  trajectoryConfig: {
+    rolloutLength: 'episode',
+    batchTransitions: args.environment === 'control' ? 12 : 30,
+  },
+}
+
+const stepPluginPathname: string = {
+  'actor-critic': '@neat-evolution/rl-core/actor-critic',
+  'n-step-actor-critic': '@neat-evolution/rl-core/actor-critic',
+  'q-learning': '@neat-evolution/rl-core/q-learning',
+  dql: '@neat-evolution/rl-core/dql',
+  a2c: '@neat-evolution/rl-core/a2c',
+  ppo: '@neat-evolution/rl-core/ppo',
+}[args.algorithm]
+
+const stepConfig:
+  | ActorCriticStepAgentConfig
+  | QLearningStepAgentConfig
+  | DeepQLearningStepAgentConfig
+  | A2CStepAgentConfig
+  | PPOStepAgentConfig = {
+  'actor-critic': acConfig,
+  'n-step-actor-critic': acConfig,
+  'q-learning': qlConfig,
+  dql: dqlConfig,
+  a2c: a2cConfig,
+  ppo: ppoConfig,
+}[args.algorithm]
+
+const outputCount =
+  args.algorithm === 'q-learning' || args.algorithm === 'dql'
+    ? actionCount
+    : actionCount + 1
 
 const evaluatorConfig: EvaluatorConfig = {
   ...(args.threadCount != null ? { threadCount: args.threadCount } : {}),
@@ -118,27 +220,33 @@ const evaluatorConfig: EvaluatorConfig = {
   environmentRuntimeData: {
     executionManagerFactoryOptions: {
       config: stepConfig,
-      rngSeed: `${args.seed ?? 'step-demo'}:${args.algorithm}`,
+      rngSeed: `${args.seed ?? 'step-demo'}:${args.environment}:${args.algorithm}`,
       isLamarckian: true,
     },
   },
 }
 
 const outputActivation: NEATGenomeOptions['outputActivation'] =
-  args.algorithm === 'q-learning'
+  args.algorithm === 'q-learning' || args.algorithm === 'dql'
     ? Activation.Linear
     : [
-        [3, Activation.Softmax],
+        [actionCount, Activation.Softmax],
         [1, Activation.Linear],
       ]
 
-const environment = new StepBanditEnvironment(outputCount)
-const CREATE_ENVIRONMENT_PATHNAME = '@neat-evolution/demo/step-bandit-environment'
+const environment =
+  args.environment === 'control'
+    ? new StepControlEnvironment(outputCount)
+    : new StepBanditEnvironment(outputCount)
+const environmentPathname =
+  args.environment === 'control'
+    ? '@neat-evolution/demo/step-control-environment'
+    : '@neat-evolution/demo/step-bandit-environment'
 
 async function run(): Promise<RunResult> {
   const fitnessLog: number[] = []
 
-const manager = new EvolutionManager({
+  const manager = new EvolutionManager({
     algorithm: {
       name: 'NEAT',
       genomeOptions: {
@@ -148,7 +256,7 @@ const manager = new EvolutionManager({
     },
     environment: {
       config: environment,
-      pathname: CREATE_ENVIRONMENT_PATHNAME,
+      pathname: environmentPathname,
     },
     population: {
       options: {
@@ -199,6 +307,7 @@ const manager = new EvolutionManager({
 const result = await run()
 
 console.log(`Step ${args.algorithm} demo complete`)
+console.log(`  Environment: ${args.environment}`)
 console.log(`  Best fitness: ${result.bestFitness.toFixed(6)}`)
 console.log(`  Evaluations: ${result.fitnessLog.length}`)
 if (result.bestGenome != null) {
