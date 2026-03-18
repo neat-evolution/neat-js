@@ -30,6 +30,13 @@ function createMockTrainableExecutor(): TrainableExecutor & {
         learningRate,
       })
     },
+    createSnapshot() {
+      return {
+        forward: (inputs: number[] | Float64Array) => this.forward(inputs),
+        forwardBatch: (batch: Array<number[] | Float64Array>) =>
+          batch.map((inputs) => this.forward(inputs)),
+      }
+    },
     getUpdatedActions(): [] {
       return []
     },
@@ -78,8 +85,8 @@ describe('createActorCriticStepAgent', () => {
 
     expect(executor.backwardCalls).toHaveLength(1)
     expect(executor.backwardCalls[0]?.learningRate).toBe(0.1)
-    expect(executor.backwardCalls[0]?.errors[0]).toBe(-1)
-    expect(executor.backwardCalls[0]?.errors[3]).toBe(-1)
+    expect(executor.backwardCalls[0]?.errors[0]).toBe(-0.75)
+    expect(executor.backwardCalls[0]?.errors[3]).toBe(-0.75)
   })
 
   it('requires open steps to be finalized before another act call', () => {
@@ -134,6 +141,13 @@ describe('createActorCriticStepAgent', () => {
           errors: Array.from(outputErrors),
           learningRate,
         })
+      },
+      createSnapshot() {
+        return {
+          forward: (inputs: number[] | Float64Array) => this.forward(inputs),
+          forwardBatch: (batch: Array<number[] | Float64Array>) =>
+            batch.map((inputs) => this.forward(inputs)),
+        }
       },
       getUpdatedActions(): [] {
         return []

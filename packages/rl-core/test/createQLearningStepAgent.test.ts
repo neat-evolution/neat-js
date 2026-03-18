@@ -30,6 +30,13 @@ function createMockTrainableExecutor(): TrainableExecutor & {
         learningRate,
       })
     },
+    createSnapshot() {
+      return {
+        forward: (inputs: number[] | Float64Array) => this.forward(inputs),
+        forwardBatch: (batch: Array<number[] | Float64Array>) =>
+          batch.map((inputs) => this.forward(inputs)),
+      }
+    },
     getUpdatedActions(): [] {
       return []
     },
@@ -125,6 +132,13 @@ describe('createQLearningStepAgent', () => {
           errors: Array.from(outputErrors),
           learningRate,
         })
+      },
+      createSnapshot() {
+        return {
+          forward: (inputs: number[] | Float64Array) => this.forward(inputs),
+          forwardBatch: (batch: Array<number[] | Float64Array>) =>
+            batch.map((inputs) => this.forward(inputs)),
+        }
       },
       getUpdatedActions(): [] {
         return []

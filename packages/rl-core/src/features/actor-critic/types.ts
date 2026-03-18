@@ -7,6 +7,7 @@ export interface ActorCriticOpenStep<Info = unknown>
   extends BaseOpenStep<Info> {
   actionProbabilities: Float64Array
   valueEstimate: number
+  actionLogProbability: number
 }
 
 export interface ActorCriticTransition<Info = unknown>
@@ -14,4 +15,5 @@ export interface ActorCriticTransition<Info = unknown>
   actionProbabilities: Float64Array
   valueEstimate: number
   nextValueEstimate: number
+  actionLogProbability: number
 }

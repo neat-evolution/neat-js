@@ -30,6 +30,21 @@
       "types": "./dist/types/features/q-learning/plugin.d.ts",
       "import": "./dist/esm/features/q-learning/plugin.js",
       "require": "./dist/cjs/features/q-learning/plugin.js"
+    },
+    "./dql": {
+      "types": "./dist/types/features/q-learning/dql-plugin.d.ts",
+      "import": "./dist/esm/features/q-learning/dql-plugin.js",
+      "require": "./dist/cjs/features/q-learning/dql-plugin.js"
+    },
+    "./a2c": {
+      "types": "./dist/types/features/actor-critic/a2c-plugin.d.ts",
+      "import": "./dist/esm/features/actor-critic/a2c-plugin.js",
+      "require": "./dist/cjs/features/actor-critic/a2c-plugin.js"
+    },
+    "./ppo": {
+      "types": "./dist/types/features/actor-critic/ppo-plugin.d.ts",
+      "import": "./dist/esm/features/actor-critic/ppo-plugin.js",
+      "require": "./dist/cjs/features/actor-critic/ppo-plugin.js"
     }
   },
   "files": [

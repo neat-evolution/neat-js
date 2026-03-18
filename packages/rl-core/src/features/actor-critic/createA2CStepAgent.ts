@@ -1,42 +1,39 @@
 import type { TrainableExecutor } from '@neat-evolution/executor'
-import {
-  extractGroupedBinaryValues,
-  extractLeadingValues,
-  sampleGroupedBinaryAction,
-} from '../action-space/groupedBinary.js'
-import {
-  computeActorCriticGradients,
-  type ActorCriticGradientConfig,
-} from '../policy-gradient/computeActorCriticGradients.js'
-import { computeActionLogProbability } from '../policy-gradient/actionLogProbabilities.js'
 import type { StepAgent } from '../../core/StepAgent.js'
 import type {
   StepEpisodeInfo,
   StepEpisodeResult,
   StepOutcome,
 } from '../../core/StepTypes.js'
-import type {
-  ActorCriticOpenStep,
-  ActorCriticTransition,
-} from './types.js'
 import {
-  StepRolloutBuffer,
-  type StepRolloutBufferConfig,
-  type StepRolloutSegment,
-} from '../rollout/StepRolloutBuffer.js'
-import { computeNStepReturns } from '../td/computeNStepReturns.js'
-import { computeAdvantages, normalizeValues } from '../trajectory/computeAdvantages.js'
+  extractGroupedBinaryValues,
+  extractLeadingValues,
+  sampleGroupedBinaryAction,
+} from '../action-space/groupedBinary.js'
+import { computeActionLogProbability } from '../policy-gradient/actionLogProbabilities.js'
+import {
+  computeActorCriticGradients,
+  type ActorCriticGradientConfig,
+} from '../policy-gradient/computeActorCriticGradients.js'
+import {
+  computeGeneralizedAdvantages,
+  normalizeValues,
+} from '../trajectory/computeAdvantages.js'
+import {
+  TrajectoryBatchCollector,
+  type TrajectoryBatchCollectorConfig,
+} from '../trajectory/TrajectoryBatchCollector.js'
+import type { ActorCriticOpenStep, ActorCriticTransition } from './types.js'
 
-export interface ActorCriticStepAgentConfig {
+export interface A2CStepAgentConfig {
   learningRate: number
   actionCount: number
   multiDiscrete?: boolean
-  variant?: 'one-step' | 'n-step'
-  nStepHorizon?: number
+  discountFactor: number
+  gaeLambda?: number
   normalizeAdvantages?: boolean
-  gradientConfig: ActorCriticGradientConfig & { discountFactor: number }
-  rolloutConfig: StepRolloutBufferConfig
-  onSegmentTrained?: (segment: StepRolloutSegment<ActorCriticTransition>) => void
+  gradientConfig: Omit<ActorCriticGradientConfig, 'discountFactor'>
+  trajectoryConfig: TrajectoryBatchCollectorConfig
 }
 
 function sampleAction(probabilities: Float64Array, rng: () => number): Float64Array {
@@ -57,7 +54,7 @@ function sampleAction(probabilities: Float64Array, rng: () => number): Float64Ar
 function computeGroupedActorCriticGradients(
   transition: ActorCriticTransition,
   advantage: number,
-  config: ActorCriticGradientConfig,
+  config: Omit<ActorCriticGradientConfig, 'discountFactor'>,
   factorCount: number
 ): Float64Array {
   const errors = new Float64Array(2 * factorCount + 1)
@@ -88,29 +85,17 @@ function computeGroupedActorCriticGradients(
   }
 
   errors[2 * factorCount] = -advantage
-
-  if (config.clipGradients) {
-    for (let i = 0; i < errors.length; i++) {
-      const value = errors[i] as number
-      if (value > config.gradientClipValue) {
-        errors[i] = config.gradientClipValue
-      } else if (value < -config.gradientClipValue) {
-        errors[i] = -config.gradientClipValue
-      }
-    }
-  }
-
   return errors
 }
 
-export function createActorCriticStepAgent(
+export function createA2CStepAgent(
   trainable: TrainableExecutor,
-  config: ActorCriticStepAgentConfig,
+  config: A2CStepAgentConfig,
   rng: () => number
 ): StepAgent {
   const multiDiscrete = config.multiDiscrete ?? false
-  const rolloutBuffer = new StepRolloutBuffer<ActorCriticTransition>(
-    config.rolloutConfig
+  const collector = new TrajectoryBatchCollector<ActorCriticTransition>(
+    config.trajectoryConfig
   )
   let openStep: ActorCriticOpenStep | null = null
 
@@ -120,51 +105,36 @@ export function createActorCriticStepAgent(
     return output[valueIndex] as number
   }
 
-  function trainSegment(
-    segment: StepRolloutSegment<ActorCriticTransition>
-  ): void {
-    const variant = config.variant ?? 'one-step'
-    const returns =
-      variant === 'n-step'
-        ? computeNStepReturns(segment.transitions, {
-            discountFactor: config.gradientConfig.discountFactor,
-            horizon: config.nStepHorizon ?? 3,
-            getBootstrapValue: (transition) => transition.nextValueEstimate,
-          })
-        : computeNStepReturns(segment.transitions, {
-            discountFactor: config.gradientConfig.discountFactor,
-            horizon: 1,
-            getBootstrapValue: (transition) => transition.nextValueEstimate,
-          })
-    const rawAdvantages = computeAdvantages(returns, segment.transitions)
-    const advantages = config.normalizeAdvantages
-      ? normalizeValues(rawAdvantages)
-      : rawAdvantages
+  function trainBatch(transitions: readonly ActorCriticTransition[]): void {
+    if (transitions.length === 0) {
+      return
+    }
 
-    for (let i = segment.transitions.length - 1; i >= 0; i--) {
-      const transition = segment.transitions[i]
+    const advantages = computeGeneralizedAdvantages(transitions, {
+      discountFactor: config.discountFactor,
+      lambda: config.gaeLambda ?? 1,
+    })
+    const normalizedAdvantages = config.normalizeAdvantages
+      ? normalizeValues(advantages)
+      : advantages
+
+    for (let i = transitions.length - 1; i >= 0; i--) {
+      const transition = transitions[i]
       if (transition === undefined) {
         throw new Error(`Missing transition at index ${i}`)
       }
-      const advantage = advantages[i] as number
-      const gradientConfig = {
-        entropyCoefficient: config.gradientConfig.entropyCoefficient,
-        clipGradients: config.gradientConfig.clipGradients,
-        gradientClipValue: config.gradientConfig.gradientClipValue,
-      }
+      const advantage = normalizedAdvantages[i] as number
       const errors = multiDiscrete
         ? computeGroupedActorCriticGradients(
             transition,
             advantage,
-            gradientConfig,
+            config.gradientConfig,
             config.actionCount
           )
-        : computeActorCriticGradients(transition, advantage, gradientConfig)
+        : computeActorCriticGradients(transition, advantage, config.gradientConfig)
       trainable.forward(transition.state)
       trainable.backward(errors, config.learningRate)
     }
-
-    config.onSegmentTrained?.(segment)
   }
 
   return {
@@ -173,19 +143,10 @@ export function createActorCriticStepAgent(
         throw new Error('completeStep() must be called before act() opens another step')
       }
 
-      const rawOutput = trainable.forward(observation)
-      const copiedOutput = Float64Array.from(rawOutput)
+      const rawOutput = Float64Array.from(trainable.forward(observation))
       const actionProbabilities = multiDiscrete
-        ? extractGroupedBinaryValues(
-            copiedOutput,
-            config.actionCount,
-            'Actor-Critic step agent'
-          )
-        : extractLeadingValues(
-            copiedOutput,
-            config.actionCount,
-            'Actor-Critic step agent'
-          )
+        ? extractGroupedBinaryValues(rawOutput, config.actionCount, 'A2C step agent')
+        : extractLeadingValues(rawOutput, config.actionCount, 'A2C step agent')
       const action = multiDiscrete
         ? sampleGroupedBinaryAction(actionProbabilities, config.actionCount, rng)
         : sampleAction(actionProbabilities, rng)
@@ -193,7 +154,7 @@ export function createActorCriticStepAgent(
 
       openStep = {
         state: Float64Array.from(observation),
-        rawOutput: copiedOutput,
+        rawOutput,
         action,
         actionProbabilities,
         valueEstimate: rawOutput[valueIndex] as number,
@@ -220,31 +181,28 @@ export function createActorCriticStepAgent(
         actionProbabilities: openStep.actionProbabilities,
         valueEstimate: openStep.valueEstimate,
         actionLogProbability: openStep.actionLogProbability,
-        nextValueEstimate: outcome.terminated
-          ? 0
-          : computeValueEstimate(outcome.nextState),
+        nextValueEstimate: outcome.terminated ? 0 : computeValueEstimate(outcome.nextState),
       }
 
-      const segment = rolloutBuffer.push(transition)
       openStep = null
-
-      if (segment !== null) {
-        trainSegment(segment)
+      const batch = collector.push(transition)
+      if (batch !== null) {
+        trainBatch(batch.transitions)
       }
     },
 
     startEpisode(info: StepEpisodeInfo): void {
       openStep = null
-      rolloutBuffer.reset(info.episodeIndex)
+      collector.startEpisode(info.episodeIndex)
     },
 
     endEpisode(_result: StepEpisodeResult): void {
       if (openStep !== null) {
         throw new Error('endEpisode() called before the current step was completed')
       }
-      const segment = rolloutBuffer.flush()
-      if (segment !== null) {
-        trainSegment(segment)
+      const batch = collector.endEpisode()
+      if (batch !== null) {
+        trainBatch(batch.transitions)
       }
     },
   }
