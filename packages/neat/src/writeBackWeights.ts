@@ -1,5 +1,6 @@
 import {
   isActionEdge,
+  isActionNode,
   type PhenotypeAction,
   PhenotypeActionType,
   toLinkKey,
@@ -8,11 +9,10 @@ import {
 import type { NEATGenome } from './NEATGenome.js'
 
 /**
- * Write trained phenotype weights back to the genome's links.
+ * Write trained phenotype weights back to the genome's links and node biases.
  *
  * Walks the topological order (matching the phenotype action order)
- * and updates each link's weight. NEAT genomes have no per-node bias,
- * so Activation actions are silently ignored.
+ * and updates each link's weight and each node's bias.
  */
 export const writeBackWeights = (
   genome: NEATGenome,
@@ -37,6 +37,17 @@ export const writeBackWeights = (
         link.weight = trainedWeight
       }
       genome.connections.setEdge(fromKey, toKey, trainedWeight)
+    } else if (
+      isActionNode(action) &&
+      updated &&
+      updated[0] === PhenotypeActionType.Activation
+    ) {
+      const [nodeKey] = action
+      const trainedBias = updated[2] as number
+      const node = genome.getNodeByKey(nodeKey)
+      if (node) {
+        node.bias = trainedBias
+      }
     }
   }
 }

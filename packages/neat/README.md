@@ -3,8 +3,10 @@
 The `@neat-evolution/neat` package provides the core implementation of the
 NeuroEvolution of Augmenting Topologies (NEAT) algorithm. It builds upon the
 foundational components defined in `@neat-evolution/core` to offer a complete,
-functional NEAT system capable of evolving neural network topologies and weights
-to solve various problems.
+functional NEAT system capable of evolving neural network topologies, weights,
+and per-node biases to solve various problems. It supports both pure
+neuroevolution (default) and Lamarckian/backprop modes where trained weights and
+biases are written back into genomes between generations.
 
 ## Purpose
 
@@ -13,12 +15,16 @@ The primary purpose of the `@neat-evolution/neat` package is to:
 - **Implement the NEAT Algorithm:** Provide a faithful and robust implementation
   of the original NEAT algorithm, including its mechanisms for speciation,
   crossover, and mutation.
+- **Support Per-Node Biases:** Every node stores a `bias` value (on `CoreNode`).
+  Bias is included in crossover (averaged), genetic distance, and
+  serialization. Bias mutation is controlled by genome options and disabled by
+  default.
+- **Enable Lamarckian Writeback:** `writeBackWeights` handles both link weight
+  updates and node bias updates from `WritebackPayload`, allowing
+  backprop-trained parameters to flow back into the genome.
 - **Extend Core Functionality:** Specialize the generic `CoreGenome`,
   `CoreConfig`, and `CoreState` from `@neat-evolution/core` to fit the specific
   requirements of NEAT.
-- **Facilitate Neuroevolution:** Offer the necessary tools and functions to run
-  an evolutionary process, allowing neural networks to adapt and improve over
-  generations.
 - **Serve as a Baseline:** Act as the standard NEAT implementation against which
   more advanced NEAT variants (like HyperNEAT) can be compared and built upon.
 
@@ -28,8 +34,8 @@ The `neat` package is a central piece of the `neat-js` monorepo, directly
 utilizing and extending several other packages:
 
 - **`@neat-evolution/core`**: Provides the fundamental `Algorithm`,
-  `CoreGenome`, `CoreConfig`, `CoreState`, `Node`, and `Link` abstractions that
-  `neat` specializes.
+  `CoreGenome`, `CoreConfig`, `CoreState`, `CoreNode`, and `Link` abstractions
+  that `neat` specializes.
 
 - **`@neat-evolution/evolution`**: The `neat` function orchestrates the
   evolutionary process by creating a population and calling the `evolve`
@@ -38,11 +44,12 @@ utilizing and extending several other packages:
 - **`@neat-evolution/evaluator`**: Requires an `Evaluator` instance to assess
   the fitness of evolved NEAT genomes.
 
+- **`@neat-evolution/executor`**: Provides `createTrainableExecutor()` for
+  backprop-based lifetime learning. Phenotypes created by this package include
+  the `trainableBiases` flag to control whether biases are trainable.
+
 - **`@neat-evolution/utils`**: Leverages utility functions for random number
   generation and other common tasks.
-
-- **`@neat-evolution/demo`**: The `demo` package uses `@neat-evolution/neat` to
-  demonstrate the basic NEAT algorithm in action.
 
 ## Installation
 
@@ -89,7 +96,9 @@ The `neat` package exposes several important classes, interfaces, and functions:
 
 - **`NEATAlgorithm`**: An object conforming to the `Algorithm` interface from
   `@neat-evolution/core`, encapsulating the factory functions for creating
-  NEAT-specific configurations, genomes, phenotypes, and states.
+  NEAT-specific configurations, genomes, phenotypes, and states. Includes
+  `writeBackWeights` for Lamarckian writeback of both link weights and node
+  biases.
 
 - **`NEATConfig`**: Extends `CoreConfig` to provide NEAT-specific configuration
   options. It primarily wraps the `NEATConfigOptions` from
@@ -97,92 +106,85 @@ The `neat` package exposes several important classes, interfaces, and functions:
 
 - **`NEATGenome`**: Extends `CoreGenome` to represent a NEAT neural network. It
   includes methods for initializing the genome, handling hidden nodes and links,
-  and converting to/from factory options and JSON.
+  and converting to/from factory options and JSON. Supports per-node bias
+  mutation via `mutateNodeBias()`.
 
 - **`neat(...)` function**: The main entry point for running the NEAT algorithm.
   It takes a `ReproducerFactory`, an `Evaluator`, `EvolutionOptions`,
   `NEATConfigOptions`, `PopulationOptions`, and `NEATGenomeOptions` to set up
   and execute the evolutionary process.
 
+- **`createPhenotype`**: Decodes a genome into a `Phenotype` for execution.
+  Reads each node's `bias` value. Sets `trainableBiases: false` unless
+  `useBias: true` in genome options.
+
 - **Factory Functions (`createConfig`, `createGenome`, `createLink`,
-  `createNode`, `createPhenotype`, `createPopulation`, `createState`)**: These
-  functions are responsible for instantiating the various components of the NEAT
-  algorithm with their specific NEAT implementations.
+  `createNode`, `createPopulation`, `createState`)**: These functions are
+  responsible for instantiating the various components of the NEAT algorithm
+  with their specific NEAT implementations.
+
+## Genome Options
+
+`NEATGenomeOptions` extends `GenomeOptions` from core and controls how genomes
+are initialized and mutated.
+
+| Option                         | Type                   | Default            | Description                                              |
+| ------------------------------ | ---------------------- | ------------------ | -------------------------------------------------------- |
+| `hiddenActivation`             | `Activation`           | `Activation.Sigmoid` | Activation function for hidden nodes                   |
+| `outputActivation`             | `OutputActivationSpec` | `Activation.Sigmoid` | Activation function(s) for output nodes                |
+| `useBias`                      | `boolean`              | `false`            | Enable trainable biases in the phenotype                 |
+| `mutateHiddenBiasProbability`  | `number`               | `0`                | Probability of mutating a hidden node's bias per generation |
+| `mutateHiddenBiasSize`         | `number`               | `0.03`             | Gaussian std dev for hidden bias mutations               |
+| `mutateOutputBiasProbability`  | `number`               | `0`                | Probability of mutating an output node's bias per generation |
+| `mutateOutputBiasSize`         | `number`               | `0.03`             | Gaussian std dev for output bias mutations               |
+
+Two pre-built defaults are provided:
+
+- **`defaultNEATGenomeOptions`** -- Pure NEAT. Bias mutation disabled
+  (`mutateHiddenBiasProbability: 0`, `mutateOutputBiasProbability: 0`).
+  Structural evolution only.
+- **`defaultBackpropNEATGenomeOptions`** -- Lamarckian/backprop mode. Sets
+  `useBias: true` and both bias mutation probabilities to `0.3`.
+
+### Backprop / Lamarckian Mode
+
+In Lamarckian mode, networks are trained via backprop during their lifetime and
+the learned weights and biases are written back into the genome for inheritance.
+
+To enable this mode:
+
+1. Use `defaultBackpropNEATGenomeOptions` (or set `useBias: true` and bias
+   mutation probabilities manually).
+2. Create a `TrainableExecutor` via `createTrainableExecutor()` from
+   `@neat-evolution/executor`.
+3. After training, call `getUpdatedActions()` on the executor to obtain a
+   `WritebackPayload`.
+4. Pass the payload to `NEATAlgorithm.writeBackWeights()`, which applies link
+   weight updates and node bias deltas back to the genome.
+
+When `useBias` is `false` (default), `createPhenotype` sets
+`trainableBiases: false` on the phenotype, so backprop skips bias updates even
+if a `TrainableExecutor` is used.
 
 ## Usage
 
 To run the NEAT algorithm, you typically call the `neat` function, providing it
-with the necessary factories and options. This function will then manage the
-evolutionary process and return the best-performing genome found.
+with the necessary factories and options.
 
 ```typescript
-
 import { defaultNEATConfigOptions } from "@neat-evolution/core";
 import {
-  DatasetEnvironment,
-  defaultDatasetOptions,
-  loadDataset,
-} from "@neat-evolution/dataset-environment";
-import { createEvaluator } from "@neat-evolution/evaluator"; // Assuming a standard evaluator
-import {
-  createReproducer,
-  defaultEvolutionOptions,
-  defaultPopulationOptions,
-} from "@neat-evolution/evolution";
-
-import {
   defaultNEATGenomeOptions,
+  defaultBackpropNEATGenomeOptions,
   neat,
   NEATAlgorithm,
 } from "@neat-evolution/neat";
 
-async function runNeatExample() {
-  // 1. Setup the environment (e.g., a dataset environment)
+// Pure NEAT (default) -- structural evolution only, no bias mutation
+const genomeOptions = { ...defaultNEATGenomeOptions };
 
-  const datasetOptions = {
-    ...defaultDatasetOptions,
-    dataset: "./path/to/your/dataset.txt",
-  };
-
-  const dataset = await loadDataset(datasetOptions);
-
-  const environment = new DatasetEnvironment(dataset);
-
-  // 2. Create an evaluator
-
-  const evaluator = createEvaluator(NEATAlgorithm, environment, null); // null for executor if not needed directly
-
-  // 3. Define evolution options
-
-  const evolutionOptions = { ...defaultEvolutionOptions, iterations: 100 };
-
-  // 4. Define NEAT-specific configuration
-
-  const neatConfigOptions = { ...defaultNEATConfigOptions };
-
-  // 5. Define population options
-
-  const populationOptions = { ...defaultPopulationOptions };
-
-  // 6. Define genome options
-
-  const genomeOptions = { ...defaultNEATGenomeOptions };
-
-  // 7. Run the NEAT algorithm
-
-  const bestGenome = await neat(
-    createReproducer,
-    evaluator,
-    evolutionOptions,
-    neatConfigOptions,
-    populationOptions,
-    genomeOptions,
-  );
-
-  console.log("Best genome found:", bestGenome);
-}
-
-runNeatExample();
+// Lamarckian / backprop mode -- trainable biases + bias mutation between generations
+const backpropGenomeOptions = { ...defaultBackpropNEATGenomeOptions };
 ```
 
 ## License

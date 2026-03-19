@@ -72,7 +72,7 @@ describe('NEATAlgorithm.writeBackWeights', () => {
       }
     )
 
-    NEATAlgorithm.writeBackWeights(genome, updatedActions)
+    NEATAlgorithm.writeBackWeights(genome, { actions: updatedActions })
 
     // All links in the genome should now have the trained weight
     for (const link of genome.links.values()) {
@@ -94,7 +94,7 @@ describe('NEATAlgorithm.writeBackWeights', () => {
       }
     )
 
-    NEATAlgorithm.writeBackWeights(genome, updatedActions)
+    NEATAlgorithm.writeBackWeights(genome, { actions: updatedActions })
 
     // All edges in the connections graph should reflect the trained weight
     const order = genome.connections.sortTopologically()
@@ -135,7 +135,7 @@ describe('NEATAlgorithm.writeBackWeights', () => {
       }
     )
 
-    NEATAlgorithm.writeBackWeights(genome, updatedActions)
+    NEATAlgorithm.writeBackWeights(genome, { actions: updatedActions })
 
     // Weights should be unchanged since no Link actions were provided
     for (const [key, link] of genome.links.entries()) {
@@ -154,7 +154,7 @@ describe('NEATAlgorithm.writeBackWeights', () => {
 
     // Pass empty array — should not throw and should leave weights unchanged
     expect(() => {
-      NEATAlgorithm.writeBackWeights(genome, [])
+      NEATAlgorithm.writeBackWeights(genome, { actions: [] })
     }).not.toThrow()
 
     for (const [key, link] of genome.links.entries()) {
@@ -202,7 +202,7 @@ describe('NEATAlgorithm.writeBackWeights', () => {
       }
     )
 
-    NEATAlgorithm.writeBackWeights(genome, updatedActions)
+    NEATAlgorithm.writeBackWeights(genome, { actions: updatedActions })
 
     // Verify all link weights were updated to one of the new weights
     const updatedWeights = Array.from(genome.links.values()).map(

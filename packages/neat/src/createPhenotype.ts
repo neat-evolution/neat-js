@@ -64,12 +64,14 @@ export const createPhenotype: PhenotypeFactory<NEATGenome, NEATContext> = (
         weight,
       ]
     } else {
-      const [node] = action
-      const outputIndex = outputIndexByNode.get(node)
+      const [nodeKey] = action
+      const genomeNode = genome.getNodeByKey(nodeKey)
+      const nodeBias = genomeNode !== undefined ? genomeNode.bias : 0
+      const outputIndex = outputIndexByNode.get(nodeKey)
       actions[i] = [
         PhenotypeActionType.Activation,
-        nodeMapping.get(node) as number,
-        0,
+        nodeMapping.get(nodeKey) as number,
+        nodeBias,
         outputIndex !== undefined
           ? resolveOutputActivation(outputActivationSpec, outputIndex)
           : hiddenActivation,

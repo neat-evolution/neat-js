@@ -10,16 +10,30 @@ export interface NEATGenomeOptions extends GenomeOptions {
   outputActivation: OutputActivationSpec
   /**
    * Whether the phenotype should include trainable biases.
-   * NEAT genomes do not store per-node biases, so this defaults to false.
    * When true, backprop can train biases during lifetime learning.
    *
    * @default false
    */
   useBias?: boolean
+  mutateHiddenBiasProbability?: number
+  mutateHiddenBiasSize?: number
+  mutateOutputBiasProbability?: number
+  mutateOutputBiasSize?: number
 }
 
 export const defaultNEATGenomeOptions: NEATGenomeOptions = {
   ...defaultGenomeOptions,
   hiddenActivation: Activation.Sigmoid,
   outputActivation: Activation.Sigmoid,
+  mutateHiddenBiasProbability: 0,
+  mutateHiddenBiasSize: 0.03,
+  mutateOutputBiasProbability: 0,
+  mutateOutputBiasSize: 0.03,
+}
+
+export const defaultBackpropNEATGenomeOptions: NEATGenomeOptions = {
+  ...defaultNEATGenomeOptions,
+  useBias: true,
+  mutateHiddenBiasProbability: 0.3,
+  mutateOutputBiasProbability: 0.3,
 }

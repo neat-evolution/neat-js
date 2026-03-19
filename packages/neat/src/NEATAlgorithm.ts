@@ -9,7 +9,7 @@ import { createPhenotype } from './createPhenotype.js'
 import { createState } from './createState.js'
 import type { NEATContext } from './NEATContext.js'
 import { defaultNEATGenomeOptions } from './NEATGenomeOptions.js'
-import { writeBackWeights } from './writeBackWeights.js'
+import { writeBackWeights as writeNEATWeights } from './writeBackWeights.js'
 
 export const NEATAlgorithm: Algorithm<NEATContext> &
   PopulationCreator<NEATContext> = {
@@ -22,7 +22,9 @@ export const NEATAlgorithm: Algorithm<NEATContext> &
   createGenome,
   createPhenotype,
   createState,
-  writeBackWeights,
+  writeBackWeights(genome, payload) {
+    writeNEATWeights(genome, payload.actions)
+  },
 
   createPopulation(
     createReproducer,

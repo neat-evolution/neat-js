@@ -66,7 +66,7 @@ describe('NEATNode class', () => {
     test('should return a JSON representation of the node', () => {
       const node = createNode({ type: NodeType.Input, id: 1 }, null, null)
       expect(node.toJSON()).toEqual({
-        factoryOptions: { type: NodeType.Input, id: 1 },
+        factoryOptions: { type: NodeType.Input, id: 1, bias: 0 },
         config: null,
         state: null,
       })
