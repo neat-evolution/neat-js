@@ -118,19 +118,29 @@ export const createPhenotype: PhenotypeFactory<
       if (cppnTrainableExecutor === undefined) {
         cppnTrainableExecutor = createTrainableExecutor(cppnPhenotype)
       }
-      // Accumulate gradients across all coordinates, then apply one coherent update
+      // Accumulate gradients across all coordinates, then apply one coherent update.
+      // Use forwardInPlace when available — skips output allocation since only
+      // internal state is needed for the subsequent accumulateBackward.
+      const fwd =
+        cppnTrainableExecutor.forwardInPlace != null
+          ? (inputs: number[]) => {
+              cppnTrainableExecutor?.forwardInPlace?.(inputs)
+            }
+          : (inputs: number[]) => {
+              cppnTrainableExecutor?.forward(inputs)
+            }
       cppnTrainableExecutor.zeroGradients()
       for (const lc of linkCoords) {
         const grad = gradients[lc.actionIndex]
         if (grad === undefined || grad === 0) continue
-        cppnTrainableExecutor.forward([lc.x0, lc.y0, lc.x1, lc.y1])
+        fwd([lc.x0, lc.y0, lc.x1, lc.y1])
         linkError[0] = grad
         cppnTrainableExecutor.accumulateBackward(linkError)
       }
       for (const nc of nodeCoords) {
         const grad = gradients[nc.actionIndex]
         if (grad === undefined || grad === 0) continue
-        cppnTrainableExecutor.forward([0.0, 0.0, nc.x, nc.y])
+        fwd([0.0, 0.0, nc.x, nc.y])
         nodeError[1] = grad
         cppnTrainableExecutor.accumulateBackward(nodeError)
       }
