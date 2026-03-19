@@ -38,22 +38,39 @@ export class WorkerPool {
 
       // Wait for WORKER_READY message from each worker
       logger.debug(`[WorkerPool] Waiting for worker ${i} to be ready...`)
-      const readyPromise = new Promise<void>((resolve) => {
-        const handler = (event: { data?: unknown }) => {
+      const readyPromise = new Promise<void>((resolve, reject) => {
+        const messageHandler = (event: { data?: unknown }) => {
           logger.debug(`[WorkerPool] Worker ${i} sent a message`, event)
           const message = event.data ?? event
-          if (
-            message != null &&
-            typeof message === 'object' &&
-            'type' in message &&
-            message.type === WORKER_READY
-          ) {
-            worker.removeEventListener('message', handler)
-            logger.debug(`[WorkerPool] Worker ${i} is ready`)
-            resolve()
+          if (message != null && typeof message === 'object' && 'type' in message) {
+            if (message.type === WORKER_READY) {
+              cleanup()
+              logger.debug(`[WorkerPool] Worker ${i} is ready`)
+              resolve()
+            } else if (message.type === 'WORKER_ERROR' && 'error' in message && message.error === true) {
+              cleanup()
+              const error = message.payload
+              reject(new Error(`Worker ${i} failed during initialization: ${error instanceof Error ? error.message : JSON.stringify(error)}`))
+            }
           }
         }
-        worker.addEventListener('message', handler)
+
+        const errorHandler = (event: unknown) => {
+          cleanup()
+          // Extract error from ErrorEvent if present
+          const error = event != null && typeof event === 'object' && 'error' in event 
+            ? (event as { error: unknown }).error 
+            : event
+          reject(new Error(`Worker ${i} encountered a fatal error during initialization: ${error instanceof Error ? error.message : String(error)}`))
+        }
+
+        const cleanup = () => {
+          worker.removeEventListener('message', messageHandler)
+          worker.removeEventListener('error', errorHandler)
+        }
+
+        worker.addEventListener('message', messageHandler)
+        worker.addEventListener('error', errorHandler)
       })
       readyPromises.push(readyPromise)
     }
