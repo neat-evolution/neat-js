@@ -1,9 +1,14 @@
 import { Activation } from '@neat-evolution/core'
 
-const allActivations: Activation[] = [
+/**
+ * Differentiable activations safe for CPPN hidden nodes in all modes.
+ * Step and Abs are excluded (throw during backpropagation).
+ * Softmax is excluded from hidden activations because it requires
+ * multi-output Jacobian handling that only applies to output groups.
+ */
+const defaultHiddenActivations: Activation[] = [
   Activation.None,
   Activation.Linear,
-  Activation.Step,
   Activation.ReLU,
   Activation.LeakyReLU,
   Activation.ELU,
@@ -12,14 +17,12 @@ const allActivations: Activation[] = [
   Activation.HardSigmoid,
   Activation.Tanh,
   Activation.HardTanh,
-  Activation.Softmax,
   Activation.Gaussian,
   Activation.OffsetGaussian,
   Activation.GELU,
   Activation.Sine,
   Activation.Cos,
   Activation.Square,
-  Activation.Abs,
   Activation.Softsign,
   Activation.Exp,
   Activation.ClippedExp,
@@ -32,7 +35,13 @@ export interface CPPNNodeOptions {
   outputActivations: Activation[]
 }
 
+/** Output activations include Softmax (proper Jacobian support in backward). */
+const defaultOutputActivations: Activation[] = [
+  ...defaultHiddenActivations,
+  Activation.Softmax,
+]
+
 export const defaultCPPNNodeOptions: CPPNNodeOptions = {
-  hiddenActivations: [...allActivations],
-  outputActivations: [...allActivations],
+  hiddenActivations: [...defaultHiddenActivations],
+  outputActivations: [...defaultOutputActivations],
 }

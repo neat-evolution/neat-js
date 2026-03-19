@@ -29,10 +29,9 @@ import { createNodeFactory } from './createNode.js'
 export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
   CPPNContext<GO>
 > {
-  private mutateNodeSelection(
+  private mutateNodeActivation(
     nodes: Map<NodeKey, CPPNNode>,
-    biasDelta: number | null,
-    activationOptions: readonly Activation[] | null
+    activationOptions: readonly Activation[]
   ): void {
     const size = nodes.size
     if (size === 0) {
@@ -44,14 +43,9 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
     let i = 0
     for (const node of nodes.values()) {
       if (i === randomIndex) {
-        if (biasDelta !== null) {
-          node.bias += biasDelta
-        }
-        if (activationOptions !== null) {
-          node.activation = activationOptions[
-            rng.genRange(0, activationOptions.length)
-          ] as Activation
-        }
+        node.activation = activationOptions[
+          rng.genRange(0, activationOptions.length)
+        ] as Activation
         break
       }
       i++
@@ -171,66 +165,20 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
     await super.mutate()
 
     const rng = threadRNG()
-    const hiddenBiasMutates =
-      rng.gen() < this.genomeOptions.mutateHiddenBiasProbability
-    const hiddenActivationMutates =
-      rng.gen() < this.genomeOptions.mutateHiddenActivationProbability
-    const outputBiasMutates =
-      rng.gen() < this.genomeOptions.mutateOutputBiasProbability
-    const outputActivationMutates =
-      rng.gen() < this.genomeOptions.mutateOutputActivationProbability
 
-    if (hiddenBiasMutates || hiddenActivationMutates) {
-      this.mutateNodeSelection(
+    if (rng.gen() < this.genomeOptions.mutateHiddenActivationProbability) {
+      this.mutateNodeActivation(
         this.hiddenNodes as Map<NodeKey, CPPNNode>,
-        hiddenBiasMutates
-          ? (rng.gen() - 0.5) * 2.0 * this.genomeOptions.mutateHiddenBiasSize
-          : null,
-        hiddenActivationMutates ? this.genomeOptions.hiddenActivations : null
+        this.genomeOptions.hiddenActivations
       )
     }
 
-    if (outputBiasMutates || outputActivationMutates) {
-      this.mutateNodeSelection(
+    if (rng.gen() < this.genomeOptions.mutateOutputActivationProbability) {
+      this.mutateNodeActivation(
         this.outputs as Map<NodeKey, CPPNNode>,
-        outputBiasMutates
-          ? (rng.gen() - 0.5) * 2.0 * this.genomeOptions.mutateOutputBiasSize
-          : null,
-        outputActivationMutates ? this.genomeOptions.outputActivations : null
+        this.genomeOptions.outputActivations
       )
     }
-  }
-
-  mutateHiddenBias(): void {
-    this.mutateNodeSelection(
-      this.hiddenNodes as Map<NodeKey, CPPNNode>,
-      (threadRNG().gen() - 0.5) * 2.0 * this.genomeOptions.mutateHiddenBiasSize,
-      null
-    )
-  }
-
-  mutateHiddenActivation(): void {
-    this.mutateNodeSelection(
-      this.hiddenNodes as Map<NodeKey, CPPNNode>,
-      null,
-      this.genomeOptions.hiddenActivations
-    )
-  }
-
-  mutateOutputBias(): void {
-    this.mutateNodeSelection(
-      this.outputs as Map<NodeKey, CPPNNode>,
-      (threadRNG().gen() - 0.5) * 2.0 * this.genomeOptions.mutateOutputBiasSize,
-      null
-    )
-  }
-
-  mutateOutputActivation(): void {
-    this.mutateNodeSelection(
-      this.outputs as Map<NodeKey, CPPNNode>,
-      null,
-      this.genomeOptions.outputActivations
-    )
   }
 
   getActivation(nodeKey: NodeKey): Activation {

@@ -91,17 +91,21 @@ The `cppn` package exposes several important classes, interfaces, and functions:
 
 - **`CPPNAlgorithm`**: An object conforming to the `Algorithm` interface,
   encapsulating the factory functions for creating CPPN-specific configurations,
-  genomes, phenotypes, and states.
+  genomes, phenotypes, and states. It also exposes `writeBackWeights` for
+  Lamarckian training, which applies trained weight/bias deltas back to the
+  CPPN genome.
 
-- **`CPPNGenome<GO>`**: Extends `CoreGenome` (effectively `NEATGenome`) to
-  represent a CPPN. It includes additional mutation methods for hidden and
-  output node biases and activation functions. It also provides methods to
-  retrieve the activation and bias of a given node.
+- **`CPPNGenome<GO>`**: Extends `CoreGenome` to represent a CPPN. It overrides
+  `mutate()` to add activation-function mutation for hidden and output nodes.
+  Bias mutation is handled by `CoreGenome.mutateNodeBias()`, which is called
+  automatically at the end of the base `mutate()` method. `CPPNGenome` provides
+  a `mutateNodeActivation()` method that randomly reassigns a node's activation
+  from the configured activation pool.
 
-- **`CPPNNode`**: Extends `CoreNode` to represent a node within a CPPN. Unlike
-  standard NEAT nodes, `CPPNNode`s have an `activation` function and a `bias`
-  value, both of which can be evolved. It also defines how `CPPNNode`s are
-  crossed over and how their genetic distance is calculated.
+- **`CPPNNode`**: Extends `CoreNode` to add an `activation` function per node.
+  The `bias` field is inherited from `CoreNode`, where every node has
+  `bias: number` (default 0). Both `activation` and `bias` participate in
+  crossover and genetic distance calculations.
 
 - **`cppn(...)` function**: The main entry point for running the CPPN algorithm.
   Similar to the `neat` function, it takes a `ReproducerFactory`, an
@@ -117,6 +121,54 @@ The `cppn` package exposes several important classes, interfaces, and functions:
   `createPopulation`)**: These functions are responsible for instantiating the
   various components of the CPPN algorithm with their specific CPPN
   implementations.
+
+## Genome Options
+
+`CPPNGenomeOptions` extends `GenomeOptions` and `CPPNNodeOptions`. The defaults
+are tuned for both pure neuroevolution and backprop/Lamarckian training -- no
+separate backprop-specific options are needed.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `mutateHiddenBiasProbability` | `number` | `0.8` | Probability of mutating a hidden node's bias during mutation |
+| `mutateHiddenBiasSize` | `number` | `0.03` | Maximum perturbation size for hidden node bias mutation |
+| `mutateHiddenActivationProbability` | `number` | `0.1` | Probability of reassigning a hidden node's activation function |
+| `mutateOutputBiasProbability` | `number` | `0.8` | Probability of mutating an output node's bias during mutation |
+| `mutateOutputBiasSize` | `number` | `0.03` | Maximum perturbation size for output node bias mutation |
+| `mutateOutputActivationProbability` | `number` | `0.1` | Probability of reassigning an output node's activation function |
+| `padMissingOutputs` | `boolean` | `false` | Whether to pad missing output nodes during genome creation |
+| `hiddenActivations` | `Activation[]` | 21 differentiable functions | Pool of activation functions available for hidden nodes |
+| `outputActivations` | `Activation[]` | 22 functions (hidden + Softmax) | Pool of activation functions available for output nodes |
+
+Bias mutation probabilities default to `0.8`, meaning CPPN biases are actively
+evolved. The bias mutation itself is performed by `CoreGenome.mutateNodeBias()`,
+which runs at the end of every `mutate()` call. The CPPN override of `mutate()`
+only adds activation-function mutation on top of the base behavior.
+
+### Activation Pools
+
+Hidden activations include 21 differentiable functions safe for backpropagation:
+None, Linear, ReLU, LeakyReLU, ELU, Sigmoid, Swish, HardSigmoid, Tanh,
+HardTanh, Gaussian, OffsetGaussian, GELU, Sine, Cos, Square, Softsign, Exp,
+ClippedExp, Softplus, and Mish. Step and Abs are excluded because they are not
+differentiable. Softmax is excluded from hidden activations because it requires
+multi-output Jacobian handling that only applies to output groups.
+
+Output activations include all 21 hidden activations plus Softmax (22 total).
+
+## Backprop and Lamarckian Training
+
+CPPN biases are always writable during Lamarckian training. When
+`writeBackWeights` is called on `CPPNAlgorithm`, trained weight and bias deltas
+from a `TrainableExecutor` are applied directly back to the CPPN genome's links
+and nodes. Because CPPN defaults already set bias mutation probability to `0.8`
+and include only differentiable activations, no special configuration is needed
+to use CPPNs in a backprop pipeline.
+
+The `trainableBiases` flag (from `Phenotype`) defaults to `true`, so biases are
+included in gradient updates during training. Combined with the evolutionary
+bias mutation, this gives CPPNs two complementary paths for bias optimization:
+gradient-based refinement and evolutionary exploration.
 
 ## Usage
 

@@ -6,11 +6,11 @@ import {
 } from './CPPNNodeOptions.js'
 
 export interface CPPNGenomeOptions extends GenomeOptions, CPPNNodeOptions {
-  mutateHiddenBiasProbability: number
-  mutateHiddenBiasSize: number
+  mutateHiddenBiasProbability?: number
+  mutateHiddenBiasSize?: number
   mutateHiddenActivationProbability: number
-  mutateOutputBiasProbability: number
-  mutateOutputBiasSize: number
+  mutateOutputBiasProbability?: number
+  mutateOutputBiasSize?: number
   mutateOutputActivationProbability: number
   padMissingOutputs: boolean
 }

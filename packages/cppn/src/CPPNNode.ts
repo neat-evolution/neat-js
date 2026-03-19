@@ -13,7 +13,6 @@ import { createNode } from './createNode.js'
 
 export class CPPNNode extends CoreNode<CPPNContext> {
   public activation: Activation
-  public bias: number
 
   public nodeOptions: CPPNNodeOptions
 
@@ -23,7 +22,6 @@ export class CPPNNode extends CoreNode<CPPNContext> {
   ) {
     super(factoryOptions, null, null, createNode)
     this.nodeOptions = nodeOptions
-    this.bias = factoryOptions.bias ?? 0
     this.activation = factoryOptions.activation ?? this.determineActivation()
   }
 
@@ -76,7 +74,6 @@ export class CPPNNode extends CoreNode<CPPNContext> {
   override distance(other: CPPNNode): number {
     let distance = super.distance(other)
     distance += 0.5 * Number(this.activation !== other.activation)
-    distance += 0.5 * Math.tanh(Math.abs(this.bias - other.bias))
     return distance
   }
 
