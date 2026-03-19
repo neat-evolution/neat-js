@@ -16,13 +16,13 @@ import type { LinkFactoryOptions } from './LinkFactoryOptions.js'
 import { toLinkKey } from './linkRefToKey.js'
 
 export class CoreLink<Ctx extends AlgorithmContext> implements Link<Ctx> {
-  // LinkRef
-  public readonly from: NodeKey
-  public readonly to: NodeKey
+  // LinkRef — writable to support object pooling
+  public from: NodeKey
+  public to: NodeKey
 
   // Link
   public weight: number
-  public readonly innovation: InnovationKey
+  public innovation: InnovationKey
 
   // LinkExtension
   public readonly config: ConfigLinkOptionsOf<Ctx>
@@ -47,10 +47,16 @@ export class CoreLink<Ctx extends AlgorithmContext> implements Link<Ctx> {
     this.createLink = createLink
   }
 
+  /** Reset numeric fields from factory options. Used by pool acquire. */
+  _resetData(factoryOptions: LinkFactoryOptions): void {
+    this.from = factoryOptions.from
+    this.to = factoryOptions.to
+    this.weight = factoryOptions.weight
+    this.innovation = factoryOptions.innovation
+  }
+
   /**
    * Creates a new link; Only async in des-hyperneat
-   * @param {LinkFactoryOptions} linkFactoryOptions core link factory options with no extensions
-   * @returns a Link
    */
   public identity(
     linkFactoryOptions: LinkFactoryOptions
@@ -87,14 +93,15 @@ export class CoreLink<Ctx extends AlgorithmContext> implements Link<Ctx> {
     return Math.tanh(Math.abs(this.weight - other.weight))
   }
 
+  /** Return this link to an object pool for reuse. Override in subclasses. */
+  release(): void {
+    // No-op by default.
+  }
+
   toString(): string {
     return String(toLinkKey(this.from, this.to))
   }
 
-  /**
-   * Must override
-   * @returns link data
-   */
   toJSON(): LinkData<
     LinkFactoryOptionsOf<Ctx>,
     ConfigLinkOptionsOf<Ctx>,
@@ -111,10 +118,6 @@ export class CoreLink<Ctx extends AlgorithmContext> implements Link<Ctx> {
     >
   }
 
-  /**
-   * Must override
-   * @returns link factory options
-   */
   toFactoryOptions(): LinkFactoryOptionsOf<Ctx> {
     return {
       from: this.from,

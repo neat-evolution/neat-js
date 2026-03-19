@@ -16,7 +16,7 @@ import type { LinkRef } from './LinkRef.js'
 export interface Link<Ctx extends AlgorithmContext> extends LinkRef {
   // Link
   weight: number
-  readonly innovation: InnovationKey
+  innovation: InnovationKey
 
   // LinkExtension
   readonly config: ConfigLinkOptionsOf<Ctx>
@@ -56,4 +56,7 @@ export interface Link<Ctx extends AlgorithmContext> extends LinkRef {
     StateLinkDataOf<Ctx>
   >
   toFactoryOptions: () => LinkFactoryOptionsOf<Ctx>
+
+  /** Return this link to an object pool for reuse. No-op if pooling is not supported. */
+  release: () => void
 }

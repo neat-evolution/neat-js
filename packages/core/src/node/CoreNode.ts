@@ -17,9 +17,9 @@ import { toNodeKey } from './nodeRefToKey.js'
 export class CoreNode<Ctx extends AlgorithmContext = AlgorithmContext>
   implements Node<Ctx>
 {
-  // NodeRef
-  public readonly type: NodeType
-  public readonly id: NodeId
+  // NodeRef — writable to support factory-options-as-node pattern
+  public type: NodeType
+  public id: NodeId
 
   public bias: number
 
