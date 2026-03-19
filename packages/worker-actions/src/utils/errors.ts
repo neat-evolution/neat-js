@@ -1,7 +1,7 @@
 export interface SerializedError {
   name: string
   message: string
-  stack?: string
+  stack?: string | undefined
   cause?: unknown
   [key: string]: unknown
 }
@@ -51,7 +51,9 @@ export function deserializeError(serialized: unknown): Error {
   const { name, message, stack, cause, ...rest } = serialized as SerializedError
   const error = new Error(message)
   error.name = name || 'Error'
-  error.stack = stack
+  if (stack !== undefined) {
+    error.stack = stack
+  }
 
   if (cause !== undefined) {
     error.cause = deserializeError(cause)
