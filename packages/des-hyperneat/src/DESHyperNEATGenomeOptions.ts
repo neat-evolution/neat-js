@@ -16,6 +16,7 @@ export interface DESHyperNEATGenomeOptions
   extends GenomeOptions,
     CPPNGenomeOptions,
     Omit<ESHyperNEATGenomeOptions, 'inputConfig' | 'outputConfig'> {
+  enableBackprop?: boolean
   singleCPPNState: boolean
   initConfig?: InitConfig
   inputConfig: IOConfig
@@ -66,5 +67,6 @@ export const defaultDESHyperNEATGenomeOptions: DESHyperNEATGenomeOptions = {
 export const defaultBackpropDESHyperNEATGenomeOptions: DESHyperNEATGenomeOptions =
   {
     ...defaultDESHyperNEATGenomeOptions,
+    enableBackprop: true,
     useBias: true,
   }
