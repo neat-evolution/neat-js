@@ -17,6 +17,7 @@
  */
 
 import { Activation, defaultNEATConfigOptions } from '@neat-evolution/core'
+import { setThreadRNGSeed } from '@neat-evolution/utils'
 import {
   DatasetEnvironment,
   type DatasetOptions,
@@ -47,6 +48,7 @@ function parseArgs(argv: string[]) {
     learningRate: 0.01,
     iterations: 50,
     seconds: 0,
+    seed: 'compare-hyperneat',
   }
 
   for (let i = 0; i < argv.length; i++) {
@@ -64,6 +66,9 @@ function parseArgs(argv: string[]) {
     } else if (arg === '--seconds' && next) {
       args.seconds = Number(next)
       i++
+    } else if (arg === '--seed' && next) {
+      args.seed = next
+      i++
     }
   }
 
@@ -75,6 +80,7 @@ const args = parseArgs(process.argv.slice(2))
 console.log('=== HyperNEAT Family Comparison ===')
 console.log(`Backprop: ${args.trainingEpochs} epochs, lr=${args.learningRate}`)
 console.log(`Evolution: ${args.iterations} iterations`)
+console.log(`Seed: ${args.seed}`)
 if (args.seconds > 0) {
   console.log(`Time limit: ${args.seconds}s per run`)
 }
@@ -186,6 +192,10 @@ async function runVariant(
   genomeOptionsOverrides?: EvolutionManagerOptions['algorithm']['genomeOptions'],
   configDataOverride?: EvolutionManagerOptions['algorithm']['configData']
 ): Promise<RunResult> {
+  // Reset RNG to the same seed for each variant so initial populations
+  // and mutation sequences are deterministic and comparable.
+  setThreadRNGSeed(args.seed)
+
   const fitnessLog: number[] = []
 
   const trainerConfig =
