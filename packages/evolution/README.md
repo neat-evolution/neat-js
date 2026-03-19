@@ -19,6 +19,12 @@ The primary purpose of the `@neat-evolution/evolution` package is to:
 - **Orchestrate Evolution:** Provide the main loop (`evolve` function) that
   drives the entire evolutionary process, including evaluation, fitness
   adjustment, and population updates.
+- **Support Lamarckian Training:** The evolution loop supports Lamarckian
+  weight writeback: organisms can have their genomes updated via
+  `writeBackWeights` after backprop training within each generation. The
+  `WritebackPayload` (from `@neat-evolution/core`) is the standard interface
+  for writeback data, carrying actions, optional auxiliary per-sub-CPPN
+  writebacks, and optional node bias deltas.
 - **Provide Configurability:** Allow for fine-grained control over the
   evolutionary parameters through `EvolutionOptions` and `PopulationOptions`.
 
@@ -91,10 +97,9 @@ functions:
   generation. It provides methods for `crossover`, `mutate`, and `distance`.
 
 - **`Population<...>`**: The central class that manages the collection of
-  `Organism`s and `Species`. It handles the overall evolutionary cycle,
-  including evaluating organisms, adjusting fitness, calculating offspring, and
-  managing speciation. It also provides methods for selecting organisms (e.g.,
-  `tournamentSelect`).
+  `Organism`s and `Species`. It handles the overall evolutionary cycle:
+  evaluate, train (optional Lamarckian writeback), reproduce, and speciate. It
+  also provides methods for selecting organisms (e.g., `tournamentSelect`).
 
 - **`Species<...>`**: Groups similar `Organism`s together. It helps in
   preserving genetic diversity and protecting novel innovations. It manages its

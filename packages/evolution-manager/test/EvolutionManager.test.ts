@@ -4,9 +4,9 @@ import {
   createEvolutionManagerConfig,
   deserializeOrganism,
   EvolutionManager,
+  type EvolutionManagerOptions,
   getBuiltInEvolutionAlgorithmDefinition,
   organismToExecutor,
-  type EvolutionManagerOptions,
   serializedToExecutor,
 } from '../src/index.js'
 import { createEnvironment } from '../src/xorEnvironment.js'
@@ -42,20 +42,22 @@ describe('EvolutionManager', () => {
 
   describe('constructor validation', () => {
     test('throws on missing algorithm', () => {
-      expect(() =>
-        new EvolutionManager({
-          ...slotConfig,
-          algorithm: undefined as never,
-        })
+      expect(
+        () =>
+          new EvolutionManager({
+            ...slotConfig,
+            algorithm: undefined as never,
+          })
       ).toThrow('EvolutionManager requires an algorithm')
     })
 
     test('throws on missing environment', () => {
-      expect(() =>
-        new EvolutionManager({
-          ...slotConfig,
-          environment: undefined as never,
-        })
+      expect(
+        () =>
+          new EvolutionManager({
+            ...slotConfig,
+            environment: undefined as never,
+          })
       ).toThrow('EvolutionManager requires an environment')
     })
 
@@ -92,7 +94,9 @@ describe('EvolutionManager', () => {
       })
 
       expect(config.algorithm).toBe(definition.algorithm)
-      expect(config.genomeOptions).toEqual(definition.createDefaultGenomeOptions())
+      expect(config.genomeOptions).toEqual(
+        definition.createDefaultGenomeOptions()
+      )
       expect(config.configData).toEqual(definition.createDefaultConfigData())
     })
 

@@ -183,9 +183,7 @@ function resolveAlgorithm<Ctx extends AlgorithmContext = AlgorithmContext>(
 
 export function createEvolutionManagerConfig<
   Ctx extends AlgorithmContext = AlgorithmContext,
->(
-  config: EvolutionManagerOptions<Ctx>
-): NormalizedEvolutionManagerConfig<Ctx> {
+>(config: EvolutionManagerOptions<Ctx>): NormalizedEvolutionManagerConfig<Ctx> {
   if (config.algorithm == null) {
     throw new Error('EvolutionManager requires an algorithm')
   }

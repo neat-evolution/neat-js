@@ -1,7 +1,7 @@
 import type {
   AnyGenome,
   FitnessData,
-  PhenotypeAction,
+  WritebackPayload,
 } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
 import type { ParentEvaluationContext } from '@neat-evolution/evaluation-strategy'
@@ -43,7 +43,7 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
   private readonly localDispatcher: LocalDispatcher
 
   /** Pending Lamarckian writebacks collected from plugin results. */
-  private readonly pendingWritebacks = new Map<AnyGenome, PhenotypeAction[]>()
+  private readonly pendingWritebacks = new Map<AnyGenome, WritebackPayload>()
   /** Latest telemetry per genome from plugin results. */
   private readonly telemetryByGenome = new WeakMap<AnyGenome, unknown>()
 
@@ -105,9 +105,9 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
     boundContext.fireFitnessCallbacks(fitness)
 
     if (writebackResults != null) {
-      const updatedActions = writebackResults.get(0)
-      if (updatedActions != null) {
-        this.pendingWritebacks.set(genome, updatedActions)
+      const payload = writebackResults.get(0)
+      if (payload != null) {
+        this.pendingWritebacks.set(genome, payload)
       }
     }
 
@@ -174,8 +174,8 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
 
   /** Apply all pending Lamarckian writebacks to genomes. */
   private applyWritebacks(): void {
-    for (const [genome, updatedActions] of this.pendingWritebacks) {
-      this.algorithm.writeBackWeights(genome, updatedActions)
+    for (const [genome, payload] of this.pendingWritebacks) {
+      this.algorithm.writeBackWeights(genome, payload)
     }
     this.pendingWritebacks.clear()
   }

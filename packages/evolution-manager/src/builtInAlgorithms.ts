@@ -1,8 +1,5 @@
-import {
-  Activation,
-  defaultNEATConfigOptions,
-} from '@neat-evolution/core'
 import type { Phenotype } from '@neat-evolution/core'
+import { Activation, defaultNEATConfigOptions } from '@neat-evolution/core'
 import {
   CPPNAlgorithm,
   createConfig as createCPPNConfig,
@@ -16,8 +13,8 @@ import {
   createGenome as createDESHyperNEATGenome,
   createPhenotype as createDESHyperNEATPhenotype,
   createState as createDESHyperNEATState,
-  defaultDESHyperNEATGenomeOptions,
   DESHyperNEATAlgorithm,
+  defaultDESHyperNEATGenomeOptions,
 } from '@neat-evolution/des-hyperneat'
 import {
   createConfig as createESHyperNEATConfig,
@@ -27,7 +24,10 @@ import {
   defaultESHyperNEATGenomeOptions,
   ESHyperNEATAlgorithm,
 } from '@neat-evolution/es-hyperneat'
-import type { AnyErasedAlgorithm, AnyErasedGenome } from '@neat-evolution/evaluator'
+import type {
+  AnyErasedAlgorithm,
+  AnyErasedGenome,
+} from '@neat-evolution/evaluator'
 import type { PopulationCreator } from '@neat-evolution/evolution'
 import { createExecutor, type StaticExecutor } from '@neat-evolution/executor'
 import {
@@ -108,9 +108,7 @@ export const ALL_CPPN_ACTIVATIONS: Activation[] = [
 ]
 
 function clonePlainData<T>(value: T): T {
-  const clone = globalThis.structuredClone as
-    | ((input: T) => T)
-    | undefined
+  const clone = globalThis.structuredClone as ((input: T) => T) | undefined
 
   if (typeof clone === 'function') {
     return clone(value)
@@ -262,10 +260,9 @@ export function createBuiltInGenomeFromSerialized(
   genomeData: SerializedGenomeData,
   initConfig: unknown
 ): AnyErasedGenome {
-  return getBuiltInEvolutionAlgorithmDefinition(name).createGenomeFromSerialized(
-    genomeData,
-    initConfig
-  )
+  return getBuiltInEvolutionAlgorithmDefinition(
+    name
+  ).createGenomeFromSerialized(genomeData, initConfig)
 }
 
 export function createBuiltInPhenotypeForGenome(
