@@ -17,6 +17,7 @@ export type IOConfig = 'line' | Point[]
 export interface HyperNEATGenomeOptions
   extends GenomeOptions,
     CPPNGenomeOptions {
+  enableBackprop?: boolean
   weightThreshold: number
   hiddenActivation: Activation
   outputActivation: OutputActivationSpec
