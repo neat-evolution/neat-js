@@ -139,6 +139,11 @@ export function findConnectionsPoints(
     return connections
   }
 
+  // Clear cached variance from Phase 1 so Phase 2 computes fresh values
+  // for the fully-built tree. Phase 2 values can then be cached safely
+  // since the tree structure is frozen.
+  root.resetVarianceTree()
+
   leaves = [root]
   while (
     leaves.length > 0 &&

@@ -24,7 +24,8 @@ export class QuadPoint {
   public width: number
   public weight: number
   public depth: number
-  public variance: number
+  /** Internal caching state — non-enumerable so it doesn't affect toEqual. */
+  declare variance: number
   public children: null | QuadPoint[]
   public options: ESHyperNEATGenomeOptions
 
@@ -42,7 +43,11 @@ export class QuadPoint {
     this.depth = depth
     this.options = options
     this.weight = isWeightNumber(weightFn) ? weightFn : weightFn(x, y)
-    this.variance = 0.0
+    Object.defineProperty(this, 'variance', {
+      value: 0.0,
+      writable: true,
+      enumerable: false,
+    })
     this.children = null
   }
 
@@ -68,6 +73,16 @@ export class QuadPoint {
       return point
     }
     return new QuadPoint(x, y, width, depth, weightFn, options)
+  }
+
+  /** Reset cached variance on this node and all descendants. */
+  resetVarianceTree(): void {
+    this.variance = 0.0
+    if (this.children !== null) {
+      for (let i = 0; i < 4; i++) {
+        this.children[i]?.resetVarianceTree()
+      }
+    }
   }
 
   public static release(point: QuadPoint): void {
@@ -142,7 +157,16 @@ export class QuadPoint {
       return 0.0
     }
 
+
     if (this.options.onlyLeafVariance && !this.options.medianVariance) {
+      // Fast path: leaf-only variance ignores root/branch params.
+      // Safe to cache when relativeVariance is false (deltaWeight unused).
+      // Phase 1 (expand) may cache, Phase 2 (extractInternal) reuses it.
+      // The subtree's leaf weights don't change after creation.
+      if (!this.options.relativeVariance && this.variance !== 0.0) {
+        return this.variance
+      }
+
       const dw = this.options.relativeVariance ? deltaWeight : 1.0
       const stack = QuadPoint.traversalPool
       let top = 0

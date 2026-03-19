@@ -1,5 +1,5 @@
 import type { Point } from '@neat-evolution/hyperneat'
-import { describe, expect, test } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import type { WeightFn } from '../src/index.js'
 
@@ -20,6 +20,12 @@ const cloneArgs = (
 }
 
 describe('QuadPoint.extractPoints', () => {
+  beforeEach(() => {
+    for (const testCase of testCases) {
+      testCase.leaf.resetVarianceTree()
+    }
+  })
+
   test.each([
     ...testCases.entries(),
   ])('should export the same factoryOptions for test case #%d', (_index, testCase: TestCase) => {
