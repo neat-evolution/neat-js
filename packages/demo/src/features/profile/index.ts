@@ -11,7 +11,6 @@ import { Session } from 'node:inspector'
 import { join, relative } from 'node:path'
 
 import { Activation, defaultNEATConfigOptions } from '@neat-evolution/core'
-import { setThreadRNGSeed } from '@neat-evolution/utils'
 import {
   DatasetEnvironment,
   type DatasetOptions,
@@ -44,6 +43,7 @@ import {
   defaultHyperNEATGenomeOptions,
   HyperNEATAlgorithm,
 } from '@neat-evolution/hyperneat'
+import { setThreadRNGSeed } from '@neat-evolution/utils'
 
 // --- Constants ---
 
@@ -402,9 +402,7 @@ try {
     console.log(`Calls:           ${cacheStats.calls}`)
     console.log(`Total queries:   ${cacheStats.totalQueries}`)
     console.log(`Cache hits:      ${cacheStats.cacheHits}`)
-    console.log(
-      `Hit rate:        ${(cacheStats.hitRate * 100).toFixed(1)}%`
-    )
+    console.log(`Hit rate:        ${(cacheStats.hitRate * 100).toFixed(1)}%`)
     console.log(`Saved forwards:  ${cacheStats.savedForwardCalls}`)
   }
 
