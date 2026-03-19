@@ -1,4 +1,4 @@
-import { binarySearchFirst, shuffle, threadRNG } from '@neat-evolution/utils'
+import { threadRNG } from '@neat-evolution/utils'
 import { Connections } from './Connections.js'
 import type { AlgorithmContext } from './contexts/AlgorithmContext.js'
 import type {
@@ -202,29 +202,37 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     let nodeDifferences = 0
     let nodeDistance = 0
     let nodeMatchingCount = 0
+    let thisNodeCount = this.hiddenNodes.size
+    let otherNodeCount = other.hiddenNodes.size
 
-    const nodeMaps: Array<
-      [Map<NodeKey, NodeTypeOf<Ctx>>, Map<NodeKey, NodeTypeOf<Ctx>>]
-    > = [[this.hiddenNodes, other.hiddenNodes]]
-    if (!neatConfig.onlyHiddenNodeDistance) {
-      nodeMaps.push([this.inputs, other.inputs])
-      nodeMaps.push([this.outputs, other.outputs])
+    // Always compare hidden nodes
+    for (const [nodeKey, node] of this.hiddenNodes) {
+      const node2 = other.hiddenNodes.get(nodeKey)
+      if (node2 !== undefined) {
+        nodeDistance += node.distance(node2)
+        nodeMatchingCount++
+      } else {
+        nodeDifferences++
+      }
     }
 
-    let thisNodeCount = 0
-    let otherNodeCount = 0
+    // Optionally compare input and output nodes
+    if (!neatConfig.onlyHiddenNodeDistance) {
+      thisNodeCount += this.inputs.size + this.outputs.size
+      otherNodeCount += other.inputs.size + other.outputs.size
 
-    for (let i = 0; i < nodeMaps.length; i++) {
-      const nodeMapPair = nodeMaps[i]
-      if (nodeMapPair == null) {
-        continue
+      for (const [nodeKey, node] of this.inputs) {
+        const node2 = other.inputs.get(nodeKey)
+        if (node2 !== undefined) {
+          nodeDistance += node.distance(node2)
+          nodeMatchingCount++
+        } else {
+          nodeDifferences++
+        }
       }
-      const [map1, map2] = nodeMapPair
-      thisNodeCount += map1.size
-      otherNodeCount += map2.size
 
-      for (const [nodeKey, node] of map1) {
-        const node2 = map2.get(nodeKey)
+      for (const [nodeKey, node] of this.outputs) {
+        const node2 = other.outputs.get(nodeKey)
         if (node2 !== undefined) {
           nodeDistance += node.distance(node2)
           nodeMatchingCount++
@@ -502,41 +510,57 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
 
   async mutationAddLink(): Promise<void> {
     const rng = threadRNG()
-    const numSources = this.inputs.size + this.hiddenNodes.size
     const numTargets = this.hiddenNodes.size + this.outputs.size
 
-    if (numSources === 0 || numTargets === 0) {
+    if (
+      (this.inputs.size === 0 && this.hiddenNodes.size === 0) ||
+      numTargets === 0
+    ) {
       return
     }
 
-    const sourceNodes: NodeTypeOf<Ctx>[] = []
-    const wheel: number[] = []
+    // --- Source selection: two-pass weighted random, zero allocation ---
+    // Pass 1: compute total weight
+    let totalWeight = 0
+    for (const nodes of [this.inputs, this.hiddenNodes]) {
+      for (const [nodeKey] of nodes) {
+        const edgeCount = this.connections.getTargetsLength(nodeKey)
+        const weight = numTargets - edgeCount
+        if (weight > 0) {
+          totalWeight += weight
+        }
+      }
+    }
 
+    if (totalWeight <= 0) {
+      return
+    }
+
+    // Pass 2: walk with random threshold to find source
+    let threshold = rng.genRange(1, totalWeight + 1)
+    let source: NodeTypeOf<Ctx> | undefined
     for (const nodes of [this.inputs, this.hiddenNodes]) {
       for (const [nodeKey, node] of nodes) {
         const edgeCount = this.connections.getTargetsLength(nodeKey)
         const weight = numTargets - edgeCount
         if (weight > 0) {
-          sourceNodes.push(node)
-          wheel.push((wheel[wheel.length - 1] ?? 0) + weight)
+          threshold -= weight
+          if (threshold <= 0) {
+            source = node
+            break
+          }
         }
       }
+      if (source !== undefined) break
     }
-
-    const lastWheelValue = wheel[wheel.length - 1] ?? 0
-
-    if (lastWheelValue <= 0) {
-      return
-    }
-
-    const val = rng.genRange(1, lastWheelValue + 1)
-    const sourceIndex = binarySearchFirst(wheel, val)
-    const source = sourceNodes[sourceIndex]
-    if (source == null) {
+    if (source === undefined) {
       return
     }
     const sourceKey = nodeRefToKey(source)
 
+    // --- Target selection: build candidate array, shuffle, probe ---
+    // We still need to filter out existing links, so we must iterate candidates.
+    // But we can avoid the separate array when there are few candidates.
     const targetNodes: NodeTypeOf<Ctx>[] = []
     for (const nodes of [this.hiddenNodes, this.outputs]) {
       for (const [nodeKey, node] of nodes) {
@@ -545,9 +569,16 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
         }
       }
     }
-    shuffle(targetNodes, rng)
 
-    for (let i = 0; i < targetNodes.length; i++) {
+    // Partial Fisher-Yates: only shuffle what we'll actually test
+    const maxAttempts = Math.min(targetNodes.length, 50)
+    for (let i = 0; i < maxAttempts; i++) {
+      const j = rng.genRange(i, targetNodes.length)
+      if (i !== j) {
+        const tmp = targetNodes[i] as NodeTypeOf<Ctx>
+        targetNodes[i] = targetNodes[j] as NodeTypeOf<Ctx>
+        targetNodes[j] = tmp
+      }
       const target = targetNodes[i]
       if (target == null) {
         continue
