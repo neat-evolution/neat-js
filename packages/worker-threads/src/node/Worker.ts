@@ -29,7 +29,12 @@ export class Worker {
 
   addEventListener(type: WorkerEventTypes, listener: MessageListenerFn) {
     const nodeListener = (message: unknown) => {
-      listener(new CompatMessageEvent(message))
+      if (type === 'message' || type === 'messageerror') {
+        listener(new CompatMessageEvent(message))
+      } else {
+        // Error event passes the error object directly
+        listener(message)
+      }
     }
     this.listenerMap.set(listener, nodeListener)
     this.nodeWorker.on(type, nodeListener)

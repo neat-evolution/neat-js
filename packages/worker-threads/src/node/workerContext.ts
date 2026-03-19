@@ -13,11 +13,21 @@ export const workerContext = {
   },
 
   addEventListener: (type: ContextEventTypes, listener: ContextListener) => {
-    parentPort?.on(type, listener)
+    if (type === 'error') {
+      process.on('uncaughtException', listener)
+      process.on('unhandledRejection', listener)
+    } else {
+      parentPort?.on(type, listener)
+    }
   },
 
   removeEventListener: (type: ContextEventTypes, listener: ContextListener) => {
-    parentPort?.off(type, listener)
+    if (type === 'error') {
+      process.off('uncaughtException', listener)
+      process.off('unhandledRejection', listener)
+    } else {
+      parentPort?.off(type, listener)
+    }
   },
 
   close: () => {
