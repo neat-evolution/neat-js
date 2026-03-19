@@ -12,6 +12,7 @@ import type { IOConfig } from '@neat-evolution/hyperneat'
 export interface ESHyperNEATGenomeOptions
   extends GenomeOptions,
     CPPNGenomeOptions {
+  enableBackprop?: boolean
   initConfig?: InitConfig
   inputConfig: IOConfig
   outputConfig: IOConfig
