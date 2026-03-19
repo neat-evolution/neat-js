@@ -1,4 +1,7 @@
-import type { StaticExecutor } from '@neat-evolution/executor'
+import type {
+  PooledFloat64Array,
+  StaticExecutor,
+} from '@neat-evolution/executor'
 import type { Point } from '@neat-evolution/hyperneat'
 
 import type { ESHyperNEATGenomeOptions } from '../ESHyperNEATGenomeOptions.js'
@@ -7,6 +10,48 @@ import { QuadPoint } from './QuadPoint.js'
 
 export type WeightFn = (x: number, y: number) => number
 type PointTarget = { node: Point; edge: number }
+
+// Cache stats tracking
+let _diagTotalQueries = 0
+let _diagCacheHits = 0
+let _diagCalls = 0
+
+export function reportCacheStats(): {
+  calls: number
+  totalQueries: number
+  cacheHits: number
+  hitRate: number
+  savedForwardCalls: number
+} {
+  const stats = {
+    calls: _diagCalls,
+    totalQueries: _diagTotalQueries,
+    cacheHits: _diagCacheHits,
+    hitRate: _diagTotalQueries > 0 ? _diagCacheHits / _diagTotalQueries : 0,
+    savedForwardCalls: _diagCacheHits,
+  }
+  _diagTotalQueries = 0
+  _diagCacheHits = 0
+  _diagCalls = 0
+  return stats
+}
+
+/**
+ * Pack two quadtree coordinates into a single numeric Map key.
+ * Coordinates are deterministic fractions (multiples of 1/2^depth),
+ * so scaling by 2^20 produces exact integers. Each component fits
+ * in 21 bits; the packed key fits in 42 bits — well within JS's
+ * 53-bit integer precision.
+ */
+const COORD_SCALE = 1048576 // 2^20
+const COORD_RANGE = 2097153 // 2 * COORD_SCALE + 1
+
+function coordToKey(x: number, y: number): number {
+  return (
+    (Math.round(x * COORD_SCALE) + COORD_SCALE) * COORD_RANGE +
+    (Math.round(y * COORD_SCALE) + COORD_SCALE)
+  )
+}
 
 /// Single iteration search for new nodes and connections from a given point.
 export function findConnectionsPoints(
@@ -26,7 +71,22 @@ export function findConnectionsPoints(
     cppnInput[1] = y
   }
 
+  // Cache CPPN results within this findConnectionsPoints call.
+  // Phase 2 band pruning queries neighbor coordinates that overlap with
+  // phase 1 quadtree nodes — ~35% hit rate measured empirically.
+  const queryCache = new Map<number, number>()
+  let totalQueries = 0
+  let cacheHits = 0
+
   const f: WeightFn = (x2: number, y2: number): number => {
+    totalQueries++
+    const key = coordToKey(x2, y2)
+    const cached = queryCache.get(key)
+    if (cached !== undefined) {
+      cacheHits++
+      return cached
+    }
+
     if (reverse) {
       cppnInput[0] = x2
       cppnInput[1] = y2
@@ -34,9 +94,12 @@ export function findConnectionsPoints(
       cppnInput[2] = x2
       cppnInput[3] = y2
     }
-    // execute now returns Float64Array, and the first element is the weight
     const result = cppn.forward(cppnInput)
-    return result[0] ?? 0
+    const weight = result[0] ?? 0
+    // Release pooled output back immediately — we only need result[0]
+    ;(result as PooledFloat64Array).release?.()
+    queryCache.set(key, weight)
+    return weight
   }
 
   const connections: PointTarget[] = []
@@ -105,6 +168,11 @@ export function findConnectionsPoints(
 
   // Release the entire tree back to the pool
   QuadPoint.release(root)
+
+  // Diagnostic: accumulate cache stats
+  _diagTotalQueries += totalQueries
+  _diagCacheHits += cacheHits
+  _diagCalls++
 
   // Only return the weights with the highest absolute value.
   if (options.maxOutgoing > 0 && connections.length > options.maxOutgoing) {

@@ -63,6 +63,7 @@ export class QuadPoint {
       point.options = options
       point.weight = typeof weightFn === 'number' ? weightFn : weightFn(x, y)
       point.variance = 0.0
+
       point.children = null
       return point
     }
@@ -199,6 +200,7 @@ export class QuadPoint {
 
       stack.length = 0
       this.variance = this.options.maxVariance ? maxSquare : sumSquares / count
+
       return this.variance
     }
 
@@ -245,7 +247,6 @@ export class QuadPoint {
     }
 
     this.variance = this.options.maxVariance ? maxSquare : sumSquares / len
-
     // Clear pool for next use
     weights.length = 0
 
