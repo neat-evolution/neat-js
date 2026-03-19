@@ -106,9 +106,17 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       ...resolvedConfig.populationOptions,
     }
     this.configData = resolvedConfig.configData
-    this.genomeOptions =
+    const baseGenomeOptions =
       resolvedConfig.genomeOptions ??
       ({ ...resolvedConfig.algorithm.defaultOptions } as GenomeOptionsOf<Ctx>)
+    // Auto-enable backprop tracking when an execution manager is configured
+    this.genomeOptions =
+      config.execution?.createExecutionManager != null
+        ? ({
+            ...baseGenomeOptions,
+            enableBackprop: true,
+          } as GenomeOptionsOf<Ctx>)
+        : baseGenomeOptions
     this.populationFactoryOptions = resolvedConfig.populationFactoryOptions
     this.evaluatorConfig = resolvedConfig.evaluatorConfig
     this.stats = resolvedConfig.stats
