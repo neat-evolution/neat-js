@@ -93,7 +93,9 @@ functions:
 
 - **`HyperNEATAlgorithm`**: An object conforming to the `Algorithm` interface,
   encapsulating the factory functions for creating HyperNEAT-specific
-  configurations, genomes (which are CPPN genomes), phenotypes, and states.
+  configurations, genomes (which are CPPN genomes), phenotypes, and states. It
+  also exposes `writeBackWeights`, which delegates to the CPPN algorithm's
+  writeback for Lamarckian training.
 - **`hyperneat(...)` function**: The main entry point for running the HyperNEAT
   algorithm. It takes a `ReproducerFactory`, an `Evaluator`, `EvolutionOptions`,
   `NEATConfigOptions`, `PopulationOptions`, and `HyperNEATGenomeOptions` to set
@@ -101,16 +103,88 @@ functions:
   here is actually a CPPN genome.
 - **`HyperNEATGenomeOptions` and `defaultHyperNEATGenomeOptions`**: Define
   configurable parameters specific to HyperNEAT, such as the structure of the
-  substrate and how the CPPN maps to it.
-- **`Substrate`**: This class (likely found in `substrate/Substrate.ts` or
-  similar) represents the fixed-topology neural network whose connections are
-  determined by the CPPN. It defines the input, hidden, and output layers, and
-  how the CPPN is queried to establish connections and weights.
+  substrate, how the CPPN maps to it, and the optional `cppnLearningRate` for
+  independent CPPN training rate tuning.
+- **`Substrate`**: Represents the fixed-topology neural network whose
+  connections and biases are determined by the CPPN. It defines the input,
+  hidden, and output layers, and how the CPPN is queried to establish
+  connections, weights, and biases.
 - **`Point` and `PointKey`**: Types and utility functions for representing 2D
   coordinates on the substrate and converting them to unique string keys.
 - **`SubstrateAction`**: Defines actions that can be performed on the substrate,
   such as activating a node or creating a link, along with their spatial
   coordinates.
+
+## Genome Options
+
+`HyperNEATGenomeOptions` extends both `GenomeOptions` and `CPPNGenomeOptions`,
+inheriting all CPPN bias/activation mutation settings plus adding
+substrate-specific configuration.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `weightThreshold` | `number` | `0.1` | Minimum absolute CPPN output weight to create a substrate link |
+| `hiddenActivation` | `Activation` | `None` | Activation function for substrate hidden nodes |
+| `outputActivation` | `OutputActivationSpec` | `Softmax` | Activation function (or spec) for substrate output nodes |
+| `inputConfig` | `IOConfig` | `'line'` | Layout of substrate input nodes (`'line'` or `Point[]`) |
+| `outputConfig` | `IOConfig` | `'line'` | Layout of substrate output nodes (`'line'` or `Point[]`) |
+| `hiddenLayerSizes` | `number[]` | `[4, 4]` | Number of nodes per substrate hidden layer |
+| `hiddenLayers` | `Point[][] \| null` | `null` | Explicit hidden layer coordinates (overrides `hiddenLayerSizes`) |
+| `resolution` | `number` | `1048576` | Coordinate resolution for ES-HyperNEAT quadtree subdivision |
+| `cppnLearningRate` | `number \| undefined` | `undefined` | Override learning rate for CPPN training during Lamarckian writeback |
+| `initConfig` | `InitConfig \| undefined` | `undefined` | Captured from environment description at population creation |
+
+All `CPPNGenomeOptions` fields (bias mutation probabilities, activation pools,
+etc.) are also available and use the same defaults. See the
+`@neat-evolution/cppn` README for details.
+
+## Lamarckian Training
+
+HyperNEAT phenotypes support Lamarckian training via two closures attached to
+the phenotype: `chainBackward` and `transformWriteback`. These enable gradient
+chaining from the substrate network back through the CPPN, allowing the CPPN's
+weights and biases to be refined by backpropagation in addition to evolution.
+
+### How it works
+
+1. **Substrate forward pass.** The substrate executor runs a forward pass using
+   weights and biases produced by the CPPN. The substrate is a standard
+   feedforward network built from `PhenotypeAction` entries.
+
+2. **Substrate backward pass.** After computing loss, the substrate's
+   `TrainableExecutor` runs backpropagation, producing gradients for each
+   substrate weight and bias. These gradients are collected into a
+   `Float64Array` indexed by the phenotype action index.
+
+3. **`chainBackward(gradients, lr)`.** The phenotype's `chainBackward` closure
+   replays each coordinate query through the CPPN. For every link coordinate
+   `(x0, y0, x1, y1)`, it runs a CPPN forward pass and then accumulates the
+   weight gradient into the CPPN's first output. For every node coordinate
+   `(x, y)`, it accumulates the bias gradient into the CPPN's second output.
+   Gradients are accumulated (not applied individually) so the CPPN receives
+   one coherent update across all coordinates.
+
+4. **Gradient averaging.** The effective CPPN learning rate is scaled by
+   `1 / coordinateCount` (the total number of link + node coordinates). This
+   ensures the CPPN training rate is independent of substrate size. If
+   `cppnLearningRate` is set, it replaces the substrate learning rate as the
+   base before scaling.
+
+5. **`transformWriteback()`.** After gradient chaining, calling
+   `transformWriteback()` extracts the CPPN's updated weight and bias values
+   as a `WritebackPayload`. The `writeBackWeights` method on
+   `HyperNEATAlgorithm` then applies these deltas back to the CPPN genome,
+   completing the Lamarckian loop.
+
+### `cppnLearningRate`
+
+By default, `chainBackward` uses the substrate's learning rate for CPPN
+updates. Setting `cppnLearningRate` in `HyperNEATGenomeOptions` overrides this,
+allowing the CPPN to train at a different rate than the substrate. This is
+useful because the CPPN is a compact network whose parameters have outsized
+influence -- a single CPPN weight change affects many substrate connections.
+A lower CPPN learning rate prevents overshoot while still allowing the
+substrate to train at its own pace.
 
 ## Usage
 

@@ -27,6 +27,12 @@ export interface HyperNEATGenomeOptions
   hiddenLayers: Point[][] | null
   /** ES-HyperNEAT */
   resolution: number
+  /**
+   * Override learning rate for CPPN training during Lamarckian writeback.
+   * When set, `chainBackward` uses this as the base rate instead of the
+   * substrate learning rate (gradient averaging still applies).
+   */
+  cppnLearningRate?: number
 }
 
 export const defaultHyperNEATGenomeOptions: HyperNEATGenomeOptions = {

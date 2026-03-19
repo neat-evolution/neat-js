@@ -98,6 +98,7 @@ functions:
 - **`ESHyperNEATAlgorithm`**: An object conforming to the `Algorithm` interface,
   encapsulating the factory functions for creating ES-HyperNEAT specific
   configurations, genomes (which are CPPN genomes), phenotypes, and states.
+  Includes `writeBackWeights` for applying Lamarckian weight updates.
 - **`eshyperneat(...)` function**: The main entry point for running the
   ES-HyperNEAT algorithm. It takes a `ReproducerFactory`, an `Evaluator`,
   `EvolutionOptions`, `NEATConfigOptions`, `PopulationOptions`, and
@@ -107,8 +108,9 @@ functions:
 - **`ESHyperNEATGenomeOptions` and `defaultESHyperNEATGenomeOptions`**: Define
   configurable parameters specific to ES-HyperNEAT, including parameters for the
   search process (e.g., `varianceThreshold`, `divisionThreshold`,
-  `initialResolution`, `maxResolution`), input/output configurations, and
-  activation functions for hidden and output layers of the substrate.
+  `initialResolution`, `maxResolution`), input/output configurations, activation
+  functions for hidden and output layers of the substrate, and the
+  `cppnLearningRate` option for Lamarckian training.
 - **`exploreSubstrate`, `findConnections` (from `search` directory)**: These are
   core functions that implement the dynamic search process. `exploreSubstrate`
   recursively queries the CPPN, and `findConnections` identifies significant
@@ -116,6 +118,69 @@ functions:
 - **`QuadPoint`**: A utility class or type (from `search` directory) used to
   represent points in a quadtree-like structure during the substrate exploration
   process.
+
+## Genome Options
+
+`ESHyperNEATGenomeOptions` extends both `GenomeOptions` and `CPPNGenomeOptions`,
+providing all CPPN and NEAT parameters plus ES-HyperNEAT-specific search
+settings. Key fields and their defaults:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `varianceThreshold` | `0.2` | Minimum variance for a quadtree region to be explored further |
+| `divisionThreshold` | `0.2` | Minimum weight magnitude for a connection to be included |
+| `bandThreshold` | `0.3` | Band-pruning threshold for connection filtering |
+| `initialResolution` | `4` | Starting resolution for quadtree subdivision |
+| `maxResolution` | `5` | Maximum subdivision depth |
+| `iterationLevel` | `3` | Number of hidden-layer iterations during substrate discovery |
+| `resolution` | `1048576` | Coordinate-space resolution for substrate points |
+| `maxDiscoveries` | `256` | Maximum hidden nodes discovered per exploration |
+| `maxOutgoing` | `32` | Maximum outgoing connections per discovered node |
+| `hiddenActivation` | `Activation.None` | Activation function for hidden substrate nodes |
+| `outputActivation` | `Activation.Softmax` | Activation function for output substrate nodes |
+| `maxVariance` | `false` | Use max instead of average variance in quadtree |
+| `relativeVariance` | `false` | Scale variance relative to parent region |
+| `medianVariance` | `false` | Use median instead of mean for variance |
+| `onlyLeafVariance` | `true` | Only evaluate variance at leaf-level regions |
+| `cppnLearningRate` | `undefined` | Override learning rate for CPPN training during Lamarckian writeback |
+
+ES-HyperNEAT inherits the CPPN bias mutation defaults
+(`mutateHiddenBiasProbability: 0.8`, `mutateOutputBiasProbability: 0.8`), which
+means CPPN node biases are mutated during evolution by default.
+
+## Lamarckian Training
+
+ES-HyperNEAT supports Lamarckian training (backpropagation-driven weight
+updates that are written back to the evolved CPPN genome). This allows the
+substrate network to be trained with gradient descent while preserving learned
+weights across evolutionary generations.
+
+The phenotype produced by `createPhenotype` exposes two methods for this:
+
+- **`chainBackward(gradients, lr)`** -- Routes substrate gradients back to the
+  CPPN. For each link in the substrate, the gradient is chained through the
+  CPPN coordinate mapping (x0, y0, x1, y1) to update CPPN weights. For each
+  node, bias gradients are routed similarly. Gradient averaging is applied so
+  the effective CPPN learning rate is independent of substrate size.
+
+- **`transformWriteback()`** -- Returns a `WritebackPayload` containing the
+  updated CPPN action weights after training. The algorithm's `writeBackWeights`
+  method applies these to the genome so the learned adjustments persist across
+  generations.
+
+### `cppnLearningRate`
+
+By default, `chainBackward` uses the substrate learning rate passed to it. Set
+`cppnLearningRate` on the genome options to override this with a fixed rate for
+CPPN training. This is useful when the substrate learning rate is tuned for the
+task but the CPPN benefits from a different rate.
+
+```typescript
+const genomeOptions = {
+  ...defaultESHyperNEATGenomeOptions,
+  cppnLearningRate: 0.001, // fixed CPPN learning rate
+};
+```
 
 ## Usage
 

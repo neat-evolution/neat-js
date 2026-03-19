@@ -93,7 +93,9 @@ functions:
 
 - **`DESHyperNEATAlgorithm`**: An object conforming to the `Algorithm`
   interface, encapsulating the factory functions for creating DES-HyperNEAT
-  specific configurations, genomes, phenotypes, and states.
+  specific configurations, genomes, phenotypes, and states. Includes
+  `writeBackWeights` for applying Lamarckian weight updates to the top-level
+  genome, per-sub-CPPN auxiliary data, and per-node bias deltas.
 - **`deshyperneat(...)` function**: The main entry point for running the
   DES-HyperNEAT algorithm. It takes a `ReproducerFactory`, an `Evaluator`,
   `EvolutionOptions`, `TopologyConfigOptions`, `NEATConfigOptions` (for the
@@ -102,7 +104,8 @@ functions:
 - **`DESHyperNEATGenome`**: A highly specialized genome that extends
   `CoreGenome`. It contains CPPN genomes for each node and link, allowing for
   the evolution of their properties. It includes mutation methods for node
-  depths and the CPPN components of nodes and links.
+  depths and the CPPN components of nodes and links. Each genome node carries a
+  `bias: number` field (from `CoreNode`) used for substrate biases.
 - **`DESHyperNEATConfig`**: Extends `CoreConfig` and holds both the general
   `neatConfig` and a `cppn` specific configuration, reflecting the dual
   evolutionary nature of DES-HyperNEAT.
@@ -113,7 +116,8 @@ functions:
   structure.
 - **`DESHyperNEATNode` and `DESHyperNEATLink`**: Specialized node and link
   implementations that each contain their own CPPN genome and depth information,
-  allowing for their individual evolution.
+  allowing for their individual evolution. Note that bias is stored on the
+  genome node (`CoreNode.bias`), not on links.
 - **`CustomState` and `CustomStateData`**: These indicate a custom state
   management system, likely to handle the complex innovation tracking required
   for dynamic substrate evolution.
@@ -122,6 +126,110 @@ functions:
 - **`topology/topologyInitConfig.ts` and `topology/parseNumSubstrates.ts`**:
   Functions related to the initial setup and parsing of the dynamic substrate's
   configuration.
+
+## Genome Options
+
+`DESHyperNEATGenomeOptions` extends `GenomeOptions`, `CPPNGenomeOptions`, and
+`ESHyperNEATGenomeOptions`, inheriting all their fields. Key DES-HyperNEAT-specific
+fields and their defaults:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `singleCPPNState` | `false` | Share a single CPPN state across all sub-CPPNs |
+| `mutateNodeDepthProbability` | `0.1` | Probability of mutating a node's substrate depth |
+| `mutateAllComponents` | `true` | Mutate all sub-CPPN components during mutation |
+| `maxInputSubstrateDepth` | `0` | Maximum depth for input substrate nodes |
+| `maxOutputSubstrateDepth` | `0` | Maximum depth for output substrate nodes |
+| `maxHiddenSubstrateDepth` | `5` | Maximum depth for hidden substrate nodes |
+| `enableIdentityMapping` | `true` | Allow identity mapping in substrate connections |
+| `staticSubstrateDepth` | `-1` | Fixed substrate depth (-1 for dynamic) |
+| `useBias` | `false` | Enable substrate biases from CPPN bias output channel |
+| `cppnLearningRate` | `undefined` | Override learning rate for CPPN training during Lamarckian writeback |
+| `mutateHiddenBiasProbability` | `0` | Probability of mutating hidden node biases (overrides CPPN default of 0.8) |
+| `mutateOutputBiasProbability` | `0` | Probability of mutating output node biases (overrides CPPN default of 0.8) |
+
+### Bias handling
+
+DES-HyperNEAT stores bias on the genome node (`CoreNode.bias`) rather than on
+links. The `biasOffset` field that previously existed on `DESHyperNEATLink` has
+been removed entirely.
+
+Bias mutation is disabled by default (`mutateHiddenBiasProbability: 0`,
+`mutateOutputBiasProbability: 0`), matching the original DES-HyperNEAT paper.
+This overrides the CPPN defaults of 0.8. When `useBias: true` is set, each
+sub-CPPN is queried for substrate node biases, and the genome node's `bias`
+value is added on top (additive composition).
+
+### Backprop preset
+
+For convenience, `defaultBackpropDESHyperNEATGenomeOptions` provides a preset
+with `useBias: true` enabled, ready for Lamarckian training:
+
+```typescript
+import { defaultBackpropDESHyperNEATGenomeOptions } from "@neat-evolution/des-hyperneat";
+
+const genomeOptions = {
+  ...defaultBackpropDESHyperNEATGenomeOptions,
+  cppnLearningRate: 0.001,
+};
+```
+
+## Lamarckian Training
+
+DES-HyperNEAT supports Lamarckian training (backpropagation-driven weight
+updates written back to the evolved genome). This is more involved than in
+simpler algorithms because DES-HyperNEAT has a hierarchical CPPN structure:
+a top-level CPPN genome plus per-node and per-link sub-CPPNs that each
+generate portions of the substrate.
+
+The phenotype produced by `createPhenotype` exposes two methods:
+
+- **`chainBackward(gradients, lr)`** -- Routes substrate gradients back through
+  the full CPPN hierarchy. Link gradients are chained to both the top-level
+  CPPN and the originating sub-CPPN (scaled by the link weight via chain rule).
+  Bias gradients are routed to the sub-CPPN that produced each node and
+  accumulated as per-node bias deltas on the target genome node. Gradient
+  averaging scales the learning rate by the inverse of the total coordinate
+  count, keeping the effective CPPN training rate independent of substrate size.
+
+- **`transformWriteback()`** -- Returns a `WritebackPayload` containing:
+  - `actions` -- Updated top-level CPPN weights.
+  - `auxiliary` -- An array of `[subCPPNKey, actions]` pairs, one per sub-CPPN
+    that received gradients.
+  - `nodeBiasDeltas` -- An array of `[nodeKey, delta]` pairs for genome node
+    bias updates.
+
+The algorithm's `writeBackWeights` method applies all three parts to the genome:
+top-level CPPN weights, per-sub-CPPN weights (walking the genome's topological
+order to match sub-CPPN keys), and node bias deltas (added directly to
+`node.bias`).
+
+### Enabling Lamarckian training
+
+Set `useBias: true` in genome options (or use
+`defaultBackpropDESHyperNEATGenomeOptions`). This enables substrate biases from
+the CPPN bias output channel and marks the phenotype as bias-trainable for
+backprop. Node bias deltas from training accumulate on genome nodes across
+generations.
+
+```typescript
+import {
+  defaultBackpropDESHyperNEATGenomeOptions,
+  DESHyperNEATAlgorithm,
+} from "@neat-evolution/des-hyperneat";
+
+const genomeOptions = {
+  ...defaultBackpropDESHyperNEATGenomeOptions,
+  cppnLearningRate: 0.001, // optional: fixed CPPN learning rate
+};
+```
+
+### `cppnLearningRate`
+
+By default, `chainBackward` uses the substrate learning rate passed to it. Set
+`cppnLearningRate` to override this with a fixed rate for all CPPN training
+(top-level and sub-CPPNs). This is useful when the substrate learning rate is
+tuned for the task but the CPPNs benefit from a different rate.
 
 ## Usage
 

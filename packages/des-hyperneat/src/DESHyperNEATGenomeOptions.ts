@@ -36,6 +36,12 @@ export interface DESHyperNEATGenomeOptions
    * @default false
    */
   useBias?: boolean
+  /**
+   * Override learning rate for CPPN training during Lamarckian writeback.
+   * When set, `chainBackward` uses this as the base rate instead of the
+   * substrate learning rate (gradient averaging still applies).
+   */
+  cppnLearningRate?: number
 }
 
 export const defaultDESHyperNEATGenomeOptions: DESHyperNEATGenomeOptions = {
@@ -43,6 +49,8 @@ export const defaultDESHyperNEATGenomeOptions: DESHyperNEATGenomeOptions = {
   ...defaultCPPNGenomeOptions,
   ...defaultESHyperNEATGenomeOptions,
   useBias: false,
+  mutateHiddenBiasProbability: 0,
+  mutateOutputBiasProbability: 0,
   singleCPPNState: false,
   inputConfig: 'line',
   outputConfig: 'line',
@@ -54,3 +62,9 @@ export const defaultDESHyperNEATGenomeOptions: DESHyperNEATGenomeOptions = {
   enableIdentityMapping: true,
   staticSubstrateDepth: -1,
 }
+
+export const defaultBackpropDESHyperNEATGenomeOptions: DESHyperNEATGenomeOptions =
+  {
+    ...defaultDESHyperNEATGenomeOptions,
+    useBias: true,
+  }

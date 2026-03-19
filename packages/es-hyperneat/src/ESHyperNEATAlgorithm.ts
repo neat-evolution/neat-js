@@ -1,5 +1,7 @@
 import type { Algorithm, InitConfig } from '@neat-evolution/core'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
+import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
+import { writeBackWeights as writeCPPNWeights } from '@neat-evolution/cppn'
 import type { PopulationCreator } from '@neat-evolution/evolution'
 import { Population } from '@neat-evolution/evolution'
 import {
@@ -24,11 +26,10 @@ export const ESHyperNEATAlgorithm: Algorithm<ESHyperNEATContext> &
   createPhenotype,
   createState: () => createNEATState(),
 
-  writeBackWeights(): void {
-    throw new Error(
-      'writeBackWeights is not yet implemented for ES-HyperNEAT. ' +
-        'Lamarckian writeback requires CPPN distillation for both ' +
-        'substrate weights and biases.'
+  writeBackWeights(genome, payload) {
+    writeCPPNWeights(
+      genome as unknown as CPPNGenome<CPPNGenomeOptions>,
+      payload.actions
     )
   },
 

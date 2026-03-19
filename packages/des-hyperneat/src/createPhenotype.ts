@@ -2,6 +2,8 @@ import {
   type Connection,
   Connections,
   isActionEdge,
+  type LinkCoord,
+  type NodeCoord,
   type NodeKey,
   NodeType,
   nodeKeyToId,
@@ -13,6 +15,7 @@ import {
   resolveOutputActivation,
   toLinkKey,
   toNodeKey,
+  type WritebackPayload,
 } from '@neat-evolution/core'
 import {
   type CPPNGenome,
@@ -23,7 +26,11 @@ import {
   type ESHyperNEATGenomeOptions,
   exploreSubstrate,
 } from '@neat-evolution/es-hyperneat'
-import { createExecutor } from '@neat-evolution/executor'
+import {
+  createExecutor,
+  createTrainableExecutor,
+  type TrainableExecutor,
+} from '@neat-evolution/executor'
 import type { Point } from '@neat-evolution/hyperneat'
 import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import type { DESHyperNEATGenome } from './DESHyperNEATGenome.js'
@@ -60,9 +67,7 @@ export const createPhenotype: PhenotypeFactory<
   )
 
   const useBias = genome.genomeOptions.useBias === true
-  const biasByNodePointId = useBias
-    ? new Map<NodePointId, number>()
-    : undefined
+  const biasByNodePointId = useBias ? new Map<NodePointId, number>() : undefined
 
   const pointIdByX = new Map<number, Map<number, number>>()
   const pointById = new Map<number, Point>()
@@ -86,6 +91,7 @@ export const createPhenotype: PhenotypeFactory<
   }
 
   const nodePointIndexByNode = new Map<NodeKey, Map<number, number>>()
+  const pointIdByNodePointId = new Map<NodePointId, number>()
   let nextNodePointId = 0
   const getOrCreateNodePointId = (
     nodeKey: NodeKey,
@@ -101,6 +107,7 @@ export const createPhenotype: PhenotypeFactory<
     const id = nextNodePointId
     nextNodePointId++
     pointIndex.set(pointId, id)
+    pointIdByNodePointId.set(id, pointId)
     return id
   }
   const getNodePointIdFromPoint = (
@@ -136,6 +143,22 @@ export const createPhenotype: PhenotypeFactory<
 
   // Init assembled network
   const assembledConnections = new Connections<NodePointId, number>()
+
+  // Provenance tracking for per-sub-CPPN gradient routing
+  const subCPPNPhenotypes = new Map<number, Phenotype>()
+  let nextSubCPPNKey = 0
+
+  interface ConnectionProv {
+    subCPPNKey: number
+    sourceType: 'link' | 'node'
+    rawOutput: number
+    linkWeight?: number
+  }
+  const connectionProvenance = new Map<string, ConnectionProv>()
+  const nodeProvenance = new Map<
+    NodePointId,
+    { subCPPNKey: number; sourceType: 'link' | 'node'; targetNodeKey?: NodeKey }
+  >()
 
   const createSubstratePointBucket = (): SubstratePointBucket => ({
     pointById: new Map<number, Point>(),
@@ -182,13 +205,15 @@ export const createPhenotype: PhenotypeFactory<
       const targetType = nodeKeyToType(targetKey)
       const targetId = nodeKeyToId(targetKey)
 
-      const cppnPhenotype = createCPPNPhenotype(
+      const linkCPPNPhenotype = createCPPNPhenotype(
         genome.getLinkCPPN(
           sourceKey,
           targetKey
         ) as CPPNGenome<CPPNGenomeOptions>
       )
-      const cppn = createExecutor(cppnPhenotype)
+      const subKey = nextSubCPPNKey++
+      subCPPNPhenotypes.set(subKey, linkCPPNPhenotype)
+      const cppn = createExecutor(linkCPPNPhenotype)
 
       let layers: Point[][]
       let connections: Array<Connection<number, number>>
@@ -258,30 +283,45 @@ export const createPhenotype: PhenotypeFactory<
         throw new Error('target is input substrate or unknown node type')
       }
 
+      const linkKey = toLinkKey(sourceKey, targetKey)
+      const desLink = genome.links.get(linkKey) as DESHyperNEATLink
+      const weight = desLink.weight
+      const targetGenomeNode = genome.getNodeByKey(targetKey)
+      const targetNodeBias =
+        useBias && targetGenomeNode != null ? targetGenomeNode.bias : 0
+
       const nodes = substrateNodes.get(targetKey) as SubstratePointBucket
       if (layers[1] != null) {
         for (const node of layers[1]) {
           const ptId = addPointToBucket(nodes, node)
+          const npId = getOrCreateNodePointId(targetKey, ptId)
+          nodeProvenance.set(npId, {
+            subCPPNKey: subKey,
+            sourceType: 'link',
+            targetNodeKey: targetKey,
+          })
           if (biasByNodePointId != null) {
-            const npId = getOrCreateNodePointId(targetKey, ptId)
-            const [, bias] = cppn.forward([
+            const [, subCppnBias] = cppn.forward([
               0.0,
               0.0,
               node[0] / r,
               node[1] / r,
             ]) as [weight: number, bias: number]
-            biasByNodePointId.set(npId, bias)
+            biasByNodePointId.set(npId, subCppnBias + targetNodeBias)
           }
         }
       }
-
-      const linkKey = toLinkKey(sourceKey, targetKey)
-      const weight = (genome.links.get(linkKey) as DESHyperNEATLink).weight
       for (const connection of connections) {
         const [fromPointId, toPointId, edge] = connection
         const fromId = getOrCreateNodePointId(sourceKey, fromPointId)
         const toId = getOrCreateNodePointId(targetKey, toPointId)
         assembledConnections.add(fromId, toId, edge * weight, true)
+        connectionProvenance.set(`${fromId}:${toId}`, {
+          subCPPNKey: subKey,
+          sourceType: 'link',
+          rawOutput: edge,
+          linkWeight: weight,
+        })
       }
     } else {
       const [nodeKey] = action
@@ -290,11 +330,12 @@ export const createPhenotype: PhenotypeFactory<
 
       const depth = genome.getDepth(nodeKey) as number
       if (depth > 0) {
-        const cppn = createExecutor(
-          createCPPNPhenotype(
-            genome.getNodeCPPN(nodeKey) as CPPNGenome<CPPNGenomeOptions>
-          )
+        const nodeCPPNPhenotype = createCPPNPhenotype(
+          genome.getNodeCPPN(nodeKey) as CPPNGenome<CPPNGenomeOptions>
         )
+        const nodeSubKey = nextSubCPPNKey++
+        subCPPNPhenotypes.set(nodeSubKey, nodeCPPNPhenotype)
+        const cppn = createExecutor(nodeCPPNPhenotype)
 
         let layers: Point[][]
         let connections: Array<Connection<number, number>>
@@ -326,19 +367,27 @@ export const createPhenotype: PhenotypeFactory<
         }
 
         const nodes = substrateNodes.get(nodeKey) as SubstratePointBucket
+        const nodeGenomeBias = useBias
+          ? (genome.getNodeByKey(nodeKey)?.bias ?? 0)
+          : 0
         for (let i = 1; i < layers.length; i++) {
           const layer = layers[i] as Point[]
           for (const node of layer) {
             const ptId = addPointToBucket(nodes, node)
+            const npId = getOrCreateNodePointId(nodeKey, ptId)
+            nodeProvenance.set(npId, {
+              subCPPNKey: nodeSubKey,
+              sourceType: 'node',
+              targetNodeKey: nodeKey,
+            })
             if (biasByNodePointId != null) {
-              const npId = getOrCreateNodePointId(nodeKey, ptId)
               const [, bias] = cppn.forward([
                 0.0,
                 0.0,
                 node[0] / r,
                 node[1] / r,
               ]) as [weight: number, bias: number]
-              biasByNodePointId.set(npId, bias)
+              biasByNodePointId.set(npId, bias + nodeGenomeBias)
             }
           }
         }
@@ -347,8 +396,12 @@ export const createPhenotype: PhenotypeFactory<
           const fromId = getOrCreateNodePointId(nodeKey, fromPointId)
           const toId = getOrCreateNodePointId(nodeKey, toPointId)
           assembledConnections.add(fromId, toId, edge, true)
+          connectionProvenance.set(`${fromId}:${toId}`, {
+            subCPPNKey: nodeSubKey,
+            sourceType: 'node',
+            rawOutput: edge,
+          })
         }
-
       }
     }
   }
@@ -429,20 +482,80 @@ export const createPhenotype: PhenotypeFactory<
     nodeMapping.set(nodes[i] as NodePointId, i)
   }
 
+  // Build the top-level CPPN phenotype for gradient chaining
+  const cppnPhenotype = createCPPNPhenotype(
+    genome as unknown as CPPNGenome<CPPNGenomeOptions>
+  )
+
   // Map topologically sorted order to neural network actions.
+  // Track coordinates for CPPN gradient chaining.
   const actions: PhenotypeAction[] = []
+  const linkCoords: LinkCoord[] = []
+  const nodeCoords: NodeCoord[] = []
+  let actionIndex = 0
+  const inverseR = 1 / r
+
   for (const action of assembledConnections.sortTopologically()) {
     if (isActionEdge(action)) {
       const [from, to, weight] = action
+      // Look up coordinates from NodePointId → pointId → [x, y]
+      const fromPointId = pointIdByNodePointId.get(from)
+      const toPointId = pointIdByNodePointId.get(to)
+      if (fromPointId !== undefined && toPointId !== undefined) {
+        const fromPoint = pointById.get(fromPointId)
+        const toPoint = pointById.get(toPointId)
+        if (fromPoint !== undefined && toPoint !== undefined) {
+          const prov = connectionProvenance.get(`${from}:${to}`)
+          const coord: LinkCoord = {
+            actionIndex,
+            x0: fromPoint[0] * inverseR,
+            y0: fromPoint[1] * inverseR,
+            x1: toPoint[0] * inverseR,
+            y1: toPoint[1] * inverseR,
+          }
+          if (prov != null) {
+            coord.sourceKey = prov.subCPPNKey
+            coord.sourceType = prov.sourceType
+            coord.subCPPNOutput = prov.rawOutput
+            if (prov.linkWeight !== undefined) {
+              coord.linkWeight = prov.linkWeight
+            }
+          }
+          linkCoords.push(coord)
+        }
+      }
       actions.push([
         PhenotypeActionType.Link,
         nodeMapping.get(from) as number,
         nodeMapping.get(to) as number,
         weight,
       ])
+      actionIndex++
     } else {
       const [nodeKey] = action
       const index = nodeMapping.get(nodeKey) as number
+      // Look up coordinate for bias chaining
+      const pointId = pointIdByNodePointId.get(nodeKey)
+      if (pointId !== undefined) {
+        const point = pointById.get(pointId)
+        if (point !== undefined) {
+          const nodeProv = nodeProvenance.get(nodeKey)
+          const coord: NodeCoord = {
+            actionIndex,
+            x: point[0] * inverseR,
+            y: point[1] * inverseR,
+          }
+          if (nodeProv != null) {
+            coord.sourceKey = nodeProv.subCPPNKey
+            coord.sourceType = nodeProv.sourceType
+            if (nodeProv.targetNodeKey !== undefined) {
+              coord.targetNodeKey = nodeProv.targetNodeKey
+            }
+          }
+          nodeCoords.push(coord)
+        }
+      }
+      // Bias comes from sub-CPPN + node.bias (composed during assembly)
       actions.push([
         PhenotypeActionType.Activation,
         index,
@@ -454,14 +567,149 @@ export const createPhenotype: PhenotypeFactory<
               index - firstOutputId
             ),
       ])
+      actionIndex++
     }
   }
 
-  return {
+  // Lazy CPPN TrainableExecutor — only created on first backward call, cached for reuse
+  let cppnTrainableExecutor: TrainableExecutor | undefined
+
+  // Per-sub-CPPN trainable executors, lazily created on first backward call
+  const subCPPNExecutors = new Map<number, TrainableExecutor>()
+  const getSubCPPNExecutor = (key: number): TrainableExecutor => {
+    let exec = subCPPNExecutors.get(key)
+    if (exec === undefined) {
+      const phenotype = subCPPNPhenotypes.get(key)
+      if (phenotype === undefined) {
+        throw new Error(`Sub-CPPN phenotype not found for key ${key}`)
+      }
+      exec = createTrainableExecutor(phenotype)
+      subCPPNExecutors.set(key, exec)
+    }
+    return exec
+  }
+
+  // Gradient averaging: divide lr by total coordinate count (all sub-CPPNs combined)
+  const coordinateCount = linkCoords.length + nodeCoords.length
+  const cppnLrScale = coordinateCount > 0 ? 1 / coordinateCount : 1
+  const baseCppnLr = genome.genomeOptions.cppnLearningRate
+
+  const result: Phenotype = {
     length: nodeMapping.size,
     inputs,
     outputs,
     actions,
     trainableBiases: useBias,
+    coordinateMap: { linkCoords, nodeCoords, cppnPhenotype },
   }
+
+  // Pre-allocate error buffers for CPPN backward (avoid per-coordinate allocation)
+  const linkError = new Float64Array(2) // [grad, 0] for weight output
+  const nodeError = new Float64Array(2) // [0, grad] for bias output
+
+  result.chainBackward = (gradients: Float64Array, lr: number): void => {
+    // Top-level CPPN training
+    if (cppnTrainableExecutor === undefined) {
+      cppnTrainableExecutor = createTrainableExecutor(cppnPhenotype)
+    }
+    cppnTrainableExecutor.zeroGradients()
+
+    // Zero all active sub-CPPN executors
+    for (const exec of subCPPNExecutors.values()) {
+      exec.zeroGradients()
+    }
+
+    // Track which sub-CPPNs received gradients this step
+    const activeSubCPPNs = new Set<number>()
+
+    // Route link gradients to the appropriate sub-CPPN
+    for (const lc of linkCoords) {
+      const grad = gradients[lc.actionIndex]
+      if (grad === undefined || grad === 0) continue
+
+      // Top-level CPPN still gets all gradients
+      cppnTrainableExecutor.forward([lc.x0, lc.y0, lc.x1, lc.y1])
+      linkError[0] = grad
+      cppnTrainableExecutor.accumulateBackward(linkError)
+
+      // Route to sub-CPPN if provenance is available
+      if (lc.sourceKey !== undefined && lc.sourceType !== undefined) {
+        const subExec = getSubCPPNExecutor(lc.sourceKey)
+        activeSubCPPNs.add(lc.sourceKey)
+        subExec.forward([lc.x0, lc.y0, lc.x1, lc.y1])
+        // Chain rule: link CPPNs get grad * linkWeight
+        const subGrad =
+          lc.linkWeight !== undefined ? grad * lc.linkWeight : grad
+        linkError[0] = subGrad
+        subExec.accumulateBackward(linkError)
+      }
+    }
+
+    // Route node/bias gradients to sub-CPPNs and accumulate node bias deltas.
+    // The top-level topology CPPN has no bias output channel — bias gradients
+    // go to sub-CPPNs (fine-grained) and node.bias (per-node).
+    const nodeBiasGradients = new Map<NodeKey, number>()
+
+    for (const nc of nodeCoords) {
+      const grad = gradients[nc.actionIndex]
+      if (grad === undefined || grad === 0) continue
+
+      // Sub-CPPN receives bias gradient (additive composition → passes through)
+      if (nc.sourceKey !== undefined) {
+        const subExec = getSubCPPNExecutor(nc.sourceKey)
+        activeSubCPPNs.add(nc.sourceKey)
+        subExec.forward([0.0, 0.0, nc.x, nc.y])
+        nodeError[1] = grad
+        subExec.accumulateBackward(nodeError)
+      }
+
+      // Accumulate node bias gradient for the target genome node
+      if (nc.targetNodeKey !== undefined) {
+        const prev = nodeBiasGradients.get(nc.targetNodeKey) ?? 0
+        nodeBiasGradients.set(nc.targetNodeKey, prev + grad)
+      }
+    }
+
+    // Apply gradients: top-level + all active sub-CPPNs
+    const scaledLr = (baseCppnLr ?? lr) * cppnLrScale
+    cppnTrainableExecutor.applyGradients(scaledLr)
+    for (const key of activeSubCPPNs) {
+      const exec = subCPPNExecutors.get(key)
+      if (exec !== undefined) {
+        exec.applyGradients(scaledLr)
+      }
+    }
+
+    // Scale node bias gradients and store for writeback
+    // The deltas are negative (gradient descent: node.bias -= lr * grad)
+    lastNodeBiasDeltas = []
+    for (const [nodeKey, grad] of nodeBiasGradients) {
+      lastNodeBiasDeltas.push([nodeKey, -scaledLr * grad])
+    }
+  }
+
+  // Persistent node bias delta accumulator for transformWriteback
+  let lastNodeBiasDeltas: Array<[nodeKey: number, delta: number]> = []
+
+  result.transformWriteback = (): WritebackPayload | undefined => {
+    if (cppnTrainableExecutor === undefined) return undefined
+    const topLevel = cppnTrainableExecutor.getUpdatedActions()
+
+    // Collect per-sub-CPPN writebacks
+    const auxiliary: Array<[key: number, actions: PhenotypeAction[]]> = []
+    for (const [key, exec] of subCPPNExecutors) {
+      auxiliary.push([key, exec.getUpdatedActions().actions])
+    }
+
+    const payload: WritebackPayload = { actions: topLevel.actions }
+    if (auxiliary.length > 0) {
+      payload.auxiliary = auxiliary
+    }
+    if (lastNodeBiasDeltas.length > 0) {
+      payload.nodeBiasDeltas = lastNodeBiasDeltas
+    }
+    return payload
+  }
+
+  return result
 }

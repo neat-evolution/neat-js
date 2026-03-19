@@ -7,7 +7,11 @@ import {
   nodeRefToKey,
   toLinkKey,
 } from '@neat-evolution/core'
-import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
+import type {
+  CPPNGenome,
+  CPPNGenomeOptions,
+  CPPNNode,
+} from '@neat-evolution/cppn'
 import { threadRNG } from '@neat-evolution/utils'
 import type { DESHyperNEATGenomeFactory } from './createGenome.js'
 import { createLinkFactory } from './createLink.js'
@@ -20,8 +24,10 @@ import type {
   DESHyperNEATNodeData,
 } from './DESHyperNEATGenomeFactoryOptions.js'
 import type { DESHyperNEATGenomeOptions } from './DESHyperNEATGenomeOptions.js'
+import type { DESHyperNEATLink } from './DESHyperNEATLink.js'
 import type { DESHyperNEATLinkFactoryOptions } from './DESHyperNEATLinkFactoryOptions.js'
 import type { DESHyperNEATNode } from './DESHyperNEATNode.js'
+import { insertIdentity } from './genome/insertIdentity.js'
 
 export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
   constructor(
@@ -121,6 +127,49 @@ export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
         : 0
     } else {
       return this.getNodeByKey(node)?.depth
+    }
+  }
+
+  override async mutationAddLink(): Promise<void> {
+    const sizeBefore = this.links.size
+    await super.mutationAddLink()
+
+    // Initialize new link CPPNs with identity mapping so they produce
+    // spatially-meaningful substrate connections from the start.
+    // Without this, new links get bare random CPPNs that may never produce
+    // outputs above the weight threshold, leaving the substrate empty.
+    // After identity init, randomize all CPPN weights and biases so the
+    // population has diverse link CPPNs from the start. Without this, every
+    // organism gets identical distance-function CPPNs.
+    if (
+      this.genomeOptions.enableIdentityMapping &&
+      this.links.size > sizeBefore
+    ) {
+      const rng = threadRNG()
+      for (const link of this.links.values()) {
+        const desLink = link as DESHyperNEATLink
+        if (desLink.cppn.links.size === 0) {
+          await insertIdentity(desLink.cppn, 0)
+          // Perturb all CPPN link weights
+          for (const cppnLink of desLink.cppn.links.values()) {
+            cppnLink.weight += (rng.gen() - 0.5) * 2.0
+            desLink.cppn.connections.setEdge(
+              cppnLink.from,
+              cppnLink.to,
+              cppnLink.weight
+            )
+          }
+          // Perturb all non-input node biases
+          for (const nodeMap of [
+            desLink.cppn.hiddenNodes,
+            desLink.cppn.outputs,
+          ]) {
+            for (const node of nodeMap.values()) {
+              ;(node as CPPNNode).bias += (rng.gen() - 0.5) * 0.5
+            }
+          }
+        }
+      }
     }
   }
 
