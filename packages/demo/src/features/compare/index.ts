@@ -30,10 +30,7 @@ import {
 } from '@neat-evolution/evolution-manager'
 import type { TrainerFactory } from '@neat-evolution/execution-manager'
 import type { Executor, ExecutorFactory } from '@neat-evolution/executor'
-import {
-  createPhenotype,
-  type NEATGenome,
-} from '@neat-evolution/neat'
+import { createPhenotype, type NEATGenome } from '@neat-evolution/neat'
 
 // --- Argument parsing ---
 
@@ -110,9 +107,7 @@ interface RunResult {
 
 const CREATE_ENVIRONMENT_PATHNAME = '@neat-evolution/dataset-environment'
 
-function backpropEvaluatorConfig(
-  trainerOptions: Record<string, unknown>
-): {
+function backpropEvaluatorConfig(trainerOptions: Record<string, unknown>): {
   evaluation: Partial<EvaluatorConfig>
   execution: {
     createExecutionManager: string
@@ -345,7 +340,9 @@ for (const result of results) {
     const trainerOptions = evaluatorConfig.environmentRuntimeData
       ?.executionManagerFactoryOptions as Record<string, unknown>
     if (trainerOptions == null) {
-      throw new Error(`executionManagerFactoryOptions missing for ${result.name}`)
+      throw new Error(
+        `executionManagerFactoryOptions missing for ${result.name}`
+      )
     }
     const trainer = createTrainer(executor, trainerOptions)
     trainer.train({

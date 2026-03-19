@@ -1,9 +1,9 @@
-import {
-  type StepAgent,
-  type StepEpisodeResult,
-  type StepOutcome,
-} from '@neat-evolution/rl-core'
 import type { StaticExecutor } from '@neat-evolution/executor'
+import type {
+  StepAgent,
+  StepEpisodeResult,
+  StepOutcome,
+} from '@neat-evolution/rl-core'
 import { describe, expect, it } from 'vitest'
 import { StepBanditEnvironment } from '../src/features/step/StepBanditEnvironment.js'
 

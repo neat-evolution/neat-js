@@ -1,5 +1,8 @@
 import { Activation } from '@neat-evolution/core'
-import { defaultEvolutionOptions, defaultPopulationOptions } from '@neat-evolution/evolution'
+import {
+  defaultEvolutionOptions,
+  defaultPopulationOptions,
+} from '@neat-evolution/evolution'
 import {
   type EvaluatorConfig,
   EvolutionManager,

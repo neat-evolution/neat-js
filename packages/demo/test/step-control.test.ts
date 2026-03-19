@@ -1,7 +1,7 @@
-import {
-  type StepAgent,
-  type StepEpisodeResult,
-  type StepOutcome,
+import type {
+  StepAgent,
+  StepEpisodeResult,
+  StepOutcome,
 } from '@neat-evolution/rl-core'
 import { describe, expect, it } from 'vitest'
 import { StepControlEnvironment } from '../src/features/step-control/StepControlEnvironment.js'

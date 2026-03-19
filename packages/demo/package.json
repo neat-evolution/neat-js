@@ -51,6 +51,8 @@
     "dev:workspace": "turbo run dev --filter=@neat-evolution/demo... --concurrency 20",
     "demo": "node ./dist/esm/worker.js",
     "compare": "node ./dist/esm/features/compare/index.js",
+    "compare-hyperneat": "node ./dist/esm/features/compare-hyperneat/index.js",
+    "diagnose-des": "node ./dist/esm/features/compare-hyperneat/diagnose-des.js",
     "step": "node ./dist/esm/features/step/index.js",
     "start": "caffeinate -s node ./dist/esm/worker.js",
     "format": "biome check --write",

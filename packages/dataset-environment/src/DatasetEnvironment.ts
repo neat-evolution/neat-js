@@ -19,7 +19,9 @@ import { crossentropy, mse } from './error.js'
 import type { Matrix } from './types.js'
 
 export class DatasetEnvironment
-  implements Environment<SharedArrayBuffer>, SupervisedEnvironment<SharedArrayBuffer>
+  implements
+    Environment<SharedArrayBuffer>,
+    SupervisedEnvironment<SharedArrayBuffer>
 {
   public readonly dataset: Dataset
   public readonly description: EnvironmentDescription
@@ -28,10 +30,7 @@ export class DatasetEnvironment
     | EnvironmentInitOptions<TrainerFactory, TrainerFactoryOptions>
     | undefined
 
-  constructor(
-    dataset: Dataset,
-    initOptions?: EnvironmentInitOptions
-  ) {
+  constructor(dataset: Dataset, initOptions?: EnvironmentInitOptions) {
     this.dataset = dataset
     this.description = {
       inputs: dataset.dimensions.inputs,

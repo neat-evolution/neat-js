@@ -23,7 +23,9 @@ export interface StepBanditFactoryOptions {
   outputCount?: number
 }
 
-export class StepBanditEnvironment implements Environment<StepBanditFactoryOptions> {
+export class StepBanditEnvironment
+  implements Environment<StepBanditFactoryOptions>
+{
   public readonly description: EnvironmentDescription
   public readonly isAsync = false
   private readonly initOptions:
@@ -39,10 +41,7 @@ export class StepBanditEnvironment implements Environment<StepBanditFactoryOptio
   private readonly stepsPerEpisode = 20
   private readonly armCount = 3
 
-  constructor(
-    outputCount?: number,
-    initOptions?: EnvironmentInitOptions
-  ) {
+  constructor(outputCount?: number, initOptions?: EnvironmentInitOptions) {
     this.description = {
       inputs: 3,
       outputs: outputCount ?? 4,

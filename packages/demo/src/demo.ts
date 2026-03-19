@@ -26,10 +26,7 @@ export enum Methods {
 
 export const method = Methods.DES_HyperNEAT
 
-type ErasedManagerConfig = Pick<
-  EvolutionManagerOptions,
-  'algorithm'
->
+type ErasedManagerConfig = Pick<EvolutionManagerOptions, 'algorithm'>
 
 /** Build algorithm-specific config fields for EvolutionManagerOptions.
  *  Type-erased: each algorithm has a specific Ctx, but the demo

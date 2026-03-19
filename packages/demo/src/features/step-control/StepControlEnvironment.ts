@@ -31,10 +31,7 @@ export class StepControlEnvironment
   private readonly horizon = 6
   private readonly goalPosition = 3
 
-  constructor(
-    outputCount?: number,
-    initOptions?: EnvironmentInitOptions
-  ) {
+  constructor(outputCount?: number, initOptions?: EnvironmentInitOptions) {
     this.description = {
       inputs: this.goalPosition + 1,
       outputs: outputCount ?? 3,

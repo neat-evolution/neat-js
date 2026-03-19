@@ -612,12 +612,12 @@ async function main() {
       const best = await withMaybeSilencedTrainingLogs(
         options.quietTraining,
         async () => {
-        return await demo(createReproducer, createEvaluator, createExecutor, {
-          method,
-          evolution: {
-            iterations: options.iterations,
-            secondsLimit: options.secondsLimit,
-            ...(Number.isFinite(options.initialMutations)
+          return await demo(createReproducer, createEvaluator, createExecutor, {
+            method,
+            evolution: {
+              iterations: options.iterations,
+              secondsLimit: options.secondsLimit,
+              ...(Number.isFinite(options.initialMutations)
                 ? { initialMutations: options.initialMutations }
                 : {}),
             },
