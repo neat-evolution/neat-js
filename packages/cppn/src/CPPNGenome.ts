@@ -3,10 +3,10 @@ import {
   CoreGenome,
   type InitConfig,
   type LinkFactory,
-  type LinkFactoryOptions,
   type NodeKey,
   NodeType,
   nodeKeyToType,
+  toLinkKey,
   toNodeKey,
 } from '@neat-evolution/core'
 import {
@@ -111,26 +111,29 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
       this.outputs.set(toNodeKey(NodeType.Output, id), node)
     }
 
+    // Bulk-load links: populate links Map and Connections in one pass.
+    // Avoids per-link insertLink() overhead (toLinkKey duplication, cycle checks,
+    // addWithKey validation). Safe because factoryOptions is known-good data.
     const linksData = factoryOptions.links
+    const linkConfig = this.config.link()
+    const linkState = this.state.link()
     for (let i = 0; i < linksData.length; i++) {
       const linkData = linksData[i]
       if (linkData == null) {
         continue
       }
       const [fromKey, toKey, weight, innovation] = linkData
-      const linkFactoryOptions: LinkFactoryOptions = {
-        from: fromKey,
-        to: toKey,
-        weight,
-        innovation,
-      }
       const link = this.createLink(
-        linkFactoryOptions,
-        this.config.link(),
-        this.state.link()
+        { from: fromKey, to: toKey, weight, innovation },
+        linkConfig,
+        linkState
       )
-      this.insertLink(link, true)
+      this.links.set(toLinkKey(fromKey, toKey), link)
     }
+    // Build Connections graph from the raw tuples — one pass, no per-link overhead
+    this.connections.bulkAdd(
+      linksData as unknown as Array<[number, number, number]>
+    )
   }
 
   protected override init(factoryOptions?: CPPNGenomeFactoryOptions): void {

@@ -15,7 +15,7 @@ export const createNodeFactory = <GO extends CPPNGenomeOptions>(
   const createNode: NodeFactory<CPPNContext<GO>> = (
     factoryOptions: CPPNNodeFactoryOptions
   ): NodeTypeOf<CPPNContext<GO>> => {
-    return new CPPNNode(factoryOptions, nodeOptions) as NodeTypeOf<
+    return CPPNNode.from(factoryOptions, nodeOptions) as NodeTypeOf<
       CPPNContext<GO>
     >
   }
@@ -25,5 +25,5 @@ export const createNodeFactory = <GO extends CPPNGenomeOptions>(
 export const createNode: NodeFactory<CPPNContext> = (
   factoryOptions: CPPNNodeFactoryOptions
 ): CPPNNode => {
-  return new CPPNNode(factoryOptions, defaultCPPNNodeOptions)
+  return CPPNNode.from(factoryOptions, defaultCPPNNodeOptions)
 }

@@ -25,6 +25,36 @@ export class CPPNNode extends CoreNode<CPPNContext> {
     this.activation = factoryOptions.activation ?? this.determineActivation()
   }
 
+  /**
+   * Decorate a CPPNNodeFactoryOptions object as a CPPNNode by setting its
+   * prototype. The factoryOptions already has { type, id, bias, activation };
+   * config/state/createNode/nodeOptions come from assignment. Zero allocation
+   * for the node shell — the factory options object IS the node.
+   */
+  static from(
+    factoryOptions: CPPNNodeFactoryOptions,
+    nodeOptions: CPPNNodeOptions
+  ): CPPNNode {
+    const node = factoryOptions as unknown as CPPNNode
+    Object.setPrototypeOf(node, CPPNNode.prototype)
+    const init = node as unknown as {
+      config: null
+      state: null
+      createNode: typeof createNode
+    }
+    init.config = null
+    init.state = null
+    init.createNode = createNode
+    node.nodeOptions = nodeOptions
+    node.bias = node.bias ?? 0
+    if (node.activation === undefined) {
+      node.activation = (
+        node as unknown as { determineActivation: () => Activation }
+      ).determineActivation()
+    }
+    return node
+  }
+
   private determineActivation(): Activation {
     const rng = threadRNG()
 
