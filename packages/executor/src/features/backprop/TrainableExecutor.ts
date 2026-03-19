@@ -9,6 +9,13 @@ export interface TrainableExecutor extends StaticExecutor {
   createSnapshot(): StaticExecutor
 
   /**
+   * Run the forward pass to populate internal state without allocating an output.
+   * Used by CPPN chaining where only the internal state is needed for gradient
+   * computation — avoids ~50 output array allocations per backward step.
+   */
+  forwardInPlace?(inputs: number[] | Float64Array): void
+
+  /**
    * Compute gradients and ADD them to the existing gradient accumulator
    * without updating weights. Call `applyGradients()` after accumulating
    * across all samples to apply one coherent weight update.

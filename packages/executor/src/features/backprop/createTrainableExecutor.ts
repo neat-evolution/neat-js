@@ -10,6 +10,7 @@ import type {
   BatchOutputs,
   StaticExecutor,
 } from '../../Executor.js'
+import { OutputPool } from '../../OutputPool.js'
 import {
   type ActivationFunction,
   toActivationFunction,
@@ -112,6 +113,7 @@ export function createTrainableExecutor(
   const postActivation = new Float64Array(nodeCount)
   const errors = new Float64Array(nodeCount)
   const softmaxProbs = new Float64Array(outputsCount)
+  const outputPool = new OutputPool(outputsCount)
 
   const forward = (inputs: number[] | Float64Array): Float64Array => {
     // Clear state
@@ -135,7 +137,6 @@ export function createTrainableExecutor(
         const from = actionNodeOrFrom[i] as number
         const to = actionTo[i] as number
         const weight = actionWeights[i] as number
-        // Accumulate weighted input into pre-activation of target
         preActivation[to] =
           (preActivation[to] as number) +
           (postActivation[from] as number) * weight
@@ -143,20 +144,21 @@ export function createTrainableExecutor(
         const node = actionNodeOrFrom[i] as number
         const fn = activationFns[i] as ActivationFunction
         const bias = actionBiases[i] as number
-        // Add bias to accumulated sum
         const z = (preActivation[node] as number) + bias
         preActivation[node] = z
         postActivation[node] = fn(z)
       }
     }
 
-    // Collect outputs
-    const output = new Float64Array(outputsCount)
+    // Collect outputs into pooled array
+    const output = outputPool.acquire()
     for (let i = 0; i < outputsCount; i++) {
       const o = phenotypeOutputs[i]
       if (o !== undefined) {
         const value = postActivation[o]
         output[i] = value !== undefined && Number.isFinite(value) ? value : 0
+      } else {
+        output[i] = 0
       }
     }
 
@@ -182,6 +184,64 @@ export function createTrainableExecutor(
     }
 
     return output
+  }
+
+  /**
+   * Run the forward pass to populate internal state (preActivation, postActivation)
+   * without allocating an output array. Used by chainBackward where only the
+   * internal state is needed for the subsequent gradient computation.
+   */
+  const forwardInPlace = (inputs: number[] | Float64Array): void => {
+    preActivation.fill(0)
+    postActivation.fill(0)
+
+    const inputsMap = phenotype.inputs
+    for (let i = 0; i < inputsCount; i++) {
+      const inputIndex = inputsMap[i]
+      if (inputIndex !== undefined) {
+        const value = inputs[inputIndex] ?? 0
+        preActivation[i] = value
+        postActivation[i] = value
+      }
+    }
+
+    for (let i = 0; i < actionCount; i++) {
+      if (actionTypes[i] === LINK_ACTION) {
+        const from = actionNodeOrFrom[i] as number
+        const to = actionTo[i] as number
+        const weight = actionWeights[i] as number
+        preActivation[to] =
+          (preActivation[to] as number) +
+          (postActivation[from] as number) * weight
+      } else {
+        const node = actionNodeOrFrom[i] as number
+        const fn = activationFns[i] as ActivationFunction
+        const bias = actionBiases[i] as number
+        const z = (preActivation[node] as number) + bias
+        preActivation[node] = z
+        postActivation[node] = fn(z)
+      }
+    }
+
+    // Store softmax probabilities for backward Jacobian
+    for (const group of softmaxGroups) {
+      let sum = 0
+      for (let i = group.start; i < group.end; i++) {
+        const o = phenotypeOutputs[i]
+        if (o !== undefined) {
+          const value = postActivation[o]
+          softmaxProbs[i] =
+            value !== undefined && Number.isFinite(value) ? value : 0
+        } else {
+          softmaxProbs[i] = 0
+        }
+        sum += softmaxProbs[i] as number
+      }
+      if (sum === 0) continue
+      for (let i = group.start; i < group.end; i++) {
+        softmaxProbs[i] = (softmaxProbs[i] as number) / sum
+      }
+    }
   }
 
   function createStaticExecutorSnapshot(
@@ -416,6 +476,7 @@ export function createTrainableExecutor(
 
   return {
     forward,
+    forwardInPlace,
     forwardBatch,
     backward,
     accumulateBackward,
