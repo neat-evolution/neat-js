@@ -3,7 +3,7 @@ import type {
   GenomeFactoryOptions,
   GenomeOptions,
   InitConfig,
-  PhenotypeAction,
+  WritebackPayload,
 } from '@neat-evolution/core'
 import type { StatsRecorderConfig } from '@neat-evolution/stats'
 import {
@@ -56,8 +56,8 @@ export interface EvaluateGenomePayload {
  *  the worker may also return writeback data and telemetry. */
 export interface EvaluateGenomeResult {
   fitness: number
-  /** Updated network weights for Lamarckian writeback. */
-  updatedActions?: PhenotypeAction[]
+  /** Writeback payload for Lamarckian writeback. */
+  writebackPayload?: WritebackPayload
   /** Plugin-specific telemetry from the evaluation. */
   telemetry?: unknown
 }
@@ -69,7 +69,7 @@ export interface EvaluateBatchPayload {
 
 export interface EvaluateBatchResult {
   fitnessScores: number[]
-  writebacks?: Map<number, PhenotypeAction[]>
+  writebacks?: Map<number, WritebackPayload>
 }
 
 export type InitAction = WorkerMessage<InitPayload, undefined>

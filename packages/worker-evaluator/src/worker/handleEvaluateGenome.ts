@@ -60,11 +60,11 @@ export const handleEvaluateGenome: HandleEvaluateGenomeFn = async (
 
   const result: EvaluateGenomeResult = { fitness }
 
-  // Extract writeback for this executor (index 0)
+  // Extract writeback payload for this executor (index 0)
   if (writebacks != null) {
-    const updatedActions = writebacks.get(0)
-    if (updatedActions != null) {
-      result.updatedActions = updatedActions
+    const payload = writebacks.get(0)
+    if (payload != null) {
+      result.writebackPayload = payload
     }
   }
 

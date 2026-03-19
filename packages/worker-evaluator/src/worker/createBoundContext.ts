@@ -1,4 +1,4 @@
-import type { PhenotypeAction } from '@neat-evolution/core'
+import type { WritebackPayload } from '@neat-evolution/core'
 import type { WorkerEvaluationContext } from '@neat-evolution/execution-manager'
 import type {
   StaticExecutor,
@@ -12,7 +12,7 @@ import type { WorkerMessage } from '@neat-evolution/worker-actions'
 interface BoundContext extends WorkerEvaluationContext {
   /** Mutable executor map for registration during evaluation setup. */
   executorMap: Map<StaticExecutor, unknown>
-  flush(): Map<number, PhenotypeAction[]> | undefined
+  flush(): Map<number, WritebackPayload> | undefined
   fireFitnessCallbacks(fitness: number): void
 }
 
@@ -60,7 +60,7 @@ export function createBoundContext(
 
     flush() {
       if (scheduledWritebacks.size === 0) return undefined
-      const results = new Map<number, PhenotypeAction[]>()
+      const results = new Map<number, WritebackPayload>()
       for (const executor of scheduledWritebacks) {
         const index = executorMap.get(executor)
         if (index != null) {

@@ -3,7 +3,7 @@ import type {
   ConfigData,
   GenomeOptions,
   InitConfig,
-  PhenotypeAction,
+  WritebackPayload,
 } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
 import {
@@ -55,7 +55,7 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   private readonly dispatcher: Dispatcher
 
   /** Pending Lamarckian writebacks collected from worker responses. */
-  private readonly pendingWritebacks = new Map<AnyGenome, PhenotypeAction[]>()
+  private readonly pendingWritebacks = new Map<AnyGenome, WritebackPayload>()
   /** Latest telemetry per genome from worker responses. */
   private readonly telemetryByGenome = new WeakMap<AnyGenome, unknown>()
   private readonly stats: StatsRecorder | undefined
@@ -221,8 +221,8 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     )
 
     // Extract side effects from the enriched response
-    if (result.updatedActions != null) {
-      this.pendingWritebacks.set(genome, result.updatedActions)
+    if (result.writebackPayload != null) {
+      this.pendingWritebacks.set(genome, result.writebackPayload)
     }
     if (result.telemetry != null) {
       this.telemetryByGenome.set(genome, result.telemetry)
@@ -264,8 +264,8 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
 
   /** Apply all pending Lamarckian writebacks to genomes. */
   private applyWritebacks(): void {
-    for (const [genome, updatedActions] of this.pendingWritebacks) {
-      this.algorithm.writeBackWeights(genome, updatedActions)
+    for (const [genome, payload] of this.pendingWritebacks) {
+      this.algorithm.writeBackWeights(genome, payload)
     }
     this.pendingWritebacks.clear()
   }
