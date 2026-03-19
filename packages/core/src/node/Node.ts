@@ -11,6 +11,8 @@ import type { NodeFactory } from './NodeFactory.js'
 import type { NodeRef } from './NodeRef.js'
 
 export interface Node<Ctx extends AlgorithmContext> extends NodeRef {
+  bias: number
+
   // NodeExtension
   config: ConfigNodeOptionsOf<Ctx>
   state: StateNodeOf<Ctx>

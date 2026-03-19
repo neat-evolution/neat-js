@@ -2,9 +2,9 @@ import type { ConfigFactory } from './config/ConfigFactory.js'
 import type { AlgorithmContext } from './contexts/AlgorithmContext.js'
 import type { GenomeOptionsOf, GenomeTypeOf } from './contexts/helpers.js'
 import type { GenomeFactory } from './genome/GenomeFactory.js'
-import type { PhenotypeAction } from './phenotype/PhenotypeAction.js'
 import type { PhenotypeFactory } from './phenotype/PhenotypeFactory.js'
 import type { StateFactory } from './state/StateFactory.js'
+import type { WritebackPayload } from './WritebackPayload.js'
 
 export interface Algorithm<Ctx extends AlgorithmContext> {
   name: string
@@ -25,15 +25,15 @@ export interface Algorithm<Ctx extends AlgorithmContext> {
 
   /**
    * Write trained phenotype weights and biases back to the genome
-   * (Lamarckian writeback). Called by BackpropPlugin after training
-   * to update the genome in-place.
+   * (Lamarckian writeback). Called after training to update the genome
+   * in-place.
    *
-   * updatedActions contains both Link actions (trained weights) and
-   * Activation actions (trained biases). The algorithm writes back
-   * whichever parameters its genome supports.
+   * `payload.actions` contains the primary CPPN actions (Link weights and
+   * Activation biases). `payload.auxiliary` carries per-sub-CPPN writebacks
+   * for multi-CPPN algorithms like DES-HyperNEAT.
    */
   writeBackWeights: (
     genome: GenomeTypeOf<Ctx>,
-    updatedActions: PhenotypeAction[]
+    payload: WritebackPayload
   ) => void
 }

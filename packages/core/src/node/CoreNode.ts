@@ -21,6 +21,8 @@ export class CoreNode<Ctx extends AlgorithmContext = AlgorithmContext>
   public readonly type: NodeType
   public readonly id: NodeId
 
+  public bias: number
+
   // NodeExtension
   public readonly config: ConfigNodeOptionsOf<Ctx>
   public readonly state: StateNodeOf<Ctx>
@@ -36,6 +38,7 @@ export class CoreNode<Ctx extends AlgorithmContext = AlgorithmContext>
   ) {
     this.type = factoryOptions.type
     this.id = factoryOptions.id
+    this.bias = factoryOptions.bias ?? 0
     this.config = config
     this.state = state
     this.createNode = createNode
@@ -49,15 +52,17 @@ export class CoreNode<Ctx extends AlgorithmContext = AlgorithmContext>
     if (this.type !== other.type || this.id !== other.id) {
       throw new Error('Mismatch in crossover')
     }
-    return this.createNode(this.toFactoryOptions(), this.config, this.state)
+    const opts = this.toFactoryOptions()
+    ;(opts as { bias?: number }).bias = (this.bias + other.bias) / 2
+    return this.createNode(opts, this.config, this.state)
   }
 
   clone(): NodeTypeOf<Ctx> {
     return this.createNode(this.toFactoryOptions(), this.config, this.state)
   }
 
-  distance(_other: NodeTypeOf<Ctx>): number {
-    return 0
+  distance(other: NodeTypeOf<Ctx>): number {
+    return 0.5 * Math.tanh(Math.abs(this.bias - other.bias))
   }
 
   toString(): string {
@@ -89,6 +94,10 @@ export class CoreNode<Ctx extends AlgorithmContext = AlgorithmContext>
    * @returns node factory options
    */
   toFactoryOptions(): NodeFactoryOptionsOf<Ctx> {
-    return { type: this.type, id: this.id } as NodeFactoryOptionsOf<Ctx>
+    return {
+      type: this.type,
+      id: this.id,
+      bias: this.bias,
+    } as NodeFactoryOptionsOf<Ctx>
   }
 }

@@ -5,22 +5,31 @@ entire `neat-js` monorepo. It defines the essential interfaces, classes, and
 utilities required to represent, manipulate, and evolve neural networks using
 the NeuroEvolution of Augmenting Topologies (NEAT) algorithm and its variants.
 This package establishes the core concepts of genomes, nodes, links,
-configurations, and the fundamental operations of mutation and crossover.
+configurations, and the fundamental operations of mutation, crossover, and
+Lamarckian writeback.
 
 ## Purpose
 
 The primary purpose of the `@neat-evolution/core` package is to:
 
 - **Define Core Data Structures:** Provide the basic building blocks for neural
-  networks, including `Node`, `Link`, and `Genome` representations.
+  networks, including `Node`, `Link`, and `Genome` representations. Every
+  `CoreNode` carries a `bias: number` field (defaults to 0), which is included
+  in crossover (averaged), distance calculation, and serialization.
 - **Establish NEAT Principles:** Implement the fundamental mechanisms of NEAT,
   such as genetic distance calculation, mutation operators (adding/removing
-  nodes and links, mutating weights), and crossover.
+  nodes and links, mutating weights and biases), and crossover.
 - **Provide Configuration:** Offer a standardized way to configure NEAT
-  algorithm parameters.
+  algorithm parameters via `NEATConfigOptions` (structural mutation
+  probabilities) and `GenomeOptions` (the base type all algorithm-specific
+  genome options extend).
 - **Enable Extensibility:** Define generic interfaces (`Algorithm`, `Genome`,
-  etc.) that allow for the implementation of various NEAT-based algorithms
-  (e.g., CPPN, HyperNEAT) while reusing core functionalities.
+  `Phenotype`, etc.) that allow for the implementation of various NEAT-based
+  algorithms (e.g., CPPN, HyperNEAT) while reusing core functionalities.
+- **Support Lamarckian Writeback:** Define `WritebackPayload` and the
+  `Phenotype` hooks (`trainableBiases`, `chainBackward`, `transformWriteback`)
+  that enable backprop-trained weights and biases to be written back into
+  genomes between generations.
 - **Manage Network Topology:** Handle the dynamic creation and modification of
   neural network connections, including cycle detection and topological sorting.
 
@@ -40,6 +49,8 @@ implementations that other specialized NEAT algorithms build upon. For instance:
   crossover capabilities to drive the evolutionary process.
 - **`@neat-evolution/evaluator`**: Works with genomes defined in `core` to
   evaluate their fitness.
+- **`@neat-evolution/executor`**: Provides `createTrainableExecutor()` for
+  backprop, consuming the `Phenotype` hooks defined here.
 
 Essentially, `core` provides the "what" and "how" of NEAT's genetic
 representation and evolution, while other packages provide the "which algorithm"
@@ -88,17 +99,36 @@ The `core` package exposes several important components:
   `Sigmoid`, `ReLU`, `Tanh`) that can be applied to neural network nodes.
 - **`Algorithm<...>`**: A generic interface that outlines the structure for any
   NEAT-based algorithm, specifying how to create configurations, genomes,
-  phenotypes, and states.
+  phenotypes, and states. Includes `writeBackWeights` for Lamarckian writeback.
 - **`Connections<N, E>`**: A class for managing the graph of connections between
   nodes. It handles adding/removing connections, checking for cycles, and
   providing topological information.
+- **`CoreNode`**: The base node class. Each node has a `bias: number` field
+  (defaults to 0). Bias is averaged during crossover and contributes to genetic
+  distance via `0.5 * tanh(|delta|)`.
 - **`CoreGenome<...>`**: The central class representing a neural network's
   genetic blueprint. It manages nodes (inputs, hidden, outputs) and links, and
-  provides methods for mutation, crossover, and genetic distance calculation.
+  provides methods for mutation (including `mutateNodeBias()` for hidden and
+  output nodes), crossover, and genetic distance calculation.
+- **`GenomeOptions`**: The base type that all algorithm-specific genome options
+  extend (e.g., `NEATGenomeOptions`, `CPPNGenomeOptions`).
 - **`NEATConfigOptions`**: An interface defining configurable parameters for the
-  NEAT algorithm, such as probabilities for various mutations and weights for
+  NEAT algorithm, such as probabilities for structural mutations and weights for
   genetic distance calculation. `defaultNEATConfigOptions` provides a standard
   set of these parameters.
+- **`NodeFactoryOptions`**: Includes `type`, `id`, and `bias?: number` for
+  constructing nodes with an initial bias value.
+- **`Phenotype`**: The decoded network ready for execution. Key fields:
+  - `trainableBiases?: boolean` -- whether backprop should train biases
+    (default `true`; NEAT sets `false` unless `useBias` is enabled).
+  - `chainBackward?` -- chains gradient signal through to the underlying CPPN
+    (set by HyperNEAT variants).
+  - `transformWriteback?` -- transforms substrate gradients into CPPN-level
+    writeback actions.
+  - `coordinateMap?` -- substrate-to-CPPN coordinate metadata.
+- **`WritebackPayload`**: Algorithm-agnostic payload for Lamarckian writeback.
+  Carries `actions` (link weight updates), optional `auxiliary` per-sub-CPPN
+  writebacks, and optional `nodeBiasDeltas` for direct bias updates.
 
 ## Usage
 
@@ -113,6 +143,8 @@ import {
   Activation,
   CoreGenome,
   defaultNEATConfigOptions,
+  type WritebackPayload,
+  type Phenotype,
 } from "@neat-evolution/core";
 // ... other imports and setup for config, state, nodeFactory, linkFactory, genomeFactory
 
@@ -124,7 +156,6 @@ const activationType = Activation.Sigmoid;
 
 // CoreGenome is typically extended by specific NEAT implementations
 // For example, in @neat-evolution/neat, a NEATGenome would extend CoreGenome
-// const myGenome = new CoreGenome(...); // Direct instantiation is less common, usually through a factory
 ```
 
 ## License

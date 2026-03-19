@@ -5,4 +5,5 @@ import type { NodeType } from './NodeType.js'
 export interface NodeFactoryOptions {
   type: NodeType
   id: NodeId
+  bias?: number
 }

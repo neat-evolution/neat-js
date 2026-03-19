@@ -44,6 +44,7 @@ export * from './OutputActivation.js'
 // src/phenotype/
 export * from './phenotype/Phenotype.js'
 export * from './phenotype/PhenotypeAction.js'
+export * from './phenotype/PhenotypeCoordinateMap.js'
 export * from './phenotype/PhenotypeFactory.js'
 // src/state/
 export * from './state/CoreState.js'
@@ -51,3 +52,4 @@ export * from './state/hashInnovationKey.js'
 export * from './state/StateData.js'
 export * from './state/StateFactory.js'
 export * from './state/StateProvider.js'
+export * from './WritebackPayload.js'

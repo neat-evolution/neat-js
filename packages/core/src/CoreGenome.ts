@@ -130,6 +130,46 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     if (rng.gen() < neatConfig.mutateLinkWeightProbability) {
       this.mutateLinkWeight()
     }
+
+    const biasOpts = this.genomeOptions as {
+      mutateHiddenBiasProbability?: number
+      mutateHiddenBiasSize?: number
+      mutateOutputBiasProbability?: number
+      mutateOutputBiasSize?: number
+    }
+    this.mutateNodeBias(
+      this.hiddenNodes,
+      biasOpts.mutateHiddenBiasProbability ?? 0,
+      biasOpts.mutateHiddenBiasSize ?? 0.03
+    )
+    this.mutateNodeBias(
+      this.outputs,
+      biasOpts.mutateOutputBiasProbability ?? 0,
+      biasOpts.mutateOutputBiasSize ?? 0.03
+    )
+  }
+
+  protected mutateNodeBias(
+    nodes: Map<NodeKey, NodeTypeOf<Ctx>>,
+    probability: number,
+    biasSize: number
+  ): void {
+    if (probability <= 0 || nodes.size === 0) {
+      return
+    }
+    const rng = threadRNG()
+    if (rng.gen() >= probability) {
+      return
+    }
+    const randomIndex = rng.genRange(0, nodes.size)
+    let i = 0
+    for (const node of nodes.values()) {
+      if (i === randomIndex) {
+        node.bias += (rng.gen() - 0.5) * 2.0 * biasSize
+        break
+      }
+      i++
+    }
   }
 
   distance(other: GenomeTypeOf<Ctx>): number {
