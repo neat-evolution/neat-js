@@ -6,5 +6,5 @@ import { NEATLink } from './NEATLink.js'
 export const createLink: LinkFactory<NEATContext> = (
   factoryOptions: LinkFactoryOptions
 ): NEATLink => {
-  return new NEATLink(factoryOptions)
+  return NEATLink.from(factoryOptions)
 }
