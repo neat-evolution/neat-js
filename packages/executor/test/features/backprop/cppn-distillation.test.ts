@@ -368,7 +368,7 @@ describe('CPPN distillation proof of concept', () => {
 
     // === Extract trained weights and biases from substrate ===
 
-    const trainedActions = substrateExecutor.getUpdatedActions()
+    const { actions: trainedActions } = substrateExecutor.getUpdatedActions()
     const trainedWeights: Array<{ coords: number[]; weight: number }> = []
     const trainedBiases: Array<{ coords: number[]; bias: number }> = []
 

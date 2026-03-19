@@ -12,6 +12,12 @@ The primary purpose of the `@neat-evolution/executor` package is to:
 
 - **Execute Neural Networks:** Provide a mechanism to run a neural network
   (phenotype) by performing a forward pass with given inputs.
+- **Train Neural Networks:** Provide backpropagation-based training via
+  `createTrainableExecutor`.
+- **Support Lamarckian Evolution:** Enable gradient-based weight updates that
+  can be written back to genomes via `WritebackPayload`.
+- **Gradient Chaining:** Support CPPN gradient chaining for HyperNEAT variants
+  via `accumulateBackward` and `applyGradients`.
 - **Support Synchronous and Asynchronous Execution:** Define interfaces for both
   synchronous (`SyncExecutor`) and asynchronous (`AsyncExecutor`) execution,
   allowing for flexibility in different environments (e.g., main thread vs.
@@ -28,7 +34,10 @@ and other components that need to run neural networks.
 
 - **`@neat-evolution/core`**: Executors operate on `Phenotype` objects, which
   are generated from `Genome`s defined in the `core` package. It also uses the
-  `Activation` enum.
+  `Activation` enum. Trainable executors use `WritebackPayload` for writing
+  trained weights back to genomes, and read `trainableBiases` and
+  `chainBackward` from the phenotype. Algorithms call `writeBackWeights` with
+  the payload from `getUpdatedActions()`.
 
 - **`@neat-evolution/evaluator`**: Evaluators (e.g., from
   `@neat-evolution/evaluator` or `@neat-evolution/worker-evaluator`) use
@@ -110,6 +119,49 @@ The `executor` package exposes the following key types and functions:
   Implements the softmax activation function, typically used for the output
   layer of classification networks to produce a probability distribution.
 
+- **`createTrainableExecutor(phenotype): TrainableExecutor` function**:
+
+  Creates a trainable executor that supports backpropagation. Compiles the
+  phenotype into optimized typed arrays. Respects `phenotype.trainableBiases`
+  (default `true`) to control whether biases are updated during training.
+
+- **`TrainableExecutor` interface**:
+
+  Extends `StaticExecutor` with training methods:
+
+  - `forward(inputs)` — forward pass, returns `Float64Array`
+  - `backward(outputErrors, learningRate)` — full backward pass: zeros
+    gradients, computes, applies, chains to CPPN
+  - `accumulateBackward(outputErrors)` — accumulate gradients without updating
+    (for multi-coordinate CPPN chaining)
+  - `applyGradients(learningRate)` — apply accumulated gradients
+  - `zeroGradients()` — zero the accumulator
+  - `getUpdatedActions(): WritebackPayload` — extract trained weights/biases
+    for writeback. Calls `transformWriteback` if available (HyperNEAT).
+  - `getWeightGradients()` — access raw gradients
+  - `createSnapshot(): StaticExecutor` — freeze current weights/biases as an
+    immutable executor
+
+- **`StaticExecutor` interface**:
+
+  Immutable executor with `forward()` and `forwardBatch()`. Created by
+  `createSnapshot()`.
+
+## Backprop Entry Point
+
+The package exports backprop features separately via
+`@neat-evolution/executor/backprop`:
+
+```typescript
+import { createTrainableExecutor } from "@neat-evolution/executor/backprop";
+```
+
+Or from the main entry:
+
+```typescript
+import { createTrainableExecutor } from "@neat-evolution/executor";
+```
+
 ## Usage
 
 Executors are typically created from a `Phenotype` and then used to process
@@ -169,6 +221,29 @@ const batchOutputs = executor.executeBatch(batchInputs);
 console.log(`Batch Inputs: ${JSON.stringify(batchInputs)}`);
 
 console.log(`Batch Outputs: ${JSON.stringify(batchOutputs)}`);
+```
+
+### Backprop Training
+
+```typescript
+import { createTrainableExecutor } from "@neat-evolution/executor";
+
+// Create a trainable executor from a phenotype
+const executor = createTrainableExecutor(phenotype);
+
+// Training loop
+for (const { input, target } of trainingData) {
+  const output = executor.forward(input);
+  const error = new Float64Array(output.length);
+  for (let i = 0; i < output.length; i++) {
+    error[i] = output[i] - target[i];
+  }
+  executor.backward(error, 0.01); // learning rate
+}
+
+// Extract trained weights for writeback to genome
+const payload = executor.getUpdatedActions();
+algorithm.writeBackWeights(genome, payload);
 ```
 
 ## License

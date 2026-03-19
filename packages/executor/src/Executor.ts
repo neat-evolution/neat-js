@@ -19,6 +19,9 @@ export function isTrainableExecutor(
     typeof executor === 'object' &&
     executor !== null &&
     'backward' in executor &&
-    'getUpdatedActions' in executor
+    'getUpdatedActions' in executor &&
+    'getWeightGradients' in executor &&
+    'accumulateBackward' in executor &&
+    'applyGradients' in executor
   )
 }

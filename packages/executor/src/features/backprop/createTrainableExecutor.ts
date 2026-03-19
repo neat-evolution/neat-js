@@ -3,8 +3,13 @@ import {
   type Phenotype,
   type PhenotypeAction,
   PhenotypeActionType,
+  type WritebackPayload,
 } from '@neat-evolution/core'
-import type { BatchInputs, BatchOutputs, StaticExecutor } from '../../Executor.js'
+import type {
+  BatchInputs,
+  BatchOutputs,
+  StaticExecutor,
+} from '../../Executor.js'
 import {
   type ActivationFunction,
   toActivationFunction,
@@ -98,6 +103,9 @@ export function createTrainableExecutor(
 
   // Whether to update biases during backward pass
   const trainableBiases = phenotype.trainableBiases !== false
+
+  // Per-action gradient storage (populated during backward, read via getWeightGradients)
+  const weightGradients = new Float64Array(actionCount)
 
   // Per-node state for forward/backward passes
   const preActivation = new Float64Array(nodeCount)
@@ -250,8 +258,13 @@ export function createTrainableExecutor(
     }
   }
 
-  const backward = (outputErrors: Float64Array, learningRate: number): void => {
-    // Initialize errors to zero
+  /**
+   * Core gradient computation: backpropagate output errors through the network,
+   * accumulating per-action gradients into weightGradients. Does NOT update weights.
+   * Does NOT zero weightGradients — caller decides whether to zero or accumulate.
+   */
+  const computeGradients = (outputErrors: Float64Array): void => {
+    // Initialize per-node errors to zero (not weightGradients — that's the caller's choice)
     errors.fill(0)
 
     // Inject output errors (dL/d_postActivation for output nodes)
@@ -264,7 +277,6 @@ export function createTrainableExecutor(
 
     // Apply Softmax Jacobian per group: convert dL/dp → dL/dz
     for (const group of softmaxGroups) {
-      // dot = sum_j(dL/dp_j * p_j)
       let dot = 0
       for (let i = group.start; i < group.end; i++) {
         const o = phenotypeOutputs[i]
@@ -272,7 +284,6 @@ export function createTrainableExecutor(
           dot += (errors[o] as number) * (softmaxProbs[i] as number)
         }
       }
-      // dL/dz_i = p_i * (dL/dp_i - dot)
       for (let i = group.start; i < group.end; i++) {
         const o = phenotypeOutputs[i]
         if (o !== undefined) {
@@ -282,36 +293,82 @@ export function createTrainableExecutor(
       }
     }
 
-    // Walk actions in reverse topological order
+    // Walk actions in reverse topological order — accumulate gradients
     for (let i = actionCount - 1; i >= 0; i--) {
       if (actionTypes[i] === ACTIVATION_ACTION) {
         const node = actionNodeOrFrom[i] as number
         const dfn = derivativeFns[i] as ActivationDerivative
         const z = preActivation[node] as number
         const a = postActivation[node] as number
-        // Convert error from post-activation to pre-activation space
         const preError = (errors[node] as number) * dfn(z, a)
         errors[node] = preError
-        // Update bias: bias -= lr * dL/dz
         if (trainableBiases) {
-          actionBiases[i] = (actionBiases[i] as number) - learningRate * preError
+          weightGradients[i] = (weightGradients[i] as number) + preError
         }
       } else {
         const from = actionNodeOrFrom[i] as number
         const to = actionTo[i] as number
         const weight = actionWeights[i] as number
-        // Weight gradient: dL/dw = error_to * activation_from
         const errorTo = errors[to] as number
         const weightGrad = errorTo * (postActivation[from] as number)
-        // Propagate error to source node (in post-activation space)
+        weightGradients[i] = (weightGradients[i] as number) + weightGrad
         errors[from] = (errors[from] as number) + errorTo * weight
-        // Update weight
-        actionWeights[i] = weight - learningRate * weightGrad
       }
     }
   }
 
-  const getUpdatedActions = (): PhenotypeAction[] => {
+  /** Apply accumulated gradients to weights/biases and zero the accumulator. */
+  const applyGradients = (learningRate: number): void => {
+    for (let i = 0; i < actionCount; i++) {
+      const grad = weightGradients[i] as number
+      if (grad === 0) continue
+      if (actionTypes[i] === ACTIVATION_ACTION) {
+        if (trainableBiases) {
+          actionBiases[i] = (actionBiases[i] as number) - learningRate * grad
+        }
+      } else {
+        actionWeights[i] = (actionWeights[i] as number) - learningRate * grad
+      }
+    }
+    weightGradients.fill(0)
+  }
+
+  const zeroGradients = (): void => {
+    weightGradients.fill(0)
+  }
+
+  /** Compute gradients and ADD to accumulator without updating weights. */
+  const accumulateBackward = (outputErrors: Float64Array): void => {
+    computeGradients(outputErrors)
+  }
+
+  /**
+   * Standard backward: zero gradients, compute, apply, then chain to CPPN.
+   * The gradient array is passed to chainBackward BEFORE being zeroed,
+   * so the CPPN closure sees the substrate gradients.
+   */
+  const backward = (outputErrors: Float64Array, learningRate: number): void => {
+    weightGradients.fill(0)
+    computeGradients(outputErrors)
+
+    // Apply weight updates
+    for (let i = 0; i < actionCount; i++) {
+      const grad = weightGradients[i] as number
+      if (grad === 0) continue
+      if (actionTypes[i] === ACTIVATION_ACTION) {
+        if (trainableBiases) {
+          actionBiases[i] = (actionBiases[i] as number) - learningRate * grad
+        }
+      } else {
+        actionWeights[i] = (actionWeights[i] as number) - learningRate * grad
+      }
+    }
+
+    // Chain gradients to the CPPN BEFORE zeroing (closure needs the values)
+    phenotype.chainBackward?.(weightGradients, learningRate)
+  }
+
+  const getRawUpdatedActions = (): PhenotypeAction[] => {
     const actions: PhenotypeAction[] = new Array(actionCount)
     for (let i = 0; i < actionCount; i++) {
       const original = phenotype.actions[i]
@@ -337,6 +394,16 @@ export function createTrainableExecutor(
     return actions
   }
 
+  const getUpdatedActions = (): WritebackPayload => {
+    if (phenotype.transformWriteback != null) {
+      const transformed = phenotype.transformWriteback()
+      if (transformed != null) return transformed
+    }
+    return { actions: getRawUpdatedActions() }
+  }
+
+  const getWeightGradients = (): Float64Array => weightGradients
+
   const forwardBatch = (batch: BatchInputs): BatchOutputs => {
     return batch.map((input) => forward(input))
   }
@@ -347,5 +414,15 @@ export function createTrainableExecutor(
       Float64Array.from(actionBiases)
     )
 
-  return { forward, forwardBatch, backward, getUpdatedActions, createSnapshot }
+  return {
+    forward,
+    forwardBatch,
+    backward,
+    accumulateBackward,
+    applyGradients,
+    zeroGradients,
+    getUpdatedActions,
+    getWeightGradients,
+    createSnapshot,
+  }
 }
