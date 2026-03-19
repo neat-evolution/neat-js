@@ -11,6 +11,7 @@ import { Session } from 'node:inspector'
 import { join, relative } from 'node:path'
 
 import { Activation, defaultNEATConfigOptions } from '@neat-evolution/core'
+import { setThreadRNGSeed } from '@neat-evolution/utils'
 import {
   DatasetEnvironment,
   type DatasetOptions,
@@ -18,19 +19,31 @@ import {
   loadDataset,
 } from '@neat-evolution/dataset-environment'
 import {
+  DESHyperNEATAlgorithm,
   defaultDESHyperNEATGenomeOptions,
   defaultTopologyConfigOptions,
 } from '@neat-evolution/des-hyperneat'
-import { defaultESHyperNEATGenomeOptions } from '@neat-evolution/es-hyperneat'
 import {
+  defaultESHyperNEATGenomeOptions,
+  ESHyperNEATAlgorithm,
+  reportCacheStats,
+} from '@neat-evolution/es-hyperneat'
+import type { AnyAlgorithm } from '@neat-evolution/evaluator'
+import { UnsafeTestEvaluator } from '@neat-evolution/evaluator'
+import {
+  createReproducer,
   defaultEvolutionOptions,
   defaultPopulationOptions,
+  evolve,
 } from '@neat-evolution/evolution'
 import {
   EvolutionManager,
   type EvolutionManagerOptions,
 } from '@neat-evolution/evolution-manager'
-import { defaultHyperNEATGenomeOptions } from '@neat-evolution/hyperneat'
+import {
+  defaultHyperNEATGenomeOptions,
+  HyperNEATAlgorithm,
+} from '@neat-evolution/hyperneat'
 
 // --- Constants ---
 
@@ -47,6 +60,11 @@ function parseArgs(argv: string[]) {
     method: 'DES-HyperNEAT' as MethodName,
     output: '',
     analyze: false,
+    heap: false,
+    lamarckian: false,
+    local: false,
+    seed: '',
+    analyzeDir: '',
     topN: 20,
     threshold: 0.01,
     jsonl: false,
@@ -77,6 +95,18 @@ function parseArgs(argv: string[]) {
       i++
     } else if (arg === '--jsonl') {
       args.jsonl = true
+    } else if (arg === '--heap') {
+      args.heap = true
+    } else if (arg === '--lamarckian') {
+      args.lamarckian = true
+    } else if (arg === '--analyze-dir' && next) {
+      args.analyzeDir = next
+      i++
+    } else if (arg === '--local') {
+      args.local = true
+    } else if (arg === '--seed' && next) {
+      args.seed = next
+      i++
     }
   }
 
@@ -85,7 +115,13 @@ function parseArgs(argv: string[]) {
 
 const args = parseArgs(process.argv.slice(2))
 
-console.log(`=== ${args.method} Profiling ===`)
+if (args.seed) {
+  setThreadRNGSeed(args.seed)
+}
+
+console.log(
+  `=== ${args.method} Profiling${args.lamarckian ? ' (Lamarckian)' : ''} ===`
+)
 console.log(`Iterations: ${args.iterations}`)
 if (args.seconds > 0) {
   console.log(`Time limit: ${args.seconds}s`)
@@ -122,6 +158,7 @@ function getMethodConfig(method: MethodName) {
     case 'HyperNEAT':
       return {
         algorithmName: 'HyperNEAT' as const,
+        algorithm: HyperNEATAlgorithm,
         genomeOptions: {
           ...defaultHyperNEATGenomeOptions,
           ...sharedOverrides,
@@ -132,6 +169,7 @@ function getMethodConfig(method: MethodName) {
     case 'ES-HyperNEAT':
       return {
         algorithmName: 'ES-HyperNEAT' as const,
+        algorithm: ESHyperNEATAlgorithm,
         genomeOptions: {
           ...defaultESHyperNEATGenomeOptions,
           ...sharedOverrides,
@@ -141,6 +179,7 @@ function getMethodConfig(method: MethodName) {
     case 'DES-HyperNEAT':
       return {
         algorithmName: 'DES-HyperNEAT' as const,
+        algorithm: DESHyperNEATAlgorithm,
         genomeOptions: {
           ...defaultDESHyperNEATGenomeOptions,
           ...sharedOverrides,
@@ -160,21 +199,34 @@ const methodConfig = getMethodConfig(args.method)
 const session = new Session()
 session.connect()
 
-function postSession(method: string): Promise<unknown> {
+type SessionPost = (
+  m: string,
+  p: Record<string, unknown> | undefined,
+  cb: (err: Error | null, r?: unknown) => void
+) => void
+
+function postSession(
+  method: string,
+  params?: Record<string, unknown>
+): Promise<unknown> {
   return new Promise<unknown>((resolve, reject) => {
-    ;(
-      session as {
-        post: (m: string, cb: (err: Error | null, p?: unknown) => void) => void
+    ;(session as unknown as { post: SessionPost }).post(
+      method,
+      params,
+      (err, result) => {
+        if (err != null) reject(err)
+        else resolve(result)
       }
-    ).post(method, (err, params) => {
-      if (err != null) reject(err)
-      else resolve(params)
-    })
+    )
   })
 }
 
 await postSession('Profiler.enable')
 await postSession('Profiler.start')
+if (args.heap) {
+  await postSession('HeapProfiler.enable')
+  await postSession('HeapProfiler.startSampling')
+}
 
 // --- Run evolution ---
 
@@ -184,37 +236,105 @@ const fitnessLog: number[] = []
 const memBefore = process.memoryUsage()
 const startMs = performance.now()
 
-const managerOptions: EvolutionManagerOptions = {
-  algorithm: {
-    name: methodConfig.algorithmName,
-    genomeOptions: methodConfig.genomeOptions,
-    ...(methodConfig.configData != null
-      ? { configData: methodConfig.configData }
-      : {}),
-  },
-  environment: {
-    config: environment,
-    pathname: CREATE_ENVIRONMENT_PATHNAME,
-  },
-  population: {
-    options: { ...defaultPopulationOptions },
-  },
-  evolution: {
+interface TerminableManager {
+  terminate(): Promise<void>
+}
+
+async function runWithWorkers(): Promise<{
+  best: { fitness?: number | null } | null | undefined
+  manager: TerminableManager
+}> {
+  const lamarckianConfig = args.lamarckian
+    ? {
+        evaluation: {
+          options: {
+            createExecutorPathname: '@neat-evolution/executor/backprop',
+          },
+        },
+        execution: {
+          createExecutionManager: '@neat-evolution/execution-manager/backprop',
+          executionManagerFactoryOptions: {
+            learningRate: 0.01,
+            epochs: 5,
+            isLamarckian: true,
+          },
+        },
+      }
+    : {}
+
+  const managerOptions: EvolutionManagerOptions = {
+    algorithm: {
+      name: methodConfig.algorithmName,
+      genomeOptions: methodConfig.genomeOptions,
+      ...(methodConfig.configData != null
+        ? { configData: methodConfig.configData }
+        : {}),
+    },
+    environment: {
+      config: environment,
+      pathname: CREATE_ENVIRONMENT_PATHNAME,
+    },
+    population: {
+      options: { ...defaultPopulationOptions },
+    },
+    evolution: {
+      ...defaultEvolutionOptions,
+      iterations: args.iterations,
+      secondsLimit: args.seconds,
+      quiet: true,
+      afterEvaluate: (population) => {
+        const best = population.best()
+        fitnessLog.push(best?.fitness ?? 0)
+      },
+    },
+    ...lamarckianConfig,
+  }
+
+  const mgr = new EvolutionManager(managerOptions)
+  const best = await mgr.evolve()
+  return { best, manager: mgr }
+}
+
+async function runLocal(): Promise<{
+  best: { fitness?: number | null } | null | undefined
+  manager: TerminableManager
+}> {
+  const { algorithm } = methodConfig
+  const evaluator = new UnsafeTestEvaluator(
+    algorithm as unknown as AnyAlgorithm,
+    environment,
+    { unsafeLocalEvaluation: true }
+  )
+  await evaluator.initGenomeFactory()
+
+  const population = algorithm.createPopulation(
+    createReproducer as never,
+    evaluator as never,
+    (methodConfig.configData ?? undefined) as never,
+    { ...defaultPopulationOptions },
+    methodConfig.genomeOptions as never,
+    undefined as never
+  )
+
+  const evolutionOptions = {
     ...defaultEvolutionOptions,
     iterations: args.iterations,
     secondsLimit: args.seconds,
     quiet: true,
-    afterEvaluate: (population) => {
+    afterEvaluate: () => {
       const best = population.best()
       fitnessLog.push(best?.fitness ?? 0)
     },
-  },
+  }
+
+  await evolve(population as never, evolutionOptions as never)
+  const best = population.best()
+  return { best, manager: { terminate: async () => {} } }
 }
 
-const manager = new EvolutionManager(managerOptions)
+const { best, manager } = args.local ? await runLocal() : await runWithWorkers()
 
 try {
-  const best = await manager.evolve()
   const elapsedMs = performance.now() - startMs
   const memAfter = process.memoryUsage()
 
@@ -223,6 +343,14 @@ try {
   const stopResult = await postSession('Profiler.stop')
   const profile = (stopResult as { profile: unknown }).profile
   await postSession('Profiler.disable')
+
+  let heapProfile: unknown | undefined
+  if (args.heap) {
+    const heapStopResult = await postSession('HeapProfiler.stopSampling')
+    heapProfile = (heapStopResult as { profile: unknown }).profile
+    await postSession('HeapProfiler.disable')
+  }
+
   session.disconnect()
 
   // --- Write .cpuprofile ---
@@ -266,12 +394,62 @@ try {
   console.log()
   console.log(`CPU profile: ${profilePath}`)
 
+  // Report CPPN query cache stats
+  const cacheStats = reportCacheStats()
+  if (cacheStats.calls > 0) {
+    console.log()
+    console.log('=== CPPN Query Cache ===')
+    console.log(`Calls:           ${cacheStats.calls}`)
+    console.log(`Total queries:   ${cacheStats.totalQueries}`)
+    console.log(`Cache hits:      ${cacheStats.cacheHits}`)
+    console.log(
+      `Hit rate:        ${(cacheStats.hitRate * 100).toFixed(1)}%`
+    )
+    console.log(`Saved forwards:  ${cacheStats.savedForwardCalls}`)
+  }
+
+  if (heapProfile !== undefined) {
+    const heapPath = join(
+      outputDir,
+      `${args.method.toLowerCase()}-${timestamp}.heapprofile`
+    )
+    await writeFile(heapPath, JSON.stringify(heapProfile))
+    console.log(`Heap profile: ${heapPath}`)
+  }
+
   // --- Inline analysis ---
 
   if (args.analyze) {
     console.log()
     const profileJson = await readFile(profilePath, 'utf8')
     analyzeProfile(profileJson, args.topN, args.threshold)
+  }
+
+  if (args.heap && heapProfile !== undefined) {
+    console.log()
+    analyzeHeapProfile(JSON.stringify(heapProfile), args.topN, args.threshold)
+  }
+
+  // --- Analyze worker profiles from --analyze-dir ---
+
+  if (args.analyzeDir) {
+    const { readdirSync, readFileSync } = await import('node:fs')
+    const dirFiles = readdirSync(args.analyzeDir).sort()
+    const cpuFiles = dirFiles.filter((f: string) => f.endsWith('.cpuprofile'))
+    const heapFiles = dirFiles.filter((f: string) => f.endsWith('.heapprofile'))
+
+    for (const file of cpuFiles) {
+      console.log()
+      console.log(`=== CPU: ${file} ===`)
+      const content = readFileSync(join(args.analyzeDir, file), 'utf8')
+      analyzeProfile(content, args.topN, args.threshold)
+    }
+    for (const file of heapFiles) {
+      console.log()
+      console.log(`=== Heap: ${file} ===`)
+      const content = readFileSync(join(args.analyzeDir, file), 'utf8')
+      analyzeHeapProfile(content, args.topN, args.threshold)
+    }
   }
 } finally {
   await manager.terminate()
@@ -582,6 +760,228 @@ function analyzeProfile(
   }
 
   // Sort by score descending — surfaces where optimization effort pays off
+  records.sort((a, b) => b.score - a.score)
+  const topRecords = records.slice(0, topN)
+
+  for (let i = 0; i < topRecords.length; i++) {
+    const record = topRecords[i]
+    if (!record) continue
+    record.rank = i + 1
+    console.log(JSON.stringify(record))
+  }
+}
+
+// --- Heap profile analysis ---
+
+interface HeapNode {
+  callFrame: ProfileCallFrame
+  selfSize: number
+  id: number
+  children?: HeapNode[]
+}
+
+interface HeapProfile {
+  head: HeapNode
+}
+
+type HeapKind = 'alloc-leaf' | 'alloc-tree' | 'builtin' | 'mixed'
+
+interface HeapRecord {
+  rank: number
+  kind: HeapKind
+  function: string
+  file: string
+  line: number
+  selfKB: number
+  totalKB: number
+  selfPct: number
+  totalPct: number
+  exclusivePct: number
+  score: number
+  callPaths: string[][]
+  children: Array<{ function: string; totalKB: number; pct: number }>
+}
+
+function classifyHeapKind(
+  fn: string,
+  file: string,
+  exclusivePct: number,
+  childCount: number
+): HeapKind {
+  if (
+    !file &&
+    (fn === 'Map' ||
+      fn === 'Set' ||
+      fn === 'set' ||
+      fn === 'add' ||
+      fn === 'get' ||
+      fn === 'next' ||
+      fn === 'delete' ||
+      fn === '(V8 API)')
+  ) {
+    return 'builtin'
+  }
+  if (exclusivePct >= 0.8) return 'alloc-leaf'
+  if (childCount > 0 && exclusivePct >= 0.1) return 'alloc-tree'
+  return 'mixed'
+}
+
+function analyzeHeapProfile(
+  profileJson: string,
+  topN: number,
+  threshold: number
+): void {
+  const profile: HeapProfile = JSON.parse(profileJson)
+
+  // Walk the tree: compute totalSize (self + all descendants) for each node,
+  // then aggregate by function+file.
+
+  interface HeapMetrics {
+    callFrame: ProfileCallFrame
+    selfBytes: number
+    totalBytes: number
+    /** child function key → total bytes */
+    childByFunction: Map<string, { name: string; totalBytes: number }>
+    callPaths: string[][]
+  }
+
+  const aggregates = new Map<string, HeapMetrics>()
+  let grandTotal = 0
+
+  // Recursive walk returns totalBytes for the subtree
+  function walk(node: HeapNode, pathSoFar: string[]): number {
+    const fn = node.callFrame.functionName || ''
+    const skipName = fn === '(root)'
+
+    // Build path for this node
+    const path = skipName ? pathSoFar : [...pathSoFar, fn]
+
+    // Recurse children first to compute their totals
+    let childrenTotal = 0
+    const childTotals = new Map<string, { name: string; totalBytes: number }>()
+
+    if (node.children) {
+      for (const child of node.children) {
+        const childTotal = walk(child, path)
+        childrenTotal += childTotal
+
+        const childFn = child.callFrame.functionName || '(anonymous)'
+        const childKey = functionKey(child.callFrame)
+        const existing = childTotals.get(childKey)
+        if (existing) {
+          existing.totalBytes += childTotal
+        } else {
+          childTotals.set(childKey, { name: childFn, totalBytes: childTotal })
+        }
+      }
+    }
+
+    const selfBytes = node.selfSize || 0
+    const totalBytes = selfBytes + childrenTotal
+    grandTotal += selfBytes
+
+    if (skipName || totalBytes === 0) return totalBytes
+
+    // Aggregate by function+file
+    const key = functionKey(node.callFrame)
+    let agg = aggregates.get(key)
+    if (!agg) {
+      agg = {
+        callFrame: node.callFrame,
+        selfBytes: 0,
+        totalBytes: 0,
+        childByFunction: new Map(),
+        callPaths: [],
+      }
+      aggregates.set(key, agg)
+    }
+
+    agg.selfBytes += selfBytes
+    agg.totalBytes += totalBytes
+
+    // Merge children
+    for (const [childKey, childInfo] of childTotals) {
+      const existing = agg.childByFunction.get(childKey)
+      if (existing) {
+        existing.totalBytes += childInfo.totalBytes
+      } else {
+        agg.childByFunction.set(childKey, { ...childInfo })
+      }
+    }
+
+    // Keep up to 3 distinct call paths (trim to last 6 for readability)
+    const trimmedPath = path.length > 6 ? path.slice(-6) : path
+    if (
+      agg.callPaths.length < 3 &&
+      !agg.callPaths.some((p) => p.join('->') === trimmedPath.join('->'))
+    ) {
+      agg.callPaths.push(trimmedPath)
+    }
+
+    return totalBytes
+  }
+
+  walk(profile.head, [])
+
+  // Build records
+  const records: HeapRecord[] = []
+
+  for (const agg of aggregates.values()) {
+    const fn = agg.callFrame.functionName || '(anonymous)'
+    if (RUNTIME_NAMES.has(fn)) continue
+
+    const selfKB = agg.selfBytes / 1024
+    const totalKB = agg.totalBytes / 1024
+    const grandTotalKB = grandTotal / 1024
+    const selfPct = selfKB / Math.max(grandTotalKB, 1)
+    const totalPct = totalKB / Math.max(grandTotalKB, 1)
+
+    if (totalPct < threshold) continue
+    // Filter noise: skip entries with < 1KB self allocation
+    if (selfKB < 1 && totalKB < 32) continue
+
+    const exclusivePct = totalKB > 0 ? selfKB / totalKB : 0
+
+    // Build sorted children
+    const childEntries: Array<{
+      function: string
+      totalKB: number
+      pct: number
+    }> = []
+    for (const child of agg.childByFunction.values()) {
+      const childKB = child.totalBytes / 1024
+      if (childKB < 1) continue
+      childEntries.push({
+        function: child.name,
+        totalKB: round1(childKB),
+        pct: round3(totalKB > 0 ? childKB / totalKB : 0),
+      })
+    }
+    childEntries.sort((a, b) => b.totalKB - a.totalKB)
+
+    const file = normalizeFilePath(agg.callFrame.url)
+    const kind = classifyHeapKind(fn, file, exclusivePct, childEntries.length)
+
+    // Score: selfKB * (0.35 + exclusivePct) — same formula as CPU, but KB instead of ms
+    const score = selfKB * (0.35 + exclusivePct)
+
+    records.push({
+      rank: 0,
+      kind,
+      function: fn,
+      file,
+      line: agg.callFrame.lineNumber + 1,
+      selfKB: round1(selfKB),
+      totalKB: round1(totalKB),
+      selfPct: round3(selfPct),
+      totalPct: round3(totalPct),
+      exclusivePct: round3(exclusivePct),
+      score: round1(score),
+      callPaths: agg.callPaths,
+      children: childEntries.slice(0, 5),
+    })
+  }
+
   records.sort((a, b) => b.score - a.score)
   const topRecords = records.slice(0, topN)
 
