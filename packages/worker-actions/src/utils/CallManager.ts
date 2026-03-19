@@ -2,6 +2,7 @@ import pDefer, { type DeferredPromise } from 'p-defer'
 
 import { verboseLogger as logger } from '../logger.js'
 import type { WorkerMessage } from '../types.js'
+import { deserializeError } from './errors.js'
 
 export interface CallOptions {
   timeout?: number
@@ -91,7 +92,7 @@ export class CallManager {
       if (call.timeoutId != null) {
         clearTimeout(call.timeoutId)
       }
-      call.deferred.reject(error)
+      call.deferred.reject(deserializeError(error))
       return true
     }
     return false

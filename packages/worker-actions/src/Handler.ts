@@ -10,6 +10,7 @@ import type {
   WorkerMessage,
 } from './types.js'
 import { CallManager } from './utils/CallManager.js'
+import { serializeError } from './utils/errors.js'
 
 const logger = createWorkerLogger('handler')
 
@@ -26,6 +27,23 @@ export class Handler {
 
     this.scope.addEventListener('message', (event: unknown) => {
       void this.handleMessage(event)
+    })
+
+    this.scope.addEventListener('error', (event: unknown) => {
+      // In Node.js with process.on, event is the error object
+      // In Browser, event is an ErrorEvent
+      const error =
+        event != null && typeof event === 'object' && 'error' in event
+          ? (event as { error: unknown }).error
+          : event
+
+      logger.error('[Worker] Fatal error:', error)
+
+      this.postMessage({
+        type: 'WORKER_ERROR',
+        payload: serializeError(error),
+        error: true,
+      })
     })
 
     // Safety timeout: if ready() isn't called manually, send it automatically
@@ -180,7 +198,7 @@ export class Handler {
   private replyError(callId: string, error: unknown) {
     const response: WorkerMessage = {
       type: 'RESPONSE_ERROR',
-      payload: error instanceof Error ? error.message : error,
+      payload: serializeError(error),
       error: true,
       meta: {
         callId,
