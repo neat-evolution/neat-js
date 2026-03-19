@@ -46,6 +46,51 @@ function createMockTrainableExecutor(): TrainableExecutor & {
   }
 }
 
+function createMultiDiscreteMockExecutor(): TrainableExecutor & {
+  backwardCalls: Array<{ errors: number[]; learningRate: number }>
+} {
+  const backwardCalls: Array<{ errors: number[]; learningRate: number }> = []
+  // 2 binary factors → 4 action probs (paired softmax) + 1 value = 5 outputs
+  const outputs = new Map<string, Float64Array>([
+    ['1,0', new Float64Array([0.7, 0.3, 0.6, 0.4, 0.2])],
+    ['0,1', new Float64Array([0.4, 0.6, 0.5, 0.5, 0.5])],
+  ])
+
+  return {
+    backwardCalls,
+    forward(inputs: number[] | Float64Array): Float64Array {
+      const key = Array.from(inputs).join(',')
+      const output = outputs.get(key)
+      if (output === undefined) {
+        throw new Error(`Unexpected forward input: ${key}`)
+      }
+      return Float64Array.from(output)
+    },
+    forwardBatch(batch: Array<number[] | Float64Array>): Float64Array[] {
+      return batch.map((inputs) => this.forward(inputs))
+    },
+    backward(outputErrors: Float64Array, learningRate: number): void {
+      backwardCalls.push({ errors: Array.from(outputErrors), learningRate })
+    },
+    createSnapshot() {
+      return {
+        forward: (inputs: number[] | Float64Array) => this.forward(inputs),
+        forwardBatch: (batch: Array<number[] | Float64Array>) =>
+          batch.map((inputs) => this.forward(inputs)),
+      }
+    },
+    getUpdatedActions() {
+      return { actions: [] }
+    },
+    getWeightGradients() {
+      return new Float64Array(0)
+    },
+    accumulateBackward() {},
+    applyGradients() {},
+    zeroGradients() {},
+  }
+}
+
 describe('createPPOStepAgent', () => {
   it('reuses collected rollout data across PPO epochs', () => {
     const executor = createMockTrainableExecutor()
@@ -91,5 +136,58 @@ describe('createPPOStepAgent', () => {
     })
 
     expect(executor.backwardCalls).toHaveLength(4)
+  })
+
+  it('supports multi-discrete actions with grouped binary outputs', () => {
+    const executor = createMultiDiscreteMockExecutor()
+    const agent = createPPOStepAgent(
+      executor,
+      {
+        learningRate: 0.1,
+        actionCount: 2,
+        multiDiscrete: true,
+        discountFactor: 0.5,
+        clipEpsilon: 0.2,
+        entropyCoefficient: 0,
+        minibatchSize: 1,
+        epochs: 2,
+        trajectoryConfig: {
+          rolloutLength: 'episode',
+          batchTransitions: 2,
+        },
+      },
+      () => 0
+    )
+
+    agent.startEpisode({ episodeIndex: 0 })
+    agent.act(new Float64Array([1, 0]))
+    agent.completeStep({
+      reward: 0,
+      nextState: new Float64Array([0, 1]),
+      terminated: false,
+      truncated: false,
+    })
+    agent.act(new Float64Array([0, 1]))
+    agent.completeStep({
+      reward: 1,
+      nextState: new Float64Array([0, 1]),
+      terminated: false,
+      truncated: true,
+    })
+    agent.endEpisode({
+      fitness: 1,
+      episodeReturn: 1,
+      totalSteps: 2,
+      terminated: false,
+      truncated: true,
+    })
+
+    // 2 epochs × 2 transitions = 4 backward calls
+    expect(executor.backwardCalls).toHaveLength(4)
+
+    // Each error array should have 5 elements (2*2 action probs + 1 value)
+    for (const call of executor.backwardCalls) {
+      expect(call.errors).toHaveLength(5)
+    }
   })
 })

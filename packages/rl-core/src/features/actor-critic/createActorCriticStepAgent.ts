@@ -259,7 +259,7 @@ export function createActorCriticStepAgent(
     endEpisode(_result: StepEpisodeResult): void {
       if (openStep !== null) {
         throw new Error(
-          'endEpisode() called before the current step was completed'
+          'endEpisode() called with an open step. Each act() must be followed by completeStep() before endEpisode()'
         )
       }
       const segment = rolloutBuffer.flush()
