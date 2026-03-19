@@ -42,15 +42,27 @@ export class WorkerPool {
         const messageHandler = (event: { data?: unknown }) => {
           logger.debug(`[WorkerPool] Worker ${i} sent a message`, event)
           const message = event.data ?? event
-          if (message != null && typeof message === 'object' && 'type' in message) {
+          if (
+            message != null &&
+            typeof message === 'object' &&
+            'type' in message
+          ) {
             if (message.type === WORKER_READY) {
               cleanup()
               logger.debug(`[WorkerPool] Worker ${i} is ready`)
               resolve()
-            } else if (message.type === 'WORKER_ERROR' && 'error' in message && message.error === true) {
+            } else if (
+              message.type === 'WORKER_ERROR' &&
+              'error' in message &&
+              message.error === true
+            ) {
               cleanup()
-              const error = message.payload
-              reject(new Error(`Worker ${i} failed during initialization: ${error instanceof Error ? error.message : JSON.stringify(error)}`))
+              const error = 'payload' in message ? message.payload : undefined
+              reject(
+                new Error(
+                  `Worker ${i} failed during initialization: ${error instanceof Error ? error.message : JSON.stringify(error)}`
+                )
+              )
             }
           }
         }
@@ -58,10 +70,15 @@ export class WorkerPool {
         const errorHandler = (event: unknown) => {
           cleanup()
           // Extract error from ErrorEvent if present
-          const error = event != null && typeof event === 'object' && 'error' in event 
-            ? (event as { error: unknown }).error 
-            : event
-          reject(new Error(`Worker ${i} encountered a fatal error during initialization: ${error instanceof Error ? error.message : String(error)}`))
+          const error =
+            event != null && typeof event === 'object' && 'error' in event
+              ? (event as { error: unknown }).error
+              : event
+          reject(
+            new Error(
+              `Worker ${i} encountered a fatal error during initialization: ${error instanceof Error ? error.message : String(error)}`
+            )
+          )
         }
 
         const cleanup = () => {
