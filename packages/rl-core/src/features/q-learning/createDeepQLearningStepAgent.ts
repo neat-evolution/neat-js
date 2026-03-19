@@ -1,4 +1,8 @@
-import type { Executor, StaticExecutor, TrainableExecutor } from '@neat-evolution/executor'
+import type {
+  Executor,
+  StaticExecutor,
+  TrainableExecutor,
+} from '@neat-evolution/executor'
 import type { StepAgent } from '../../core/StepAgent.js'
 import type {
   StepEpisodeInfo,
@@ -93,7 +97,12 @@ export function createDeepQLearningStepAgent(
   }
 
   function computeTargetQValues(nextState: Float64Array): Float64Array {
-    return computeStateQValues(targetExecutor, nextState, config.actionCount, multiDiscrete)
+    return computeStateQValues(
+      targetExecutor,
+      nextState,
+      config.actionCount,
+      multiDiscrete
+    )
   }
 
   function trainFromReplay(): void {
@@ -112,7 +121,11 @@ export function createDeepQLearningStepAgent(
                 config.actionCount
               )
           const errors = new Float64Array(transition.rawOutput.length)
-          for (let factorIndex = 0; factorIndex < transition.action.length; factorIndex++) {
+          for (
+            let factorIndex = 0;
+            factorIndex < transition.action.length;
+            factorIndex++
+          ) {
             const chosenIndex =
               transition.action[factorIndex] === 1
                 ? 2 * factorIndex
@@ -133,8 +146,9 @@ export function createDeepQLearningStepAgent(
           config.discountFactor *
             (transition.terminated ? 0 : maxQBootstrap(transition.nextQValues))
         const errors = new Float64Array(transition.rawOutput.length)
-        const chosenQValue =
-          transition.qValues[transition.chosenActionIndex] as number
+        const chosenQValue = transition.qValues[
+          transition.chosenActionIndex
+        ] as number
         errors[transition.chosenActionIndex] = chosenQValue - target
         trainable.forward(transition.state)
         trainable.backward(errors, config.learningRate)
@@ -150,14 +164,22 @@ export function createDeepQLearningStepAgent(
   return {
     act(observation: Float64Array): Float64Array {
       if (openStep !== null) {
-        throw new Error('completeStep() must be called before act() opens another step')
+        throw new Error(
+          'completeStep() must be called before act() opens another step'
+        )
       }
 
       const rawOutput = Float64Array.from(trainable.forward(observation))
       const qValues = multiDiscrete
-        ? extractGroupedBinaryValues(rawOutput, config.actionCount, 'DQL step agent')
+        ? extractGroupedBinaryValues(
+            rawOutput,
+            config.actionCount,
+            'DQL step agent'
+          )
         : extractLeadingValues(rawOutput, config.actionCount, 'DQL step agent')
-      const standardSelection = multiDiscrete ? null : selectAction(qValues, epsilon, rng)
+      const standardSelection = multiDiscrete
+        ? null
+        : selectAction(qValues, epsilon, rng)
       const action = multiDiscrete
         ? selectGroupedBinaryAction(qValues, config.actionCount, epsilon, rng)
         : (standardSelection?.action as Float64Array)
@@ -190,7 +212,9 @@ export function createDeepQLearningStepAgent(
         ...(outcome.info !== undefined ? { info: outcome.info } : {}),
         qValues: openStep.qValues,
         nextQValues: outcome.terminated
-          ? new Float64Array(multiDiscrete ? 2 * config.actionCount : config.actionCount)
+          ? new Float64Array(
+              multiDiscrete ? 2 * config.actionCount : config.actionCount
+            )
           : computeTargetQValues(outcome.nextState),
         chosenActionIndex: openStep.chosenActionIndex,
       }
@@ -217,7 +241,9 @@ export function createDeepQLearningStepAgent(
 
     endEpisode(_result: StepEpisodeResult): void {
       if (openStep !== null) {
-        throw new Error('endEpisode() called before the current step was completed')
+        throw new Error(
+          'endEpisode() called before the current step was completed'
+        )
       }
     },
   }

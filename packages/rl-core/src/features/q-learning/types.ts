@@ -1,7 +1,4 @@
-import type {
-  BaseOpenStep,
-  BaseStepTransition,
-} from '../../core/StepTypes.js'
+import type { BaseOpenStep, BaseStepTransition } from '../../core/StepTypes.js'
 
 export interface QLearningOpenStep<Info = unknown> extends BaseOpenStep<Info> {
   qValues: Float64Array

@@ -1,31 +1,31 @@
 import type { TrainableExecutor } from '@neat-evolution/executor'
-import {
-  extractGroupedBinaryValues,
-  extractLeadingValues,
-  sampleGroupedBinaryAction,
-} from '../action-space/groupedBinary.js'
-import {
-  computeActorCriticGradients,
-  type ActorCriticGradientConfig,
-} from '../policy-gradient/computeActorCriticGradients.js'
-import { computeActionLogProbability } from '../policy-gradient/actionLogProbabilities.js'
 import type { StepAgent } from '../../core/StepAgent.js'
 import type {
   StepEpisodeInfo,
   StepEpisodeResult,
   StepOutcome,
 } from '../../core/StepTypes.js'
-import type {
-  ActorCriticOpenStep,
-  ActorCriticTransition,
-} from './types.js'
+import {
+  extractGroupedBinaryValues,
+  extractLeadingValues,
+  sampleGroupedBinaryAction,
+} from '../action-space/groupedBinary.js'
+import { computeActionLogProbability } from '../policy-gradient/actionLogProbabilities.js'
+import {
+  type ActorCriticGradientConfig,
+  computeActorCriticGradients,
+} from '../policy-gradient/computeActorCriticGradients.js'
 import {
   StepRolloutBuffer,
   type StepRolloutBufferConfig,
   type StepRolloutSegment,
 } from '../rollout/StepRolloutBuffer.js'
 import { computeNStepReturns } from '../td/computeNStepReturns.js'
-import { computeAdvantages, normalizeValues } from '../trajectory/computeAdvantages.js'
+import {
+  computeAdvantages,
+  normalizeValues,
+} from '../trajectory/computeAdvantages.js'
+import type { ActorCriticOpenStep, ActorCriticTransition } from './types.js'
 
 export interface ActorCriticStepAgentConfig {
   learningRate: number
@@ -36,10 +36,15 @@ export interface ActorCriticStepAgentConfig {
   normalizeAdvantages?: boolean
   gradientConfig: ActorCriticGradientConfig & { discountFactor: number }
   rolloutConfig: StepRolloutBufferConfig
-  onSegmentTrained?: (segment: StepRolloutSegment<ActorCriticTransition>) => void
+  onSegmentTrained?: (
+    segment: StepRolloutSegment<ActorCriticTransition>
+  ) => void
 }
 
-function sampleAction(probabilities: Float64Array, rng: () => number): Float64Array {
+function sampleAction(
+  probabilities: Float64Array,
+  rng: () => number
+): Float64Array {
   const action = new Float64Array(probabilities.length)
   const threshold = rng()
   let cumulative = 0
@@ -116,7 +121,9 @@ export function createActorCriticStepAgent(
 
   function computeValueEstimate(state: Float64Array): number {
     const output = trainable.forward(state)
-    const valueIndex = multiDiscrete ? 2 * config.actionCount : config.actionCount
+    const valueIndex = multiDiscrete
+      ? 2 * config.actionCount
+      : config.actionCount
     return output[valueIndex] as number
   }
 
@@ -170,7 +177,9 @@ export function createActorCriticStepAgent(
   return {
     act(observation: Float64Array): Float64Array {
       if (openStep !== null) {
-        throw new Error('completeStep() must be called before act() opens another step')
+        throw new Error(
+          'completeStep() must be called before act() opens another step'
+        )
       }
 
       const rawOutput = trainable.forward(observation)
@@ -187,9 +196,15 @@ export function createActorCriticStepAgent(
             'Actor-Critic step agent'
           )
       const action = multiDiscrete
-        ? sampleGroupedBinaryAction(actionProbabilities, config.actionCount, rng)
+        ? sampleGroupedBinaryAction(
+            actionProbabilities,
+            config.actionCount,
+            rng
+          )
         : sampleAction(actionProbabilities, rng)
-      const valueIndex = multiDiscrete ? 2 * config.actionCount : config.actionCount
+      const valueIndex = multiDiscrete
+        ? 2 * config.actionCount
+        : config.actionCount
 
       openStep = {
         state: Float64Array.from(observation),
@@ -197,7 +212,10 @@ export function createActorCriticStepAgent(
         action,
         actionProbabilities,
         valueEstimate: rawOutput[valueIndex] as number,
-        actionLogProbability: computeActionLogProbability(action, actionProbabilities),
+        actionLogProbability: computeActionLogProbability(
+          action,
+          actionProbabilities
+        ),
       }
 
       return action
@@ -240,7 +258,9 @@ export function createActorCriticStepAgent(
 
     endEpisode(_result: StepEpisodeResult): void {
       if (openStep !== null) {
-        throw new Error('endEpisode() called before the current step was completed')
+        throw new Error(
+          'endEpisode() called before the current step was completed'
+        )
       }
       const segment = rolloutBuffer.flush()
       if (segment !== null) {

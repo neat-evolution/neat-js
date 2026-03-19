@@ -1,4 +1,7 @@
-import type { StaticExecutor, TrainableExecutor } from '@neat-evolution/executor'
+import type {
+  StaticExecutor,
+  TrainableExecutor,
+} from '@neat-evolution/executor'
 import { describe, expect, it } from 'vitest'
 import { createDeepQLearningStepAgent } from '../src/features/q-learning/createDeepQLearningStepAgent.js'
 
@@ -45,9 +48,15 @@ function createMockTrainableExecutor(): TrainableExecutor & {
       backwardCalls.push({ errors: Array.from(outputErrors), learningRate })
     },
     createSnapshot,
-    getUpdatedActions(): [] {
-      return []
+    getUpdatedActions() {
+      return { actions: [] }
     },
+    getWeightGradients() {
+      return new Float64Array(0)
+    },
+    accumulateBackward() {},
+    applyGradients() {},
+    zeroGradients() {},
   }
 }
 

@@ -6,11 +6,11 @@ import type {
   StepAgentFactory,
   StepAgentFactoryOptions,
 } from '../../index.js'
+import type { StepRolloutSegment } from '../rollout/StepRolloutBuffer.js'
 import {
   createQLearningStepAgent,
   type QLearningStepAgentConfig,
 } from './createQLearningStepAgent.js'
-import type { StepRolloutSegment } from '../rollout/StepRolloutBuffer.js'
 import type { QLearningTransition } from './types.js'
 
 interface QLearningStepAgentFactoryOptions extends StepAgentFactoryOptions {
@@ -37,10 +37,14 @@ export const createStepAgent: StepAgentFactory = (
   context?: StepAgentContext
 ) => {
   if (!isTrainableExecutor(executor)) {
-    throw new Error('Q-learning step agent factory requires a TrainableExecutor')
+    throw new Error(
+      'Q-learning step agent factory requires a TrainableExecutor'
+    )
   }
   if (!isQLearningStepAgentFactoryOptions(options)) {
-    throw new Error('Q-learning step agent factory requires { config, rngSeed }')
+    throw new Error(
+      'Q-learning step agent factory requires { config, rngSeed }'
+    )
   }
 
   const { config, rngSeed, isLamarckian } = options

@@ -6,7 +6,10 @@ import type {
   StepAgentFactory,
   StepAgentFactoryOptions,
 } from '../../index.js'
-import { createA2CStepAgent, type A2CStepAgentConfig } from './createA2CStepAgent.js'
+import {
+  type A2CStepAgentConfig,
+  createA2CStepAgent,
+} from './createA2CStepAgent.js'
 
 interface A2CStepAgentFactoryOptions extends StepAgentFactoryOptions {
   config: A2CStepAgentConfig

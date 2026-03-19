@@ -54,12 +54,11 @@ export function computeGeneralizedAdvantages<
       config.getNextValueEstimate?.(transition) ?? transition.nextValueEstimate
     const delta =
       transition.reward +
-      config.discountFactor *
-        bootstrapMask(transition) *
-        nextValueEstimate -
+      config.discountFactor * bootstrapMask(transition) * nextValueEstimate -
       valueEstimate
     gae =
-      delta + config.discountFactor * config.lambda * bootstrapMask(transition) * gae
+      delta +
+      config.discountFactor * config.lambda * bootstrapMask(transition) * gae
     advantages[i] = gae
   }
 

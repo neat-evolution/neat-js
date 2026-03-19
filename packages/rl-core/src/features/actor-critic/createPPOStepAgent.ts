@@ -31,7 +31,10 @@ export interface PPOStepAgentConfig {
   trajectoryConfig: TrajectoryBatchCollectorConfig
 }
 
-function sampleAction(probabilities: Float64Array, rng: () => number): Float64Array {
+function sampleAction(
+  probabilities: Float64Array,
+  rng: () => number
+): Float64Array {
   const action = new Float64Array(probabilities.length)
   const threshold = rng()
   let cumulative = 0
@@ -84,9 +87,10 @@ export function createPPOStepAgent(
       discountFactor: config.discountFactor,
       lambda: config.gaeLambda ?? 0.95,
     })
-    const advantages = config.normalizeAdvantages === false
-      ? rawAdvantages
-      : normalizeValues(rawAdvantages)
+    const advantages =
+      config.normalizeAdvantages === false
+        ? rawAdvantages
+        : normalizeValues(rawAdvantages)
 
     const returnTargets = new Float64Array(transitions.length)
     for (let i = 0; i < transitions.length; i++) {
@@ -99,14 +103,20 @@ export function createPPOStepAgent(
 
     for (let epoch = 0; epoch < config.epochs; epoch++) {
       const indices = shuffleIndices(transitions.length, rng)
-      for (let start = 0; start < indices.length; start += config.minibatchSize) {
+      for (
+        let start = 0;
+        start < indices.length;
+        start += config.minibatchSize
+      ) {
         const batchIndices = indices.slice(start, start + config.minibatchSize)
         for (const index of batchIndices) {
           const transition = transitions[index]
           if (transition === undefined) {
             throw new Error(`Missing transition at index ${index}`)
           }
-          const currentOutput = Float64Array.from(trainable.forward(transition.state))
+          const currentOutput = Float64Array.from(
+            trainable.forward(transition.state)
+          )
           const currentProbabilities = extractLeadingValues(
             currentOutput,
             config.actionCount,
@@ -148,14 +158,17 @@ export function createPPOStepAgent(
               errors[i] =
                 (errors[i] as number) +
                 config.entropyCoefficient *
-                  (Math.log(Math.max(currentProbabilities[i] as number, 1e-10)) + 1)
+                  (Math.log(
+                    Math.max(currentProbabilities[i] as number, 1e-10)
+                  ) +
+                    1)
             }
           }
 
           const valueEstimate = computeValueEstimate(currentOutput)
           errors[config.actionCount] =
-            ((valueEstimate - (returnTargets[index] as number)) *
-              (config.valueLossCoefficient ?? 0.5))
+            (valueEstimate - (returnTargets[index] as number)) *
+            (config.valueLossCoefficient ?? 0.5)
 
           trainable.backward(errors, config.learningRate)
         }
@@ -166,7 +179,9 @@ export function createPPOStepAgent(
   return {
     act(observation: Float64Array): Float64Array {
       if (openStep !== null) {
-        throw new Error('completeStep() must be called before act() opens another step')
+        throw new Error(
+          'completeStep() must be called before act() opens another step'
+        )
       }
 
       const rawOutput = Float64Array.from(trainable.forward(observation))
@@ -183,7 +198,10 @@ export function createPPOStepAgent(
         action,
         actionProbabilities,
         valueEstimate: computeValueEstimate(rawOutput),
-        actionLogProbability: computeActionLogProbability(action, actionProbabilities),
+        actionLogProbability: computeActionLogProbability(
+          action,
+          actionProbabilities
+        ),
       }
 
       return action
@@ -209,7 +227,8 @@ export function createPPOStepAgent(
         actionProbabilities: openStep.actionProbabilities,
         valueEstimate: openStep.valueEstimate,
         actionLogProbability: openStep.actionLogProbability,
-        nextValueEstimate: nextOutput === null ? 0 : computeValueEstimate(nextOutput),
+        nextValueEstimate:
+          nextOutput === null ? 0 : computeValueEstimate(nextOutput),
       }
 
       openStep = null
@@ -226,7 +245,9 @@ export function createPPOStepAgent(
 
     endEpisode(_result: StepEpisodeResult): void {
       if (openStep !== null) {
-        throw new Error('endEpisode() called before the current step was completed')
+        throw new Error(
+          'endEpisode() called before the current step was completed'
+        )
       }
       const batch = collector.endEpisode()
       if (batch !== null) {

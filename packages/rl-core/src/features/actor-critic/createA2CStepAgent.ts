@@ -12,8 +12,8 @@ import {
 } from '../action-space/groupedBinary.js'
 import { computeActionLogProbability } from '../policy-gradient/actionLogProbabilities.js'
 import {
-  computeActorCriticGradients,
   type ActorCriticGradientConfig,
+  computeActorCriticGradients,
 } from '../policy-gradient/computeActorCriticGradients.js'
 import {
   computeGeneralizedAdvantages,
@@ -36,7 +36,10 @@ export interface A2CStepAgentConfig {
   trajectoryConfig: TrajectoryBatchCollectorConfig
 }
 
-function sampleAction(probabilities: Float64Array, rng: () => number): Float64Array {
+function sampleAction(
+  probabilities: Float64Array,
+  rng: () => number
+): Float64Array {
   const action = new Float64Array(probabilities.length)
   const threshold = rng()
   let cumulative = 0
@@ -101,7 +104,9 @@ export function createA2CStepAgent(
 
   function computeValueEstimate(state: Float64Array): number {
     const output = trainable.forward(state)
-    const valueIndex = multiDiscrete ? 2 * config.actionCount : config.actionCount
+    const valueIndex = multiDiscrete
+      ? 2 * config.actionCount
+      : config.actionCount
     return output[valueIndex] as number
   }
 
@@ -131,7 +136,11 @@ export function createA2CStepAgent(
             config.gradientConfig,
             config.actionCount
           )
-        : computeActorCriticGradients(transition, advantage, config.gradientConfig)
+        : computeActorCriticGradients(
+            transition,
+            advantage,
+            config.gradientConfig
+          )
       trainable.forward(transition.state)
       trainable.backward(errors, config.learningRate)
     }
@@ -140,17 +149,29 @@ export function createA2CStepAgent(
   return {
     act(observation: Float64Array): Float64Array {
       if (openStep !== null) {
-        throw new Error('completeStep() must be called before act() opens another step')
+        throw new Error(
+          'completeStep() must be called before act() opens another step'
+        )
       }
 
       const rawOutput = Float64Array.from(trainable.forward(observation))
       const actionProbabilities = multiDiscrete
-        ? extractGroupedBinaryValues(rawOutput, config.actionCount, 'A2C step agent')
+        ? extractGroupedBinaryValues(
+            rawOutput,
+            config.actionCount,
+            'A2C step agent'
+          )
         : extractLeadingValues(rawOutput, config.actionCount, 'A2C step agent')
       const action = multiDiscrete
-        ? sampleGroupedBinaryAction(actionProbabilities, config.actionCount, rng)
+        ? sampleGroupedBinaryAction(
+            actionProbabilities,
+            config.actionCount,
+            rng
+          )
         : sampleAction(actionProbabilities, rng)
-      const valueIndex = multiDiscrete ? 2 * config.actionCount : config.actionCount
+      const valueIndex = multiDiscrete
+        ? 2 * config.actionCount
+        : config.actionCount
 
       openStep = {
         state: Float64Array.from(observation),
@@ -158,7 +179,10 @@ export function createA2CStepAgent(
         action,
         actionProbabilities,
         valueEstimate: rawOutput[valueIndex] as number,
-        actionLogProbability: computeActionLogProbability(action, actionProbabilities),
+        actionLogProbability: computeActionLogProbability(
+          action,
+          actionProbabilities
+        ),
       }
 
       return action
@@ -181,7 +205,9 @@ export function createA2CStepAgent(
         actionProbabilities: openStep.actionProbabilities,
         valueEstimate: openStep.valueEstimate,
         actionLogProbability: openStep.actionLogProbability,
-        nextValueEstimate: outcome.terminated ? 0 : computeValueEstimate(outcome.nextState),
+        nextValueEstimate: outcome.terminated
+          ? 0
+          : computeValueEstimate(outcome.nextState),
       }
 
       openStep = null
@@ -198,7 +224,9 @@ export function createA2CStepAgent(
 
     endEpisode(_result: StepEpisodeResult): void {
       if (openStep !== null) {
-        throw new Error('endEpisode() called before the current step was completed')
+        throw new Error(
+          'endEpisode() called before the current step was completed'
+        )
       }
       const batch = collector.endEpisode()
       if (batch !== null) {

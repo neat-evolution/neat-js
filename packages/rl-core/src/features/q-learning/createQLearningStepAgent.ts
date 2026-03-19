@@ -1,16 +1,16 @@
 import type { TrainableExecutor } from '@neat-evolution/executor'
 import type { StepAgent } from '../../core/StepAgent.js'
+import type {
+  StepEpisodeInfo,
+  StepEpisodeResult,
+  StepOutcome,
+} from '../../core/StepTypes.js'
 import {
   computeGroupedBinaryBootstrapValues,
   extractGroupedBinaryValues,
   extractLeadingValues,
   selectGroupedBinaryAction,
 } from '../action-space/groupedBinary.js'
-import type {
-  StepEpisodeInfo,
-  StepEpisodeResult,
-  StepOutcome,
-} from '../../core/StepTypes.js'
 import {
   StepRolloutBuffer,
   type StepRolloutBufferConfig,
@@ -63,7 +63,9 @@ function computeQOutputErrors(
   target: number
 ): Float64Array {
   const errors = new Float64Array(transition.rawOutput.length)
-  const chosenQValue = transition.qValues[transition.chosenActionIndex] as number
+  const chosenQValue = transition.qValues[
+    transition.chosenActionIndex
+  ] as number
   errors[transition.chosenActionIndex] = chosenQValue - target
   return errors
 }
@@ -99,10 +101,11 @@ export function createQLearningStepAgent(
         )
   }
 
-  function trainSegment(segment: StepRolloutSegment<QLearningTransition>): void {
+  function trainSegment(
+    segment: StepRolloutSegment<QLearningTransition>
+  ): void {
     if (multiDiscrete) {
-      const lastTransition =
-        segment.transitions[segment.transitions.length - 1]
+      const lastTransition = segment.transitions[segment.transitions.length - 1]
       if (lastTransition === undefined) {
         throw new Error('Missing last transition for grouped Q-learning')
       }
@@ -169,7 +172,9 @@ export function createQLearningStepAgent(
   return {
     act(observation: Float64Array): Float64Array {
       if (openStep !== null) {
-        throw new Error('completeStep() must be called before act() opens another step')
+        throw new Error(
+          'completeStep() must be called before act() opens another step'
+        )
       }
 
       const rawOutput = Float64Array.from(trainable.forward(observation))
@@ -219,7 +224,9 @@ export function createQLearningStepAgent(
         ...(outcome.info !== undefined ? { info: outcome.info } : {}),
         qValues: openStep.qValues,
         nextQValues: outcome.terminated
-          ? new Float64Array(multiDiscrete ? 2 * config.actionCount : config.actionCount)
+          ? new Float64Array(
+              multiDiscrete ? 2 * config.actionCount : config.actionCount
+            )
           : computeNextQValues(outcome.nextState),
         chosenActionIndex: openStep.chosenActionIndex,
       }
@@ -246,7 +253,9 @@ export function createQLearningStepAgent(
 
     endEpisode(_result: StepEpisodeResult): void {
       if (openStep !== null) {
-        throw new Error('endEpisode() called before the current step was completed')
+        throw new Error(
+          'endEpisode() called before the current step was completed'
+        )
       }
       const segment = rolloutBuffer.flush()
       if (segment !== null) {

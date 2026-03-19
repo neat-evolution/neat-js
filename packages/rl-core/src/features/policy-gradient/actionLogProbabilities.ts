@@ -30,5 +30,7 @@ export function computeActionLogProbability(
     return logProbability
   }
 
-  throw new Error('Action and action probabilities must have compatible lengths')
+  throw new Error(
+    'Action and action probabilities must have compatible lengths'
+  )
 }

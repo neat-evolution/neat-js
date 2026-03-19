@@ -37,9 +37,15 @@ function createMockTrainableExecutor(): TrainableExecutor & {
           batch.map((inputs) => this.forward(inputs)),
       }
     },
-    getUpdatedActions(): [] {
-      return []
+    getUpdatedActions() {
+      return { actions: [] }
     },
+    getWeightGradients() {
+      return new Float64Array(0)
+    },
+    accumulateBackward() {},
+    applyGradients() {},
+    zeroGradients() {},
   }
 }
 
@@ -140,9 +146,15 @@ describe('createQLearningStepAgent', () => {
             batch.map((inputs) => this.forward(inputs)),
         }
       },
-      getUpdatedActions(): [] {
-        return []
+      getUpdatedActions() {
+        return { actions: [] }
       },
+      getWeightGradients() {
+        return new Float64Array(0)
+      },
+      accumulateBackward() {},
+      applyGradients() {},
+      zeroGradients() {},
     }
 
     const agent = createQLearningStepAgent(
@@ -182,8 +194,8 @@ describe('createQLearningStepAgent', () => {
     expect(executor.backwardCalls).toHaveLength(1)
     expect(executor.backwardCalls[0]?.errors).toHaveLength(4)
     expect(
-      (executor.backwardCalls[0]?.errors.filter((value) => value !== 0).length ??
-        0) > 0
+      (executor.backwardCalls[0]?.errors.filter((value) => value !== 0)
+        .length ?? 0) > 0
     ).toBe(true)
   })
 })

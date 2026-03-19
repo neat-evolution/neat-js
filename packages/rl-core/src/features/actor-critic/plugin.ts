@@ -1,16 +1,16 @@
+import type { Executor } from '@neat-evolution/executor'
+import { isTrainableExecutor } from '@neat-evolution/executor'
+import { createRNG } from '@neat-evolution/utils'
 import type {
   StepAgentContext,
   StepAgentFactory,
   StepAgentFactoryOptions,
 } from '../../index.js'
-import type { Executor } from '@neat-evolution/executor'
-import { createRNG } from '@neat-evolution/utils'
-import { isTrainableExecutor } from '@neat-evolution/executor'
-import {
-  createActorCriticStepAgent,
-  type ActorCriticStepAgentConfig,
-} from './createActorCriticStepAgent.js'
 import type { StepRolloutSegment } from '../rollout/StepRolloutBuffer.js'
+import {
+  type ActorCriticStepAgentConfig,
+  createActorCriticStepAgent,
+} from './createActorCriticStepAgent.js'
 import type { ActorCriticTransition } from './types.js'
 
 interface ActorCriticStepAgentFactoryOptions extends StepAgentFactoryOptions {
@@ -37,7 +37,9 @@ export const createStepAgent: StepAgentFactory = (
   context?: StepAgentContext
 ) => {
   if (!isTrainableExecutor(executor)) {
-    throw new Error('Actor-critic step agent factory requires a TrainableExecutor')
+    throw new Error(
+      'Actor-critic step agent factory requires a TrainableExecutor'
+    )
   }
   if (!isActorCriticStepAgentFactoryOptions(options)) {
     throw new Error(

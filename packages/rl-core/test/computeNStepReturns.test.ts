@@ -77,7 +77,8 @@ describe('computeDiscountedReturns', () => {
       ],
       {
         discountFactor: 0.5,
-        getBootstrapValue: (transition) => maxQBootstrap(transition.nextQValues),
+        getBootstrapValue: (transition) =>
+          maxQBootstrap(transition.nextQValues),
       }
     )
 

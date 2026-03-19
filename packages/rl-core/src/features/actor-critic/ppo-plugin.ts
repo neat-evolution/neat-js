@@ -6,7 +6,10 @@ import type {
   StepAgentFactory,
   StepAgentFactoryOptions,
 } from '../../index.js'
-import { createPPOStepAgent, type PPOStepAgentConfig } from './createPPOStepAgent.js'
+import {
+  createPPOStepAgent,
+  type PPOStepAgentConfig,
+} from './createPPOStepAgent.js'
 
 interface PPOStepAgentFactoryOptions extends StepAgentFactoryOptions {
   config: PPOStepAgentConfig

@@ -1,7 +1,4 @@
-import type {
-  BaseOpenStep,
-  BaseStepTransition,
-} from '../../core/StepTypes.js'
+import type { BaseOpenStep, BaseStepTransition } from '../../core/StepTypes.js'
 
 export interface ActorCriticOpenStep<Info = unknown>
   extends BaseOpenStep<Info> {

@@ -34,9 +34,15 @@ function createMockTrainableExecutor(): TrainableExecutor & {
           batch.map((inputs) => this.forward(inputs)),
       }
     },
-    getUpdatedActions(): [] {
-      return []
+    getUpdatedActions() {
+      return { actions: [] }
     },
+    getWeightGradients() {
+      return new Float64Array(0)
+    },
+    accumulateBackward() {},
+    applyGradients() {},
+    zeroGradients() {},
   }
 }
 
