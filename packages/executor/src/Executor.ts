@@ -1,6 +1,8 @@
+import type { PooledFloat64Array } from './OutputPool.js'
+
 export type Inputs = number[] | Float64Array
 export type BatchInputs = Inputs[]
-export type Outputs = number[] | Float64Array
+export type Outputs = number[] | Float64Array | PooledFloat64Array
 export type BatchOutputs = Outputs[]
 
 export interface StaticExecutor {

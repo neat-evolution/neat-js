@@ -12,6 +12,7 @@ import type {
   StaticExecutor,
 } from './Executor.js'
 import type { ExecutorFactory } from './ExecutorFactory.js'
+import { OutputPool } from './OutputPool.js'
 import {
   type ActivationFunction,
   toActivationFunction,
@@ -93,12 +94,13 @@ export const createExecutor: ExecutorFactory = (
     softmaxGroups.push({ start: groupStart, end: outputsCount })
   }
 
+  // Pool of output arrays — avoids allocation on every forward() call.
+  // Callers must release() or readAndRelease() the returned output.
+  const outputPool = new OutputPool(outputsCount)
+
   const forward = (inputs: Inputs): Outputs => {
-    // Clear network values - Float64Array.fill is very fast
     values.fill(0)
 
-    // Copy inputs into values
-    // Using simple for loop over typed array is extremely fast
     const inputsMap = phenotype.inputs
     for (let i = 0; i < inputsCount; i++) {
       const inputIndex = inputsMap[i]
@@ -107,35 +109,29 @@ export const createExecutor: ExecutorFactory = (
       }
     }
 
-    // Do forward pass
+    // Forward pass — typed arrays guarantee numeric values for valid indices.
+    // The phenotype builder ensures all indices are within bounds.
     for (let i = 0; i < actionCount; i++) {
       if (actionTypes[i] === LINK_ACTION) {
         const from = actionNodeOrFrom[i] as number
         const to = actionTo[i] as number
-        const nextValue = values[to]
-        const fromValue = values[from]
-        const weight = actionValue[i]
-        if (nextValue !== undefined && fromValue !== undefined) {
-          values[to] = nextValue + fromValue * (weight ?? 0)
-        }
+        values[to] =
+          (values[to] as number) +
+          (values[from] as number) * (actionValue[i] as number)
       } else {
-        const node = actionNodeOrFrom[i] as number
         const fn = activationFns[i] as ActivationFunction
-        const nodeValue = values[node]
-        const bias = actionValue[i]
-        if (nodeValue !== undefined) {
-          values[node] = fn(nodeValue + (bias ?? 0))
-        }
+        const node = actionNodeOrFrom[i] as number
+        values[node] = fn((values[node] as number) + (actionValue[i] as number))
       }
     }
 
-    // Collect output
-    const output = new Float64Array(outputsCount)
+    // Collect output into pooled array
+    const output = outputPool.acquire()
     for (let i = 0; i < outputsCount; i++) {
       const o = phenotypeOutputs[i]
       if (o !== undefined) {
-        const value = values[o]
-        output[i] = value !== undefined && Number.isFinite(value) ? value : 0
+        const value = values[o] as number
+        output[i] = Number.isFinite(value) ? value : 0
       }
     }
 
