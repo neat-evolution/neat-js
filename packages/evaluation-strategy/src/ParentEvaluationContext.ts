@@ -1,5 +1,6 @@
 import type { AnyGenome, FitnessData, GenomeEntry } from '@neat-evolution/core'
 import type { StatsRecorder } from '@neat-evolution/stats'
+import type { RNG } from '@neat-evolution/utils'
 import type { DispatcherContext } from '@neat-evolution/worker-actions'
 
 export interface ParentEvaluationContext<G extends AnyGenome = AnyGenome>
@@ -26,4 +27,7 @@ export interface ParentEvaluationContext<G extends AnyGenome = AnyGenome>
 
   /** Optional stats recorder for evaluation-level metrics. */
   stats?: StatsRecorder
+
+  /** Optional RNG for deriving per-organism evaluation seeds. */
+  rng?: RNG
 }

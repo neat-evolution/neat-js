@@ -8,6 +8,7 @@ import type {
   InitConfig,
 } from '@neat-evolution/core'
 import type { Environment } from '@neat-evolution/environment'
+import type { RNG } from '@neat-evolution/utils'
 
 export type { FitnessData }
 
@@ -25,7 +26,10 @@ export interface Evaluator<EFO = unknown> {
     initConfig: InitConfig
   ) => Promise<void>
 
-  evaluate: (genomeEntries: GenomeEntries) => AsyncIterable<FitnessData>
+  evaluate: (
+    genomeEntries: GenomeEntries,
+    rng?: RNG
+  ) => AsyncIterable<FitnessData>
 
   /** Retrieve the latest telemetry for a genome (from evaluation). */
   getTelemetry?: (genome: AnyGenome) => unknown

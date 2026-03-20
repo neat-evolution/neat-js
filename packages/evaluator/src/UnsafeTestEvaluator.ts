@@ -8,7 +8,7 @@ import type { ParentEvaluationContext } from '@neat-evolution/evaluation-strateg
 import type { EnvironmentInitOptions } from '@neat-evolution/execution-manager'
 import type { ExecutorFactory } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
-import { createRNG } from '@neat-evolution/utils'
+import { createRNG, type RNG } from '@neat-evolution/utils'
 import { createBoundContext } from './createBoundContext.js'
 import type { Evaluator } from './Evaluator.js'
 import type { EvaluatorFactoryOptions } from './EvaluatorFactoryOptions.js'
@@ -70,7 +70,10 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
     this.localDispatcher = new LocalDispatcher()
   }
 
-  private async worker(entry: GenomeEntry): Promise<FitnessData> {
+  private async worker(
+    entry: GenomeEntry,
+    seed?: string
+  ): Promise<FitnessData> {
     const [speciesIndex, organismIndex, genome] = entry
 
     if (this.executorFactory == null) {
@@ -83,7 +86,7 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
     const executor = this.executorFactory(phenotype)
 
     // Create bound context with per-evaluation RNG
-    const rng = createRNG()
+    const rng = createRNG(seed)
     const boundContext = createBoundContext({
       send: this.localDispatcher.context.send,
       call: this.localDispatcher.context.call,
@@ -141,16 +144,20 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
     return this.telemetryByGenome.get(genome)
   }
 
-  async *evaluate(genomeEntries: GenomeEntries): AsyncIterable<FitnessData> {
+  async *evaluate(
+    genomeEntries: GenomeEntries,
+    rng?: RNG
+  ): AsyncIterable<FitnessData> {
     if (this.strategy) {
       // Clear pending writebacks from previous generation
       this.pendingWritebacks.clear()
       const context: ParentEvaluationContext = {
-        evaluateGenomeEntry: (entry) => this.worker(entry),
-        evaluateGenomeEntryBatch: (entries) =>
-          Promise.all(entries.map((e) => this.worker(e))),
+        evaluateGenomeEntry: (entry, seed) => this.worker(entry, seed),
+        evaluateGenomeEntryBatch: (entries, seed) =>
+          Promise.all(entries.map((e) => this.worker(e, seed))),
         ...this.localDispatcher.context,
         ...(this.stats != null ? { stats: this.stats } : {}),
+        ...(rng != null ? { rng } : {}),
       }
       yield* this.strategy.evaluate(context, genomeEntries)
       // After all fitness has been yielded, apply Lamarckian writebacks

@@ -16,9 +16,12 @@ export class IndividualStrategy<G extends AnyGenome = AnyGenome>
     const promises: Array<Promise<FitnessData>> = []
 
     // process in parallel
+    let organismIndex = 0
     for (const entry of genomeEntries) {
-      const p = context.evaluateGenomeEntry(entry)
+      const seed = context.rng?.derive(`organism:${organismIndex}`).toSeed()
+      const p = context.evaluateGenomeEntry(entry, seed)
       promises.push(p)
+      organismIndex++
     }
 
     // yield sequentially
