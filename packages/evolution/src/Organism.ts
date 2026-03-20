@@ -8,6 +8,7 @@ import type {
   NodeHiddenDataOf,
   StateDataOf,
 } from '@neat-evolution/core'
+import type { RNG } from '@neat-evolution/utils'
 
 import type { OrganismData } from './OrganismData.js'
 import type { OrganismFactoryOptions } from './OrganismFactoryOptions.js'
@@ -31,21 +32,22 @@ export class Organism<Ctx extends AlgorithmContext = AlgorithmContext> {
   }
 
   // Breed organism with other organism
-  crossover(other: Organism<Ctx>): Organism<Ctx> {
+  crossover(other: Organism<Ctx>, rng: RNG): Organism<Ctx> {
     return new Organism<Ctx>(
       this.genome.crossover(
         other.genome,
         // FIXME: is it correct to cast to zero here?
         this.fitness ?? 0,
-        other.fitness ?? 0
+        other.fitness ?? 0,
+        rng
       ),
       this.generation + 1
     )
   }
 
   // Mutate organism
-  async mutate(): Promise<void> {
-    await this.genome.mutate()
+  async mutate(rng: RNG): Promise<void> {
+    await this.genome.mutate(rng)
   }
 
   // Genetic distance to other organism

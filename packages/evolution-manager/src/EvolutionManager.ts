@@ -36,6 +36,7 @@ import {
 import type { StaticExecutor } from '@neat-evolution/executor'
 import { createExecutor } from '@neat-evolution/executor'
 import type { StatsRecorder } from '@neat-evolution/stats'
+import { createRNG, type RNG } from '@neat-evolution/utils'
 import {
   createEvaluator as createWorkerEvaluator,
   type WorkerEvaluator,
@@ -76,6 +77,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       >
     | undefined
   private readonly evaluatorConfig: EvaluatorConfig | undefined
+  private readonly rng: RNG
   private readonly stats: StatsRecorder | undefined
   private readonly signal: AbortSignal | undefined
 
@@ -119,6 +121,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
         : baseGenomeOptions
     this.populationFactoryOptions = resolvedConfig.populationFactoryOptions
     this.evaluatorConfig = resolvedConfig.evaluatorConfig
+    this.rng = resolvedConfig.rng ?? createRNG()
     this.stats = resolvedConfig.stats
     this.signal = resolvedConfig.signal
   }
@@ -165,11 +168,13 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
 
     const initialMutations = this.evolutionOptions.initialMutations
     if (initialMutations > 0) {
+      const initRng = this.rng.derive('initial-mutations')
       for (let i = 0; i < initialMutations; i++) {
-        await population.mutate()
+        await population.mutate(initRng.derive(`round:${i}`))
       }
     }
-    await population.evaluate()
+    const initEvalRng = this.rng.derive('initial-evaluation')
+    await population.evaluate(initEvalRng)
 
     this.populationInitialized = true
   }
@@ -196,6 +201,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
       ...this.evolutionOptions,
       ...options,
       initialMutations: 0,
+      rng: this.rng,
     }
     if (this.stats != null) {
       evolveOptions.stats = this.stats

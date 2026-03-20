@@ -1,4 +1,4 @@
-import { threadRNG } from '@neat-evolution/utils'
+import type { RNG } from '@neat-evolution/utils'
 
 import type { Organism } from '../Organism.js'
 import type { Population } from '../Population.js'
@@ -9,7 +9,6 @@ import type { Reproducer } from './Reproducer.js'
 export const createReproducer = <P extends Population>(
   population: P
 ): Reproducer => {
-  const rng = threadRNG()
   return {
     copyElites: async (speciesIds: number[]) => {
       const organisms: Array<Organism> = []
@@ -33,8 +32,9 @@ export const createReproducer = <P extends Population>(
       }
       return organisms
     },
-    reproduce: async (speciesIds: number[]) => {
+    reproduce: async (speciesIds: number[], rng: RNG) => {
       const organisms: Array<Organism> = []
+      let offspringIndex = 0
 
       for (const i of speciesIds) {
         const species = population.species.get(i) as Species
@@ -47,11 +47,13 @@ export const createReproducer = <P extends Population>(
             population.populationOptions.interspeciesReproductionProbability
               ? // Interspecies breeding
                 population.tournamentSelect(
-                  population.populationOptions.interspeciesTournamentSize
+                  population.populationOptions.interspeciesTournamentSize,
+                  rng
                 )
               : // Breeding within species
                 species.tournamentSelect(
-                  population.populationOptions.tournamentSize
+                  population.populationOptions.tournamentSize,
+                  rng
                 )
 
           if (father == null) {
@@ -66,15 +68,17 @@ export const createReproducer = <P extends Population>(
             child = father.asElite()
           } else {
             const mother = species.tournamentSelect(
-              population.populationOptions.tournamentSize
+              population.populationOptions.tournamentSize,
+              rng
             )
             if (mother == null) {
               throw new Error('Unable to gather mother organism')
             }
-            child = mother.crossover(father)
+            child = mother.crossover(father, rng)
           }
 
-          await child.mutate()
+          await child.mutate(rng.derive(`offspring:${offspringIndex}`))
+          offspringIndex++
           organisms.push(child)
           population.push(child, true)
         }

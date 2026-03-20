@@ -1,4 +1,5 @@
 import { muteChannel } from '@neat-evolution/logger'
+import { createRNG } from '@neat-evolution/utils'
 
 import type { EvolutionOptions } from './EvolutionOptions.js'
 import { logger, tui } from './logger.js'
@@ -47,12 +48,14 @@ export const evolve = async <
     }
 
     // Mutate: initial mutations for i===0, or single mutation for i>0
+    const rootRng = options.rng ?? createRNG()
+    const generationRng = rootRng.derive(`generation:${i}`)
     if (i === 0 && options.initialMutations > 0) {
       for (let _ = 0; _ < options.initialMutations; _++) {
-        await population.mutate()
+        await population.mutate(generationRng.derive('mutation'))
       }
     } else {
-      await population.evolve()
+      await population.evolve(generationRng.derive('reproduction'))
     }
 
     const afterEvolveCallback = options.afterEvolve
@@ -64,7 +67,7 @@ export const evolve = async <
     }
 
     // Evaluate
-    await population.evaluate()
+    await population.evaluate(generationRng.derive('evaluation'))
     const afterEvaluateCallback = options.afterEvaluate
     if (afterEvaluateCallback != null) {
       const afterEvaluateInterval = options.afterEvaluateInterval ?? 1

@@ -7,7 +7,7 @@ import type {
   NodeHiddenDataOf,
   StateDataOf,
 } from '@neat-evolution/core'
-import { threadRNG } from '@neat-evolution/utils'
+import type { RNG } from '@neat-evolution/utils'
 
 import type { Organism } from './Organism.js'
 import type { SpeciesData, SpeciesState } from './SpeciesData.js'
@@ -126,8 +126,8 @@ export class Species<Ctx extends AlgorithmContext = AlgorithmContext> {
   }
 
   /// Get random organism. Adheres to lock.
-  randomOrganism(): Organism<Ctx> | null {
-    const randomIndex = threadRNG().genRange(0, this.size)
+  randomOrganism(rng: RNG): Organism<Ctx> | null {
+    const randomIndex = rng.genRange(0, this.size)
     let i = 0
     for (const organism of this.organismValues()) {
       if (i === randomIndex) {
@@ -257,12 +257,12 @@ export class Species<Ctx extends AlgorithmContext = AlgorithmContext> {
     this.speciesState.elites = this.speciesOptions.guaranteedElites
   }
 
-  tournamentSelect(k: number): Organism<Ctx> | null {
+  tournamentSelect(k: number, rng: RNG): Organism<Ctx> | null {
     let best: Organism<Ctx> | null = null
     let bestFitness: number | null = null
 
     for (let i = 0; i < k; i++) {
-      const organism = this.randomOrganism()
+      const organism = this.randomOrganism(rng)
       const fitness = organism?.fitness ?? null
       if (
         best === null ||

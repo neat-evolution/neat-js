@@ -1,4 +1,5 @@
 import type { StatsRecorder } from '@neat-evolution/stats'
+import type { RNG } from '@neat-evolution/utils'
 
 import type { Organism } from './Organism.js'
 import type { Population } from './Population.js'
@@ -21,6 +22,7 @@ export interface EvolutionOptions<
   handleNewBest?: (organism: O, iteration: number) => void
   afterEvolve?: (population: P, iteration: number) => void
   afterEvolveInterval?: number
+  rng?: RNG
   signal?: AbortSignal
   stats?: StatsRecorder
   quiet?: boolean

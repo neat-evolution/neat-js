@@ -18,6 +18,7 @@ import type {
   PopulationOptions,
 } from '@neat-evolution/evolution'
 import type { StatsRecorder } from '@neat-evolution/stats'
+import type { RNG } from '@neat-evolution/utils'
 
 import {
   type BuiltInEvolutionAlgorithmName,
@@ -86,6 +87,7 @@ export interface EvolutionManagerOptions<
   evolution?: EvolutionManagerEvolutionOptions
   evaluation?: EvolutionManagerEvaluationOptions
   execution?: EvolutionManagerExecutionOptions
+  rng?: RNG
   signal?: AbortSignal
 }
 
@@ -109,6 +111,7 @@ export interface NormalizedEvolutionManagerConfig<
     GenomeOptionsOf<Ctx>
   >
   evaluatorConfig?: EvaluatorConfig
+  rng?: RNG
   stats?: StatsRecorder
   signal?: AbortSignal
 }
@@ -236,6 +239,7 @@ export function createEvolutionManagerConfig<
     ...(config.evaluation?.stats != null
       ? { stats: config.evaluation.stats }
       : {}),
+    ...(config.rng != null ? { rng: config.rng } : {}),
     ...(config.signal != null ? { signal: config.signal } : {}),
   }
 }

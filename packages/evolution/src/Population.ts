@@ -12,7 +12,7 @@ import type {
   StateTypeOf,
 } from '@neat-evolution/core'
 import type { Evaluator, GenomeEntry } from '@neat-evolution/evaluator'
-import { threadRNG } from '@neat-evolution/utils'
+import type { RNG } from '@neat-evolution/utils'
 import QuickLRU from 'quick-lru'
 
 import { Organism } from './Organism.js'
@@ -186,7 +186,7 @@ export class Population<Ctx extends AlgorithmContext = AlgorithmContext> {
   }
 
   /// Evolve the population
-  async evolve(): Promise<void> {
+  async evolve(rng: RNG): Promise<void> {
     // Adjust fitnesses based on age, stagnation and apply fitness sharing
     // Also sorts organisms by descending fitness
     for (const species of this.species.values()) {
@@ -301,7 +301,7 @@ export class Population<Ctx extends AlgorithmContext = AlgorithmContext> {
     promises.push(this.reproducer.copyElites(speciesIds))
 
     // Evolve species
-    promises.push(this.reproducer.reproduce(speciesIds))
+    promises.push(this.reproducer.reproduce(speciesIds, rng))
 
     await Promise.all(promises)
 
@@ -341,22 +341,24 @@ export class Population<Ctx extends AlgorithmContext = AlgorithmContext> {
     }
   }
 
-  async mutate() {
+  async mutate(rng: RNG) {
     const promises: Array<Promise<void>> = []
+    let i = 0
     for (const organism of this.organismValues()) {
-      promises.push(organism.mutate())
+      promises.push(organism.mutate(rng.derive(`organism:${i}`)))
+      i++
     }
     await Promise.all(promises)
   }
 
   /// Get random organism from population
-  randomOrganism(): Organism<Ctx> | null {
+  randomOrganism(rng: RNG): Organism<Ctx> | null {
     const len = this.size
 
     if (len === 0) {
       return null
     } else {
-      const randomIndex = threadRNG().genRange(0, len)
+      const randomIndex = rng.genRange(0, len)
       let i = 0
       for (const organism of this.organismValues()) {
         if (i === randomIndex) {
@@ -369,12 +371,12 @@ export class Population<Ctx extends AlgorithmContext = AlgorithmContext> {
   }
 
   /// Use tournament selection to select an organism
-  tournamentSelect(k: number): Organism<Ctx> | null {
+  tournamentSelect(k: number, rng: RNG): Organism<Ctx> | null {
     let best: Organism<Ctx> | null = null
     let bestFitness: number | null = null
 
     for (let i = 0; i < k; i++) {
-      const organism = this.randomOrganism()
+      const organism = this.randomOrganism(rng)
       const fitness = organism?.fitness ?? null
       if (
         best === null ||
@@ -389,11 +391,14 @@ export class Population<Ctx extends AlgorithmContext = AlgorithmContext> {
   }
 
   /// Update fitness of all organisms
-  async evaluate() {
+  async evaluate(rng?: RNG) {
     await this.evaluatorReady
 
     // evaluate every organism's genome
-    for await (const result of this.evaluator.evaluate(this.genomeEntries())) {
+    for await (const result of this.evaluator.evaluate(
+      this.genomeEntries(),
+      rng
+    )) {
       const [speciesIndex, organismIndex, fitness] = result
       const species = this.species.get(speciesIndex)
       if (species == null) {
