@@ -43,7 +43,7 @@ import {
   defaultHyperNEATGenomeOptions,
   HyperNEATAlgorithm,
 } from '@neat-evolution/hyperneat'
-import { setThreadRNGSeed } from '@neat-evolution/utils'
+import { createRNG } from '@neat-evolution/utils'
 
 // --- Constants ---
 
@@ -115,9 +115,7 @@ function parseArgs(argv: string[]) {
 
 const args = parseArgs(process.argv.slice(2))
 
-if (args.seed) {
-  setThreadRNGSeed(args.seed)
-}
+const rootRng = args.seed ? createRNG(args.seed) : createRNG()
 
 console.log(
   `=== ${args.method} Profiling${args.lamarckian ? ' (Lamarckian)' : ''} ===`
@@ -288,6 +286,7 @@ async function runWithWorkers(): Promise<{
       },
     },
     ...lamarckianConfig,
+    rng: rootRng,
   }
 
   const mgr = new EvolutionManager(managerOptions)

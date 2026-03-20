@@ -17,7 +17,6 @@
  */
 
 import { Activation, defaultNEATConfigOptions } from '@neat-evolution/core'
-import { setThreadRNGSeed } from '@neat-evolution/utils'
 import {
   DatasetEnvironment,
   type DatasetOptions,
@@ -39,6 +38,7 @@ import {
   type EvolutionManagerOptions,
 } from '@neat-evolution/evolution-manager'
 import { defaultHyperNEATGenomeOptions } from '@neat-evolution/hyperneat'
+import { createRNG } from '@neat-evolution/utils'
 
 // --- Argument parsing ---
 
@@ -192,9 +192,9 @@ async function runVariant(
   genomeOptionsOverrides?: EvolutionManagerOptions['algorithm']['genomeOptions'],
   configDataOverride?: EvolutionManagerOptions['algorithm']['configData']
 ): Promise<RunResult> {
-  // Reset RNG to the same seed for each variant so initial populations
-  // and mutation sequences are deterministic and comparable.
-  setThreadRNGSeed(args.seed)
+  // Create a fresh RNG from the same seed for each variant so initial
+  // populations and mutation sequences are deterministic and comparable.
+  const rootRng = createRNG(args.seed)
 
   const fitnessLog: number[] = []
 
@@ -235,6 +235,7 @@ async function runVariant(
       },
     },
     ...trainerConfig,
+    rng: rootRng,
   }
 
   const manager = new EvolutionManager(managerOptions)

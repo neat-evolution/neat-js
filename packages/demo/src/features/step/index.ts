@@ -19,7 +19,7 @@ import type {
   PPOStepAgentConfig,
   QLearningStepAgentConfig,
 } from '@neat-evolution/rl-core'
-import { setThreadRNGSeed } from '@neat-evolution/utils'
+import { createRNG } from '@neat-evolution/utils'
 import { StepControlEnvironment } from '../step-control/StepControlEnvironment.js'
 import { StepBanditEnvironment } from './StepBanditEnvironment.js'
 
@@ -103,9 +103,7 @@ interface RunResult {
 
 const args = parseArgs(process.argv.slice(2))
 
-if (args.seed != null) {
-  setThreadRNGSeed(args.seed)
-}
+const rootRng = args.seed != null ? createRNG(args.seed) : createRNG()
 
 const actionCount = args.environment === 'control' ? 2 : 3
 const discountFactor = args.environment === 'control' ? 0.9 : 0
@@ -223,7 +221,6 @@ const evaluatorConfig: EvaluatorConfig = {
   environmentRuntimeData: {
     executionManagerFactoryOptions: {
       config: stepConfig,
-      rngSeed: `${args.seed ?? 'step-demo'}:${args.environment}:${args.algorithm}`,
       isLamarckian: true,
     },
   },
@@ -293,6 +290,7 @@ async function run(): Promise<RunResult> {
         (evaluatorConfig.environmentRuntimeData
           ?.executionManagerFactoryOptions as Record<string, unknown>) ?? {},
     },
+    rng: rootRng,
   })
 
   try {

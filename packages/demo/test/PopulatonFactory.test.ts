@@ -26,6 +26,7 @@ import {
   type NEATPopulation,
   type NEATReproducerFactory,
 } from '@neat-evolution/neat'
+import { createRNG } from '@neat-evolution/utils'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
@@ -89,7 +90,7 @@ describe('PopulationFactory', () => {
 
     // 2. Mutate it 50 times
     for (let i = 0; i < 50; i++) {
-      await population.mutate()
+      await population.mutate(createRNG('test'))
     }
 
     // 3. Evolve it for 10 iterations
