@@ -13,7 +13,7 @@ import {
   createLink as createNEATLink,
   type NEATLinkData,
 } from '@neat-evolution/neat'
-import { threadRNG } from '@neat-evolution/utils'
+import type { RNG } from '@neat-evolution/utils'
 
 import type { CPPNContext } from './CPPNContext.js'
 import type { CPPNGenomeData } from './CPPNGenomeData.js'
@@ -31,14 +31,13 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
 > {
   private mutateNodeActivation(
     nodes: Map<NodeKey, CPPNNode>,
-    activationOptions: readonly Activation[]
+    activationOptions: readonly Activation[],
+    rng: RNG
   ): void {
     const size = nodes.size
     if (size === 0) {
       return
     }
-
-    const rng = threadRNG()
     const randomIndex = rng.genRange(0, size)
     let i = 0
     for (const node of nodes.values()) {
@@ -164,22 +163,22 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
     }
   }
 
-  override async mutate(): Promise<void> {
-    await super.mutate()
-
-    const rng = threadRNG()
+  override async mutate(rng: RNG): Promise<void> {
+    await super.mutate(rng)
 
     if (rng.gen() < this.genomeOptions.mutateHiddenActivationProbability) {
       this.mutateNodeActivation(
         this.hiddenNodes as Map<NodeKey, CPPNNode>,
-        this.genomeOptions.hiddenActivations
+        this.genomeOptions.hiddenActivations,
+        rng
       )
     }
 
     if (rng.gen() < this.genomeOptions.mutateOutputActivationProbability) {
       this.mutateNodeActivation(
         this.outputs as Map<NodeKey, CPPNNode>,
-        this.genomeOptions.outputActivations
+        this.genomeOptions.outputActivations,
+        rng
       )
     }
   }

@@ -1,5 +1,6 @@
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import { createConfig, createState } from '@neat-evolution/neat'
+import { createRNG } from '@neat-evolution/utils'
 import { bench, describe } from 'vitest'
 import { CPPNGenome } from '../src/CPPNGenome.js'
 import { defaultCPPNGenomeOptions } from '../src/CPPNGenomeOptions.js'
@@ -20,9 +21,10 @@ describe('CPPN createPhenotype Benchmark', async () => {
     createGenome
   )
 
+  const rng = createRNG('bench')
   for (let i = 0; i < 300; i++) {
-    await genome.mutationAddNode()
-    await genome.mutationAddLink()
+    await genome.mutationAddNode(rng)
+    await genome.mutationAddLink(rng)
   }
 
   bench(

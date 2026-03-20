@@ -4,7 +4,7 @@ import {
   type NodeData,
   NodeType,
 } from '@neat-evolution/core'
-import { threadRNG } from '@neat-evolution/utils'
+import { threadRNG, type RNG } from '@neat-evolution/utils'
 
 import type { CPPNContext } from './CPPNContext.js'
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
@@ -79,13 +79,14 @@ export class CPPNNode extends CoreNode<CPPNContext> {
   override crossover(
     other: CPPNNode,
     _fitness: number,
-    _otherFitness: number
+    _otherFitness: number,
+    rng: RNG
   ): CPPNNode {
     if (this.type !== other.type || this.id !== other.id) {
       throw new Error('Mismatch in crossover')
     }
     const newBias = (this.bias + other.bias) / 2.0
-    const newActivation = threadRNG().genBool()
+    const newActivation = rng.genBool()
       ? this.activation
       : other.activation
 
