@@ -1,6 +1,5 @@
 import type { Executor } from '@neat-evolution/executor'
 import { isTrainableExecutor } from '@neat-evolution/executor'
-import { createRNG } from '@neat-evolution/utils'
 import type {
   StepAgentContext,
   StepAgentFactory,
@@ -15,7 +14,6 @@ import type { QLearningTransition } from './types.js'
 
 interface QLearningStepAgentFactoryOptions extends StepAgentFactoryOptions {
   config: QLearningStepAgentConfig
-  rngSeed: string
   isLamarckian?: boolean
 }
 
@@ -25,9 +23,7 @@ function isQLearningStepAgentFactoryOptions(
   return (
     'config' in options &&
     typeof options.config === 'object' &&
-    options.config !== null &&
-    'rngSeed' in options &&
-    typeof options.rngSeed === 'string'
+    options.config !== null
   )
 }
 
@@ -42,21 +38,22 @@ export const createStepAgent: StepAgentFactory = (
     )
   }
   if (!isQLearningStepAgentFactoryOptions(options)) {
-    throw new Error(
-      'Q-learning step agent factory requires { config, rngSeed }'
-    )
+    throw new Error('Q-learning step agent factory requires { config }')
+  }
+  if (context == null) {
+    throw new Error('Q-learning step agent factory requires context with rng')
   }
 
-  const { config, rngSeed, isLamarckian } = options
+  const { config, isLamarckian } = options
 
   if (isLamarckian !== false) {
-    context?.scheduleWriteback?.(executor)
+    context.scheduleWriteback?.(executor)
   }
 
   const onSegmentTrained = (
     segment: StepRolloutSegment<QLearningTransition>
   ): void => {
-    context?.stats?.record('step.ql.segmentTrained', {
+    context.stats?.record('step.ql.segmentTrained', {
       transitions: segment.transitions.length,
       completedBy: segment.completedBy,
       episodeIndex: segment.episodeIndex,
@@ -64,7 +61,7 @@ export const createStepAgent: StepAgentFactory = (
     config.onSegmentTrained?.(segment)
   }
 
-  const rng = createRNG(rngSeed)
+  const agentRng = context.rng.derive('ql-agent')
 
   return createQLearningStepAgent(
     executor,
@@ -72,7 +69,7 @@ export const createStepAgent: StepAgentFactory = (
       ...config,
       onSegmentTrained,
     },
-    rng.gen
+    agentRng.gen
   )
 }
 

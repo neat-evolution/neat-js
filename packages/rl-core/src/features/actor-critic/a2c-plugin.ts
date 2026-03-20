@@ -1,6 +1,5 @@
 import type { Executor } from '@neat-evolution/executor'
 import { isTrainableExecutor } from '@neat-evolution/executor'
-import { createRNG } from '@neat-evolution/utils'
 import type {
   StepAgentContext,
   StepAgentFactory,
@@ -13,7 +12,6 @@ import {
 
 interface A2CStepAgentFactoryOptions extends StepAgentFactoryOptions {
   config: A2CStepAgentConfig
-  rngSeed: string
   isLamarckian?: boolean
 }
 
@@ -23,9 +21,7 @@ function isA2CStepAgentFactoryOptions(
   return (
     'config' in options &&
     typeof options.config === 'object' &&
-    options.config !== null &&
-    'rngSeed' in options &&
-    typeof options.rngSeed === 'string'
+    options.config !== null
   )
 }
 
@@ -38,16 +34,19 @@ export const createStepAgent: StepAgentFactory = (
     throw new Error('A2C step agent factory requires a TrainableExecutor')
   }
   if (!isA2CStepAgentFactoryOptions(options)) {
-    throw new Error('A2C step agent factory requires { config, rngSeed }')
+    throw new Error('A2C step agent factory requires { config }')
+  }
+  if (context == null) {
+    throw new Error('A2C step agent factory requires context with rng')
   }
 
-  const { config, rngSeed, isLamarckian } = options
+  const { config, isLamarckian } = options
   if (isLamarckian !== false) {
-    context?.scheduleWriteback?.(executor)
+    context.scheduleWriteback?.(executor)
   }
 
-  const rng = createRNG(rngSeed)
-  return createA2CStepAgent(executor, config, rng.gen)
+  const agentRng = context.rng.derive('a2c-agent')
+  return createA2CStepAgent(executor, config, agentRng.gen)
 }
 
 export default createStepAgent

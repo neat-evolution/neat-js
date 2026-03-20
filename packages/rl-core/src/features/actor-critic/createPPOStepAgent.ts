@@ -91,12 +91,8 @@ export function createPPOStepAgent(
   )
   let openStep: ActorCriticOpenStep | null = null
 
-  const valueIndex = multiDiscrete
-    ? 2 * config.actionCount
-    : config.actionCount
-  const probCount = multiDiscrete
-    ? 2 * config.actionCount
-    : config.actionCount
+  const valueIndex = multiDiscrete ? 2 * config.actionCount : config.actionCount
+  const probCount = multiDiscrete ? 2 * config.actionCount : config.actionCount
   const outputCount = multiDiscrete
     ? 2 * config.actionCount + 1
     : config.actionCount + 1
@@ -217,9 +213,7 @@ export function createPPOStepAgent(
               trainErrors[i] =
                 (trainErrors[i] as number) +
                 config.entropyCoefficient *
-                  (Math.log(
-                    Math.max(trainProbabilities[i] as number, 1e-10)
-                  ) +
+                  (Math.log(Math.max(trainProbabilities[i] as number, 1e-10)) +
                     1)
             }
           }
