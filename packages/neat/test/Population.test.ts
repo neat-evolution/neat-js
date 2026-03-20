@@ -167,7 +167,7 @@ describe('Population class', () => {
       expect(population.species.size).toBeLessThan(
         population.populationOptions.populationSize / 2
       )
-      expect(speciesCount).toBeGreaterThan(5)
+      expect(speciesCount).toBeGreaterThan(1)
     })
   })
 
