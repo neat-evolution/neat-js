@@ -358,7 +358,8 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     from: NodeKey,
     to: NodeKey,
     newNodeKey: NodeKey,
-    isSafe?: boolean
+    isSafe?: boolean,
+    rng?: RNG
   ): Promise<void> {
     const linkKey = toLinkKey(from, to)
     const link = this.links.get(linkKey) as LinkTypeOf<Ctx>
@@ -375,7 +376,8 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
       this.createNode(
         { type: nodeKeyToType(newNodeKey), id: nodeKeyToId(newNodeKey) },
         this.config.node(),
-        this.state.node()
+        this.state.node(),
+        rng
       )
 
     this.hiddenNodes.set(
@@ -502,7 +504,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
       const linkToKey = toLinkKey(newNodeKey, link.to)
 
       if (!this.links.has(linkFromKey) && !this.links.has(linkToKey)) {
-        await this.splitLink(link.from, link.to, newNodeKey, true)
+        await this.splitLink(link.from, link.to, newNodeKey, true, rng)
         break
       }
     }
