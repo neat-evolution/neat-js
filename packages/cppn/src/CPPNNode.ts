@@ -4,12 +4,37 @@ import {
   type NodeData,
   NodeType,
 } from '@neat-evolution/core'
-import { threadRNG, type RNG } from '@neat-evolution/utils'
+import type { RNG } from '@neat-evolution/utils'
 
 import type { CPPNContext } from './CPPNContext.js'
 import type { CPPNNodeFactoryOptions } from './CPPNNodeFactoryOptions.js'
 import type { CPPNNodeOptions } from './CPPNNodeOptions.js'
 import { createNode } from './createNode.js'
+
+/**
+ * Pick a random activation for a CPPN node based on its type.
+ * Input nodes always get `Activation.None`.
+ */
+export function pickActivation(
+  type: NodeType,
+  nodeOptions: CPPNNodeOptions,
+  rng: RNG
+): Activation {
+  switch (type) {
+    case NodeType.Input:
+      return Activation.None
+    case NodeType.Hidden:
+      return nodeOptions.hiddenActivations[
+        rng.genRange(0, nodeOptions.hiddenActivations.length)
+      ] as Activation
+    case NodeType.Output:
+      return nodeOptions.outputActivations[
+        rng.genRange(0, nodeOptions.outputActivations.length)
+      ] as Activation
+    default:
+      throw new Error('Invalid NodeRef type')
+  }
+}
 
 export class CPPNNode extends CoreNode<CPPNContext> {
   public activation: Activation
@@ -22,7 +47,12 @@ export class CPPNNode extends CoreNode<CPPNContext> {
   ) {
     super(factoryOptions, null, null, createNode)
     this.nodeOptions = nodeOptions
-    this.activation = factoryOptions.activation ?? this.determineActivation()
+    if (factoryOptions.activation == null) {
+      throw new Error(
+        'CPPNNode requires activation in factory options — use pickActivation() before construction'
+      )
+    }
+    this.activation = factoryOptions.activation
   }
 
   /**
@@ -48,32 +78,11 @@ export class CPPNNode extends CoreNode<CPPNContext> {
     node.nodeOptions = nodeOptions
     node.bias = node.bias ?? 0
     if (node.activation === undefined) {
-      node.activation = (
-        node as unknown as { determineActivation: () => Activation }
-      ).determineActivation()
+      throw new Error(
+        'CPPNNode.from requires activation in factory options — use pickActivation() before construction'
+      )
     }
     return node
-  }
-
-  private determineActivation(): Activation {
-    const rng = threadRNG()
-
-    switch (this.type) {
-      case NodeType.Input:
-        return Activation.None
-      case NodeType.Hidden: {
-        return this.nodeOptions.hiddenActivations[
-          rng.genRange(0, this.nodeOptions.hiddenActivations.length)
-        ] as Activation
-      }
-      case NodeType.Output: {
-        return this.nodeOptions.outputActivations[
-          rng.genRange(0, this.nodeOptions.outputActivations.length)
-        ] as Activation
-      }
-      default:
-        throw new Error('Invalid NodeRef type')
-    }
   }
 
   override crossover(

@@ -1,5 +1,5 @@
 import {
-  type Activation,
+  Activation,
   CoreGenome,
   type InitConfig,
   type LinkFactory,
@@ -151,10 +151,14 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
     if (factoryOptions != null) {
       this.hydrate(factoryOptions)
     } else {
+      // Fresh genome — use deterministic default activation for output nodes.
+      // All organisms start identical; initial mutations will diversify activations.
+      const defaultOutputActivation =
+        this.genomeOptions.outputActivations[0] ?? Activation.Linear
       const outputsCount = this.initConfig.outputs
       for (let i = 0; i < outputsCount; i++) {
         const node = this.createNode(
-          { type: NodeType.Output, id: i },
+          { type: NodeType.Output, id: i, activation: defaultOutputActivation },
           this.config.node(),
           this.state.node()
         )
