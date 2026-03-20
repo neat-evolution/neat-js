@@ -11,7 +11,7 @@ import {
   type CPPNGenome,
   type CPPNGenomeOptions,
 } from '@neat-evolution/cppn'
-import { threadRNG } from '@neat-evolution/utils'
+import type { RNG } from '@neat-evolution/utils'
 
 import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import type { DESHyperNEATGenomeOptions } from './DESHyperNEATGenomeOptions.js'
@@ -68,15 +68,15 @@ export class DESHyperNEATNode extends CoreNode<DESHyperNEATContext> {
   override crossover(
     other: DESHyperNEATNode,
     fitness: number,
-    otherFitness: number
+    otherFitness: number,
+    rng: RNG
   ): DESHyperNEATNode {
     if (this.type !== other.type || this.id !== other.id) {
       throw new Error('Mismatch in crossover')
     }
-    const rng = threadRNG()
     const factoryOptions = {
       ...super.toFactoryOptions(),
-      cppn: this.cppn.crossover(other.cppn, fitness, otherFitness),
+      cppn: this.cppn.crossover(other.cppn, fitness, otherFitness, rng),
       depth: rng.genBool() ? this.depth : other.depth,
     }
     return this.createNode(factoryOptions, this.config, this.state)

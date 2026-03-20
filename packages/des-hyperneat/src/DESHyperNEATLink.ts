@@ -10,7 +10,7 @@ import {
   type CPPNGenome,
   type CPPNGenomeOptions,
 } from '@neat-evolution/cppn'
-import { threadRNG } from '@neat-evolution/utils'
+import type { RNG } from '@neat-evolution/utils'
 
 import type { DESHyperNEATContext } from './DESHyperNEATContext.js'
 import type { DESHyperNEATGenomeOptions } from './DESHyperNEATGenomeOptions.js'
@@ -93,7 +93,8 @@ export class DESHyperNEATLink extends CoreLink<DESHyperNEATContext> {
   override crossover(
     other: DESHyperNEATLink,
     fitness: number,
-    otherFitness: number
+    otherFitness: number,
+    rng?: RNG
   ): DESHyperNEATLink {
     if (
       this.from !== other.from ||
@@ -102,14 +103,15 @@ export class DESHyperNEATLink extends CoreLink<DESHyperNEATContext> {
     ) {
       throw new Error('Mismatch in crossover')
     }
-
-    const rng = threadRNG()
+    if (rng == null) {
+      throw new Error('DESHyperNEATLink.crossover requires rng')
+    }
 
     return this.createLink(
       {
         ...super.toFactoryOptions(),
         weight: (this.weight + other.weight) / 2,
-        cppn: this.cppn.crossover(other.cppn, fitness, otherFitness),
+        cppn: this.cppn.crossover(other.cppn, fitness, otherFitness, rng),
         depth: rng.genBool() ? this.depth : other.depth,
       },
       this.config,

@@ -12,7 +12,7 @@ import type {
   CPPNGenomeOptions,
   CPPNNode,
 } from '@neat-evolution/cppn'
-import { threadRNG } from '@neat-evolution/utils'
+import type { RNG } from '@neat-evolution/utils'
 import type { DESHyperNEATGenomeFactory } from './createGenome.js'
 import { createLinkFactory } from './createLink.js'
 import { createNodeFactory } from './createNode.js'
@@ -130,9 +130,9 @@ export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
     }
   }
 
-  override async mutationAddLink(): Promise<void> {
+  override async mutationAddLink(rng: RNG): Promise<void> {
     const sizeBefore = this.links.size
-    await super.mutationAddLink()
+    await super.mutationAddLink(rng)
 
     // Initialize new link CPPNs with identity mapping so they produce
     // spatially-meaningful substrate connections from the start.
@@ -145,7 +145,6 @@ export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
       this.genomeOptions.enableIdentityMapping &&
       this.links.size > sizeBefore
     ) {
-      const rng = threadRNG()
       for (const link of this.links.values()) {
         const desLink = link as DESHyperNEATLink
         if (desLink.cppn.links.size === 0) {
@@ -173,9 +172,8 @@ export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
     }
   }
 
-  override async mutate(): Promise<void> {
-    await super.mutate()
-    const rng = threadRNG()
+  override async mutate(rng: RNG): Promise<void> {
+    await super.mutate(rng)
 
     const nodeMutProb =
       3.0 /
@@ -185,14 +183,14 @@ export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
     for (const nodeMap of [this.hiddenNodes, this.inputs, this.outputs]) {
       for (const node of nodeMap.values()) {
         if (this.genomeOptions.mutateAllComponents || rng.gen() < nodeMutProb) {
-          await node.cppn.mutate()
+          await node.cppn.mutate(rng)
         }
       }
     }
 
     for (const link of this.links.values()) {
       if (this.genomeOptions.mutateAllComponents || rng.gen() < linkMutProb) {
-        await link.cppn.mutate()
+        await link.cppn.mutate(rng)
       }
     }
 
@@ -222,7 +220,7 @@ export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
         if (map !== undefined) {
           for (const node of map.values()) {
             if (i === randomIndex) {
-              this.mutateNodeDepth(node, limit)
+              this.mutateNodeDepth(node, limit, rng)
               break
             }
             i++
@@ -232,8 +230,7 @@ export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
     }
   }
 
-  mutateNodeDepth(node: DESHyperNEATNode, limit: number): void {
-    const rng = threadRNG()
+  mutateNodeDepth(node: DESHyperNEATNode, limit: number, rng: RNG): void {
     if (limit === 0) {
       node.depth = 0
       return

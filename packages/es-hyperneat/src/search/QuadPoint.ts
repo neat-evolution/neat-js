@@ -157,7 +157,6 @@ export class QuadPoint {
       return 0.0
     }
 
-
     if (this.options.onlyLeafVariance && !this.options.medianVariance) {
       // Fast path: leaf-only variance ignores root/branch params.
       // Safe to cache when relativeVariance is false (deltaWeight unused).
