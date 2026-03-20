@@ -2,6 +2,8 @@ export interface RNG {
   gen: () => number
   genRange: (min: number, max: number) => number
   genBool: () => boolean
+  derive: (label: string) => RNG
+  toSeed: () => string
 }
 
 /**
@@ -37,19 +39,7 @@ const mulberry32 = (seed: number): (() => number) => {
   }
 }
 
-export const createRNG = (seed?: string): RNG => {
-  let numericSeed: number
-  if (seed != null) {
-    numericSeed = hashString(seed)
-  } else {
-    try {
-      const bytes = new Uint32Array(1)
-      crypto.getRandomValues(bytes)
-      numericSeed = bytes[0] ?? 0
-    } catch {
-      numericSeed = (Math.random() * 0x100000000) >>> 0
-    }
-  }
+const createSeededRNG = (numericSeed: number): RNG => {
   const rng = mulberry32(numericSeed)
   return {
     gen: (): number => rng(),
@@ -61,23 +51,45 @@ export const createRNG = (seed?: string): RNG => {
       return Math.floor(rng() * range) + min
     },
     genBool: (): boolean => rng() < 0.5,
+    derive: (label: string): RNG => {
+      const childSeed = hashString(`${numericSeed}:${label}`)
+      return createSeededRNG(childSeed)
+    },
+    toSeed: (): string => `__rng:${numericSeed}`,
   }
+}
+
+export const createRNG = (seed?: string): RNG => {
+  let numericSeed: number
+  if (seed != null && seed.startsWith('__rng:')) {
+    numericSeed = Number.parseInt(seed.slice(6), 10) >>> 0
+  } else if (seed != null) {
+    numericSeed = hashString(seed)
+  } else {
+    try {
+      const bytes = new Uint32Array(1)
+      crypto.getRandomValues(bytes)
+      numericSeed = bytes[0] ?? 0
+    } catch {
+      numericSeed = (Math.random() * 0x100000000) >>> 0
+    }
+  }
+  return createSeededRNG(numericSeed)
 }
 
 let globalRNG: RNG = createRNG()
 
+/** @deprecated Use `createRNG(seed)` and pass the RNG through context instead. */
 export const setThreadRNGSeed = (seed: string) => {
   globalRNG = createRNG(seed)
   return globalRNG
 }
 
+/** @deprecated Use `createRNG()` and pass the RNG through context instead. */
 export const resetThreadRNG = () => {
   globalRNG = createRNG()
   return globalRNG
 }
 
-/**
- * A crude port of the Rust rand crate's thread_rng function.
- * @returns {RNG} a random number generator seeded with the current thread id
- */
+/** @deprecated Use `context.rng` or derive from a root RNG instead. */
 export const threadRNG = () => globalRNG
