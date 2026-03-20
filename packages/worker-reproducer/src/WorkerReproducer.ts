@@ -353,9 +353,13 @@ export class WorkerReproducer implements Reproducer {
     try {
       const batches = this.createReproductionBatches(speciesIds)
       const result = await Promise.all(
-        batches.map(async (batch) => {
+        batches.map(async (batch, batchIndex) => {
+          const batchPayload: ReproduceBatchPayload = {
+            ...batch,
+            rngSeed: rng.derive(`batch:${batchIndex}`).toSeed(),
+          }
           const data = await this.dispatcher.call<OrganismBatchPayload>(
-            requestReproduceBatch(batch)
+            requestReproduceBatch(batchPayload)
           )
           return data.organisms.map((payload) => {
             const genome = this.population.algorithm.createGenome(
@@ -384,7 +388,7 @@ export class WorkerReproducer implements Reproducer {
 
   private createReproductionBatches(
     speciesIds: number[]
-  ): Array<ReproduceBatchPayload> {
+  ): Array<Omit<ReproduceBatchPayload, 'rngSeed'>> {
     const speciesPayloads: Array<ReproductionSpeciesPayload> = []
     for (const speciesId of speciesIds) {
       const species = this.population.species.get(speciesId) as Species

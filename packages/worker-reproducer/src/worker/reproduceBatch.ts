@@ -1,4 +1,5 @@
 import type { Organism } from '@neat-evolution/evolution'
+import { createRNG } from '@neat-evolution/utils'
 
 import type { OrganismBatchPayload, ReproduceBatchPayload } from '../actions.js'
 import { hydrateOrganismPayload } from './hydrateOrganismPayload.js'
@@ -42,11 +43,14 @@ export const reproduceBatch = async (
     context.threadInfo.populationOptions.interspeciesReproductionProbability > 0
 
   try {
+    // Use per-batch RNG derived on the main thread — deterministic
+    // regardless of which worker processes this batch.
+    const batchRng = createRNG(payload.rngSeed)
     const organisms: OrganismBatchPayload['organisms'] = []
     for (const speciesEntry of payload.species) {
       for (let i = 0; i < speciesEntry.reproductions; i++) {
         const father =
-          context.rng.gen() <
+          batchRng.gen() <
           context.threadInfo.populationOptions
             .interspeciesReproductionProbability
             ? await populationTournamentSelect(context)
@@ -58,7 +62,7 @@ export const reproduceBatch = async (
 
         let child: Organism
         if (
-          context.rng.gen() <
+          batchRng.gen() <
           context.threadInfo.populationOptions.asexualReproductionProbability
         ) {
           child = father.asElite()
@@ -70,10 +74,10 @@ export const reproduceBatch = async (
           if (mother == null) {
             throw new Error('Unable to gather mother organism')
           }
-          child = mother.crossover(father, context.rng)
+          child = mother.crossover(father, batchRng)
         }
 
-        await child.mutate(context.rng.derive(`mutation:${i}`))
+        await child.mutate(batchRng.derive(`mutation:${i}`))
         organisms.push(toPayload(child))
       }
     }

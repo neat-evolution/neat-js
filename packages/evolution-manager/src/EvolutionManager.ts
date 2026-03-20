@@ -312,6 +312,7 @@ export class EvolutionManager<Ctx extends AlgorithmContext = AlgorithmContext> {
     const reproducerOptions: WorkerReproducerOptions = {
       algorithmPathname,
       threadCount,
+      randomSeed: this.rng.derive('reproducer').toSeed(),
       enableCustomState: this.algorithm.enableCustomState,
     }
     if (evaluatorConfig?.reproducerWorkerScriptUrl != null) {

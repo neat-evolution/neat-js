@@ -84,6 +84,8 @@ export interface ReproduceBatchPayload<
   GFO extends GenomeFactoryOptions = GenomeFactoryOptions,
 > {
   species: Array<ReproductionSpeciesPayload<GFO>>
+  /** Per-batch RNG seed — deterministic regardless of worker assignment. */
+  rngSeed: string
 }
 
 export interface CPPNStateRedirectPayload {
