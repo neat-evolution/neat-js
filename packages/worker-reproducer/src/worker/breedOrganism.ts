@@ -35,10 +35,10 @@ export const breedOrganism = async (
     if (mother == null) {
       throw new Error('Unable to gather mother organism')
     }
-    child = mother.crossover(father)
+    child = mother.crossover(father, context.rng)
   }
 
-  await child.mutate()
+  await child.mutate(context.rng.derive('mutation'))
 
   const responsePayload = {
     genome: child.genome.toFactoryOptions(),

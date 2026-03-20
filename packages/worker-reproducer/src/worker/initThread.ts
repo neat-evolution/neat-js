@@ -18,12 +18,9 @@ export const initThread = async (
   payload: InitReproducerPayload,
   context: ReproducerHandlerContext
 ) => {
-  context.rng =
-    payload.reproducerOptions.randomSeed != null
-      ? createRNG(
-          `${payload.reproducerOptions.randomSeed}:worker:${payload.workerIndex}`
-        )
-      : context.rng
+  if (payload.reproducerOptions.randomSeed != null) {
+    context.rng = createRNG(payload.reproducerOptions.randomSeed)
+  }
 
   const stateProvider = new WorkerState(
     setCPPNStateRedirect,

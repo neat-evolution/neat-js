@@ -4,6 +4,7 @@ import {
   type Reproducer,
   type Species,
 } from '@neat-evolution/evolution'
+import type { RNG } from '@neat-evolution/utils'
 import {
   Dispatcher,
   type DispatcherContext,
@@ -47,6 +48,7 @@ export class WorkerReproducer implements Reproducer {
 
   private readonly pool: WorkerPool
   private readonly dispatcher: Dispatcher
+  private reproductionRng: RNG | null = null
   private reproductionPayloadCache: {
     species: QuickLRU<number, OrganismBatchPayload>
     population: OrganismBatchPayload | null
@@ -139,7 +141,15 @@ export class WorkerReproducer implements Reproducer {
     action: WorkerMessage<EmptyPayload>,
     context: DispatcherContext
   ) {
-    const responsePayload = this.selectPopulationPayload(1).organisms[0]
+    if (this.reproductionRng == null) {
+      throw new Error(
+        'reproductionRng not set — reproduce() must be called first'
+      )
+    }
+    const responsePayload = this.selectPopulationPayload(
+      1,
+      this.reproductionRng
+    ).organisms[0]
     if (responsePayload == null) throw new Error('No organism found')
     // For worker→main→worker RPC, we need to use context.send with proper meta
     if (action.meta?.callId != null) {
@@ -159,9 +169,15 @@ export class WorkerReproducer implements Reproducer {
     action: WorkerMessage<SpeciesPayload>,
     context: DispatcherContext
   ) {
+    if (this.reproductionRng == null) {
+      throw new Error(
+        'reproductionRng not set — reproduce() must be called first'
+      )
+    }
     const responsePayload = this.selectSpeciesPayload(
       action.payload.speciesId,
-      1
+      1,
+      this.reproductionRng
     ).organisms[0]
     if (responsePayload == null) throw new Error('No organism found')
     if (action.meta?.callId != null) {
@@ -195,12 +211,16 @@ export class WorkerReproducer implements Reproducer {
     }
   }
 
-  private selectPopulationPayload(count: number): OrganismBatchPayload {
+  private selectPopulationPayload(
+    count: number,
+    rng: RNG
+  ): OrganismBatchPayload {
     const organisms: Array<OrganismPayload> = []
     const safeCount = Math.max(1, Math.trunc(count))
     for (let i = 0; i < safeCount; i++) {
       const organism = this.population.tournamentSelect(
-        this.population.populationOptions.interspeciesTournamentSize
+        this.population.populationOptions.interspeciesTournamentSize,
+        rng
       )
       if (organism == null) continue
       organisms.push({
@@ -216,14 +236,16 @@ export class WorkerReproducer implements Reproducer {
 
   private selectSpeciesPayload(
     speciesId: number,
-    count: number
+    count: number,
+    rng: RNG
   ): OrganismBatchPayload {
     const species = this.population.species.get(speciesId) as Species
     const organisms: Array<OrganismPayload> = []
     const safeCount = Math.max(1, Math.trunc(count))
     for (let i = 0; i < safeCount; i++) {
       const organism = species.tournamentSelect(
-        this.population.populationOptions.tournamentSize
+        this.population.populationOptions.tournamentSize,
+        rng
       )
       if (organism == null) continue
       organisms.push({
@@ -319,9 +341,10 @@ export class WorkerReproducer implements Reproducer {
     return elite
   }
 
-  async reproduce(speciesIds: number[]): Promise<Array<Organism>> {
+  async reproduce(speciesIds: number[], rng: RNG): Promise<Array<Organism>> {
     await this.initPromise
 
+    this.reproductionRng = rng
     this.reproductionPayloadCache = {
       species: new QuickLRU({ maxSize: Math.max(16, speciesIds.length) }),
       population: null,
@@ -354,6 +377,7 @@ export class WorkerReproducer implements Reproducer {
       )
       return result.flat()
     } finally {
+      this.reproductionRng = null
       this.reproductionPayloadCache = null
     }
   }

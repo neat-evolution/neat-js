@@ -19,6 +19,7 @@ import type {
   GenomeEntry,
 } from '@neat-evolution/evaluator'
 import type { StatsRecorder } from '@neat-evolution/stats'
+import type { RNG } from '@neat-evolution/utils'
 import { Dispatcher } from '@neat-evolution/worker-actions'
 import { WorkerPool } from '@neat-evolution/worker-pool'
 
@@ -187,12 +188,18 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     await this.pool.terminate()
   }
 
-  async *evaluate(genomeEntries: GenomeEntries): AsyncIterable<FitnessData> {
+  async *evaluate(
+    genomeEntries: GenomeEntries,
+    rng?: RNG
+  ): AsyncIterable<FitnessData> {
     await this.initPromise
     // Clear pending writebacks from previous generation
     this.pendingWritebacks.clear()
+    // Merge per-generation RNG into evaluation context for the strategy
+    const context =
+      rng != null ? { ...this.evaluationContext, rng } : this.evaluationContext
     // Delegate to strategy, passing the evaluation context
-    yield* this.strategy.evaluate(this.evaluationContext, genomeEntries)
+    yield* this.strategy.evaluate(context, genomeEntries)
     // After all fitness has been yielded, apply Lamarckian writebacks
     this.applyWritebacks()
   }

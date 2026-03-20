@@ -1,4 +1,4 @@
-import { threadRNG } from '@neat-evolution/utils'
+import { createRNG } from '@neat-evolution/utils'
 import { Handler, type WorkerContext } from '@neat-evolution/worker-actions'
 import QuickLRU from 'quick-lru'
 
@@ -19,7 +19,7 @@ const handler = new Handler()
 
 // Minimal ThreadContext - only app-specific state
 const threadContext: ThreadContext & Partial<WorkerContext> = {
-  rng: threadRNG(),
+  rng: createRNG(),
   threadInfo: null,
   speciesSelectionCache: new QuickLRU({ maxSize: 32 }),
   populationSelectionCache: [],
