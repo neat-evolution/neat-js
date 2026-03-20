@@ -6,6 +6,7 @@ import {
   defaultNEATGenomeOptions,
   NEATGenome,
 } from '@neat-evolution/neat'
+import { createRNG } from '@neat-evolution/utils'
 import { bench, describe } from 'vitest'
 
 describe('createPhenotype Benchmark', async () => {
@@ -16,10 +17,11 @@ describe('createPhenotype Benchmark', async () => {
 
   const genome = new NEATGenome(config, state, options, initConfig)
 
+  const rng = createRNG('bench')
   console.log('Building large genome...')
   for (let i = 0; i < 500; i++) {
-    await genome.mutationAddNode()
-    await genome.mutationAddLink()
+    await genome.mutationAddNode(rng)
+    await genome.mutationAddLink(rng)
   }
 
   bench(

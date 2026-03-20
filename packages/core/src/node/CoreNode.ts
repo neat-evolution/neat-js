@@ -1,3 +1,4 @@
+import type { RNG } from '@neat-evolution/utils'
 import type { AlgorithmContext } from '../contexts/AlgorithmContext.js'
 import type {
   ConfigNodeOptionsOf,
@@ -47,7 +48,8 @@ export class CoreNode<Ctx extends AlgorithmContext = AlgorithmContext>
   crossover(
     other: NodeTypeOf<Ctx>,
     _fitness: number,
-    _otherFitness: number
+    _otherFitness: number,
+    _rng: RNG
   ): NodeTypeOf<Ctx> {
     if (this.type !== other.type || this.id !== other.id) {
       throw new Error('Mismatch in crossover')

@@ -5,6 +5,7 @@ import {
   defaultNEATGenomeOptions,
   NEATGenome,
 } from '@neat-evolution/neat'
+import { createRNG } from '@neat-evolution/utils'
 import { bench, describe } from 'vitest'
 
 describe('Genome Crossover Benchmark', async () => {
@@ -16,18 +17,19 @@ describe('Genome Crossover Benchmark', async () => {
   const parent1 = new NEATGenome(config, state, options, initConfig)
   const parent2 = new NEATGenome(config, state, options, initConfig)
 
+  const rng = createRNG('bench')
   console.log('Building parent genomes...')
   for (let i = 0; i < 200; i++) {
-    await parent1.mutationAddNode()
-    await parent1.mutationAddLink()
-    await parent2.mutationAddNode()
-    await parent2.mutationAddLink()
+    await parent1.mutationAddNode(rng)
+    await parent1.mutationAddLink(rng)
+    await parent2.mutationAddNode(rng)
+    await parent2.mutationAddLink(rng)
   }
 
   bench(
     'NEATGenome.crossover',
     () => {
-      parent1.crossover(parent2, 0.8, 0.5)
+      parent1.crossover(parent2, 0.8, 0.5, rng)
     },
     { iterations: 100 }
   )

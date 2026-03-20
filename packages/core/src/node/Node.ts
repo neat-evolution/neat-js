@@ -1,3 +1,4 @@
+import type { RNG } from '@neat-evolution/utils'
 import type { AlgorithmContext } from '../contexts/AlgorithmContext.js'
 import type {
   ConfigNodeOptionsOf,
@@ -23,7 +24,8 @@ export interface Node<Ctx extends AlgorithmContext> extends NodeRef {
   crossover: (
     other: NodeTypeOf<Ctx>,
     fitness: number,
-    otherFitness: number
+    otherFitness: number,
+    rng: RNG
   ) => NodeTypeOf<Ctx>
   clone: () => NodeTypeOf<Ctx>
   distance: (other: NodeTypeOf<Ctx>) => number

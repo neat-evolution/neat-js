@@ -1,3 +1,4 @@
+import type { RNG } from '@neat-evolution/utils'
 import type { AlgorithmContext } from '../contexts/AlgorithmContext.js'
 import type {
   ConfigLinkOptionsOf,
@@ -75,7 +76,8 @@ export class CoreLink<Ctx extends AlgorithmContext> implements Link<Ctx> {
   crossover(
     other: LinkTypeOf<Ctx>,
     _fitness: number,
-    _otherFitness: number
+    _otherFitness: number,
+    _rng: RNG
   ): LinkTypeOf<Ctx> {
     if (
       this.from !== other.from ||

@@ -5,6 +5,7 @@ import {
   defaultNEATGenomeOptions,
   NEATGenome,
 } from '@neat-evolution/neat'
+import { createRNG } from '@neat-evolution/utils'
 import { bench, describe } from 'vitest'
 
 const config = createConfig({ neat: defaultNEATConfigOptions })
@@ -12,12 +13,14 @@ const state = createState()
 const options = defaultNEATGenomeOptions
 const initConfig = { inputs: 100, outputs: 100 }
 
+const benchRng = createRNG('bench')
+
 const createPreparedGenome = async (steps: number): Promise<NEATGenome> => {
   const genome = new NEATGenome(config, state, options, initConfig)
 
   for (let i = 0; i < steps; i++) {
-    await genome.mutationAddNode()
-    await genome.mutationAddLink()
+    await genome.mutationAddNode(benchRng)
+    await genome.mutationAddLink(benchRng)
   }
 
   return genome
@@ -45,7 +48,7 @@ describe('Genome Mutation Benchmark', async () => {
     async () => {
       const genome = sparsePool[sparseIndex % sparsePool.length] as NEATGenome
       sparseIndex++
-      await genome.mutationAddLink()
+      await genome.mutationAddLink(benchRng)
     },
     { iterations: 100 }
   )
@@ -55,7 +58,7 @@ describe('Genome Mutation Benchmark', async () => {
     async () => {
       const genome = largePool[largeIndex % largePool.length] as NEATGenome
       largeIndex++
-      await genome.mutationAddLink()
+      await genome.mutationAddLink(benchRng)
     },
     { iterations: 100 }
   )
@@ -65,7 +68,7 @@ describe('Genome Mutation Benchmark', async () => {
     async () => {
       const genome = largePool[largeIndex % largePool.length] as NEATGenome
       largeIndex++
-      await genome.mutate()
+      await genome.mutate(createRNG('bench'))
     },
     { iterations: 100 }
   )

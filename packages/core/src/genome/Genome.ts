@@ -1,3 +1,5 @@
+import type { RNG } from '@neat-evolution/utils'
+
 import type { AlgorithmContext } from '../contexts/AlgorithmContext.js'
 import type {
   ConfigTypeOf,
@@ -27,9 +29,10 @@ export interface Genome<Ctx extends AlgorithmContext = AlgorithmContext> {
   crossover: (
     other: GenomeTypeOf<Ctx>,
     fitness: number,
-    otherFitness: number
+    otherFitness: number,
+    rng: RNG
   ) => GenomeTypeOf<Ctx>
-  mutate: () => Promise<void>
+  mutate: (rng: RNG) => Promise<void>
   distance: (other: GenomeTypeOf<Ctx>) => number
   insertLink: (link: LinkTypeOf<Ctx>, isSafe?: boolean) => void
   toJSON: () => GenomeDataOf<Ctx>

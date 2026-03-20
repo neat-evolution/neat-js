@@ -1,3 +1,4 @@
+import type { RNG } from '@neat-evolution/utils'
 import type { AlgorithmContext } from '../contexts/AlgorithmContext.js'
 import type {
   ConfigLinkOptionsOf,
@@ -46,7 +47,8 @@ export interface Link<Ctx extends AlgorithmContext> extends LinkRef {
   crossover: (
     other: LinkTypeOf<Ctx>,
     fitness: number,
-    otherFitness: number
+    otherFitness: number,
+    rng: RNG
   ) => LinkTypeOf<Ctx>
   distance: (other: LinkTypeOf<Ctx>) => number
 

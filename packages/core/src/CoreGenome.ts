@@ -1,4 +1,4 @@
-import { threadRNG } from '@neat-evolution/utils'
+import type { RNG } from '@neat-evolution/utils'
 import { Connections } from './Connections.js'
 import type { AlgorithmContext } from './contexts/AlgorithmContext.js'
 import type {
@@ -108,27 +108,26 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     )
   }
 
-  async mutate(): Promise<void> {
+  async mutate(rng: RNG): Promise<void> {
     const neatConfig = this.config.neat()
-    const rng = threadRNG()
     if (rng.gen() < neatConfig.addNodeProbability) {
-      await this.mutationAddNode()
+      await this.mutationAddNode(rng)
     }
 
     if (rng.gen() < neatConfig.addLinkProbability) {
-      await this.mutationAddLink()
+      await this.mutationAddLink(rng)
     }
 
     if (rng.gen() < neatConfig.removeLinkProbability) {
-      this.mutationRemoveLink()
+      this.mutationRemoveLink(rng)
     }
 
     if (rng.gen() < neatConfig.removeNodeProbability) {
-      this.mutationRemoveNode()
+      this.mutationRemoveNode(rng)
     }
 
     if (rng.gen() < neatConfig.mutateLinkWeightProbability) {
-      this.mutateLinkWeight()
+      this.mutateLinkWeight(rng)
     }
 
     const biasOpts = this.genomeOptions as {
@@ -140,24 +139,26 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     this.mutateNodeBias(
       this.hiddenNodes,
       biasOpts.mutateHiddenBiasProbability ?? 0,
-      biasOpts.mutateHiddenBiasSize ?? 0.03
+      biasOpts.mutateHiddenBiasSize ?? 0.03,
+      rng
     )
     this.mutateNodeBias(
       this.outputs,
       biasOpts.mutateOutputBiasProbability ?? 0,
-      biasOpts.mutateOutputBiasSize ?? 0.03
+      biasOpts.mutateOutputBiasSize ?? 0.03,
+      rng
     )
   }
 
   protected mutateNodeBias(
     nodes: Map<NodeKey, NodeTypeOf<Ctx>>,
     probability: number,
-    biasSize: number
+    biasSize: number,
+    rng: RNG
   ): void {
     if (probability <= 0 || nodes.size === 0) {
       return
     }
-    const rng = threadRNG()
     if (rng.gen() >= probability) {
       return
     }
@@ -257,7 +258,8 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
   crossover(
     other: GenomeTypeOf<Ctx>,
     fitness: number,
-    otherFitness: number
+    otherFitness: number,
+    rng: RNG
   ): GenomeTypeOf<Ctx> {
     const [parent1, parent2] =
       fitness > otherFitness ? [this, other] : [other, this]
@@ -273,7 +275,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     for (const [linkKey, link] of parent1.links) {
       const link2 = parent2Links.get(linkKey)
       if (link2 !== undefined) {
-        genome.insertLink(link.crossover(link2, fitness, otherFitness), true)
+        genome.insertLink(link.crossover(link2, fitness, otherFitness, rng), true)
       } else {
         genome.insertLink(link.clone(), true)
       }
@@ -286,7 +288,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
         if (node2 !== undefined) {
           genome.inputs.set(
             nodeKey,
-            node.crossover(node2, fitness, otherFitness)
+            node.crossover(node2, fitness, otherFitness, rng)
           )
         } else {
           genome.inputs.set(nodeKey, node.clone())
@@ -300,7 +302,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
       if (node2 !== undefined) {
         genome.hiddenNodes.set(
           nodeKey,
-          node.crossover(node2, fitness, otherFitness)
+          node.crossover(node2, fitness, otherFitness, rng)
         )
       } else {
         genome.hiddenNodes.set(nodeKey, node.clone())
@@ -314,7 +316,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
         if (node2 !== undefined) {
           genome.outputs.set(
             nodeKey,
-            node.crossover(node2, fitness, otherFitness)
+            node.crossover(node2, fitness, otherFitness, rng)
           )
         } else {
           genome.outputs.set(nodeKey, node.clone())
@@ -445,13 +447,12 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     }
   }
 
-  mutateLinkWeight(): void {
+  mutateLinkWeight(rng: RNG): void {
     const linkSize = this.links.size
     if (linkSize === 0) {
       return
     }
     const neatConfig = this.config.neat()
-    const rng = threadRNG()
 
     const updateLinkWeight = (link: LinkTypeOf<Ctx>, delta: number): void => {
       link.weight += delta
@@ -479,13 +480,12 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     }
   }
 
-  async mutationAddNode(): Promise<void> {
+  async mutationAddNode(rng: RNG): Promise<void> {
     const linkSize = this.links.size
     if (linkSize === 0) {
       return
     }
     const linksArray = Array.from(this.links.values())
-    const rng = threadRNG()
 
     for (let i = 0; i < 50; i++) {
       const linkIndex = rng.genRange(0, linkSize)
@@ -508,8 +508,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     }
   }
 
-  async mutationAddLink(): Promise<void> {
-    const rng = threadRNG()
+  async mutationAddLink(rng: RNG): Promise<void> {
     const numTargets = this.hiddenNodes.size + this.outputs.size
 
     if (
@@ -610,13 +609,13 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     }
   }
 
-  mutationRemoveLink(): void {
+  mutationRemoveLink(rng: RNG): void {
     const linkSize = this.links.size
     if (linkSize === 0) {
       return
     }
 
-    const randomIndex = threadRNG().genRange(0, linkSize)
+    const randomIndex = rng.genRange(0, linkSize)
     let currentIndex = 0
 
     for (const [linkKey, link] of this.links) {
@@ -629,13 +628,13 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     }
   }
 
-  mutationRemoveNode(): void {
+  mutationRemoveNode(rng: RNG): void {
     const hiddenSize = this.hiddenNodes.size
     if (hiddenSize === 0) {
       return
     }
 
-    const randomIndex = threadRNG().genRange(0, hiddenSize)
+    const randomIndex = rng.genRange(0, hiddenSize)
     let currentIndex = 0
 
     for (const nodeKey of this.hiddenNodes.keys()) {

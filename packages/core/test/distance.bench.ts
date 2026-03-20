@@ -5,6 +5,7 @@ import {
   defaultNEATGenomeOptions,
   NEATGenome,
 } from '@neat-evolution/neat'
+import { createRNG } from '@neat-evolution/utils'
 import { bench, describe } from 'vitest'
 
 describe('Genome Distance Benchmark', async () => {
@@ -16,12 +17,13 @@ describe('Genome Distance Benchmark', async () => {
   const genome1 = new NEATGenome(config, state, options, initConfig)
   const genome2 = new NEATGenome(config, state, options, initConfig)
 
+  const rng = createRNG('bench')
   console.log('Building genomes...')
   for (let i = 0; i < 500; i++) {
-    await genome1.mutationAddNode()
-    await genome1.mutationAddLink()
-    await genome2.mutationAddNode()
-    await genome2.mutationAddLink()
+    await genome1.mutationAddNode(rng)
+    await genome1.mutationAddLink(rng)
+    await genome2.mutationAddNode(rng)
+    await genome2.mutationAddLink(rng)
   }
 
   bench(
