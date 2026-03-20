@@ -1,6 +1,7 @@
 import type { InitConfig } from '@neat-evolution/core'
 import { defaultNEATConfigOptions } from '@neat-evolution/core'
 import { Organism } from '@neat-evolution/evolution'
+import { createRNG } from '@neat-evolution/utils'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createConfig } from '../src/createConfig.js'
@@ -46,7 +47,7 @@ describe('Organism class', () => {
         initConfig
       )
       for (let i = 0; i < 50; i++) {
-        await genome.mutate()
+        await genome.mutate(createRNG('test'))
       }
       return genome
     }
@@ -102,7 +103,7 @@ describe('Organism class', () => {
     test('should correctly perform crossover', () => {
       const organism1 = new Organism(genome, generation)
       const organism2 = new Organism(genome, generation)
-      const child = organism1.crossover(organism2)
+      const child = organism1.crossover(organism2, createRNG('test'))
       expect(child.generation).toBe(organism1.generation + 1)
     })
 
@@ -115,7 +116,7 @@ describe('Organism class', () => {
         fitness: 200,
         adjustedFitness: null,
       })
-      const child = organism1.crossover(organism2)
+      const child = organism1.crossover(organism2, createRNG('test'))
       expect(child.generation).toBe(organism1.generation + 1)
     })
 
@@ -125,14 +126,14 @@ describe('Organism class', () => {
         adjustedFitness: null,
       })
       const organism2 = new Organism(genome, generation)
-      const child = organism1.crossover(organism2)
+      const child = organism1.crossover(organism2, createRNG('test'))
       expect(child.generation).toBe(organism1.generation + 1)
     })
 
     test('should correctly perform crossover when neither organism has a fitness value', () => {
       const organism1 = new Organism(genome, generation)
       const organism2 = new Organism(genome, generation)
-      const child = organism1.crossover(organism2)
+      const child = organism1.crossover(organism2, createRNG('test'))
       expect(child.generation).toBe(organism1.generation + 1)
     })
 
@@ -145,7 +146,7 @@ describe('Organism class', () => {
         fitness: 200,
         adjustedFitness: null,
       })
-      const child = organism1.crossover(organism2)
+      const child = organism1.crossover(organism2, createRNG('test'))
       expect(child.genome).not.toBe(organism1.genome)
       expect(child.genome).not.toBe(organism2.genome)
     })
@@ -155,7 +156,7 @@ describe('Organism class', () => {
     test('should change the genome after mutation', async () => {
       const organism = new Organism(genome)
       const size = organism.genome.hiddenNodes.size + organism.genome.links.size
-      await organism.mutate()
+      await organism.mutate(createRNG('test'))
       const mutatedSize =
         organism.genome.hiddenNodes.size + organism.genome.links.size
       expect(mutatedSize).not.toEqual(size)
@@ -169,7 +170,7 @@ describe('Organism class', () => {
       const originalFitness = organism.fitness
       const originalAdjustedFitness = organism.adjustedFitness
       const originalGeneration = organism.generation
-      organism.mutate()
+      organism.mutate(createRNG('test'))
       expect(organism.fitness).toEqual(originalFitness)
       expect(organism.adjustedFitness).toEqual(originalAdjustedFitness)
       expect(organism.generation).toEqual(originalGeneration)

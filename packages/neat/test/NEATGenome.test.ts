@@ -8,6 +8,7 @@ import {
   nodeTupleToKey,
   toLinkKey,
 } from '@neat-evolution/core'
+import { createRNG } from '@neat-evolution/utils'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createConfig } from '../src/createConfig.js'
@@ -68,7 +69,7 @@ describe('NEATGenome class', () => {
       const config = createConfig({ neat: options })
       const genome = createGenome(config, state, genomeOptions, initConfig)
       for (let i = 0; i < 50; i++) {
-        await genome.mutate()
+        await genome.mutate(createRNG('test'))
       }
       return genome
     }
@@ -167,7 +168,7 @@ describe('NEATGenome class', () => {
         initConfig
       )
 
-      await genome.mutationAddLink()
+      await genome.mutationAddLink(createRNG('test'))
 
       const x = genome.config.neat().initialLinkWeightSize
       expect(genome.links.size).toBe(1)
@@ -188,8 +189,8 @@ describe('NEATGenome class', () => {
           initConfig
         )
 
-        await genome.mutationAddLink()
-        await genome.mutationAddNode()
+        await genome.mutationAddLink(createRNG('test'))
+        await genome.mutationAddNode(createRNG('test'))
 
         const inputNode = Array.from(genome.inputs.values())[0] as NEATNode
         const hiddenNode = Array.from(
@@ -212,8 +213,8 @@ describe('NEATGenome class', () => {
           initConfig
         )
 
-        await genome.mutationAddLink()
-        await genome.mutationAddNode()
+        await genome.mutationAddLink(createRNG('test'))
+        await genome.mutationAddNode(createRNG('test'))
 
         expect(genome.links.size).toBe(2)
         expect(genome.hiddenNodes.size).toBe(1)
@@ -230,9 +231,9 @@ describe('NEATGenome class', () => {
           initConfig
         )
 
-        await genome.mutationAddLink()
-        await genome.mutationAddNode()
-        genome.mutationRemoveNode()
+        await genome.mutationAddLink(createRNG('test'))
+        await genome.mutationAddNode(createRNG('test'))
+        genome.mutationRemoveNode(createRNG('test'))
 
         expect(Array.from(genome.links.entries())).toEqual([])
         expect(Array.from(genome.hiddenNodes.entries())).toEqual([])
@@ -249,17 +250,17 @@ describe('NEATGenome class', () => {
           initConfig
         )
 
-        await genome.mutationAddLink()
+        await genome.mutationAddLink(createRNG('test'))
         expect(genome.links.size).toBe(1)
 
-        genome.mutationRemoveLink()
+        genome.mutationRemoveLink(createRNG('test'))
         expect(genome.links.size).toBe(0)
       })
 
       test('should remove a link from a seasoned genome', async () => {
         const genome = await createSeasonedGenome()
         const size = genome.links.size
-        genome.mutationRemoveLink()
+        genome.mutationRemoveLink(createRNG('test'))
         expect(genome.links.size).toBe(size - 1)
       })
     })

@@ -8,6 +8,7 @@ import {
   PhenotypeActionType,
   toLinkKey,
 } from '@neat-evolution/core'
+import { createRNG } from '@neat-evolution/utils'
 import { beforeEach, describe, expect, test } from 'vitest'
 import {
   createConfig,
@@ -51,8 +52,8 @@ describe('NEATAlgorithm.writeBackWeights', () => {
         initConfig
       )
       // Add enough links to connect inputs to output
-      await genome.mutationAddLink()
-      await genome.mutationAddLink()
+      await genome.mutationAddLink(createRNG('test'))
+      await genome.mutationAddLink(createRNG('test'))
       return genome
     }
   })

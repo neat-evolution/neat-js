@@ -6,6 +6,7 @@ import {
   toLinkKey,
   toNodeKey,
 } from '@neat-evolution/core'
+import { createRNG } from '@neat-evolution/utils'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createLink } from '../src/createLink.js'
@@ -73,7 +74,7 @@ describe('NEATLink class', () => {
     })
 
     test('should successfully perform crossover with identical links', () => {
-      const resultLink = link1.crossover(link2, 10, 5)
+      const resultLink = link1.crossover(link2, 10, 5, createRNG('test'))
       expect(resultLink.weight).toBeCloseTo(0.6)
       expect(resultLink.from).toEqual(from)
       expect(resultLink.to).toEqual(to)
@@ -92,7 +93,7 @@ describe('NEATLink class', () => {
         null
       )
       expect(() => {
-        link1.crossover(link2, 10, 5)
+        link1.crossover(link2, 10, 5, createRNG('test'))
       }).toThrowError('Mismatch in crossover')
     })
 
@@ -108,7 +109,7 @@ describe('NEATLink class', () => {
         null
       )
       expect(() => {
-        link1.crossover(link2, 10, 5)
+        link1.crossover(link2, 10, 5, createRNG('test'))
       }).toThrowError('Mismatch in crossover')
     })
 
@@ -119,12 +120,12 @@ describe('NEATLink class', () => {
         null
       )
       expect(() => {
-        link1.crossover(link2, 10, 5)
+        link1.crossover(link2, 10, 5, createRNG('test'))
       }).toThrowError('Mismatch in crossover')
     })
 
     test('should not return the same link', () => {
-      const resultLink = link1.crossover(link2, 10, 5)
+      const resultLink = link1.crossover(link2, 10, 5, createRNG('test'))
       expect(resultLink).not.toBe(link1)
       expect(resultLink).not.toBe(link2)
     })

@@ -16,6 +16,7 @@ import {
   type PopulationOptions,
   type Species,
 } from '@neat-evolution/evolution'
+import { createRNG } from '@neat-evolution/utils'
 import {
   afterEach,
   beforeEach,
@@ -135,7 +136,7 @@ describe('Population class', () => {
         initConfig
       )
       for (let i = 0; i < 100; i++) {
-        await population.mutate()
+        await population.mutate(createRNG('test'))
       }
       await population.evaluate()
     })
@@ -159,7 +160,7 @@ describe('Population class', () => {
     test('should evolve more than one species', async () => {
       let speciesCount = 0
       for (let i = 0; i < 2; i++) {
-        await population.evolve()
+        await population.evolve(createRNG('test'))
         await population.evaluate()
         speciesCount += population.species.size
       }
@@ -185,7 +186,7 @@ describe('Population class', () => {
 
       // mutate all genomes 50 times
       for (let i = 0; i < 50; i++) {
-        await population.mutate()
+        await population.mutate(createRNG('test'))
       }
       await population.evaluate()
     })
@@ -224,14 +225,14 @@ describe('Population class', () => {
         'age',
         'removeOld',
       ])('should call %s exactly once', async (methodName) => {
-        await population.evolve()
+        await population.evolve(createRNG('test'))
         for (const spyObj of speciesSpies) {
           expect(spyObj[methodName]).toHaveBeenCalledTimes(1)
         }
       })
 
       test('should call methods in the correct order', async () => {
-        await population.evolve()
+        await population.evolve(createRNG('test'))
         for (const spyObj of speciesSpies) {
           const orderedSpies: MockInstance[] = [
             spyObj.adjustFitness as MockInstance,
@@ -265,7 +266,7 @@ describe('Population class', () => {
         })
       }
 
-      await population.evolve()
+      await population.evolve(createRNG('test'))
 
       // Check that the elite count and offsprings count for each species is calculated correctly.
       let elitesChanged = false
@@ -294,7 +295,7 @@ describe('Population class', () => {
     test('should adjust speciation threshold if speciesTarget is defined', async () => {
       const options = population.populationOptions
       const threshold = options.speciationThreshold
-      await population.evolve()
+      await population.evolve(createRNG('test'))
       const newThreshold = options.speciationThreshold
 
       let expectedThreshold = threshold

@@ -5,6 +5,7 @@ import {
   Species,
   type SpeciesOptions,
 } from '@neat-evolution/evolution'
+import { createRNG } from '@neat-evolution/utils'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createConfig } from '../src/createConfig.js'
@@ -45,7 +46,7 @@ describe('Species class', () => {
         }
       )
       for (let i = 0; i < 50; i++) {
-        await genome.mutate()
+        await genome.mutate(createRNG('test'))
       }
       return genome
     }

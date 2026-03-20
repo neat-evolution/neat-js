@@ -1,3 +1,4 @@
+import { createRNG } from '@neat-evolution/utils'
 import { describe, expect, test } from 'vitest'
 
 import type { NEATGenome } from '../src/NEATGenome.js'
@@ -29,7 +30,7 @@ describe('Genome crossover fixtures', () => {
   test.each(
     formattedTestCases
   )('%s', (_name: string, a: NEATGenome, b: NEATGenome, fitness1: number, fitness2: number, expected: NEATGenome) => {
-    const result = a.crossover(b, fitness1, fitness2)
+    const result = a.crossover(b, fitness1, fitness2, createRNG('test'))
     const resultJSON = JSON.parse(JSON.stringify(result.toJSON()))
     const expectedJSON = JSON.parse(JSON.stringify(expected.toJSON()))
 

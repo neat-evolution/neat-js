@@ -1,4 +1,5 @@
 import { NodeType } from '@neat-evolution/core'
+import { createRNG } from '@neat-evolution/utils'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { createNode } from '../src/createNode.js'
@@ -31,7 +32,7 @@ describe('NEATNode class', () => {
     })
 
     test('should successfully perform crossover when both nodes have the same type and ID', () => {
-      const resultNode = node1.crossover(node2, 10, 5)
+      const resultNode = node1.crossover(node2, 10, 5, createRNG('test'))
       expect(resultNode.type).toBe(NodeType.Input)
       expect(resultNode.id).toBe(1)
     })
@@ -39,25 +40,25 @@ describe('NEATNode class', () => {
     test('should throw an error for mismatched node types', () => {
       node2 = createNode({ type: NodeType.Output, id: 1 }, null, null)
       expect(() => {
-        node1.crossover(node2, 10, 5)
+        node1.crossover(node2, 10, 5, createRNG('test'))
       }).toThrowError('Mismatch in crossover')
     })
 
     test('should throw an error for mismatched node IDs', () => {
       node2 = createNode({ type: NodeType.Input, id: 2 }, null, null)
       expect(() => {
-        node1.crossover(node2, 10, 5)
+        node1.crossover(node2, 10, 5, createRNG('test'))
       }).toThrowError('Mismatch in crossover')
     })
 
     test('should not return the same node', () => {
-      const resultNode = node1.crossover(node2, 10, 5)
+      const resultNode = node1.crossover(node2, 10, 5, createRNG('test'))
       expect(resultNode).not.toBe(node1)
       expect(resultNode).not.toBe(node2)
     })
 
     test('should clone the fittest node', () => {
-      const resultNode = node1.crossover(node2, 10, 5)
+      const resultNode = node1.crossover(node2, 10, 5, createRNG('test'))
       expect(resultNode).toEqual(node1)
     })
   })

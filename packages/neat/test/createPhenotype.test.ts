@@ -3,6 +3,7 @@ import {
   type InitConfig,
   isPhenotypeLinkAction,
 } from '@neat-evolution/core'
+import { createRNG } from '@neat-evolution/utils'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
@@ -53,7 +54,7 @@ describe('createPhenotype', () => {
         initConfig
       )
       for (let i = 0; i < 50; i++) {
-        await genome.mutate()
+        await genome.mutate(createRNG('test'))
       }
       return genome
     }
