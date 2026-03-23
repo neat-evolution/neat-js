@@ -1,4 +1,9 @@
-import { Activation, NodeType, type NodeFactory, type NodeTypeOf } from '@neat-evolution/core'
+import {
+  Activation,
+  type NodeFactory,
+  NodeType,
+  type NodeTypeOf,
+} from '@neat-evolution/core'
 import type { RNG } from '@neat-evolution/utils'
 
 import type { CPPNContext } from './CPPNContext.js'

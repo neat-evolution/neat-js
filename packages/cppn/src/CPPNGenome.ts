@@ -38,12 +38,12 @@ export class CPPNGenome<GO extends CPPNGenomeOptions> extends CoreGenome<
     if (size === 0) {
       return
     }
-    const randomIndex = rng.genRange(0, size)
+    const randomIndex = rng.genIntRange(0, size)
     let i = 0
     for (const node of nodes.values()) {
       if (i === randomIndex) {
         node.activation = activationOptions[
-          rng.genRange(0, activationOptions.length)
+          rng.genIntRange(0, activationOptions.length)
         ] as Activation
         break
       }

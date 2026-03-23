@@ -25,11 +25,11 @@ export function pickActivation(
       return Activation.None
     case NodeType.Hidden:
       return nodeOptions.hiddenActivations[
-        rng.genRange(0, nodeOptions.hiddenActivations.length)
+        rng.genIntRange(0, nodeOptions.hiddenActivations.length)
       ] as Activation
     case NodeType.Output:
       return nodeOptions.outputActivations[
-        rng.genRange(0, nodeOptions.outputActivations.length)
+        rng.genIntRange(0, nodeOptions.outputActivations.length)
       ] as Activation
     default:
       throw new Error('Invalid NodeRef type')
@@ -95,9 +95,7 @@ export class CPPNNode extends CoreNode<CPPNContext> {
       throw new Error('Mismatch in crossover')
     }
     const newBias = (this.bias + other.bias) / 2.0
-    const newActivation = rng.genBool()
-      ? this.activation
-      : other.activation
+    const newActivation = rng.genBool() ? this.activation : other.activation
 
     return this.createNode(
       {
