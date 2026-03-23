@@ -1,4 +1,5 @@
 import type { FitnessData, GenomeEntry } from '@neat-evolution/evaluator'
+import { createRNG } from '@neat-evolution/utils'
 import { describe, expect, test, vi } from 'vitest'
 
 import type { ParentEvaluationContext } from '../../src/ParentEvaluationContext.js'
@@ -15,6 +16,7 @@ describe('IndividualStrategy', () => {
         }
       ),
       evaluateGenomeEntryBatch: vi.fn(),
+      rng: createRNG('test'),
     } as unknown as ParentEvaluationContext
 
     const strategy = new IndividualStrategy()

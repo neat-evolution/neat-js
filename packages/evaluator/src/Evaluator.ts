@@ -28,7 +28,7 @@ export interface Evaluator<EFO = unknown> {
 
   evaluate: (
     genomeEntries: GenomeEntries,
-    rng?: RNG
+    rng: RNG
   ) => AsyncIterable<FitnessData>
 
   /** Retrieve the latest telemetry for a genome (from evaluation). */

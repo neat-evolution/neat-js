@@ -185,9 +185,10 @@ describe('PopulationFactory', () => {
 
     // evaluate
     const fitnessResults: FitnessData[] = []
-    for await (const fitnessData of evaluator.evaluate([
-      [0, 0, genome],
-    ] as never)) {
+    for await (const fitnessData of evaluator.evaluate(
+      [[0, 0, genome]] as never,
+      createRNG('test')
+    )) {
       fitnessResults.push(fitnessData)
     }
 
@@ -223,10 +224,10 @@ describe('PopulationFactory', () => {
     const hydratedPhenotypeData = [1, 1, hydratedGenome] as const
 
     const fitnessResults: FitnessData[] = []
-    for await (const fitnessData of evaluator.evaluate([
-      phenotypeData,
-      hydratedPhenotypeData,
-    ] as never)) {
+    for await (const fitnessData of evaluator.evaluate(
+      [phenotypeData, hydratedPhenotypeData] as never,
+      createRNG('test')
+    )) {
       fitnessResults.push(fitnessData)
     }
 

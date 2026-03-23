@@ -146,7 +146,7 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
 
   async *evaluate(
     genomeEntries: GenomeEntries,
-    rng?: RNG
+    rng: RNG
   ): AsyncIterable<FitnessData> {
     if (this.strategy) {
       // Clear pending writebacks from previous generation
@@ -157,7 +157,7 @@ export class UnsafeTestEvaluator<EFO> implements Evaluator<EFO> {
           Promise.all(entries.map((e) => this.worker(e, seed))),
         ...this.localDispatcher.context,
         ...(this.stats != null ? { stats: this.stats } : {}),
-        ...(rng != null ? { rng } : {}),
+        rng,
       }
       yield* this.strategy.evaluate(context, genomeEntries)
       // After all fitness has been yielded, apply Lamarckian writebacks

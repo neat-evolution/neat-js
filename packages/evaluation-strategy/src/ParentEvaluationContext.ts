@@ -28,6 +28,6 @@ export interface ParentEvaluationContext<G extends AnyGenome = AnyGenome>
   /** Optional stats recorder for evaluation-level metrics. */
   stats?: StatsRecorder
 
-  /** Optional RNG for deriving per-organism evaluation seeds. */
-  rng?: RNG
+  /** RNG for deriving per-organism evaluation seeds. */
+  rng: RNG
 }

@@ -138,7 +138,7 @@ describe('Population class', () => {
       for (let i = 0; i < 100; i++) {
         await population.mutate(createRNG('test'))
       }
-      await population.evaluate()
+      await population.evaluate(createRNG('test'))
     })
 
     test('should initialize with only one species', () => {
@@ -161,7 +161,7 @@ describe('Population class', () => {
       let speciesCount = 0
       for (let i = 0; i < 2; i++) {
         await population.evolve(createRNG('test'))
-        await population.evaluate()
+        await population.evaluate(createRNG('test'))
         speciesCount += population.species.size
       }
       expect(population.species.size).toBeLessThan(
@@ -188,7 +188,7 @@ describe('Population class', () => {
       for (let i = 0; i < 50; i++) {
         await population.mutate(createRNG('test'))
       }
-      await population.evaluate()
+      await population.evaluate(createRNG('test'))
     })
 
     describe('Population.evolve species calls', () => {

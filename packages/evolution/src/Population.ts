@@ -396,7 +396,7 @@ export class Population<Ctx extends AlgorithmContext = AlgorithmContext> {
   }
 
   /// Update fitness of all organisms
-  async evaluate(rng?: RNG) {
+  async evaluate(rng: RNG) {
     await this.evaluatorReady
 
     // evaluate every organism's genome

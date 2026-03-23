@@ -62,9 +62,9 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
   private readonly stats: StatsRecorder | undefined
 
   /**
-   * Evaluation context exposing worker pool functionality to evaluation strategies
+   * Base evaluation context — everything except rng, which is merged per-evaluate call.
    */
-  public readonly evaluationContext: ParentEvaluationContext
+  private readonly baseEvaluationContext: Omit<ParentEvaluationContext, 'rng'>
 
   /**
    * Evaluation strategy determining how genomes are evaluated
@@ -109,8 +109,8 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
 
     this.initPromise = this.initWorkers()
 
-    // Create evaluation context - expose Dispatcher methods directly
-    this.evaluationContext = {
+    // Create base evaluation context — rng is merged per-evaluate call
+    this.baseEvaluationContext = {
       evaluateGenomeEntry: this.evaluateGenomeEntry.bind(this),
       evaluateGenomeEntryBatch: this.evaluateGenomeEntryBatch.bind(this),
       send: (
@@ -190,14 +190,13 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
 
   async *evaluate(
     genomeEntries: GenomeEntries,
-    rng?: RNG
+    rng: RNG
   ): AsyncIterable<FitnessData> {
     await this.initPromise
     // Clear pending writebacks from previous generation
     this.pendingWritebacks.clear()
     // Merge per-generation RNG into evaluation context for the strategy
-    const context =
-      rng != null ? { ...this.evaluationContext, rng } : this.evaluationContext
+    const context: ParentEvaluationContext = { ...this.baseEvaluationContext, rng }
     // Delegate to strategy, passing the evaluation context
     yield* this.strategy.evaluate(context, genomeEntries)
     // After all fitness has been yielded, apply Lamarckian writebacks
