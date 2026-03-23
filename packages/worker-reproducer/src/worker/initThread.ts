@@ -1,4 +1,4 @@
-import { createRNG, setThreadRNGSeed } from '@neat-evolution/utils'
+import { setThreadRNGSeed } from '@neat-evolution/utils'
 import QuickLRU from 'quick-lru'
 import { type InitReproducerPayload, StateType } from '../actions.js'
 import { WorkerState } from '../WorkerState.js'
@@ -18,9 +18,10 @@ export const initThread = async (
   payload: InitReproducerPayload,
   context: ReproducerHandlerContext
 ) => {
+  // Seed threadRNG for legacy callers (e.g. CPPNNode.determineActivation).
+  // context.rng is NOT seeded here — each handler (reproduceBatch,
+  // breedOrganism) scopes it per-request from the payload's rngSeed.
   if (payload.reproducerOptions.randomSeed != null) {
-    context.rng = createRNG(payload.reproducerOptions.randomSeed)
-    // Seed threadRNG for legacy callers (e.g. CPPNNode.determineActivation)
     setThreadRNGSeed(payload.reproducerOptions.randomSeed)
   }
 

@@ -64,8 +64,11 @@ export interface OrganismPayload<
 
 export interface SpeciesPayload {
   speciesId: number
+}
+
+export interface BreedOrganismPayload extends SpeciesPayload {
   /** Per-request RNG seed for deterministic breeding. */
-  rngSeed?: string
+  rngSeed: string
 }
 
 export interface OrganismBatchPayload<
@@ -111,7 +114,7 @@ export const requestEliteOrganism = createMessage<
 >(ActionType.REQUEST_ELITE_ORGANISM)
 
 export const requestBreedOrganism = createMessage<
-  SpeciesPayload,
+  BreedOrganismPayload,
   OrganismPayload
 >(ActionType.REQUEST_BREED_ORGANISM)
 

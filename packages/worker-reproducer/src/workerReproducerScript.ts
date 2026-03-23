@@ -4,10 +4,10 @@ import QuickLRU from 'quick-lru'
 
 import {
   ActionType,
+  type BreedOrganismPayload,
   type InitReproducerPayload,
   type OrganismPayload,
   type ReproduceBatchPayload,
-  type SpeciesPayload,
 } from './actions.js'
 import { breedOrganism } from './worker/breedOrganism.js'
 import { eliteOrganism } from './worker/eliteOrganism.js'
@@ -17,7 +17,9 @@ import type { ThreadContext } from './worker/ThreadContext.js'
 
 const handler = new Handler()
 
-// Minimal ThreadContext - only app-specific state
+// Minimal ThreadContext — app-specific state only.
+// context.rng is a placeholder; each handler (reproduceBatch, breedOrganism)
+// scopes it per-request from the payload's rngSeed.
 const threadContext: ThreadContext & Partial<WorkerContext> = {
   rng: createRNG(),
   threadInfo: null,
@@ -43,7 +45,10 @@ handler.register(ActionType.REQUEST_ELITE_ORGANISM, (payload) => {
 })
 
 handler.register(ActionType.REQUEST_BREED_ORGANISM, async (payload) => {
-  return await breedOrganism(payload as SpeciesPayload, getThreadContext())
+  return await breedOrganism(
+    payload as BreedOrganismPayload,
+    getThreadContext()
+  )
 })
 
 handler.register(ActionType.REQUEST_REPRODUCE_BATCH, async (payload) => {

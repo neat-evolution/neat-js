@@ -1,14 +1,14 @@
 import type { Organism } from '@neat-evolution/evolution'
 import { createRNG } from '@neat-evolution/utils'
 
-import type { SpeciesPayload } from '../actions.js'
+import type { BreedOrganismPayload } from '../actions.js'
 
 import { populationTournamentSelect } from './populationTournamentSelect.js'
 import { speciesTournamentSelect } from './speciesTournamentSelect.js'
 import type { ReproducerHandlerContext } from './ThreadContext.js'
 
 export const breedOrganism = async (
-  payload: SpeciesPayload,
+  payload: BreedOrganismPayload,
   context: ReproducerHandlerContext
 ) => {
   if (context.threadInfo == null) {
@@ -16,11 +16,9 @@ export const breedOrganism = async (
   }
   const threadInfo = context.threadInfo
 
-  // Scope context.rng to this request when a per-request seed is provided.
-  // Without a seed, falls back to the thread-level RNG (non-deterministic
-  // with multiple workers, but preserves legacy behavior).
+  // Scope context.rng to this request — same pattern as reproduceBatch.
   const previousRng = context.rng
-  const rng = payload.rngSeed != null ? createRNG(payload.rngSeed) : context.rng
+  const rng = createRNG(payload.rngSeed)
   context.rng = rng.derive('selection')
 
   try {
