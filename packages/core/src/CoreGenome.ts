@@ -162,7 +162,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     if (rng.gen() >= probability) {
       return
     }
-    const randomIndex = rng.genRange(0, nodes.size)
+    const randomIndex = rng.genIntRange(0, nodes.size)
     let i = 0
     for (const node of nodes.values()) {
       if (i === randomIndex) {
@@ -275,7 +275,10 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     for (const [linkKey, link] of parent1.links) {
       const link2 = parent2Links.get(linkKey)
       if (link2 !== undefined) {
-        genome.insertLink(link.crossover(link2, fitness, otherFitness, rng), true)
+        genome.insertLink(
+          link.crossover(link2, fitness, otherFitness, rng),
+          true
+        )
       } else {
         genome.insertLink(link.clone(), true)
       }
@@ -462,7 +465,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     }
 
     if (neatConfig.mutateOnlyOneLink) {
-      const linkIndex = rng.genRange(0, linkSize)
+      const linkIndex = rng.genIntRange(0, linkSize)
       let i = 0
       for (const link of this.links.values()) {
         if (i === linkIndex) {
@@ -490,7 +493,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     const linksArray = Array.from(this.links.values())
 
     for (let i = 0; i < 50; i++) {
-      const linkIndex = rng.genRange(0, linkSize)
+      const linkIndex = rng.genIntRange(0, linkSize)
       const link = linksArray[linkIndex]
       if (link == null) {
         continue
@@ -538,7 +541,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     }
 
     // Pass 2: walk with random threshold to find source
-    let threshold = rng.genRange(1, totalWeight + 1)
+    let threshold = rng.genIntRange(1, totalWeight + 1)
     let source: NodeTypeOf<Ctx> | undefined
     for (const nodes of [this.inputs, this.hiddenNodes]) {
       for (const [nodeKey, node] of nodes) {
@@ -574,7 +577,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
     // Partial Fisher-Yates: only shuffle what we'll actually test
     const maxAttempts = Math.min(targetNodes.length, 50)
     for (let i = 0; i < maxAttempts; i++) {
-      const j = rng.genRange(i, targetNodes.length)
+      const j = rng.genIntRange(i, targetNodes.length)
       if (i !== j) {
         const tmp = targetNodes[i] as NodeTypeOf<Ctx>
         targetNodes[i] = targetNodes[j] as NodeTypeOf<Ctx>
@@ -617,7 +620,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
       return
     }
 
-    const randomIndex = rng.genRange(0, linkSize)
+    const randomIndex = rng.genIntRange(0, linkSize)
     let currentIndex = 0
 
     for (const [linkKey, link] of this.links) {
@@ -636,7 +639,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
       return
     }
 
-    const randomIndex = rng.genRange(0, hiddenSize)
+    const randomIndex = rng.genIntRange(0, hiddenSize)
     let currentIndex = 0
 
     for (const nodeKey of this.hiddenNodes.keys()) {
