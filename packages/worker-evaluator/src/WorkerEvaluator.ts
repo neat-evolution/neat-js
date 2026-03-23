@@ -196,7 +196,10 @@ export class WorkerEvaluator<EFO = unknown> implements Evaluator<EFO> {
     // Clear pending writebacks from previous generation
     this.pendingWritebacks.clear()
     // Merge per-generation RNG into evaluation context for the strategy
-    const context: ParentEvaluationContext = { ...this.baseEvaluationContext, rng }
+    const context: ParentEvaluationContext = {
+      ...this.baseEvaluationContext,
+      rng,
+    }
     // Delegate to strategy, passing the evaluation context
     yield* this.strategy.evaluate(context, genomeEntries)
     // After all fitness has been yielded, apply Lamarckian writebacks
