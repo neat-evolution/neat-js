@@ -27,7 +27,6 @@ export const createReproducer = <P extends Population>(
           const organism = species.organisms[j % species.size] as Organism
           const elite = organism.asElite()
           organisms.push(elite)
-          population.push(elite, true)
         }
       }
       return organisms
@@ -80,7 +79,6 @@ export const createReproducer = <P extends Population>(
           await child.mutate(rng.derive(`offspring:${offspringIndex}`))
           offspringIndex++
           organisms.push(child)
-          population.push(child, true)
         }
       }
       return organisms

@@ -294,16 +294,21 @@ export class Population<Ctx extends AlgorithmContext = AlgorithmContext> {
       species.age()
     }
 
-    // Perform copyElites and reproduce simultaneously
-    const promises: Array<Promise<Array<Organism>>> = []
+    // Perform copyElites and reproduce simultaneously.
+    // Both methods return organisms without pushing to the population.
+    const [newElites, newOffspring] = await Promise.all([
+      this.reproducer.copyElites(speciesIds),
+      this.reproducer.reproduce(speciesIds, rng),
+    ])
 
-    // Directly copy elites, without crossover or mutation
-    promises.push(this.reproducer.copyElites(speciesIds))
-
-    // Evolve species
-    promises.push(this.reproducer.reproduce(speciesIds, rng))
-
-    await Promise.all(promises)
+    // Push in deterministic order: all elites first, then all offspring.
+    // This ensures species assignment is independent of worker completion timing.
+    for (const organism of newElites) {
+      this.push(organism as unknown as Organism<Ctx>, true)
+    }
+    for (const organism of newOffspring) {
+      this.push(organism as unknown as Organism<Ctx>, true)
+    }
 
     // Kill old population
     for (const species of this.species.values()) {
