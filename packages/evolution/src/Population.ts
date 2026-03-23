@@ -363,7 +363,7 @@ export class Population<Ctx extends AlgorithmContext = AlgorithmContext> {
     if (len === 0) {
       return null
     } else {
-      const randomIndex = rng.genRange(0, len)
+      const randomIndex = rng.genIntRange(0, len)
       let i = 0
       for (const organism of this.organismValues()) {
         if (i === randomIndex) {

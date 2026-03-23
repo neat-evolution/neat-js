@@ -127,7 +127,7 @@ export class Species<Ctx extends AlgorithmContext = AlgorithmContext> {
 
   /// Get random organism. Adheres to lock.
   randomOrganism(rng: RNG): Organism<Ctx> | null {
-    const randomIndex = rng.genRange(0, this.size)
+    const randomIndex = rng.genIntRange(0, this.size)
     let i = 0
     for (const organism of this.organismValues()) {
       if (i === randomIndex) {
