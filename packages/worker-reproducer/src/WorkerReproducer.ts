@@ -341,9 +341,7 @@ export class WorkerReproducer implements Reproducer {
     return allElites
   }
 
-  private async getElitePayload(
-    organism: Organism
-  ): Promise<OrganismPayload> {
+  private async getElitePayload(organism: Organism): Promise<OrganismPayload> {
     return await this.dispatcher.call<OrganismPayload>(
       requestEliteOrganism({
         genome: organism.genome.toFactoryOptions(),

@@ -14,7 +14,7 @@ export const selectOrganism = (
 
   for (let i = 0; i < safeK; i++) {
     if (organisms.length === 0) break
-    const index = rng.genRange(0, organisms.length)
+    const index = rng.genIntRange(0, organisms.length)
     const candidate = organisms[index] ?? null
     if (candidate == null) continue
     const candidateFitness = candidate.fitness ?? null

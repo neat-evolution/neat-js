@@ -34,8 +34,7 @@ export const breedOrganism = async (
 
     let child: Organism
     if (
-      rng.gen() <
-      threadInfo.populationOptions.asexualReproductionProbability
+      rng.gen() < threadInfo.populationOptions.asexualReproductionProbability
     ) {
       child = father.asElite()
     } else {
