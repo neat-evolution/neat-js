@@ -298,7 +298,7 @@ export class WorkerReproducer implements Reproducer {
   async copyElites(speciesIds: number[]): Promise<Array<Organism>> {
     await this.initPromise
 
-    const promises: Array<Promise<Organism>> = []
+    const promises: Array<Promise<OrganismPayload>> = []
     for (const i of speciesIds) {
       const species = this.population.species.get(i) as Species
       // Steal elites from number of offsprings
@@ -312,33 +312,44 @@ export class WorkerReproducer implements Reproducer {
       // Directly copy elites, without crossover or mutation
       for (let j = 0; j < species.elites; j++) {
         const organism = species.organisms[j % species.size] as Organism
-        promises.push(this.eliteOrganism(organism))
+        promises.push(this.getElitePayload(organism))
       }
     }
-    return await Promise.all(promises)
+
+    // Collect all elite payloads in submission order (deterministic).
+    // Promise.all returns results in input order regardless of completion order.
+    const payloads = await Promise.all(promises)
+
+    // Convert payloads to organisms in submission order.
+    // Population.evolve() is responsible for pushing to the population.
+    const allElites: Array<Organism> = []
+    for (const data of payloads) {
+      const genome = this.population.algorithm.createGenome(
+        this.population.configProvider,
+        this.population.stateProvider,
+        this.population.genomeOptions,
+        this.population.initConfig,
+        data.genome
+      )
+      const elite = new Organism(
+        genome,
+        data.organismState.generation,
+        data.organismState
+      )
+      allElites.push(elite)
+    }
+    return allElites
   }
 
-  async eliteOrganism(organism: Organism): Promise<Organism> {
-    const data = await this.dispatcher.call<OrganismPayload>(
+  private async getElitePayload(
+    organism: Organism
+  ): Promise<OrganismPayload> {
+    return await this.dispatcher.call<OrganismPayload>(
       requestEliteOrganism({
         genome: organism.genome.toFactoryOptions(),
         organismState: organism.toFactoryOptions(),
       })
     )
-    const genome = this.population.algorithm.createGenome(
-      this.population.configProvider,
-      this.population.stateProvider,
-      this.population.genomeOptions,
-      this.population.initConfig,
-      data.genome
-    )
-    const elite = new Organism(
-      genome,
-      data.organismState.generation,
-      data.organismState
-    )
-    this.population.push(elite, true)
-    return elite
   }
 
   async reproduce(speciesIds: number[], rng: RNG): Promise<Array<Organism>> {
@@ -352,7 +363,10 @@ export class WorkerReproducer implements Reproducer {
 
     try {
       const batches = this.createReproductionBatches(speciesIds)
-      const result = await Promise.all(
+
+      // Dispatch all batches to workers concurrently, collect raw payloads.
+      // Promise.all returns results in input order regardless of completion order.
+      const batchResults = await Promise.all(
         batches.map(async (batch, batchIndex) => {
           const batchPayload: ReproduceBatchPayload = {
             ...batch,
@@ -361,25 +375,31 @@ export class WorkerReproducer implements Reproducer {
           const data = await this.dispatcher.call<OrganismBatchPayload>(
             requestReproduceBatch(batchPayload)
           )
-          return data.organisms.map((payload) => {
-            const genome = this.population.algorithm.createGenome(
-              this.population.configProvider,
-              this.population.stateProvider,
-              this.population.genomeOptions,
-              this.population.initConfig,
-              payload.genome
-            )
-            const organism = new Organism(
-              genome,
-              payload.organismState.generation,
-              payload.organismState
-            )
-            this.population.push(organism, true)
-            return organism
-          })
+          return data.organisms
         })
       )
-      return result.flat()
+
+      // Convert payloads to organisms in batch-index order (deterministic).
+      // Population.evolve() is responsible for pushing to the population.
+      const allOrganisms: Array<Organism> = []
+      for (const payloads of batchResults) {
+        for (const payload of payloads) {
+          const genome = this.population.algorithm.createGenome(
+            this.population.configProvider,
+            this.population.stateProvider,
+            this.population.genomeOptions,
+            this.population.initConfig,
+            payload.genome
+          )
+          const organism = new Organism(
+            genome,
+            payload.organismState.generation,
+            payload.organismState
+          )
+          allOrganisms.push(organism)
+        }
+      }
+      return allOrganisms
     } finally {
       this.reproductionRng = null
       this.reproductionPayloadCache = null
@@ -495,36 +515,38 @@ export class WorkerReproducer implements Reproducer {
     return payload
   }
 
-  async reproduceSpecies(speciesId: number): Promise<Array<Organism>> {
+  async reproduceSpecies(
+    speciesId: number,
+    rng: RNG
+  ): Promise<Array<Organism>> {
     const species = this.population.species.get(speciesId) as Species
     const reproductions = Math.floor(species.offsprings)
 
-    const tasks: Array<Promise<Organism>> = []
+    const tasks: Array<Promise<OrganismPayload>> = []
     for (let i = 0; i < reproductions; i++) {
-      tasks.push(this.breedOrganism(speciesId))
+      tasks.push(
+        this.dispatcher.call<OrganismPayload>(
+          requestBreedOrganism({
+            speciesId,
+            rngSeed: rng.derive(`breed:${i}`).toSeed(),
+          })
+        )
+      )
     }
-    return await Promise.all(tasks)
-  }
-
-  async breedOrganism(speciesId: number): Promise<Organism> {
-    const data = await this.dispatcher.call<OrganismPayload>(
-      requestBreedOrganism({
-        speciesId,
-      })
-    )
-    const genome = this.population.algorithm.createGenome(
-      this.population.configProvider,
-      this.population.stateProvider,
-      this.population.genomeOptions,
-      this.population.initConfig,
-      data.genome
-    )
-    const organism = new Organism(
-      genome,
-      data.organismState.generation,
-      data.organismState
-    )
-    this.population.push(organism, true)
-    return organism
+    const payloads = await Promise.all(tasks)
+    return payloads.map((data) => {
+      const genome = this.population.algorithm.createGenome(
+        this.population.configProvider,
+        this.population.stateProvider,
+        this.population.genomeOptions,
+        this.population.initConfig,
+        data.genome
+      )
+      return new Organism(
+        genome,
+        data.organismState.generation,
+        data.organismState
+      )
+    })
   }
 }

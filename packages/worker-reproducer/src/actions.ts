@@ -64,6 +64,8 @@ export interface OrganismPayload<
 
 export interface SpeciesPayload {
   speciesId: number
+  /** Per-request RNG seed for deterministic breeding. */
+  rngSeed?: string
 }
 
 export interface OrganismBatchPayload<

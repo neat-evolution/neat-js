@@ -22,10 +22,22 @@ export const reproduceBatch = async (
     throw new Error('reproduceBatch threadInfo not initialized')
   }
 
+  // Save all batch-scoped context fields for restore in finally.
+  const previousRng = context.rng
   const previousSpecies = context.localSpeciesOrganisms
   const previousPopulation = context.localPopulationOrganisms
   const previousAllowLazyPopulationSnapshot =
     context.allowLazyPopulationSnapshot
+
+  // Per-batch RNG derived on the main thread — deterministic regardless of
+  // which worker processes this batch.
+  const batchRng = createRNG(payload.rngSeed)
+
+  // Scope context.rng to this batch so downstream tournament selection
+  // reads from a deterministic, batch-local RNG instead of the thread-level
+  // singleton. Derived separately so selection calls don't interleave with
+  // breeding decisions on batchRng.
+  context.rng = batchRng.derive('selection')
 
   const localSpecies = new Map<number, Array<Organism>>()
   for (const speciesEntry of payload.species) {
@@ -43,9 +55,6 @@ export const reproduceBatch = async (
     context.threadInfo.populationOptions.interspeciesReproductionProbability > 0
 
   try {
-    // Use per-batch RNG derived on the main thread — deterministic
-    // regardless of which worker processes this batch.
-    const batchRng = createRNG(payload.rngSeed)
     const organisms: OrganismBatchPayload['organisms'] = []
     for (const speciesEntry of payload.species) {
       for (let i = 0; i < speciesEntry.reproductions; i++) {
@@ -84,6 +93,7 @@ export const reproduceBatch = async (
 
     return { organisms }
   } finally {
+    context.rng = previousRng
     context.localSpeciesOrganisms = previousSpecies
     context.localPopulationOrganisms = previousPopulation
     context.allowLazyPopulationSnapshot = previousAllowLazyPopulationSnapshot

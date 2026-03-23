@@ -7,13 +7,14 @@ export const selectOrganism = (
   k: number,
   context: ReproducerHandlerContext
 ): Organism | null => {
+  const { rng } = context
   let best: Organism | null = null
   let bestFitness: number | null = null
   const safeK = Math.max(1, Math.trunc(k))
 
   for (let i = 0; i < safeK; i++) {
     if (organisms.length === 0) break
-    const index = context.rng.genRange(0, organisms.length)
+    const index = rng.genRange(0, organisms.length)
     const candidate = organisms[index] ?? null
     if (candidate == null) continue
     const candidateFitness = candidate.fitness ?? null
