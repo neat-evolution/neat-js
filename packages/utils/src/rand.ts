@@ -1,8 +1,20 @@
+import { uniformInt } from 'pure-rand/distribution/uniformInt'
+import { xoroshiro128plus } from 'pure-rand/generator/xoroshiro128plus'
+
 export interface RNG {
+  /** Uniform float in [0, 1). */
   gen: () => number
-  genRange: (min: number, max: number) => number
+  /** Uniform integer in [min, max) — no modulo bias. */
+  genIntRange: (min: number, max: number) => number
+  /** Uniform boolean (50/50). */
   genBool: () => boolean
+  /** Standard normal (Gaussian) variate via Box-Muller. */
+  genGaussian: () => number
+  /** Deterministic child RNG from a string label. Does not advance parent. */
   derive: (label: string) => RNG
+  /** Fast-path child RNG from an integer id. Does not advance parent. */
+  deriveInt: (id: number) => RNG
+  /** Serialize seed for worker transport. */
   toSeed: () => string
 }
 
@@ -26,35 +38,53 @@ const hashString = (str: string): number => {
 }
 
 /**
- * Mulberry32 PRNG. Returns a function that produces floats in [0, 1).
- * https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
+ * Fast integer hash for deriveInt — avoids string allocation and parsing.
  */
-const mulberry32 = (seed: number): (() => number) => {
-  let s = seed | 0
-  return () => {
-    s = (s + 0x6d2b79f5) | 0
-    let t = Math.imul(s ^ (s >>> 15), 1 | s)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 0x100000000
-  }
+const hashInt = (seed: number, id: number): number => {
+  let hash = (seed ^ id) | 0
+  hash = Math.imul(hash ^ (hash >>> 16), 0x21f0aaad)
+  hash = Math.imul(hash ^ (hash >>> 15), 0x735a2d97)
+  return (hash ^ (hash >>> 15)) >>> 0
 }
 
 const createSeededRNG = (numericSeed: number): RNG => {
-  const rng = mulberry32(numericSeed)
+  // xoroshiro128plus: 128-bit state, period 2^128-1 — safe for heavy ML workloads.
+  const generator = xoroshiro128plus(numericSeed)
+
   return {
-    gen: (): number => rng(),
-    genRange: (min: number, max: number): number => {
+    gen: (): number => {
+      // uniformInt mutates generator in place; range is [from, to] inclusive.
+      return uniformInt(generator, 0, 0x7fffffff) / 0x80000000
+    },
+
+    genIntRange: (min: number, max: number): number => {
       if (min >= max) {
         throw new Error('min must be less than max')
       }
-      const range = max - min
-      return Math.floor(rng() * range) + min
+      // pure-rand uses rejection sampling — no modulo bias.
+      // Its range is [min, max] inclusive, so subtract 1 for [min, max) semantics.
+      return uniformInt(generator, min, max - 1)
     },
-    genBool: (): boolean => rng() < 0.5,
+
+    genBool: (): boolean => uniformInt(generator, 0, 1) === 1,
+
+    genGaussian: (): number => {
+      // Box-Muller transform: two uniform draws → one standard normal variate.
+      // u1 starts at 1 (not 0) to avoid log(0).
+      const u1 = uniformInt(generator, 1, 0x7fffffff) / 0x80000000
+      const u2 = uniformInt(generator, 0, 0x7fffffff) / 0x80000000
+      return Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2)
+    },
+
     derive: (label: string): RNG => {
       const childSeed = hashString(`${numericSeed}:${label}`)
       return createSeededRNG(childSeed)
     },
+
+    deriveInt: (id: number): RNG => {
+      return createSeededRNG(hashInt(numericSeed, id))
+    },
+
     toSeed: (): string => `__rng:${numericSeed}`,
   }
 }

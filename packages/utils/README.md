@@ -82,7 +82,7 @@ The `utils` package exposes the following key functions and interfaces:
 
 - **`RNG` interface**: Defines the contract for a random number generator,
   including methods like `gen()` (to generate a random number between 0 and 1),
-  `genRange(min, max)` (to generate a random integer within a specified range),
+  `genIntRange(min, max)` (to generate a random integer within a specified range),
   and `genBool()` (to generate a random boolean).
 
 - **`createRNG(seed?: string): RNG`**: A factory function that creates an `RNG`
@@ -114,7 +114,7 @@ const randomNumber = rng.gen();
 console.log(`Random number: ${randomNumber}`);
 
 // Generate a random number within a range
-const randomInRange = rng.genRange(1, 10); // Between 1 (inclusive) and 10 (exclusive)
+const randomInRange = rng.genIntRange(1, 10); // Between 1 (inclusive) and 10 (exclusive)
 console.log(`Random number in range: ${randomInRange}`);
 
 // Shuffle an array

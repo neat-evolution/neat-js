@@ -113,11 +113,11 @@ describe('derive', () => {
     }
   })
 
-  it('derived child supports genRange and genBool', () => {
+  it('derived child supports genIntRange and genBool', () => {
     const parent = createRNG('root')
     const child = parent.derive('child')
 
-    const rangeValue = child.genRange(10, 20)
+    const rangeValue = child.genIntRange(10, 20)
     expect(rangeValue).toBeGreaterThanOrEqual(10)
     expect(rangeValue).toBeLessThan(20)
 

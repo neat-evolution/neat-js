@@ -15,7 +15,7 @@ export const shuffle = <T>(array: T[], rng: RNG): T[] => {
     return array
   }
   for (let index = array.length - 1; index > 0; index--) {
-    const newIndex = Math.floor(rng.gen() * (index + 1))
+    const newIndex = rng.genIntRange(0, index + 1)
     if (index === newIndex) {
       continue
     }
