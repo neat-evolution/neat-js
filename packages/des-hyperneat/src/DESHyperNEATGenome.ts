@@ -198,7 +198,7 @@ export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
       const totalSize =
         this.inputs.size + this.hiddenNodes.size + this.outputs.size
       if (totalSize > 0) {
-        const randomIndex = rng.genRange(0, totalSize)
+        const randomIndex = rng.genIntRange(0, totalSize)
 
         let i = 0
         let map: Map<NodeKey, DESHyperNEATNode> | undefined
