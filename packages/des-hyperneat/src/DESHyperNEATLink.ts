@@ -55,14 +55,15 @@ export class DESHyperNEATLink extends CoreLink<DESHyperNEATContext> {
   }
 
   override async identity(
-    linkFactoryOptions: LinkFactoryOptions
+    linkFactoryOptions: LinkFactoryOptions,
+    rng?: RNG
   ): Promise<DESHyperNEATLink> {
     // create a new link with a new cppn
     const link = this.createLink(linkFactoryOptions, this.config, this.state)
 
     // initialize the new cppn with the identity function
     if (this.options.enableIdentityMapping) {
-      await insertIdentity(link.cppn, 0)
+      await insertIdentity(link.cppn, 0, rng)
     }
     return link
   }

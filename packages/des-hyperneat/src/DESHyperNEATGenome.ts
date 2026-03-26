@@ -148,7 +148,7 @@ export class DESHyperNEATGenome extends CoreGenome<DESHyperNEATContext> {
       for (const link of this.links.values()) {
         const desLink = link as DESHyperNEATLink
         if (desLink.cppn.links.size === 0) {
-          await insertIdentity(desLink.cppn, 0)
+          await insertIdentity(desLink.cppn, 0, rng)
           // Perturb all CPPN link weights
           for (const cppnLink of desLink.cppn.links.values()) {
             cppnLink.weight += (rng.gen() - 0.5) * 2.0

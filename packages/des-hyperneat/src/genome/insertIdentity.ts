@@ -6,13 +6,15 @@ import {
   toNodeKey,
 } from '@neat-evolution/core'
 import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
+import type { RNG } from '@neat-evolution/utils'
 
 import { insertLink } from './insertLink.js'
 import { splitLink } from './splitLink.js'
 
 export const insertIdentity = async (
   genome: CPPNGenome<CPPNGenomeOptions>,
-  outputId: number
+  outputId: number,
+  rng?: RNG
 ): Promise<void> => {
   const outputNodeRef: NodeRef = { type: NodeType.Output, id: outputId }
   const outputNodeKey = toNodeKey(NodeType.Output, outputId)
@@ -43,7 +45,8 @@ export const insertIdentity = async (
     7.5,
     7.5,
     Activation.Square,
-    0.0
+    0.0,
+    rng
   )
 
   const hiddenY = await splitLink(
@@ -53,7 +56,8 @@ export const insertIdentity = async (
     7.5,
     7.5,
     Activation.Square,
-    0.0
+    0.0,
+    rng
   )
 
   await Promise.all([

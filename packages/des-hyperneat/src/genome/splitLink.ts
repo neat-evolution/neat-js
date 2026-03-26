@@ -1,5 +1,6 @@
 import { type Activation, type NodeKey, toLinkKey } from '@neat-evolution/core'
 import type { CPPNGenome, CPPNGenomeOptions } from '@neat-evolution/cppn'
+import type { RNG } from '@neat-evolution/utils'
 
 export const splitLink = async (
   genome: CPPNGenome<CPPNGenomeOptions>,
@@ -8,7 +9,8 @@ export const splitLink = async (
   weight: number,
   weight2: number,
   activation: Activation,
-  bias: number
+  bias: number,
+  rng?: RNG
 ): Promise<NodeKey> => {
   const linkKey = toLinkKey(from, to)
   const existingLink = genome.links.get(linkKey)
@@ -17,7 +19,7 @@ export const splitLink = async (
   }
   const newNodeKey = await genome.state.getSplitInnovation(from, to)
 
-  await genome.splitLink(from, to, newNodeKey)
+  await genome.splitLink(from, to, newNodeKey, undefined, rng)
 
   const hiddenNode = genome.hiddenNodes.get(newNodeKey)
   if (hiddenNode == null) {
