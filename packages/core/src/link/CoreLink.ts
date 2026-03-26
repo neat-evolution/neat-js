@@ -60,7 +60,8 @@ export class CoreLink<Ctx extends AlgorithmContext> implements Link<Ctx> {
    * Creates a new link; Only async in des-hyperneat
    */
   public identity(
-    linkFactoryOptions: LinkFactoryOptions
+    linkFactoryOptions: LinkFactoryOptions,
+    _rng?: RNG
   ): LinkTypeOf<Ctx> | Promise<LinkTypeOf<Ctx>> {
     return this.createLink(linkFactoryOptions, this.config, this.state)
   }

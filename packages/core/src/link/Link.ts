@@ -32,7 +32,8 @@ export interface Link<Ctx extends AlgorithmContext> extends LinkRef {
    * @returns a link for this algorithm
    */
   identity: (
-    linkFactoryOptions: LinkFactoryOptions
+    linkFactoryOptions: LinkFactoryOptions,
+    rng?: RNG
   ) => LinkTypeOf<Ctx> | Promise<LinkTypeOf<Ctx>>
 
   /**

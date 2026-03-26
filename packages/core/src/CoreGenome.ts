@@ -424,7 +424,7 @@ export class CoreGenome<Ctx extends AlgorithmContext> implements Genome<Ctx> {
       to: link1Details[1],
       weight: 1.0,
       innovation: link1Details[2],
-    })
+    }, rng)
     const link2 = link.cloneWith({
       from: link2Details[0],
       to: link2Details[1],
