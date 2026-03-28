@@ -1,27 +1,22 @@
-export function extractLeadingValues(
-  rawOutput: Float64Array,
-  count: number,
-  label: string
-): Float64Array {
-  if (rawOutput.length < count) {
-    throw new Error(
-      `${label} expected ${count} outputs, received ${rawOutput.length}`
-    )
-  }
+import {
+  computeGroupedCategoricalBootstrapValues,
+  extractGroupedCategoricalValues,
+  extractLeadingValues,
+  selectGroupedCategoricalAction,
+} from './groupedCategorical.js'
 
-  const values = new Float64Array(count)
-  for (let i = 0; i < count; i++) {
-    values[i] = rawOutput[i] as number
-  }
-  return values
-}
+export { extractLeadingValues }
 
 export function extractGroupedBinaryValues(
   rawOutput: Float64Array,
   factorCount: number,
   label: string
 ): Float64Array {
-  return extractLeadingValues(rawOutput, 2 * factorCount, label)
+  return extractGroupedCategoricalValues(
+    rawOutput,
+    Array.from({ length: factorCount }, () => 2),
+    label
+  )
 }
 
 export function sampleGroupedBinaryAction(
@@ -43,16 +38,15 @@ export function selectGroupedBinaryAction(
   epsilon: number,
   rng: () => number
 ): Float64Array {
+  const categorical = selectGroupedCategoricalAction(
+    qValues,
+    Array.from({ length: factorCount }, () => 2),
+    epsilon,
+    rng
+  )
   const action = new Float64Array(factorCount)
   for (let factorIndex = 0; factorIndex < factorCount; factorIndex++) {
-    if (rng() < epsilon) {
-      action[factorIndex] = rng() < 0.5 ? 1 : 0
-      continue
-    }
-
-    const qOn = qValues[2 * factorIndex] as number
-    const qOff = qValues[2 * factorIndex + 1] as number
-    action[factorIndex] = qOn >= qOff ? 1 : 0
+    action[factorIndex] = categorical[2 * factorIndex] === 1 ? 1 : 0
   }
   return action
 }
@@ -61,13 +55,10 @@ export function computeGroupedBinaryBootstrapValues(
   qValues: Float64Array,
   factorCount: number
 ): Float64Array {
-  const bootstrapValues = new Float64Array(factorCount)
-  for (let factorIndex = 0; factorIndex < factorCount; factorIndex++) {
-    const qOn = qValues[2 * factorIndex] as number
-    const qOff = qValues[2 * factorIndex + 1] as number
-    bootstrapValues[factorIndex] = Math.max(qOn, qOff)
-  }
-  return bootstrapValues
+  return computeGroupedCategoricalBootstrapValues(
+    qValues,
+    Array.from({ length: factorCount }, () => 2)
+  )
 }
 
 export function computeGroupedBinaryQErrors(
