@@ -10,11 +10,14 @@ import type {
   StepOutcome,
 } from '../../core/StepTypes.js'
 import {
-  computeGroupedBinaryBootstrapValues,
-  extractGroupedBinaryValues,
+  chosenGroupedCategoricalIndices,
+  computeGroupedCategoricalBootstrapValues,
+  extractGroupedCategoricalValues,
   extractLeadingValues,
-  selectGroupedBinaryAction,
-} from '../action-space/groupedBinary.js'
+  groupedActionOutputCount,
+  resolveGroupedActionFactorSizes,
+  selectGroupedCategoricalAction,
+} from '../action-space/groupedCategorical.js'
 import { ReplayBuffer } from '../replay/ReplayBuffer.js'
 import { maxQBootstrap } from '../td/computeDiscountedReturns.js'
 import type { QLearningOpenStep, QLearningTransition } from './types.js'
@@ -22,6 +25,7 @@ import type { QLearningOpenStep, QLearningTransition } from './types.js'
 export interface DeepQLearningStepAgentConfig {
   learningRate: number
   actionCount: number
+  actionFactorSizes?: readonly number[]
   multiDiscrete?: boolean
   discountFactor: number
   epsilonInitial: number
@@ -63,11 +67,16 @@ function computeStateQValues(
   executor: Executor,
   state: Float64Array,
   actionCount: number,
-  multiDiscrete: boolean
+  multiDiscrete: boolean,
+  actionFactorSizes?: readonly number[]
 ): Float64Array {
   const rawOutput = Float64Array.from(executor.forward(state))
   return multiDiscrete
-    ? extractGroupedBinaryValues(rawOutput, actionCount, 'DQL step agent')
+    ? extractGroupedCategoricalValues(
+        rawOutput,
+        resolveGroupedActionFactorSizes(actionCount, actionFactorSizes),
+        'DQL step agent'
+      )
     : extractLeadingValues(rawOutput, actionCount, 'DQL step agent')
 }
 
@@ -77,6 +86,15 @@ export function createDeepQLearningStepAgent(
   rng: () => number
 ): StepAgent {
   const multiDiscrete = config.multiDiscrete ?? false
+  const factorSizes = multiDiscrete
+    ? resolveGroupedActionFactorSizes(
+        config.actionCount,
+        config.actionFactorSizes
+      )
+    : undefined
+  const groupedOutputCount = factorSizes
+    ? groupedActionOutputCount(config.actionCount, factorSizes)
+    : 0
   const replayBuffer = new ReplayBuffer<QLearningTransition>({
     capacity: config.replayCapacity,
   })
@@ -101,7 +119,8 @@ export function createDeepQLearningStepAgent(
       targetExecutor,
       nextState,
       config.actionCount,
-      multiDiscrete
+      multiDiscrete,
+      factorSizes
     )
   }
 
@@ -115,21 +134,19 @@ export function createDeepQLearningStepAgent(
       for (const transition of samples) {
         if (multiDiscrete) {
           const bootstrapValues = transition.terminated
-            ? new Float64Array(config.actionCount)
-            : computeGroupedBinaryBootstrapValues(
+            ? new Float64Array((factorSizes as number[]).length)
+            : computeGroupedCategoricalBootstrapValues(
                 transition.nextQValues,
-                config.actionCount
+                factorSizes as number[]
               )
           const errors = new Float64Array(transition.rawOutput.length)
-          for (
-            let factorIndex = 0;
-            factorIndex < transition.action.length;
-            factorIndex++
-          ) {
-            const chosenIndex =
-              transition.action[factorIndex] === 1
-                ? 2 * factorIndex
-                : 2 * factorIndex + 1
+          const chosenIndices = chosenGroupedCategoricalIndices(
+            transition.action,
+            factorSizes as number[],
+            'DQL step agent'
+          )
+          for (let factorIndex = 0; factorIndex < chosenIndices.length; factorIndex++) {
+            const chosenIndex = chosenIndices[factorIndex] as number
             const target =
               transition.reward +
               config.discountFactor * (bootstrapValues[factorIndex] as number)
@@ -171,9 +188,9 @@ export function createDeepQLearningStepAgent(
 
       const rawOutput = Float64Array.from(trainable.forward(observation))
       const qValues = multiDiscrete
-        ? extractGroupedBinaryValues(
+        ? extractGroupedCategoricalValues(
             rawOutput,
-            config.actionCount,
+            factorSizes as number[],
             'DQL step agent'
           )
         : extractLeadingValues(rawOutput, config.actionCount, 'DQL step agent')
@@ -181,7 +198,12 @@ export function createDeepQLearningStepAgent(
         ? null
         : selectAction(qValues, epsilon, rng)
       const action = multiDiscrete
-        ? selectGroupedBinaryAction(qValues, config.actionCount, epsilon, rng)
+        ? selectGroupedCategoricalAction(
+            qValues,
+            factorSizes as number[],
+            epsilon,
+            rng
+          )
         : (standardSelection?.action as Float64Array)
       const chosenActionIndex = standardSelection?.chosenActionIndex ?? 0
 
@@ -213,7 +235,7 @@ export function createDeepQLearningStepAgent(
         qValues: openStep.qValues,
         nextQValues: outcome.terminated
           ? new Float64Array(
-              multiDiscrete ? 2 * config.actionCount : config.actionCount
+              multiDiscrete ? groupedOutputCount : config.actionCount
             )
           : computeTargetQValues(outcome.nextState),
         chosenActionIndex: openStep.chosenActionIndex,

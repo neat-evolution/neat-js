@@ -3,19 +3,22 @@ export function computeActionLogProbability(
   actionProbabilities: Float64Array
 ): number {
   if (action.length === actionProbabilities.length) {
-    let chosenIndex = -1
+    let chosenCount = 0
+    let logProbability = 0
     for (let i = 0; i < action.length; i++) {
       if (action[i] === 1) {
-        chosenIndex = i
-        break
+        chosenCount += 1
+        logProbability += Math.log(
+          Math.max(actionProbabilities[i] as number, 1e-10)
+        )
       }
     }
 
-    if (chosenIndex === -1) {
+    if (chosenCount === 0) {
       throw new Error('Action must contain a chosen index')
     }
 
-    return Math.log(Math.max(actionProbabilities[chosenIndex] as number, 1e-10))
+    return logProbability
   }
 
   if (actionProbabilities.length === 2 * action.length) {

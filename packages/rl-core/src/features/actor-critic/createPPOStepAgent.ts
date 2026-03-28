@@ -6,10 +6,13 @@ import type {
   StepOutcome,
 } from '../../core/StepTypes.js'
 import {
-  extractGroupedBinaryValues,
+  chosenGroupedCategoricalIndices,
+  extractGroupedCategoricalValues,
   extractLeadingValues,
-  sampleGroupedBinaryAction,
-} from '../action-space/groupedBinary.js'
+  groupedActionOutputCount,
+  resolveGroupedActionFactorSizes,
+  sampleGroupedCategoricalAction,
+} from '../action-space/groupedCategorical.js'
 import { computeActionLogProbability } from '../policy-gradient/actionLogProbabilities.js'
 import {
   computeGeneralizedAdvantages,
@@ -24,6 +27,7 @@ import type { ActorCriticOpenStep, ActorCriticTransition } from './types.js'
 export interface PPOStepAgentConfig {
   learningRate: number
   actionCount: number
+  actionFactorSizes?: readonly number[]
   multiDiscrete?: boolean
   discountFactor: number
   clipEpsilon: number
@@ -86,15 +90,23 @@ export function createPPOStepAgent(
   rng: () => number
 ): StepAgent {
   const multiDiscrete = config.multiDiscrete ?? false
+  const factorSizes = multiDiscrete
+    ? resolveGroupedActionFactorSizes(
+        config.actionCount,
+        config.actionFactorSizes
+      )
+    : undefined
   const collector = new TrajectoryBatchCollector<ActorCriticTransition>(
     config.trajectoryConfig
   )
   let openStep: ActorCriticOpenStep | null = null
 
-  const valueIndex = multiDiscrete ? 2 * config.actionCount : config.actionCount
-  const probCount = multiDiscrete ? 2 * config.actionCount : config.actionCount
+  const probCount = multiDiscrete
+    ? groupedActionOutputCount(config.actionCount, factorSizes)
+    : config.actionCount
+  const valueIndex = multiDiscrete ? probCount : config.actionCount
   const outputCount = multiDiscrete
-    ? 2 * config.actionCount + 1
+    ? probCount + 1
     : config.actionCount + 1
 
   // Placeholder for rawOutput in transitions — PPO's trainBatch re-forwards
@@ -179,15 +191,12 @@ export function createPPOStepAgent(
 
           if (!useClippedBranch) {
             if (multiDiscrete) {
-              for (
-                let factorIndex = 0;
-                factorIndex < config.actionCount;
-                factorIndex++
-              ) {
-                const chosenIdx =
-                  transition.action[factorIndex] === 1
-                    ? 2 * factorIndex
-                    : 2 * factorIndex + 1
+              const chosenIndices = chosenGroupedCategoricalIndices(
+                transition.action,
+                factorSizes as number[],
+                'PPO step agent'
+              )
+              for (const chosenIdx of chosenIndices) {
                 const oldProb = Math.max(
                   transition.actionProbabilities[chosenIdx] as number,
                   1e-10
@@ -240,9 +249,9 @@ export function createPPOStepAgent(
       // re-forwards transition.state, so rawOutput is never read during training.
       const fwdOutput = trainable.forward(observation)
       const actionProbabilities = multiDiscrete
-        ? extractGroupedBinaryValues(
+        ? extractGroupedCategoricalValues(
             fwdOutput,
-            config.actionCount,
+            factorSizes as number[],
             'PPO step agent'
           )
         : extractLeadingValues(fwdOutput, config.actionCount, 'PPO step agent')
@@ -250,9 +259,9 @@ export function createPPOStepAgent(
       releaseOutput(fwdOutput)
 
       const action = multiDiscrete
-        ? sampleGroupedBinaryAction(
+        ? sampleGroupedCategoricalAction(
             actionProbabilities,
-            config.actionCount,
+            factorSizes as number[],
             rng
           )
         : sampleAction(actionProbabilities, rng)

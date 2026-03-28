@@ -6,11 +6,14 @@ import type {
   StepOutcome,
 } from '../../core/StepTypes.js'
 import {
-  computeGroupedBinaryBootstrapValues,
-  extractGroupedBinaryValues,
+  chosenGroupedCategoricalIndices,
+  computeGroupedCategoricalBootstrapValues,
+  extractGroupedCategoricalValues,
   extractLeadingValues,
-  selectGroupedBinaryAction,
-} from '../action-space/groupedBinary.js'
+  groupedActionOutputCount,
+  resolveGroupedActionFactorSizes,
+  selectGroupedCategoricalAction,
+} from '../action-space/groupedCategorical.js'
 import {
   StepRolloutBuffer,
   type StepRolloutBufferConfig,
@@ -25,6 +28,7 @@ import type { QLearningOpenStep, QLearningTransition } from './types.js'
 export interface QLearningStepAgentConfig {
   learningRate: number
   actionCount: number
+  actionFactorSizes?: readonly number[]
   multiDiscrete?: boolean
   discountFactor: number
   epsilonInitial: number
@@ -76,6 +80,15 @@ export function createQLearningStepAgent(
   rng: () => number
 ): StepAgent {
   const multiDiscrete = config.multiDiscrete ?? false
+  const factorSizes = multiDiscrete
+    ? resolveGroupedActionFactorSizes(
+        config.actionCount,
+        config.actionFactorSizes
+      )
+    : undefined
+  const groupedOutputCount = factorSizes
+    ? groupedActionOutputCount(config.actionCount, factorSizes)
+    : 0
   const rolloutBuffer = new StepRolloutBuffer<QLearningTransition>(
     config.rolloutConfig
   )
@@ -89,9 +102,9 @@ export function createQLearningStepAgent(
   function computeNextQValues(nextState: Float64Array): Float64Array {
     const rawOutput = Float64Array.from(trainable.forward(nextState))
     return multiDiscrete
-      ? extractGroupedBinaryValues(
+      ? extractGroupedCategoricalValues(
           rawOutput,
-          config.actionCount,
+          factorSizes as number[],
           'Q-learning step agent'
         )
       : extractLeadingValues(
@@ -111,12 +124,18 @@ export function createQLearningStepAgent(
       }
 
       const bootstrapValues = lastTransition.terminated
-        ? new Float64Array(config.actionCount)
-        : computeGroupedBinaryBootstrapValues(
+        ? new Float64Array((factorSizes as number[]).length)
+        : computeGroupedCategoricalBootstrapValues(
             lastTransition.nextQValues,
-            config.actionCount
+            factorSizes as number[]
           )
       const returns = Float64Array.from(bootstrapValues)
+      const chosenIndicesForTransition = (transition: QLearningTransition) =>
+        chosenGroupedCategoricalIndices(
+          transition.action,
+          factorSizes as number[],
+          'Q-learning step agent'
+        )
 
       for (let i = segment.transitions.length - 1; i >= 0; i--) {
         const transition = segment.transitions[i]
@@ -125,18 +144,12 @@ export function createQLearningStepAgent(
         }
 
         const errors = new Float64Array(transition.rawOutput.length)
-        for (
-          let factorIndex = 0;
-          factorIndex < transition.action.length;
-          factorIndex++
-        ) {
+        const chosenIndices = chosenIndicesForTransition(transition)
+        for (let factorIndex = 0; factorIndex < chosenIndices.length; factorIndex++) {
           returns[factorIndex] =
             transition.reward +
             config.discountFactor * (returns[factorIndex] as number)
-          const chosenIndex =
-            transition.action[factorIndex] === 1
-              ? 2 * factorIndex
-              : 2 * factorIndex + 1
+          const chosenIndex = chosenIndices[factorIndex] as number
           errors[chosenIndex] =
             (transition.qValues[chosenIndex] as number) -
             (returns[factorIndex] as number)
@@ -179,9 +192,9 @@ export function createQLearningStepAgent(
 
       const rawOutput = Float64Array.from(trainable.forward(observation))
       const qValues = multiDiscrete
-        ? extractGroupedBinaryValues(
+        ? extractGroupedCategoricalValues(
             rawOutput,
-            config.actionCount,
+            factorSizes as number[],
             'Q-learning step agent'
           )
         : extractLeadingValues(
@@ -193,7 +206,12 @@ export function createQLearningStepAgent(
         ? null
         : selectAction(qValues, epsilon, rng)
       const action = multiDiscrete
-        ? selectGroupedBinaryAction(qValues, config.actionCount, epsilon, rng)
+        ? selectGroupedCategoricalAction(
+            qValues,
+            factorSizes as number[],
+            epsilon,
+            rng
+          )
         : (standardSelection?.action as Float64Array)
       const chosenActionIndex = standardSelection?.chosenActionIndex ?? 0
 
@@ -225,7 +243,7 @@ export function createQLearningStepAgent(
         qValues: openStep.qValues,
         nextQValues: outcome.terminated
           ? new Float64Array(
-              multiDiscrete ? 2 * config.actionCount : config.actionCount
+              multiDiscrete ? groupedOutputCount : config.actionCount
             )
           : computeNextQValues(outcome.nextState),
         chosenActionIndex: openStep.chosenActionIndex,

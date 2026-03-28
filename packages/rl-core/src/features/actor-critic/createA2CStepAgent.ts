@@ -6,10 +6,13 @@ import type {
   StepOutcome,
 } from '../../core/StepTypes.js'
 import {
-  extractGroupedBinaryValues,
+  chosenGroupedCategoricalIndices,
+  extractGroupedCategoricalValues,
   extractLeadingValues,
-  sampleGroupedBinaryAction,
-} from '../action-space/groupedBinary.js'
+  groupedActionOutputCount,
+  resolveGroupedActionFactorSizes,
+  sampleGroupedCategoricalAction,
+} from '../action-space/groupedCategorical.js'
 import { computeActionLogProbability } from '../policy-gradient/actionLogProbabilities.js'
 import {
   type ActorCriticGradientConfig,
@@ -28,6 +31,7 @@ import type { ActorCriticOpenStep, ActorCriticTransition } from './types.js'
 export interface A2CStepAgentConfig {
   learningRate: number
   actionCount: number
+  actionFactorSizes?: readonly number[]
   multiDiscrete?: boolean
   discountFactor: number
   gaeLambda?: number
@@ -58,36 +62,42 @@ function computeGroupedActorCriticGradients(
   transition: ActorCriticTransition,
   advantage: number,
   config: Omit<ActorCriticGradientConfig, 'discountFactor'>,
-  factorCount: number
+  factorSizes: readonly number[]
 ): Float64Array {
-  const errors = new Float64Array(2 * factorCount + 1)
+  const actionOutputCount = factorSizes.reduce((sum, size) => sum + size, 0)
+  const errors = new Float64Array(actionOutputCount + 1)
+  const chosenIndices = chosenGroupedCategoricalIndices(
+    transition.action,
+    factorSizes,
+    'A2C step agent'
+  )
 
-  for (let factorIndex = 0; factorIndex < factorCount; factorIndex++) {
-    const pOn = Math.max(
-      transition.actionProbabilities[2 * factorIndex] as number,
+  for (const chosenIndex of chosenIndices) {
+    const chosenProbability = Math.max(
+      transition.actionProbabilities[chosenIndex] as number,
       1e-10
     )
-    const pOff = Math.max(
-      transition.actionProbabilities[2 * factorIndex + 1] as number,
-      1e-10
-    )
-    const chooseOn = transition.action[factorIndex] === 1
-    const chosenIndex = chooseOn ? 2 * factorIndex : 2 * factorIndex + 1
-    const chosenProbability = chooseOn ? pOn : pOff
-
     errors[chosenIndex] = -advantage / chosenProbability
+  }
 
-    if (config.entropyCoefficient !== 0) {
-      errors[2 * factorIndex] =
-        (errors[2 * factorIndex] as number) +
-        config.entropyCoefficient * (Math.log(pOn) + 1)
-      errors[2 * factorIndex + 1] =
-        (errors[2 * factorIndex + 1] as number) +
-        config.entropyCoefficient * (Math.log(pOff) + 1)
+  if (config.entropyCoefficient !== 0) {
+    let offset = 0
+    for (const size of factorSizes) {
+      for (let i = 0; i < size; i++) {
+        const index = offset + i
+        const probability = Math.max(
+          transition.actionProbabilities[index] as number,
+          1e-10
+        )
+        errors[index] =
+          (errors[index] as number) +
+          config.entropyCoefficient * (Math.log(probability) + 1)
+      }
+      offset += size
     }
   }
 
-  errors[2 * factorCount] = -advantage
+  errors[actionOutputCount] = -advantage
   return errors
 }
 
@@ -97,6 +107,15 @@ export function createA2CStepAgent(
   rng: () => number
 ): StepAgent {
   const multiDiscrete = config.multiDiscrete ?? false
+  const factorSizes = multiDiscrete
+    ? resolveGroupedActionFactorSizes(
+        config.actionCount,
+        config.actionFactorSizes
+      )
+    : undefined
+  const groupedOutputCount = factorSizes
+    ? groupedActionOutputCount(config.actionCount, factorSizes)
+    : 0
   const collector = new TrajectoryBatchCollector<ActorCriticTransition>(
     config.trajectoryConfig
   )
@@ -105,7 +124,7 @@ export function createA2CStepAgent(
   function computeValueEstimate(state: Float64Array): number {
     const output = trainable.forward(state)
     const valueIndex = multiDiscrete
-      ? 2 * config.actionCount
+      ? groupedOutputCount
       : config.actionCount
     return output[valueIndex] as number
   }
@@ -134,7 +153,7 @@ export function createA2CStepAgent(
             transition,
             advantage,
             config.gradientConfig,
-            config.actionCount
+            factorSizes as number[]
           )
         : computeActorCriticGradients(
             transition,
@@ -156,21 +175,21 @@ export function createA2CStepAgent(
 
       const rawOutput = Float64Array.from(trainable.forward(observation))
       const actionProbabilities = multiDiscrete
-        ? extractGroupedBinaryValues(
+        ? extractGroupedCategoricalValues(
             rawOutput,
-            config.actionCount,
+            factorSizes as number[],
             'A2C step agent'
           )
         : extractLeadingValues(rawOutput, config.actionCount, 'A2C step agent')
       const action = multiDiscrete
-        ? sampleGroupedBinaryAction(
+        ? sampleGroupedCategoricalAction(
             actionProbabilities,
-            config.actionCount,
+            factorSizes as number[],
             rng
           )
         : sampleAction(actionProbabilities, rng)
       const valueIndex = multiDiscrete
-        ? 2 * config.actionCount
+        ? groupedOutputCount
         : config.actionCount
 
       openStep = {
