@@ -1,0 +1,7 @@
+{
+  "type": "none",
+  "comment": "pin Node with .node-version for Vite+ instead of Volta",
+  "packageName": "@neat-evolution/worker-actions",
+  "email": "github@heygrady.net",
+  "dependentChangeType": "none"
+}
