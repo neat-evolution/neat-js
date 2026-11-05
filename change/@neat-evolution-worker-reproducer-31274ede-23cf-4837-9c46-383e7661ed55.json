@@ -1,7 +1,0 @@
-{
-  "type": "none",
-  "comment": "pin Node with .node-version for Vite+ instead of Volta",
-  "packageName": "@neat-evolution/worker-reproducer",
-  "email": "github@heygrady.net",
-  "dependentChangeType": "none"
-}

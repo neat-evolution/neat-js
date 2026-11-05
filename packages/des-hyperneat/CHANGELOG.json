@@ -2,6 +2,21 @@
   "name": "@neat-evolution/des-hyperneat",
   "entries": [
     {
+      "date": "Thu, 05 Nov 2026 01:13:16 GMT",
+      "version": "0.6.8",
+      "tag": "@neat-evolution/des-hyperneat_v0.6.8",
+      "comments": {
+        "none": [
+          {
+            "author": "github@heygrady.net",
+            "package": "@neat-evolution/des-hyperneat",
+            "commit": "bc965a33b9af722460bcb67b35900e312bd334c7",
+            "comment": "pin Node with .node-version for Vite+ instead of Volta"
+          }
+        ]
+      }
+    },
+    {
       "date": "Tue, 10 Mar 2026 23:01:45 GMT",
       "version": "0.6.8",
       "tag": "@neat-evolution/des-hyperneat_v0.6.8",
