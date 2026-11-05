@@ -28,8 +28,5 @@
     "typescript": "^5.9.3",
     "vitest": "^4.0.14"
   },
-  "volta": {
-    "extends": "../../../package.json"
-  },
   "packageManager": "yarn@4.12.0"
 }
