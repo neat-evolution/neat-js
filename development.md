@@ -4,7 +4,16 @@ This guide outlines the development workflow for this repository.
 
 ## Setup
 
-1.  **Install Dependencies:** This project uses Yarn for package management. To install all dependencies, run:
+1.  **Install Node and Yarn:** Node and Yarn versions are pinned by `.node-version` and `packageManager` in `package.json`, and managed by [Vite+](https://vite.plus). Install it with the Node and Yarn managers enabled, then check the pinned versions from the repo root:
+
+    ```bash
+    curl -fsSL https://vite.plus | VP_NODE_MANAGER=yes VP_YARN_MANAGER=yes bash
+    vp env current
+    ```
+
+    Install global tools with `vp install -g <pkg>`.
+
+2.  **Install Dependencies:** This project uses Yarn for package management. To install all dependencies, run:
 
     ```bash
     yarn install
